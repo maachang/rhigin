@@ -130,7 +130,9 @@ public class LogFactory {
     
     // ログ出力処理.
     @SuppressWarnings("deprecation")
-	public static final void write(String name, int logLevel, long fileSize, int typeNo, String logDir, Object... args) {
+	public static final void write(final String name,
+		final int logLevel, final long fileSize, final int typeNo, final String logDir,
+		final Object... args) {
     	// 指定されたログレベル以下はログ出力させない場合.
     	if(typeNo < logLevel) {
     		return;
@@ -141,11 +143,11 @@ public class LogFactory {
     		dir.mkdirs();
     	}
     	
-    	String format = format(numberLogLevelByStr(logLevel), args);
-    	String fileName = name + ".log";
-    	File stat = new File(logDir + fileName);
-    	Date date = new Date(stat.lastModified());
-    	Date now = new Date();
+    	final String format = format(numberLogLevelByStr(logLevel), args);
+    	final String fileName = name + ".log";
+    	final File stat = new File(logDir + fileName);
+    	final Date date = new Date(stat.lastModified());
+    	final Date now = new Date();
     	
         // ファイルサイズの最大値が設定されていて、その最大値が増える場合.
         // また、現在のログファイルの日付が、現在の日付と一致しない場合.
@@ -160,11 +162,11 @@ public class LogFactory {
         	int p, v;
         	String n;
         	int cnt = -1;
-        	final String targetName = fileName + "." + dateString(date) + ".";
         	File renameToStat = null;
+        	final String targetName = fileName + "." + dateString(date) + ".";
         	
         	// nameでjava内同期.
-        	String sync = name.intern();
+        	final String sync = name.intern();
         	synchronized(sync) {
         		// 指定フォルダ内から、targetNameの条件とマッチするものを検索.
         		String[] list = dir.list(new FilenameFilter() {
@@ -340,7 +342,6 @@ public class LogFactory {
     	private String logDir;
     	private int logLevel;
     	private long maxFileSize;
-    	
     	BaseLog(String n, int lv, long fs, String ld) {
     		name = n;
     		logLevel = lv;

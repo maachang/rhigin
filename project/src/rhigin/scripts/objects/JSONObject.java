@@ -5,8 +5,8 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
 import rhigin.RhiginException;
+import rhigin.scripts.Json;
 import rhigin.scripts.function.AbstractFunction;
-import rhigin.util.Json;
 
 /**
  * [js]: Jsonオブジェクト.
