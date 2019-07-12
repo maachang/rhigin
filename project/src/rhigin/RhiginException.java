@@ -1,5 +1,8 @@
 package rhigin;
 
+/**
+ * Rhigin用例外.
+ */
 public class RhiginException extends RuntimeException {
 	private static final long serialVersionUID = -3354862673253639272L;
 	protected int status;

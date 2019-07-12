@@ -1,7 +1,10 @@
-package rhigin.scripts.comple;
+package rhigin.scripts.compile;
 
 import org.mozilla.javascript.Script;
 
+/**
+ * １つのコンパイルスクリプト情報を管理.
+ */
 public class ScriptElement {
 	private Script script;
 	private String name;

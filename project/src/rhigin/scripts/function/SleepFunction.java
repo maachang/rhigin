@@ -8,17 +8,17 @@ import rhigin.scripts.RhiginFunction;
 import rhigin.util.Converter;
 
 /**
- * [Function]: Binary生成メソッド.
+ * [js] sleep処理.
  */
-public final class BinaryFunction extends RhiginFunction {
-	private static final BinaryFunction THIS = new BinaryFunction();
-	public static final BinaryFunction getInstance() {
+public class SleepFunction extends RhiginFunction {
+	private static final SleepFunction THIS = new SleepFunction();
+	public static final SleepFunction getInstance() {
 		return THIS;
 	}
 	
 	@Override
 	public String getName() {
-		return "binary";
+		return "sleep";
 	}
 
 	@Override
@@ -26,7 +26,9 @@ public final class BinaryFunction extends RhiginFunction {
                        Object[] args)
     {
 		if(args.length >= 1 && Converter.isFloat(args[0])) {
-			return new byte[Converter.convertInt(args[0])];
+			try {
+				Thread.sleep(Converter.convertInt(args[0]));
+			} catch(Exception e) {}
 		}
         return Undefined.instance;
     }

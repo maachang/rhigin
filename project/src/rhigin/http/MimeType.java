@@ -5,9 +5,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import rhigin.scripts.Json;
-import rhigin.util.FileUtil;
-
 /**
  * MimeType.
  */
@@ -28,20 +25,6 @@ public class MimeType {
 	
 	/** charsetを付加するMimeType. **/
 	private final Map<String,Boolean> charsetMimeTable = new HashMap<String,Boolean>() ;
-	
-	/**
-	 * 拡張Mimeタイプ定義を読み込む.
-	 * @param name 対象のコンフィグファイル名を設定します.
-	 * @return MimeType 拡張Mimeタイプオブジェクトが返却されます.
-	 * @exception Exception 例外.
-	 */
-	public static final MimeType createMime(String name)
-		throws Exception {
-		if(name == null || !FileUtil.isFile(name)) {
-			return new MimeType() ;
-		}
-		return createMime((Map)Json.decode(FileUtil.getFileString(name, "UTF8"))) ;
-	}
 	
 	/**
 	 * 拡張Mimeタイプ定義を読み込む.
@@ -161,7 +144,7 @@ public class MimeType {
 	 * @param addMime 新たに追加するMimeType群が格納されたMapオブジェクトを設定します.
 	 * @param charsetMime Charsetを付加するMimeTypeを設定します.
 	 */
-	public void init( Map<String,String> addMime,Map<String,Boolean> charsetMime ) {
+	public void init(Map<String,String> addMime, Map<String,Boolean> charsetMime) {
 		mimeTable.putAll( addMime ) ;
 		charsetMimeTable.putAll( charsetMime ) ;
 	}
@@ -172,7 +155,7 @@ public class MimeType {
 	 * @return String MimeTypeが返却されます.
 	 *                [null]が返却された場合は、スクリプト実行条件が考慮されます.
 	 */
-	public String get( String url ) {
+	public String get(String url) {
 		int p = url.lastIndexOf( "." ) ;
 		if( p == -1 || url.lastIndexOf( "/" ) > p ) {
 			return null ;
@@ -186,7 +169,7 @@ public class MimeType {
 	 * @param mime 対象のMimeTypeを設定します.
 	 * @return boolean [true]の場合、charsetの設定は必要です.
 	 */
-	public boolean isCharset( String mime ) {
+	public boolean isCharset(String mime) {
 		Boolean ret = charsetMimeTable.get( mime ) ;
 		return (ret==null)? false : ret ;
 	}

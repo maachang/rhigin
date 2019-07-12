@@ -1,11 +1,15 @@
-package rhigin.scripts.function;
+package rhigin.scripts;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
-public abstract class AbstractFunction implements Function {
+/**
+ * Rhigin用Function.
+ * jsに組み込みたいオリジナルのFunctionを作成したい場合に、継承して実装します.
+ */
+public abstract class RhiginFunction implements Function {
 	@Override
 	public void delete(String arg0) {
 	}
@@ -80,13 +84,18 @@ public abstract class AbstractFunction implements Function {
 	public void setPrototype(Scriptable arg0) {
 	}
 
+	/**
+	 * Function の内容を実装する場合は、こちらを実装してください.
+	 */
 	@Override
-    public Object call(Context cx, Scriptable scope, Scriptable thisObj,
-                       Object[] args)
-    {
-        return Undefined.instance;
-    }
+	public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		return Undefined.instance;
+	}
 
+	/**
+	 * new XXX のようなオブジェクトを作成する場合には、こちらを実装します.
+	 * また、戻り値は rhigin.scripts.objects.RhiginObjectを利用すると、楽に作成できると思います.
+	 */
 	@Override
 	public Scriptable construct(Context arg0, Scriptable arg1, Object[] arg2) {
 		return null;
@@ -97,7 +106,9 @@ public abstract class AbstractFunction implements Function {
 		return "function " + getName() + "() {\n  [native code]\n}";
 	}
 	
-	
+	/**
+	 * function名を設定します.
+	 */
 	public String getName() {
 		return "";
 	}

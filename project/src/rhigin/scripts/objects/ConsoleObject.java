@@ -9,7 +9,8 @@ import org.mozilla.javascript.Undefined;
 
 import rhigin.logs.Log;
 import rhigin.logs.LogFactory;
-import rhigin.scripts.function.AbstractFunction;
+import rhigin.scripts.RhiginFunction;
+import rhigin.scripts.RhiginObject;
 
 /**
  * [js]: Consoleオブジェクト.
@@ -18,7 +19,7 @@ public class ConsoleObject {
 	private static final Log LOG = LogFactory.create("console");
 	
 	// ログ出力用.
-	private static final class out extends AbstractFunction {
+	private static final class out extends RhiginFunction {
 		private int type = 0;
 		out(int t) {
 			type = t;
@@ -78,7 +79,7 @@ public class ConsoleObject {
     
 	
 	// オブジェクトリスト.
-	private static final AbstractFunction[] list = {
+	private static final RhiginFunction[] list = {
 		new out(0), new out(1), new out(2), new out(3), 
 		new out(4), new out(5), new out(6)
 	};

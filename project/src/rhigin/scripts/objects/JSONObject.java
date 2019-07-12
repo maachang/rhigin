@@ -6,7 +6,8 @@ import org.mozilla.javascript.Undefined;
 
 import rhigin.RhiginException;
 import rhigin.scripts.Json;
-import rhigin.scripts.function.AbstractFunction;
+import rhigin.scripts.RhiginFunction;
+import rhigin.scripts.RhiginObject;
 
 /**
  * [js]: Jsonオブジェクト.
@@ -14,7 +15,7 @@ import rhigin.scripts.function.AbstractFunction;
 public final class JSONObject {
 	
 	// json エンコード.
-	private static final AbstractFunction stringify = new AbstractFunction() {
+	private static final RhiginFunction stringify = new RhiginFunction() {
 		@Override
 	    public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args)
 	    {
@@ -32,7 +33,7 @@ public final class JSONObject {
 	};
 	
 	// json デコード.
-	private static final AbstractFunction parse = new AbstractFunction() {
+	private static final RhiginFunction parse = new RhiginFunction() {
 		@Override
 	    public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args)
 	    {
@@ -50,7 +51,7 @@ public final class JSONObject {
 	};
 	
 	// オブジェクトリスト.
-	private static final AbstractFunction[] list = {
+	private static final RhiginFunction[] list = {
 		stringify, parse
 	};
 	

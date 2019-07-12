@@ -1,7 +1,10 @@
-package rhigin.scripts;
+package rhigin.util;
 
 import org.mozilla.javascript.Scriptable;
 
+/**
+ * 空のScriptable.
+ */
 public interface BlankScriptable extends Scriptable {
 	@Override
 	default void delete(String arg0) {

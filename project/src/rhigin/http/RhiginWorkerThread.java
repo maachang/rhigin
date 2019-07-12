@@ -8,6 +8,10 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.zip.GZIPOutputStream;
 
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.Undefined;
+
 import rhigin.RhiginConstants;
 import rhigin.logs.Log;
 import rhigin.logs.LogFactory;
@@ -15,8 +19,10 @@ import rhigin.net.ByteArrayIO;
 import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.Json;
 import rhigin.scripts.RhiginContext;
-import rhigin.scripts.comple.CompileCache;
-import rhigin.scripts.comple.ScriptElement;
+import rhigin.scripts.RhiginFunction;
+import rhigin.scripts.ScriptConstants;
+import rhigin.scripts.compile.CompileCache;
+import rhigin.scripts.compile.ScriptElement;
 import rhigin.scripts.function.RequireFunction;
 import rhigin.util.Alphabet;
 import rhigin.util.ArrayMap;
@@ -284,14 +290,14 @@ public class RhiginWorkerThread extends Thread {
             context.setAttribute("params", params);
             context.setAttribute("req", req);
             context.setAttribute("res", res);
+            context.setAttribute(redirect.getName(), redirect);
             
             // コンテンツキャッシュセット.
             RequireFunction.getInstance().setCache(cache);
             Object ret = "";
             try {
-                    
                 // スクリプトの実行.
-                ScriptElement ce = cache.get(path, "use strict';(function(_g){\n", "\n)(this);");
+                ScriptElement ce = cache.get(path, ScriptConstants.HEADER, ScriptConstants.FOOTER);
                 ret = ExecuteScript.execute(context, ce.getScript());
             } catch (Redirect redirect) {
                 redirectResponse(em, redirect);
@@ -305,11 +311,11 @@ public class RhiginWorkerThread extends Thread {
                 ret = "";
                 gzip = false;
             } else if(!(ret instanceof String)) {
-            	ret = Json.encode(ret);
+                ret = Json.encode(ret);
             } else if(((String)ret).length() == 0) {
                 ret = "";
                 gzip = false;
-        	}
+            }
             sendResponse(gzip, em, res.getStatus(), res, (String)ret);
         } catch (Exception e) {
             LOG.info("error", e);
@@ -555,4 +561,34 @@ public class RhiginWorkerThread extends Thread {
         STATE_RESPONSE_1 = s1;
         STATE_RESPONSE_2 = s2;
     }
+    
+    // リダイレクト用メソッド.
+    private static final RhiginFunction redirect = new RhiginFunction() {
+        @Override
+        public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+            int status = 301;
+            String url = null;
+            if(args.length >= 1) {
+                if(args.length >= 2) {
+                    if(Converter.isNumeric(args[0])) {
+                        status = Converter.convertInt(args[0]);
+                        url = "" + args[1];
+                    } else if(Converter.isNumeric(args[1])) {
+                        url = "" + args[0];
+                        status = Converter.convertInt(args[1]);
+                    } else {
+                        url = "" + args[0];
+                        status = Converter.convertInt(args[1]);
+                    }
+                } else {
+                    url = "" + args[0];
+                }
+                throw new Redirect(status, url);
+            }
+            return Undefined.instance;
+        }
+        
+        @Override
+        public final String getName() { return "redirect"; }
+    };
 }

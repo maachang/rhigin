@@ -1,10 +1,9 @@
-package rhigin.scripts.objects;
+package rhigin.scripts;
 
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
-import rhigin.scripts.BlankScriptable;
-import rhigin.scripts.function.AbstractFunction;
+import rhigin.util.BlankScriptable;
 
 /**
  * RhiginObject.
@@ -19,7 +18,7 @@ public class RhiginObject implements BlankScriptable {
 	 * @param name オブジェクト名を設定します.
 	 * @param list オブジェクトで有効になるFunctionをAbstractFunction配列で設定します.
 	 */
-	public RhiginObject(String name, AbstractFunction[] list) {
+	public RhiginObject(String name, RhiginFunction[] list) {
 		int cnt = 0;
 		final int len = list.length;
 		final int listLen = len << 1;

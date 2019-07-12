@@ -1,7 +1,10 @@
-package rhigin.scripts.comple;
+package rhigin.scripts.compile;
 
 import rhigin.RhiginException;
 
+/**
+ * Rhiginコンパイルエラー.
+ */
 public class CompileException extends RhiginException {
     private static final long serialVersionUID = -2078988719079761710L;
     public CompileException(int status) {

@@ -15,9 +15,13 @@ import org.mozilla.javascript.ScriptableObject;
 
 import rhigin.scripts.function.BinaryFunction;
 import rhigin.scripts.function.GetClassFunction;
+import rhigin.scripts.function.GetEnvFunction;
 import rhigin.scripts.function.RequireFunction;
+import rhigin.scripts.function.SleepFunction;
 import rhigin.scripts.objects.ConsoleObject;
 import rhigin.scripts.objects.JSONObject;
+import rhigin.util.ListMap;
+import rhigin.util.OList;
 
 /**
  * javscriptを実行.
@@ -37,6 +41,10 @@ public class ExecuteScript {
 	//private static final int SCRIPT_LANGUAGE_VERSION = Context.VERSION_1_5;
 	private static final int SCRIPT_LANGUAGE_VERSION = Context.VERSION_1_8;
 	//private static final int SCRIPT_LANGUAGE_VERSION = Context.VERSION_ES6;
+	
+	
+	/** originalFunctionAndObject. **/
+	private static final ListMap originalFunctionAndObjectList = new ListMap();
 	
     static {
     	    // Context初期化.
@@ -259,25 +267,40 @@ public class ExecuteScript {
 	// 基本オブジェクトをセット.
 	private static final void settingRhiginObject(Context ctx, Scriptable scope)
 		throws Exception {
+		
+		// rhigin用の基本オブジェクトを設定.
 		scope.put("console", scope, ConsoleObject.getInstance());
 		scope.put("JSON", scope, JSONObject.getInstance());
 		scope.put("require", scope, RequireFunction.getInstance());
 		scope.put("binary", scope, BinaryFunction.getInstance());
 		scope.put("getClass", scope, GetClassFunction.getInstance());
+		scope.put("sleep", scope, SleepFunction.getInstance());
+		scope.put("getEnv", scope, GetEnvFunction.getInstance());
+		//ThreadFunction.set(scope);
+		
+		// オリジナルオブジェクトを設定.
+		Object[] kv;
+		final OList<Object[]> list = originalFunctionAndObjectList.rawData();
+		final int len = list.size();
+		for(int i = 0; i < len; i ++) {
+			kv = list.get(i);
+			scope.put((String)kv[0], scope, kv[1]);
+		}
 	}
 	
-	public static final void main(String[] args) throws Exception {
-		String js = "(function(_g) { const a = 100; console.debug('hogehoge'); return a; })(this);";
-		Script script = compile(js);
-		
-		RhiginContext context = null;
-		long tm = System.currentTimeMillis();
-		for(int i = 0; i < 100000; i ++) {
-			context = new RhiginContext();
-			execute(context, script);
-			//execute(context, js);
-		}
-		tm = System.currentTimeMillis() - tm;
-		System.out.println("time:" + tm + "msec");
+	/**
+	 * オリジナルなRhigin用のFunction及びオブジェクトを設定.
+	 * @param args [name], [value], [name], [value] .... のように設定します.
+	 */
+	public static final void addOriginals(Object... args) {
+		originalFunctionAndObjectList.set(args);
+	}
+	
+	/**
+	 * オリジナルなRhigin用のFunction及びオブジェクトを格納するオブジェクトを取得.
+	 * @return ListMap 
+	 */
+	public static final ListMap getOriginal() {
+		return originalFunctionAndObjectList;
 	}
 }

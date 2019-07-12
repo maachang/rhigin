@@ -5,13 +5,14 @@ import org.mozilla.javascript.Scriptable;
 
 import rhigin.RhiginException;
 import rhigin.scripts.ExecuteScript;
-import rhigin.scripts.comple.CompileCache;
-import rhigin.scripts.comple.ScriptElement;
+import rhigin.scripts.RhiginFunction;
+import rhigin.scripts.compile.CompileCache;
+import rhigin.scripts.compile.ScriptElement;
 
 /**
  * [Function]: requireメソッド.
  */
-public final class RequireFunction extends AbstractFunction {
+public final class RequireFunction extends RhiginFunction {
 	private static final RequireFunction THIS = new RequireFunction();
 	public static final RequireFunction getInstance() {
 		return THIS;

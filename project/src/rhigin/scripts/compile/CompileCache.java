@@ -1,4 +1,4 @@
-package rhigin.scripts.comple;
+package rhigin.scripts.compile;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -11,8 +11,8 @@ import rhigin.util.FileUtil;
 import rhigin.util.LruCache;
 
 /**
- * コンパイルキャッシュ
- * このキャッシュ情報は、全体で管理するのではなく、スレッド単位で作成します.
+ * Rhiginコンパイルキャッシュ
+ * コンパイルされた、キャッシュ情報は、全体で管理するのではなく、スレッド単位で作成します.
  */
 public class CompileCache {
 	private static final ThreadLocal<LruCache<String, ScriptElement>> cache =
@@ -154,6 +154,7 @@ public class CompileCache {
 			// 対象ファイルパスをフルパスで取得.
 			name = FileUtil.getFullPath(name);
 			if(!name.startsWith(baseDir)) {
+				// ベースパス上のスクリプトファイルでない場合は、400エラーを返却.
 				throw new CompileException(400);
 			}
 			// ベースパス以降を対象とする.
