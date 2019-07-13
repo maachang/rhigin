@@ -18,7 +18,7 @@ public class ShutdownClient {
     /**
      * コンストラクタ.
      */
-    private ShutdownClient() {
+    protected ShutdownClient() {
 
     }
 

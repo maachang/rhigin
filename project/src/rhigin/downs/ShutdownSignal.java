@@ -7,7 +7,7 @@ import java.net.InetAddress;
 /**
  * シャットダウンシグナル送信.
  */
-class ShutdownSignal {
+public class ShutdownSignal {
 
     /**
      * デフォルトポート番号.

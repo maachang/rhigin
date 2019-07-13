@@ -28,7 +28,7 @@ public class RhiginBatch {
 			System.out.println("Target file does not exist:" + args[0]);
 			System.exit(1); return;
 		}
-		RhiginConfig conf = RhiginStartup.initLogFactory(false);
+		RhiginConfig conf = RhiginStartup.initLogFactory(false, args);
 		RhiginBatch o = new RhiginBatch();
 		
 		// バッチ実行.

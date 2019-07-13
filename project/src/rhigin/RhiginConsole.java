@@ -14,7 +14,7 @@ import rhigin.util.ConsoleInKey;
  */
 public class RhiginConsole {
 	public static final void main(String[] args) throws Exception {
-		RhiginConfig conf = RhiginStartup.initLogFactory(false);
+		RhiginConfig conf = RhiginStartup.initLogFactory(false, args);
 		RhiginConsole o = new RhiginConsole();
 		o.console(conf, new ConsoleInKey());
 	}

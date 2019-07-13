@@ -51,7 +51,7 @@ public class Rhigin {
 
     /** Main. **/
     public static final void main(String[] args) {
-        RhiginConfig conf = RhiginStartup.initLogFactory(true);
+        RhiginConfig conf = RhiginStartup.initLogFactory(true, args);
         LOG = LogFactory.create();
         try {
             LOG.info("start rhigin.");

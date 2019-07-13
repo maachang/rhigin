@@ -2,21 +2,19 @@ package rhigin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.AbstractList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.Json;
-import rhigin.util.BlankMap;
 import rhigin.util.BlankScriptable;
 import rhigin.util.ConvertGet;
 import rhigin.util.FileUtil;
 import rhigin.util.OList;
+import rhigin.util.Read;
 
 /**
  * Rhiginコンフィグ.
@@ -54,7 +52,7 @@ public class RhiginConfig implements BlankScriptable {
 					name = dir + list[i];
 					if(FileUtil.isFile(name)) {
 						v = (Map)Json.decode(FileUtil.getFileString(name, CONF_CHARSET));
-						ret.put(cutExtention(list[i]), new ReadMap(v));
+						ret.put(cutExtention(list[i]), new Read.Maps(v));
 						v = null;
 					}
 				}
@@ -74,78 +72,6 @@ public class RhiginConfig implements BlankScriptable {
 			return name;
 		}
 		return name.substring(0, p);
-	}
-	
-	// 読み込み専用のリスト.
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static final class ReadList extends AbstractList<Object> implements ConvertGet<Integer> {
-		private List srcList = null;
-		public ReadList(List<Object> srcList) {
-			this.srcList = srcList;
-		}
-		@Override
-		public Object get(int index) {
-			Object o = srcList.get(index);
-			if(o instanceof Map) {
-				return new ReadMap((Map)o);
-			} else if(o instanceof List) {
-				return new ReadList((List)o);
-			}
-			return o;
-		}
-
-		@Override
-		public int size() {
-			return srcList.size();
-		}
-		@Override
-		public Object getOriginal(Integer n) {
-			if(n == null) {
-				return get(-1);
-			}
-			return get(n);
-		}
-	}
-	
-	// 読み込み専用のMap.
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static final class ReadMap implements BlankMap, ConvertGet<String> {
-		Map<String,Object> srcMap = null;
-		public ReadMap(Map<String,Object> srcMap) {
-			this.srcMap = srcMap;
-		}
-		@Override
-		public Object get(Object name) {
-			if(name != null) {
-				Object o = srcMap.get(name);
-				if(o instanceof Map) {
-					return new ReadMap((Map)o);
-				} else if(o instanceof List) {
-					return new ReadList((List)o);
-				}
-				return o;
-			}
-			return null;
-		}
-		@Override
-		public boolean containsKey(Object name) {
-			if(name != null) {
-				return srcMap.containsKey(name);
-			}
-			return false;
-		}
-		@Override
-		public int size() {
-			return srcMap.size();
-		}
-		@Override
-		public String toString() {
-			return srcMap.toString();
-		}
-		@Override
-		public Object getOriginal(String n) {
-			return get(n);
-		}
 	}
 	
 	/**

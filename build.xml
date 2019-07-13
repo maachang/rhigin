@@ -17,6 +17,8 @@
   <property name="dest.dir" value="project/classes"/>
   <property name="jar.dir" value="jar" />
   <property name="jar.name" value="${project.name}-${version}.jar"/>
+  <property environment="env"/>
+  <property name="rhigin.home" value="${env.RHIGIN_HOME}"/>
   <property name="doc.dir" value="doc/"/>
   <property name="debug" value="on"/>
   <property name="deprecation" value="on"/>
@@ -54,6 +56,10 @@
     >
       <classpath refid="path.lib" />
     </javac>
+    <copy overwrite="yes"
+      todir="${dest.dir}/res">
+      <fileset dir="${src.dir}/res" />
+    </copy>
   </target>
   
   <!-- ===================================================================== -->

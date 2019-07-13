@@ -13,6 +13,7 @@ import org.mozilla.javascript.Script;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
+import rhigin.scripts.function.ArgsFunction;
 import rhigin.scripts.function.BinaryFunction;
 import rhigin.scripts.function.GetClassFunction;
 import rhigin.scripts.function.GetEnvFunction;
@@ -276,6 +277,7 @@ public class ExecuteScript {
 		scope.put("getClass", scope, GetClassFunction.getInstance());
 		scope.put("sleep", scope, SleepFunction.getInstance());
 		scope.put("getEnv", scope, GetEnvFunction.getInstance());
+		scope.put("args", scope, ArgsFunction.getInstance());
 		//ThreadFunction.set(scope);
 		
 		// オリジナルオブジェクトを設定.

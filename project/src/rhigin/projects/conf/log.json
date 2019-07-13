@@ -1,9 +1,0 @@
-{
-  "level": "DEBUG", 
-  "maxFileSize": 1048576,
-  "logDir": "./log",
-  "system": {
-    "level": "DEBUG", 
-    "maxFileSize": 1048576
-  }
-}

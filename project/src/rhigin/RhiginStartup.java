@@ -1,6 +1,7 @@
 package rhigin;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -20,7 +21,9 @@ import rhigin.scripts.RhiginContext;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginThreadPool;
 import rhigin.scripts.ScriptConstants;
+import rhigin.util.Args;
 import rhigin.util.Converter;
+import rhigin.util.EnvCache;
 import rhigin.util.FileUtil;
 
 /**
@@ -38,13 +41,36 @@ public class RhiginStartup {
 	/**
 	 * ログファクトリの初期化.
 	 * @param server
+	 * @param args
 	 * @return RhiginConfig
 	 */
-	public static final RhiginConfig initLogFactory(boolean server) {
+	public static final RhiginConfig initLogFactory(boolean server, String[] args) {
+		// Args管理オブジェクトにセット.
+		Args.set(args);
 		RhiginConfig config = null;
 		try {
+			// 環境変数から、rhigin起動環境を取得.
+			String rhiginEnv = EnvCache.get(RhiginConstants.ENV_ENV);
+			
+			// コンフィグ読み込みディレクトリ先を、rhigin起動環境に合わせる.
+			String confDir = RhiginConstants.DIR_CONFIG;
+			if(rhiginEnv != null && rhiginEnv.length() != 0) {
+				confDir += rhiginEnv + "/";
+				// 対象フォルダが存在しない、対象フォルダ以下のコンフィグ情報が０件の場合は
+				// エラーで終了.
+				File confStat = new File(confDir);
+				if(!confStat.isDirectory() ||
+					confStat.list() == null || confStat.list().length == 0) {
+					System.out.println(
+						"error: There is no configuration definition for the execution environment:" + confDir);
+					System.exit(1);
+					return null;
+				}
+				confStat = null;
+			}
+			
 			// メインコンフィグファイルが存在するかチェック.
-			config = new RhiginConfig();
+			config = new RhiginConfig(confDir);
 			
 			// ログファクトリの初期化.
 			if(config.has("logger")) {
