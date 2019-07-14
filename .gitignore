@@ -1,3 +1,7 @@
-rhigin-*.jar
-project/classes
 .DS_Store
+
+rhigin-*.jar
+bin/lib/rhigin-*.jar
+
+project/classes
+

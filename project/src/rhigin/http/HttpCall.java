@@ -18,7 +18,7 @@ public final class HttpCall extends NioCall {
     private int workerLength = -1;
     private MimeType mime = null;
     private CompileCache compileCache = null;
-    private RhiginWorkerThread[] worker = null;
+    private HttpWorkerThread[] worker = null;
     private final AtomicNumber counter = new AtomicNumber(0);
 
     /**
@@ -55,9 +55,9 @@ public final class HttpCall extends NioCall {
         LOG.info(" start Http nio");
 
         // ワーカースレッドを生成.
-        RhiginWorkerThread[] w = new RhiginWorkerThread[workerLength];
+        HttpWorkerThread[] w = new HttpWorkerThread[workerLength];
         for (int i = 0; i < workerLength; i++) {
-            w[i] = new RhiginWorkerThread(compileCache, mime, i);
+            w[i] = new HttpWorkerThread(compileCache, mime, i);
             w[i].startThread();
         }
         worker = w;
@@ -71,7 +71,7 @@ public final class HttpCall extends NioCall {
         LOG.info(" stop Http nio");
 
         // ワーカースレッドを破棄.
-        RhiginWorkerThread[] w = worker;
+        HttpWorkerThread[] w = worker;
         worker = null;
         for (int i = 0; i < workerLength; i++) {
             w[i].stopThread();
