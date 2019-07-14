@@ -3,7 +3,6 @@ package rhigin.scripts;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.mozilla.javascript.Context;
@@ -14,6 +13,8 @@ import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Wrapper;
+
+import rhigin.util.JavaScriptable;
 
 final class RhiginScriptable implements Scriptable {
     private static final String RHINO_JS_PACKAGE_NAME = "org.mozilla.javascript";
@@ -52,9 +53,9 @@ final class RhiginScriptable implements Scriptable {
             Object value = context.getAttribute(name);
             if(value == null) {
                 return NOT_FOUND;
-            } else if(
-                (c = value.getClass()).isArray() ||
-                c.getPackage().getName().startsWith(RHINO_JS_PACKAGE_NAME)) {
+            } else if ((c = value.getClass()).isArray()) {
+                return new JavaScriptable.GetArray(value);
+            } else if (c.getPackage().getName().startsWith(RHINO_JS_PACKAGE_NAME)) {
                 return value;
             } else {
                 return Context.javaToJS(value, this);

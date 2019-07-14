@@ -28,6 +28,8 @@ final class RhiginWrapFactory extends WrapFactory {
 			return new JavaScriptable.GetMap((java.util.Map)javaObject);
 		} else if(javaObject instanceof java.util.List) {
 			return new JavaScriptable.GetList((java.util.List)javaObject);
+		} else if(javaObject.getClass().isArray()) {
+			return new JavaScriptable.GetArray(javaObject);
 		} else if (javaObject instanceof ClassLoader) {
 			return super.wrapAsJavaObject(cx, scope, javaObject, staticType);
 		} else {

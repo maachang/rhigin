@@ -4,7 +4,6 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
-import rhigin.RhiginException;
 import rhigin.scripts.Json;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginObject;

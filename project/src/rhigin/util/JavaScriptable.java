@@ -1,5 +1,6 @@
 package rhigin.util;
 
+import java.lang.reflect.Array;
 import java.util.AbstractList;
 import java.util.Iterator;
 
@@ -187,6 +188,34 @@ public class JavaScriptable {
 		@Override
 		public Object remove(int no) {
 			return srcList.remove(no);
+		}
+	}
+	
+	// 配列実装用.
+	public static class GetArray extends JavaScriptable.List {
+		private final Object array;
+		public GetArray(Object a) {
+			array = a;
+		}
+		@Override
+		public int size() {
+			return Array.getLength(array);
+		}
+		@Override
+		public Object get(int no) {
+			return Array.get(array, no);
+		}
+		@Override
+		public boolean add(Object o) {
+			return false;
+		}
+		@Override
+		public Object set(int no, Object o) {
+			return null;
+		}
+		@Override
+		public Object remove(int no) {
+			return null;
 		}
 	}
 }
