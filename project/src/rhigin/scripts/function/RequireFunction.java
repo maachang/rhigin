@@ -4,6 +4,8 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
 import rhigin.RhiginException;
+import rhigin.http.Http;
+import rhigin.http.HttpInfo;
 import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.compile.CompileCache;
@@ -23,6 +25,18 @@ public final class RequireFunction extends RhiginFunction {
 	public final void setCache(CompileCache c) {
 		cache.set(c);
 	}
+	public final CompileCache getCache() {
+		// 別スレッドを作成した場合の拡張対応.
+		CompileCache ret = cache.get();
+		if(ret == null) {
+			HttpInfo info = Http.getHttpInfo();
+			if(info != null) {
+				ret = new CompileCache(info.getCompileCacheSize(), info.getCompileCacheRootDir());
+				cache.set(ret);
+			}
+		}
+		return ret;
+	}
 	
 	// ヘッダ・フッタ.
 	private static final String HEADER_SCRIPT = "'use strict';(function(_g){var _$def_$exports={};var module= {exports:_$def_$exports};var exports=_$def_$exports;\n";
@@ -34,14 +48,12 @@ public final class RequireFunction extends RhiginFunction {
 	}
 	
 	@Override
-    public final Object call(Context ctx, Scriptable scope, Scriptable thisObj,
-                       Object[] args)
-    {
+	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		if(args == null || args.length < 1) {
 			throw new RhiginException(404, "The require argument has not been set.");
 		}
 		try {
-			CompileCache c = cache.get();
+			CompileCache c = getCache();
 			if(c == null) {
 				throw new RhiginException(500, "compileCache has not been set.");
 			}
@@ -52,7 +64,5 @@ public final class RequireFunction extends RhiginFunction {
 		} catch(Exception e) {
 			throw new RhiginException(500, e);
 		}
-    }
-	
-	
+	}
 }

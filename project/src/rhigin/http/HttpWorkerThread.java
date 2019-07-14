@@ -48,8 +48,9 @@ public class HttpWorkerThread extends Thread {
   private volatile boolean stopFlag = true;
   private volatile boolean endThreadFlag = false;
 
-  public HttpWorkerThread(CompileCache c, MimeType m, int n) {
-    compileCache = c;
+  public HttpWorkerThread(HttpInfo info, MimeType m, int n) {
+    // コンパイルキャッシュ生成.
+    compileCache = new CompileCache(info.getCompileCacheSize(), info.getCompileCacheRootDir());
     no = n;
     mime = m;
     queue = new ConcurrentLinkedQueue<HttpElement>();
@@ -82,7 +83,11 @@ public class HttpWorkerThread extends Thread {
 
   public void run() {
     LOG.info(" * start rhigin workerThread(" + no + ").");
-
+    
+    // コンパイルキャッシュを require命令に設定.
+    RequireFunction.getInstance().setCache(compileCache);
+    
+    // 実行処理.
     ThreadDeath td = execute();
 
     LOG.info(" * stop rhigin workerThread(" + no + ").");

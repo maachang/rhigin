@@ -2,7 +2,6 @@ package rhigin.scripts.function;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.RhiginFunction;
 import rhigin.util.Args;

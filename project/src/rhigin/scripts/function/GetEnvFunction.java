@@ -22,11 +22,10 @@ public class GetEnvFunction extends RhiginFunction {
 	}
 
 	@Override
-    public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args)
-    {
+	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		if(args.length >= 1) {
 			return EnvCache.get(""+args[0]);
 		}
-        return Undefined.instance;
-    }
+		return Undefined.instance;
+	}
 }

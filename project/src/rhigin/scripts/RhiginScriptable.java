@@ -14,8 +14,6 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Wrapper;
 
-import rhigin.util.JavaScriptable;
-
 final class RhiginScriptable implements Scriptable {
     private static final String RHINO_JS_PACKAGE_NAME = "org.mozilla.javascript";
     private RhiginContext context;

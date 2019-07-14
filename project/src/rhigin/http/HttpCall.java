@@ -7,7 +7,6 @@ import rhigin.logs.Log;
 import rhigin.logs.LogFactory;
 import rhigin.net.NioCall;
 import rhigin.net.NioElement;
-import rhigin.scripts.compile.CompileCache;
 import rhigin.util.AtomicNumber;
 
 /**
@@ -16,23 +15,23 @@ import rhigin.util.AtomicNumber;
 public final class HttpCall extends NioCall {
     private static final Log LOG = LogFactory.create();
     private int workerLength = -1;
+    private HttpInfo info = null;
     private MimeType mime = null;
-    private CompileCache compileCache = null;
     private HttpWorkerThread[] worker = null;
     private final AtomicNumber counter = new AtomicNumber(0);
 
     /**
      * コンストラクタ.
      * 
-     * @param compileManage
-     *            コンパイルマネージャを設定します.
+     * @param info
+     *            Http情報を設定します.
      * @param mime
      *            MimeTypeオブジェクトを設定します.
      * @param wprkerLength
      *            ワーカースレッド長を設定します.
      */
-    public HttpCall(CompileCache compileCache, MimeType mime, int workerLength) {
-        this.compileCache = compileCache;
+    public HttpCall(HttpInfo info, MimeType mime, int workerLength) {
+        this.info = info;
         this.workerLength = workerLength;
         this.mime = mime;
     }
@@ -57,7 +56,7 @@ public final class HttpCall extends NioCall {
         // ワーカースレッドを生成.
         HttpWorkerThread[] w = new HttpWorkerThread[workerLength];
         for (int i = 0; i < workerLength; i++) {
-            w[i] = new HttpWorkerThread(compileCache, mime, i);
+            w[i] = new HttpWorkerThread(info, mime, i);
             w[i].startThread();
         }
         worker = w;
