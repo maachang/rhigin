@@ -53,7 +53,6 @@ final class RhiginScriptable implements Scriptable {
             if(value == null) {
                 return NOT_FOUND;
             } else if(
-                value instanceof Map || value instanceof List ||
                 (c = value.getClass()).isArray() ||
                 c.getPackage().getName().startsWith(RHINO_JS_PACKAGE_NAME)) {
                 return value;

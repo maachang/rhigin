@@ -6,11 +6,12 @@ import java.util.List;
 
 import rhigin.net.ByteArrayIO;
 import rhigin.util.ConvertMap;
+import rhigin.util.JavaScriptable;
 
 /**
  * Httpヘッダ情報. 基本HTTPヘッダ情報のみを保持します. (bodyデータは非保持).
  */
-public class Header implements ConvertMap {
+public class Header extends JavaScriptable.Map implements ConvertMap {
     protected String method;
     protected String url;
     protected String version;
@@ -45,7 +46,7 @@ public class Header implements ConvertMap {
     protected final void analysisFirst(String v) throws IOException {
       String[] list = v.split(" ");
       if (list.length != 3) {
-          throw new IOException("受信データはHTTPリクエストではありません:" + v);
+          throw new IOException("Received data is not an HTTP request:" + v);
       }
       this.method = list[0];
       this.url = list[1];
@@ -104,7 +105,7 @@ public class Header implements ConvertMap {
     }
 
     public List<String> getHeaders() throws IOException {
-    	  getHeaderString();
+      getHeaderString();
       int p;
       int b = 0;
       List<String> ret = new ArrayList<String>();
@@ -142,4 +143,52 @@ public class Header implements ConvertMap {
         return null;
       }
     }
+    
+    @Override
+    public String toString() {
+        try {
+            List<String> list = getHeaders();
+            int len = list.size();
+            StringBuilder buf = new StringBuilder("{");
+            for(int i = 0; i < len; i ++) {
+                if(i != 0) {
+                    buf.append(", ");
+                }
+                buf.append("\"").append(list.get(i)).append("\": \"").append(get(list.get(i))).append("\"");
+            }
+            return buf.append("}").toString();
+        } catch(Exception e) {
+        }
+        return "";
+    }
+
+	@Override
+	public Object[] getIds() {
+		try {
+			List<String> list = getHeaders();
+			int len = list.size();
+			Object[] ret = new Object[len];
+			for(int i = 0; i < len; i ++) {
+				ret[i] = list.get(i);
+			}
+			return ret;
+		} catch(Exception e) {
+			return new Object[] {};
+		}
+	}
+
+	@Override
+	public boolean containsKey(Object name) {
+		return get(name) != null;
+	}
+
+	@Override
+	public Object put(Object name, Object value) {
+		return null;
+	}
+
+	@Override
+	public Object remove(Object name) {
+		return null;
+	}
 }

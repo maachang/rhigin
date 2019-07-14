@@ -21,6 +21,7 @@ import rhigin.scripts.function.RequireFunction;
 import rhigin.scripts.function.SleepFunction;
 import rhigin.scripts.objects.ConsoleObject;
 import rhigin.scripts.objects.JSONObject;
+import rhigin.scripts.objects.Xor128Object;
 import rhigin.util.ListMap;
 import rhigin.util.OList;
 
@@ -271,6 +272,7 @@ public class ExecuteScript {
 		
 		// rhigin用の基本オブジェクトを設定.
 		scope.put("console", scope, ConsoleObject.getInstance());
+		scope.put("Xor128", scope, Xor128Object.getInstance());
 		scope.put("JSON", scope, JSONObject.getInstance());
 		scope.put("require", scope, RequireFunction.getInstance());
 		scope.put("binary", scope, BinaryFunction.getInstance());

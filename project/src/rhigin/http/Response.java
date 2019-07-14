@@ -1,17 +1,20 @@
 package rhigin.http;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import rhigin.util.ConvertMap;
 import rhigin.util.Converter;
+import rhigin.util.JavaScriptable;
 import rhigin.util.ListMap;
 import rhigin.util.OList;
 
 /**
  * Response.
  */
-public class Response implements ConvertMap {
+public class Response extends JavaScriptable.Map implements ConvertMap {
     private static final String DEFAULT_CONTENT_TYPE = "application/json; charset=UTF-8";
     protected int status = 200;
     protected ListMap header = new ListMap();
@@ -52,24 +55,33 @@ public class Response implements ConvertMap {
     }
 
     public Object setHeader(Object k, Object v) {
-        if (k == null || v == null) {
-            return null;
+        if (k != null && v != null) {
+            Object ret = header.put(k.toString(), v.toString());
+            if(ret != null) {
+                return ret;
+            }
         }
-        return header.put(k.toString(), v.toString());
+        return null;
     }
 
     public Object getHeader(Object k) {
-        if (k == null) {
-            return null;
+        if (k != null) {
+            Object ret = header.get(k.toString());
+            if(ret != null) {
+                return ret;
+            }
         }
-        return header.get(k.toString());
+        return null;
     }
 
     public Object removeHeader(Object k) {
-        if (k == null) {
-            return null;
+        if (k != null) {
+            Object ret = header.remove(k.toString());
+            if(ret != null) {
+                return ret;
+            }
         }
-        return header.remove(k.toString());
+        return null;
     }
 
     protected static final String headers(Response h) {
@@ -92,9 +104,7 @@ public class Response implements ConvertMap {
 
     /**
      * 取得.
-     * 
-     * @param key
-     *            対象のキーを設定します.
+     * @param key d対象のキーを設定します.
      * @return Object キーに対する要素情報が返却されます.
      */
     @Override
@@ -109,11 +119,8 @@ public class Response implements ConvertMap {
 
     /**
      * 登録.
-     * 
-     * @param key
-     *            対象のキーを設定します.
-     * @param value
-     *            対象の要素を設定します.
+     * @param key 対象のキーを設定します.
+     * @param value 対象の要素を設定します.
      * @return Object 前回登録されていた内容が返却されます.
      */
     @Override
@@ -132,9 +139,7 @@ public class Response implements ConvertMap {
 
     /**
      * 削除.
-     * 
-     * @param key
-     *            対象のキーを設定します.
+     * @param key 対象のキーを設定します.
      * @return Object キーに対する要素情報が返却されます.
      */
     @Override
@@ -153,9 +158,7 @@ public class Response implements ConvertMap {
 
     /**
      * 存在確認.
-     * 
-     * @param key
-     *            対象のキーを設定します.
+     * @param key 対象のキーを設定します.
      * @return Object キーに対する要素情報が返却されます.
      */
     @Override
@@ -168,4 +171,46 @@ public class Response implements ConvertMap {
         return header.containsKey(key.toString());
     }
 
+    /**
+     * ヘッダ一覧を取得.
+     * @return List<String> ヘッダ一覧が返却されます.
+     */
+    public List<String> getHeaders() {
+        OList<Object[]> list = header.rawData();
+        int len = list.size();
+        List<String> ret = new ArrayList<String>();
+        for(int i = 0; i < len; i ++) {
+            ret.add(""+list.get(i)[0]);
+        }
+        return ret;
+    }
+
+    @Override
+    public String toString() {
+        try {
+            List<String> list = getHeaders();
+            int len = list.size();
+            StringBuilder buf = new StringBuilder("{");
+            for(int i = 0; i < len; i ++) {
+                if(i != 0) {
+                    buf.append(", ");
+                }
+                buf.append("\"").append(list.get(i)).append("\": \"").append(get(list.get(i))).append("\"");
+            }
+            return buf.append("}").toString();
+        } catch(Exception e) {
+        }
+        return "";
+    }
+
+	@Override
+	public Object[] getIds() {
+		String[] names = header.names();
+		if(names == null) {
+			return new Object[] {};
+		}
+		Object[] ret = new Object[names.length];
+		System.arraycopy(names, 0 , ret, 0, names.length);
+		return ret;
+	}
 }

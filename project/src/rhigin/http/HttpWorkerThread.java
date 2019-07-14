@@ -537,19 +537,24 @@ public class HttpWorkerThread extends Thread {
     try {
       op = ("HTTP/1.1 200 OK\r\n" + "Allow: GET, POST, HEAD, OPTIONS\r\n"
           + "Cache-Control: no-cache\r\n"
+          + "Pragma: no-cache\r\n"
+          + "Expire: -1\r\n"
           + "X-Accel-Buffering: no\r\n"
           + "Access-Control-Allow-Origin: *\r\n"
-          + "Access-Control-Allow-Headers: content-type, *\r\n"
+          + "Access-Control-Allow-Headers: content-type, X-Accel-Buffering, *\r\n"
           + "Access-Control-Allow-Methods: GET, POST, HEAD, OPTIONS\r\n"
           + "Server: "
           + name + "\r\n" + "Connection: close\r\n" + "Content-Length: 0\r\n\r\n")
           .getBytes("UTF8");
 
       s1 = ("HTTP/1.1 ").getBytes("UTF8");
-      s2 = ("\r\n" + "Cache-Control: no-cache\r\n"
+      s2 = ("\r\n"
+          + "Cache-Control: no-cache\r\n"
+          + "Pragma: no-cache\r\n"
+          + "Expire: -1\r\n"
           + "X-Accel-Buffering: no\r\n"
           + "Access-Control-Allow-Origin: *\r\n"
-          + "Access-Control-Allow-Headers: content-type, *\r\n"
+          + "Access-Control-Allow-Headers: content-type, X-Accel-Buffering, *\r\n"
           + "Access-Control-Allow-Methods: GET, POST, HEAD, OPTIONS\r\n"
           + "Server: "
           + name + "\r\n" + "Connection: close\r\n"

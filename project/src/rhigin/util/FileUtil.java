@@ -93,7 +93,7 @@ public final class FileUtil {
   public static final void mkdirs(String dir) throws Exception {
 	  File fp = new File(dir);
 	  if (!fp.mkdirs()) {
-		  throw new IOException("ディレクトリ(" + dir + ")の作成に失敗しました");
+		  throw new IOException("Failed to create directory ("+ dir +").");
 	  }
   }
 
@@ -267,7 +267,7 @@ public final class FileUtil {
   public static final void setFile(boolean newFile, String name, byte[] binary)
 		throws Exception {
 	  if (binary == null) {
-		  throw new IOException("出力対象のバイナリは存在しません");
+		  throw new IOException("There is no binary to output.");
 	  }
 	  BufferedOutputStream buf = new BufferedOutputStream(
 			  new FileOutputStream(name, !newFile));
@@ -297,7 +297,7 @@ public final class FileUtil {
   public static final void setFileString(boolean newFile, String name, String value, String charset)
     throws Exception {
 	  if (value == null) {
-		  throw new IOException("出力対象の文字列情報は存在しません");
+		  throw new IOException("There is no target string information for output.");
 	  }
 	  BufferedWriter buf = new BufferedWriter(new OutputStreamWriter(
 			  new FileOutputStream(name, !newFile),

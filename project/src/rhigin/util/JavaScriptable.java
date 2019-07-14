@@ -1,6 +1,7 @@
 package rhigin.util;
 
 import java.util.AbstractList;
+import java.util.Iterator;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
@@ -38,6 +39,7 @@ public class JavaScriptable {
 			return "jmap";
 		}
 	}
+	
 	// Listオブジェクト変換.
 	@SuppressWarnings("rawtypes")
 	public static abstract class List extends AbstractList implements BlankScriptable {
@@ -100,8 +102,9 @@ public class JavaScriptable {
 			return "jlist";
 		}
 	}
+	
 	// List.pushファンクション用.
-	private static class JListPushFunction extends RhiginFunction {
+	private static final class JListPushFunction extends RhiginFunction {
 		JavaScriptable.List srcList = null;
 		JListPushFunction(JavaScriptable.List l) {
 			srcList = l;
@@ -119,6 +122,71 @@ public class JavaScriptable {
 				}
 			}
 			return Undefined.instance;
+		}
+	}
+	
+	// Map実装用.
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	public static class GetMap extends JavaScriptable.Map {
+		private final java.util.Map srcMap ;
+		public GetMap(java.util.Map m) {
+			srcMap = m;
+		}
+		@Override
+		public Object[] getIds() {
+			int cnt = 0;
+			final int len = srcMap.size();
+			final Object[] ret = new Object[len];
+			final Iterator it = srcMap.keySet().iterator();
+			while(it.hasNext()) {
+				ret[cnt++] = it.next();
+			}
+			return ret;
+		}
+		@Override
+		public Object get(Object name) {
+			return srcMap.get(name);
+		}
+		@Override
+		public boolean containsKey(Object name) {
+			return srcMap.containsKey(name);
+		}
+		@Override
+		public Object put(Object name, Object value) {
+			return srcMap.put(name, value);
+		}
+		@Override
+		public Object remove(Object name) {
+			return srcMap.remove(name);
+		}
+	}
+	
+	// List実装用.
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public static class GetList extends JavaScriptable.List {
+		private final java.util.List srcList;
+		public GetList(java.util.List l) {
+			srcList = l;
+		}
+		@Override
+		public int size() {
+			return srcList.size();
+		}
+		@Override
+		public Object get(int no) {
+			return srcList.get(no);
+		}
+		@Override
+		public boolean add(Object o) {
+			return srcList.add(o);
+		}
+		@Override
+		public Object set(int no, Object o) {
+			return srcList.set(no, o);
+		}
+		@Override
+		public Object remove(int no) {
+			return srcList.remove(no);
 		}
 	}
 }

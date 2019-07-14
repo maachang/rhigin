@@ -34,7 +34,7 @@ public final class DateConvert {
     case 3: return Converter.parseInt(h.substring(0, h.length() - 3) + v) - 1900;
     case 4: return Converter.parseInt(v) - 1900;
     }
-    throw new ConvertException("日付の桁数が[" + v.length() + "]と不正です");
+    throw new ConvertException("The number of digits in the date is incorrect as ["+ v.length() +"]");
   }
 
   /** ミリ秒に対するナノ秒変換. **/
@@ -350,6 +350,6 @@ public final class DateConvert {
       cal.set(Calendar.SECOND, Converter.parseInt(list.get(6)));
       return new java.sql.Timestamp(cal.getTime().getTime());
     }
-    throw new ConvertException("不正なwebTimeフォーマット:" + value);
+    throw new ConvertException("Incorrect webTime format:" + value);
   }
 }

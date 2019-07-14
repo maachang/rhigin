@@ -1,10 +1,8 @@
 package rhigin.http;
 
 import java.io.IOException;
-import java.util.Map;
 
 import rhigin.net.ByteArrayIO;
-import rhigin.util.ArrayMap;
 import rhigin.util.Converter;
 
 /**
@@ -53,10 +51,10 @@ public final class Analysis {
      * @param body 対象のBody情報を設定します.
      * @param cset 対象のキャラクタセットを設定します.
      * @param pos 対象のポジションを設定します.
-     * @return Map<String,String> 変換結果を返却します.
+     * @return Params 変換結果を返却します.
      * @exception IOException IO例外.
      */
-    public static final Map<String, Object> paramsAnalysis(String body, int pos)
+    public static final Params paramsAnalysis(String body, int pos)
       throws IOException {
       return paramsAnalysis(body, "UTF8", pos);
     }
@@ -66,16 +64,16 @@ public final class Analysis {
      * @param body 対象のBody情報を設定します.
      * @param cset 対象のキャラクタセットを設定します.
      * @param pos 対象のポジションを設定します.
-     * @return ListMap 変換結果を返却します.
+     * @return Params 変換結果を返却します.
      * @exception IOException IO例外.
      */
-    public static final Map<String, Object> paramsAnalysis(String body, String cset, int pos)
+	public static final Params paramsAnalysis(String body, String cset, int pos)
       throws IOException {
       // パラメータバイナリを解析.
       int p, n;
       String k;
       int b = pos;
-      Map<String, Object> ret = new ArrayMap();
+      Params ret = new Params();
       while (true) {
         if ((n = body.indexOf("&", b)) == -1) {
           k = body.substring(b);

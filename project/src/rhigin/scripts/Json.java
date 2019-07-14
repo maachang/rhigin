@@ -1,12 +1,18 @@
 package rhigin.scripts;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import rhigin.RhiginException;
 
 /**
  * Json変換処理.
@@ -26,10 +32,8 @@ public final class Json {
 	 * @param target
 	 *            対象のターゲットオブジェクトを設定します.
 	 * @return String 変換されたJSON情報が返されます.
-	 * @exception IOException
-	 *                例外.
 	 */
-	public static final String encode(Object target) throws IOException {
+	public static final String encode(Object target) {
 		StringBuilder buf = new StringBuilder();
 		_encode(buf, target, target);
 		return buf.toString();
@@ -41,10 +45,8 @@ public final class Json {
 	 * @param json
 	 *            対象のJSON情報を設定します.
 	 * @return Object 変換されたJSON情報が返されます.
-	 * @exception Exception
-	 *                例外.
 	 */
-	public static final Object decode(String json) throws IOException {
+	public static final Object decode(String json) {
 		if (json == null) {
 			return null;
 		}
@@ -78,8 +80,7 @@ public final class Json {
 	}
 
 	/** [encodeJSON]jsonコンバート. **/
-	private static final void _encode(StringBuilder buf, Object base,
-			Object target) throws IOException {
+	private static final void _encode(StringBuilder buf, Object base, Object target) {
 		if (target instanceof Map) {
 			encodeJsonMap(buf, base, (Map) target);
 		} else if (target instanceof List) {
@@ -114,8 +115,7 @@ public final class Json {
 	}
 
 	/** [encodeJSON]jsonMapコンバート. **/
-	private static final void encodeJsonMap(StringBuilder buf, Object base,
-			Map map) throws IOException {
+	private static final void encodeJsonMap(StringBuilder buf, Object base, Map map) {
 		boolean flg = false;
 		Map mp = (Map) map;
 		Iterator it = mp.keySet().iterator();
@@ -137,8 +137,7 @@ public final class Json {
 	}
 
 	/** [encodeJSON]jsonListコンバート. **/
-	private static final void encodeJsonList(StringBuilder buf, Object base,
-			List list) throws IOException {
+	private static final void encodeJsonList(StringBuilder buf, Object base, List list) {
 		boolean flg = false;
 		List lst = (List) list;
 		buf.append("[");
@@ -158,8 +157,7 @@ public final class Json {
 	}
 
 	/** [encodeJSON]json配列コンバート. **/
-	private static final void encodeJsonArray(StringBuilder buf, Object base,
-			Object list) throws IOException {
+	private static final void encodeJsonArray(StringBuilder buf, Object base, Object list) {
 		boolean flg = false;
 		int len = Array.getLength(list);
 		buf.append("[");
@@ -178,8 +176,7 @@ public final class Json {
 	}
 
 	/** [decodeJSON]１つの要素を変換. **/
-	private static final Object decJsonValue(int[] n, int no, String json)
-			throws IOException {
+	private static final Object decJsonValue(int[] n, int no, String json) {
 		int len;
 		if ((len = json.length()) <= 0) {
 			return json;
@@ -215,12 +212,11 @@ public final class Json {
 			return Long.parseLong(json);
 		}
 		// その他.
-		throw new IOException("JSON解析に失敗(" + json + "):No:" + no);
+		throw new RhiginException(500, "Failed to parse JSON(" + json + "):No:" + no);
 	}
 
 	/** JSON_Token_解析処理 **/
-	private static final List<Object> analysisJsonToken(String json)
-			throws IOException {
+	private static final List<Object> analysisJsonToken(String json) {
 		int s = -1;
 		char c;
 		int cote = -1;
@@ -279,8 +275,7 @@ public final class Json {
 	}
 
 	/** Json-Token解析. **/
-	private static final Object createJsonInfo(int[] n, List<Object> token,
-			int type, int no, int len) throws IOException {
+	private static final Object createJsonInfo(int[] n, List<Object> token, int type, int no, int len) {
 		String value;
 		StringBuilder before = null;
 		// List.
@@ -342,7 +337,7 @@ public final class Json {
 				value = (String) token.get(i);
 				if (":".equals(value)) {
 					if (key == null) {
-						throw new IOException("Map形式が不正です(No:" + i + ")");
+						throw new RhiginException(500, "Map format is invalid(No:" + i + ")");
 					}
 				} else if (",".equals(value) || "}".equals(value)) {
 					if ("}".equals(value)) {
@@ -350,8 +345,7 @@ public final class Json {
 							if (before == null) {
 								ret.put(key, null);
 							} else {
-								ret.put(key,
-										decJsonValue(n, i, before.toString()));
+								ret.put(key, decJsonValue(n, i, before.toString()));
 							}
 						}
 						n[0] = i;
@@ -361,7 +355,7 @@ public final class Json {
 							if (before == null) {
 								continue;
 							}
-							throw new IOException("Map形式が不正です(No:" + i + ")");
+							throw new RhiginException(500, "Map format is invalid(No:" + i + ")");
 						}
 						if (before == null) {
 							ret.put(key, null);
@@ -373,7 +367,7 @@ public final class Json {
 					}
 				} else if ("[".equals(value)) {
 					if (key == null) {
-						throw new IOException("Map形式が不正です(No:" + i + ")");
+						throw new RhiginException(500, "Map format is invalid(No:" + i + ")");
 					}
 					ret.put(key, createJsonInfo(n, token, 0, i, len));
 					i = n[0];
@@ -381,7 +375,7 @@ public final class Json {
 					before = null;
 				} else if ("{".equals(value)) {
 					if (key == null) {
-						throw new IOException("Map形式が不正です(No:" + i + ")");
+						throw new RhiginException(500, "Map format is invalid(No:" + i + ")");
 					}
 					ret.put(key, createJsonInfo(n, token, 1, i, len));
 					i = n[0];
@@ -406,7 +400,7 @@ public final class Json {
 			return ret;
 		}
 		// その他.
-		throw new IOException("JSON解析に失敗");
+		throw new RhiginException(500, "Failed to parse JSON");
 	}
 
 	/** 日付情報チェック. **/
@@ -425,11 +419,11 @@ public final class Json {
 	}
 
 	/** 文字を日付変換. **/
-	private static final Date stringToDate(String s) throws IOException {
+	private static final Date stringToDate(String s) {
 		try {
 			return _getISO8601().parse(s);
 		} catch (Exception e) {
-			throw new IOException(e);
+			throw new RhiginException(500, e);
 		}
 	}
 

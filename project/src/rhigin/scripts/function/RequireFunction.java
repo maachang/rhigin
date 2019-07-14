@@ -38,12 +38,12 @@ public final class RequireFunction extends RhiginFunction {
                        Object[] args)
     {
 		if(args == null || args.length < 1) {
-			throw new RhiginException(404, "require引数が設定されていません");
+			throw new RhiginException(404, "The require argument has not been set.");
 		}
 		try {
 			CompileCache c = cache.get();
 			if(c == null) {
-				throw new RhiginException(500, "compileCacheが設定されていません");
+				throw new RhiginException(500, "compileCache has not been set.");
 			}
 			ScriptElement se = c.get(""+args[0], HEADER_SCRIPT, FOOTER_SCRIPT);
 			return ExecuteScript.execute(null, se.getScript());

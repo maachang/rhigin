@@ -20,11 +20,7 @@ public final class JSONObject {
 	    public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args)
 	    {
 			if(args.length >= 1) {
-				try {
-					return Json.encode(args[0]);
-				} catch(Exception e) {
-					throw new RhiginException(500, e);
-				}
+				return Json.encode(args[0]);
 			}
 	        return Undefined.instance;
 	    }
@@ -38,11 +34,7 @@ public final class JSONObject {
 	    public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args)
 	    {
 			if(args.length >= 1) {
-				try {
-					return Json.decode(""+args[0]);
-				} catch(Exception e) {
-					throw new RhiginException(500, e);
-				}
+				return Json.decode(""+args[0]);
 			}
 	        return Undefined.instance;
 	    }
