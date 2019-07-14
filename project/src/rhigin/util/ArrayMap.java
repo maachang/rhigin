@@ -253,7 +253,7 @@ public class ArrayMap implements Map<String, Object>, ConvertGet<String> {
 		}
 
 		public boolean equals(Object o) {
-			return this == o;
+			return this.equals(o);
 		}
 
 		public int hashCode() {

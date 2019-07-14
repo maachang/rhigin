@@ -25,16 +25,16 @@ public class HttpInfo {
     private String localAddress = null;
 
     /** サーバーバインドポート. **/
-    private int localPort = 3120;
+    private int localPort = HttpConstants.BIND_PORT;
 
     /** ワーカースレッド数. **/
-    private int workerThread = 5;
+    private int workerThread = HttpConstants.WORKER_THREAD;
 
     /** コンパイルキャッシュサイズ. **/
-    private int compileCacheSize = 128;
+    private int compileCacheSize = HttpConstants.COMPILE_CACHE_SIZE;
     
-    /** コンパイルキャッシュ基本ディレクトリ. **/
-    private String compileCacheBaseDir = ".";
+    /** コンパイルキャッシュルートディレクトリ. **/
+    private String compileCacheRootDir = HttpConstants.COMPILE_ROOT_DIR;
 
     public int getBacklog() {
         return backlog;
@@ -100,12 +100,12 @@ public class HttpInfo {
         this.compileCacheSize = compileCacheSize;
     }
 
-    public String getCompileCacheBaseDir() {
-        return compileCacheBaseDir;
+    public String getCompileCacheRootDir() {
+        return compileCacheRootDir;
     }
 
-    public void setCompileCacheBaseDir(String compileCacheBaseDir) {
-        this.compileCacheBaseDir = compileCacheBaseDir;
+    public void setCompileCacheRootDir(String compileCacheRootDir) {
+        this.compileCacheRootDir = compileCacheRootDir;
     }
 
     /**
@@ -162,9 +162,9 @@ public class HttpInfo {
             info.setCompileCacheSize(Converter.convertInt(o));
         }
 
-        o = conf.get("compileCacheBaseDir");
+        o = conf.get("compileCacheRootDir");
         if (o != null) {
-            info.setCompileCacheBaseDir(""+ o);
+            info.setCompileCacheRootDir(""+ o);
         }
     }
 }

@@ -63,7 +63,7 @@ public abstract class NioCall {
   @SuppressWarnings("resource")
   protected boolean sendInputStream(NioElement em, ByteBuffer buf) throws IOException {
     InputStream in = em.getSendData();
-    byte[] sendTempBinary = em.getSendTempBinary();
+    byte[] sendTempBinary = em.getSendTempBinary(buf.capacity());
     while(true) {
       // FileChannelで処理できる場合.
       if(in instanceof FileInputStream) {

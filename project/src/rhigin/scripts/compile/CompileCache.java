@@ -98,26 +98,26 @@ public class CompileCache {
 	
 	// キャッシュ情報が古いかキャッシュに存在しない場合は、ファイルからコンパイル結果を作成してロードする.
 	private static final ScriptElement load(
-		LruCache<String, ScriptElement> c, String name, long time, String headerScript, String footerScript, int lineNo)
+		LruCache<String, ScriptElement> c, String key, String jsName, long time, String headerScript, String footerScript, int lineNo)
 		throws Exception {
 		BufferedReader r = null;
 		try {
 			// ファイルが存在しない場合.
 			if(time == -1) {
 				// キャッシュに情報が存在する場合.
-				if(c.contains(name)) {
-					c.remove(name);
+				if(c.contains(key)) {
+					c.remove(key);
 				}
 				// ファイルが存在しないことを示すエラー返却.
 				throw new CompileException(404);
 			}
 			// ファイルを読み込んでキャッシュセット.
-			r = new BufferedReader(new InputStreamReader(new FileInputStream(name), CHARSET));
-			Script sc = ExecuteScript.compile(r, name, headerScript, footerScript, lineNo);
+			r = new BufferedReader(new InputStreamReader(new FileInputStream(jsName), CHARSET));
+			Script sc = ExecuteScript.compile(r, key, headerScript, footerScript, lineNo);
 			r.close();
 			r = null;
-			ScriptElement em = new ScriptElement(sc, name, time);
-			c.put(name, em);
+			ScriptElement em = new ScriptElement(sc, jsName, time);
+			c.put(key, em);
 			
 			return em;
 		} finally {
@@ -143,35 +143,35 @@ public class CompileCache {
 	
 	/**
 	 * キャッシュ情報をロード＆取得.
-	 * @param name ロードするファイル名を設定します.
+	 * @param jsName ロードするファイル名を設定します.
 	 * @param headerScript ヘッダに追加するスクリプトを設定します.
 	 * @param footerScript フッタに追加するスクリプトを設定します.
 	 * @return ScriptElement スクリプト要素が返却されます.
 	 * @exception CompileException コンパイル例外.
 	 */
-	public ScriptElement get(String name, String headerScript, String footerScript) {
+	public ScriptElement get(String jsName, String headerScript, String footerScript) {
 		try {
 			// 対象ファイルパスをフルパスで取得.
-			name = FileUtil.getFullPath(name);
-			if(!name.startsWith(baseDir)) {
+			jsName = FileUtil.getFullPath(jsName);
+			if(!jsName.startsWith(baseDir)) {
 				// ベースパス上のスクリプトファイルでない場合は、400エラーを返却.
 				throw new CompileException(400);
 			}
-			// ベースパス以降を対象とする.
-			name = name.substring(baseDir.length());
 			// 拡張子がjsでない場合は、jsを付与.
-			if(!name.toLowerCase().endsWith(".js")) {
-				name += ".js";
+			if(!jsName.toLowerCase().endsWith(".js")) {
+				jsName += ".js";
 			}
-			// 現在のキャッシュ情報を取得.
-			LruCache<String, ScriptElement> c = cache.get();
-			ScriptElement ret = c.get(name);
 			// 現在のファイル時間（存在しない場合は-1)を取得.
-			long time = FileUtil.getFileTime(name);
+			final long time = FileUtil.getFileTime(jsName);
+			// ベースパス以降を対象とする.
+			final String key = jsName.substring(baseDir.length());
+			// 現在のキャッシュ情報を取得.
+			final LruCache<String, ScriptElement> c = cache();
+			ScriptElement ret = c.get(key);
 			// キャッシュ情報が無いか、キャッシュ情報が更新された場合.
 			if(ret == null || time != ret.getTime()) {
 				// データロード.
-				ret = load(c, name, time, headerScript, footerScript, 1 - getEnterCount(headerScript));
+				ret = load(c, key, jsName, time, headerScript, footerScript, 1 - getEnterCount(headerScript));
 			}
 			return ret;
 		} catch(CompileException ce) {

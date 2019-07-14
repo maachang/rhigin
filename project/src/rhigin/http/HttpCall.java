@@ -115,7 +115,7 @@ public final class HttpCall extends NioCall {
      *                IO例外.
      */
     public boolean accept(NioElement em) throws IOException {
-        LOG.debug(" accept Http nio");
+        //LOG.debug(" accept Http nio");
         return true;
     }
 
@@ -131,7 +131,7 @@ public final class HttpCall extends NioCall {
      *                IO例外.
      */
     public boolean receive(NioElement em, ByteBuffer buf) throws IOException {
-        LOG.debug(" recv Http nio:" + buf);
+        //LOG.debug(" recv Http nio:" + buf);
 
         HttpElement rem = (HttpElement) em;
 

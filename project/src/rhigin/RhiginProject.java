@@ -5,8 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.attribute.PosixFilePermission;
-import java.util.EnumSet;
+import java.nio.file.attribute.PosixFilePermissions;
 
 import rhigin.http.HttpConstants;
 import rhigin.util.Args;
@@ -45,7 +44,7 @@ public class RhiginProject {
 		// プロジェクト名が存在しないじゃ、ヘルプを表示.
 		if(name == null || Args.getInstance().isValue("-h") || Args.getInstance().isValue("--help")) {
 			if(name == null) {
-				System.out.println("Project name is required.");
+				System.out.println("> Project name is required.");
 				System.out.println("");
 			}
 			help();
@@ -69,26 +68,26 @@ public class RhiginProject {
 		FileUtil.mkdirs("./jar");
 		
 		// 必要なファイルを転送.
-		rcpy("/res/rhigin/projects/index.js", "./index.js");
-		rcpy("/res/rhigin/projects/conf/http.json", "./http.json");
-		rcpy("/res/rhigin/projects/conf/log.json", "./log.json");
-		rcpy("/res/rhigin/projects/conf/rhigin.json", "./rhigin.json");
+		rcpy("res/rhigin/projects/index.js", "./index.js");
+		rcpy("res/rhigin/projects/conf/http.json", "./conf/http.json");
+		rcpy("res/rhigin/projects/conf/log.json", "./conf/log.json");
+		rcpy("res/rhigin/projects/conf/rhigin.json", "./conf/rhigin.json");
 		
 		// rhigin.jsonのファイルを書き換える.
-		change("./rhigin.json", "{{projectName}}", name);
-		change("./rhigin.json", "{{version}}", version);
+		change("./conf/rhigin.json", "{{projectName}}", name);
+		change("./conf/rhigin.json", "{{version}}", version);
 		
 		// OSに対する起動バッチファイルをコピー.
 		if(IsOs.getInstance().getOS() == IsOs.OS_WINNT ||
 			IsOs.getInstance().getOS() == IsOs.OS_WIN9X) {
 			// windows用.
-			rcpy("/res/rhigin/projects/rhigin.cmd", "./rhigin.cmd");
-			rcpy("/res/rhigin/projects/rbatch.cmd", "./rbatch.cmd");
+			rcpy("res/rhigin/projects/rhigin.cmd", "./rhigin.cmd");
+			rcpy("res/rhigin/projects/rbatch.cmd", "./rbatch.cmd");
 			
 		} else {
 			// linux用.
-			rcpy("/res/rhigin/projects/rhigin.cmd", "./rhigin");
-			rcpy("/res/rhigin/projects/rbatch.cmd", "./rbatch");
+			rcpy("res/rhigin/projects/rhigin", "./rhigin");
+			rcpy("res/rhigin/projects/rbatch", "./rbatch");
 			setExecPermission("./rhigin");
 			setExecPermission("./rbatch");
 		}
@@ -141,17 +140,14 @@ public class RhiginProject {
 		throws Exception {
 		String file = FileUtil.getFileString(name,  "UTF8");
 		file = Converter.changeString(file,  keyword, value);
-		FileUtil.setFileString(false, name, file, "UTF8");
+		FileUtil.setFileString(true, name, file, "UTF8");
 	}
 	
 	// 実行パーミッションをセット.
 	private final void setExecPermission(String name)
 		throws Exception {
 		Files.setPosixFilePermissions(Paths.get(name),
-			EnumSet.of(
-				PosixFilePermission.OWNER_READ,
-				PosixFilePermission.OWNER_WRITE,
-				PosixFilePermission.OWNER_EXECUTE
-		));
+			PosixFilePermissions.fromString("rwxr--r--")
+		);
 	}
 }

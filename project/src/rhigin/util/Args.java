@@ -5,7 +5,7 @@ package rhigin.util;
  * たとえば args = ["-a", "hoge"] のような実行引数が設定されていた場合,
  * Args argsObject = new Args(args);
  * String value = argsObject.get("-a");
- * value == "hoge"
+ * value.equals("hoge") == true
  * 
  * のような形で取得が出来ます.
  */
@@ -74,7 +74,7 @@ public class Args implements ConvertGet<String> {
 	public String get(String name) {
 		final int len = args.length - 1;
 		for(int i = 0;i < len; i ++) {
-			if(args[i] == name) {
+			if(name.equals(args[i])) {
 				return args[i+1];
 			}
 		}
@@ -89,7 +89,7 @@ public class Args implements ConvertGet<String> {
 	public boolean isValue(String name) {
 		final int len = args.length;
 		for(int i = 0;i < len; i ++) {
-			if(args[i] == name) {
+			if(name.equals(args[i])) {
 				return true;
 			}
 		}

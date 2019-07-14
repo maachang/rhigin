@@ -92,7 +92,7 @@ public class WaitShutdown {
                     recvBuffer.length);
             connection.receive(packet);
             if (packet.getLength() == ShutdownSignal.SHUTDOWN_BINARY.length) {
-                if (equals(packet) == true) {
+                if (equals(packet)) {
                     srcPort = packet.getPort();
                     ret = true;
                 }

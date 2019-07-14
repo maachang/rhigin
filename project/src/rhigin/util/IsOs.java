@@ -235,29 +235,29 @@ public class IsOs {
         
         int ret = OS_UNKNOWN ;
         
-        if( checkOS( "windows" ) == true ){
+        if( checkOS( "windows" ) ){
             ret = OS_WINNT ;
-        }else if( checkOS( "os2" ) == true ){
+        }else if( checkOS( "os2" ) ){
             ret = OS_OS_2 ;
-        }else if( checkOS("netware" ) == true ){
+        }else if( checkOS("netware" ) ){
             ret = OS_NETWARE ;
-        }else if( checkOS( "dos" ) == true ){
+        }else if( checkOS( "dos" ) ){
             ret = OS_DOS ;
-        }else if( checkOS( "mac" ) == true ){
+        }else if( checkOS( "mac" ) ){
             ret = OS_MACINTOSH ;
-        }else if( checkOS( "macX" ) == true ){
+        }else if( checkOS( "macX" ) ){
             ret = OS_MAC_OS_X ;
-        }else if( checkOS( "tandem" ) == true ){
+        }else if( checkOS( "tandem" ) ){
             ret = OS_TANDEM ;
-        }else if( checkOS( "unix" ) == true ){
+        }else if( checkOS( "unix" ) ){
             ret = OS_UNIX ;
-        }else if( checkOS( "win9x" ) == true ){
+        }else if( checkOS( "win9x" ) ){
             ret = OS_WIN9X ;
-        }else if( checkOS( "z/os" ) == true ){
+        }else if( checkOS( "z/os" ) ){
             ret = OS_Z_OS ;
-        }else if( checkOS( "os/400" ) == true ){
+        }else if( checkOS( "os/400" ) ){
             ret = OS_OS_400 ;
-        }else if( checkOS( "openvms" ) == true ){
+        }else if( checkOS( "openvms" ) ){
             ret = OS_OPENVMS ;
         }
         return ret ;
@@ -278,36 +278,36 @@ public class IsOs {
         
         if( name != null ){
             
-            if( name.equals( "windows" ) == true ){
+            if( name.equals( "windows" ) ){
                 
                 ret = os_name.indexOf( "windows" ) > -1 ;
                 
-            }else if( name.equals( "os/s" ) == true){
+            }else if( name.equals( "os/s" )){
                 
                 ret = os_name.indexOf( "os/2" ) > -1 ;
                 
-            }else if( name.equals( "netware" ) == true ){
+            }else if( name.equals( "netware" ) ){
                 
                 ret= os_name.indexOf( "netware" ) > -1 ;
                 
-            }else if( name.equals( "dos" ) == true ){
+            }else if( name.equals( "dos" ) ){
                 
                 ret = path_sp.equals( ";" ) &&
                     ! checkOS( "netware" ) ;
                 
-            }else if( name.equals( "macX" ) == true ){
+            }else if( name.equals( "macX" ) ){
                 
                 ret = os_name.startsWith( "Mac os" ) ;
                 
-            }else if( name.equals( "mac" ) == true ){
+            }else if( name.equals( "mac" ) ){
                 
                 ret = os_name.indexOf( "mac" ) > -1 ;
                 
-            }else if( name.equals( "tandem" ) == true ){
+            }else if( name.equals( "tandem" ) ){
                 
                 ret = os_name.indexOf( "nonstop_kernel" ) > -1 ;
                 
-            }else if( name.equals( "unix" ) == true ){
+            }else if( name.equals( "unix" ) ){
                 
                 ret = path_sp.equals( ":" ) &&
                     ! checkOS( "openvms" ) &&
@@ -316,7 +316,7 @@ public class IsOs {
                         os_name.endsWith( "x" )
                     ) ;
                 
-            }else if( name.equals( "win9x" ) == true ){
+            }else if( name.equals( "win9x" ) ){
                 
                 ret = checkOS( "windows" ) &&
                     (
@@ -326,16 +326,16 @@ public class IsOs {
                         os_name.indexOf( "ce" ) >= 0
                     ) ;
                 
-            }else if( name.equals( "z/os" ) == true ){
+            }else if( name.equals( "z/os" ) ){
                 
                 ret = os_name.indexOf( "z/os" ) > -1 ||
                     os_name.indexOf( "os/390" ) > -1 ;
                 
-            }else if( name.equals( "os/400" ) == true ){
+            }else if( name.equals( "os/400" ) ){
                 
                 ret = os_name.indexOf( "os/400" ) > -1 ;
                 
-            }else if( name.equals( "openvms" ) == true ){
+            }else if( name.equals( "openvms" ) ){
                 
                 ret = os_name.indexOf( "openvms" ) > -1 ;
                 

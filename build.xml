@@ -40,20 +40,23 @@
   <!-- ===================================================================== -->
   <!-- all.                                                                  -->
   <!-- ===================================================================== -->
-  <target name="all" depends="compile,jar"/>
+  <target name="all" depends="compile, jar"/>
   
   <!-- ===================================================================== -->
   <!-- compile.                                                              -->
   <!-- ===================================================================== -->
   <target name="compile">
+    <delete dir="${dest.dir}" />
+    <delete file="${jar.name}" />
     <mkdir dir="${dest.dir}" />
-    <javac srcdir="${src.dir}"
+    <javac includeantruntime="false"
+           srcdir="${src.dir}"
            destdir="${dest.dir}"
            encoding="UTF8"
            debug="${debug}"
            deprecation="${deprecation}"
            optimize="${optimize}"
-           nowarn="${nowarn}"
+           nowarn="${nowarn}"   
     >
       <classpath refid="path.lib" />
     </javac>
@@ -66,7 +69,7 @@
   <!-- ===================================================================== -->
   <!-- create JarFile.                                                       -->
   <!-- ===================================================================== -->
-  <target name="jar" depends="compile">
+  <target name="jar">
     <jar jarfile="${jar.name}" basedir="${dest.dir}">
     </jar>
     <delete dir="${rhigin.home}/lib" />

@@ -45,7 +45,7 @@ public class RhiginBatch {
 		
 		// コンパイルキャッシュ生成.
 		CompileCache cache = new CompileCache(
-			httpInfo.getCompileCacheSize(), httpInfo.getCompileCacheBaseDir());
+			httpInfo.getCompileCacheSize(), httpInfo.getCompileCacheRootDir());
 		
 		// コンパイルキャッシュを require命令に設定.
 		RequireFunction.getInstance().setCache(cache);

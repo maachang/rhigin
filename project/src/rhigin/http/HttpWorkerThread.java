@@ -13,6 +13,7 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
 import rhigin.RhiginConstants;
+import rhigin.RhiginException;
 import rhigin.logs.Log;
 import rhigin.logs.LogFactory;
 import rhigin.net.ByteArrayIO;
@@ -305,9 +306,9 @@ public class HttpWorkerThread extends Thread {
       } catch (Redirect redirect) {
         redirectResponse(em, redirect);
         return;
-      } catch (HttpException httpException) {
-        errorResponse(em, httpException.getStatus(),
-            httpException.getMessage());
+      } catch (RhiginException rhiginException) {
+        errorResponse(em, rhiginException.getStatus(),
+          rhiginException.getMessage());
         return;
       }
       if (ret == null) {

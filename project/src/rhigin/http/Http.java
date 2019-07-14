@@ -35,7 +35,7 @@ public final class Http {
             info.getLocalPort(), info.getBacklog());
         
         // コンパイルキャッシュ生成.
-        CompileCache cache = new CompileCache(info.getCompileCacheSize(), info.getCompileCacheBaseDir());
+        CompileCache cache = new CompileCache(info.getCompileCacheSize(), info.getCompileCacheRootDir());
         
         // コンパイルキャッシュを require命令に設定.
         RequireFunction.getInstance().setCache(cache);

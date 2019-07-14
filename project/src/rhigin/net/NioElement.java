@@ -37,10 +37,12 @@ public abstract class NioElement {
         less = null;
       }
       InputStream in;
-      while((in = sendDataList.pop()) != null) {
-	    try {
-	        in.close();
-	      } catch(Exception e) {}
+      
+      while(!sendDataList.isEmpty()) {
+        in = sendDataList.pop();
+        try {
+            in.close();
+         } catch(Exception e) {}
       }
       if (buffer != null) {
         buffer.clear();
@@ -118,9 +120,6 @@ public abstract class NioElement {
      */
     public void setSendData(InputStream in)
       throws IOException {
-      if(dataBinary == null) {
-        dataBinary = new byte[NetConstants.NIO_ELEMENT_BUFFER_SIZE];
-      }
       sendDataList.offer(in);
     }
     
@@ -137,7 +136,10 @@ public abstract class NioElement {
      * @return InputStream オブジェクトが返却されます.
      */
     public InputStream getSendData() {
-      return sendDataList.peek();
+      if(!sendDataList.isEmpty()) {
+          return sendDataList.peek();
+      }
+      return null;
     }
     
     /**
@@ -145,14 +147,21 @@ public abstract class NioElement {
      * @return InputStream オブジェクトが返却されます.
      */
     public InputStream removeSendData() {
-    	return sendDataList.pop();
+        if(!sendDataList.isEmpty()) {
+            return sendDataList.pop();
+        }
+        return null;
     }
 
     /**
      * データ一時受け取り用バイナリを取得.
+     * @param bufLen ByteBuffer.allocateDirectを生成した時のバッファサイズを設定します.
      * @return byte[] SendDataを一時的に受け取るバイナリを取得します.
      */
-    public byte[] getSendTempBinary() {
+    public byte[] getSendTempBinary(int bufLen) {
+      if(dataBinary == null) {
+        dataBinary = new byte[bufLen];
+      }
       return dataBinary;
     }
 

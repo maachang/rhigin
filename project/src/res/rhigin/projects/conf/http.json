@@ -7,5 +7,5 @@
   ,"localPort": null
   ,"workerThread": null
   ,"compileCacheSize": null
-  ,"compileCacheBaseDir": null
+  ,"compileCacheRootDir": null
 }

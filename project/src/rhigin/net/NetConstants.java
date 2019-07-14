@@ -23,7 +23,7 @@ public class NetConstants {
   public static final int ERROR_DNS_CACHE_TIME = 0;
 
   /**
-   * NioElement バッファサイズ.
+   * NioElement ByteArrayIOバッファサイズ.
    */
   public static final int NIO_ELEMENT_BUFFER_SIZE = 512;
 }
