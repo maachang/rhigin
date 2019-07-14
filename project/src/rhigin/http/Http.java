@@ -10,7 +10,7 @@ import rhigin.net.NioUtil;
  */
 public final class Http {
     // net設定.
-    protected static final boolean TCP_NO_DELAY = true; // Nagle アルゴリズムを有効にします.
+    protected static final boolean TCP_NO_DELAY = false; // Nagle アルゴリズムを有効にします.
     protected static final boolean KEEP_ALIVE = false; // TCP-KeepAliveを無効に設定します.
 
     /** Nio処理. **/
