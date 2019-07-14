@@ -6,6 +6,7 @@ import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.RhiginFunction;
 import rhigin.util.Args;
+import rhigin.util.Converter;
 
 /**
  * [Function]: 実行引数I/Oメソッド.
@@ -22,12 +23,15 @@ public final class ArgsFunction extends RhiginFunction {
 	}
 
 	@Override
-    public final Object call(Context ctx, Scriptable scope, Scriptable thisObj,
-                       Object[] args)
-    {
+	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		if(args.length >= 1) {
-			return Args.getInstance().get(""+args[0]);
+			Object o = args[0];
+			if(Converter.isNumeric(o)) {
+				return Args.get()[Converter.convertInt(o)];
+			} else {
+				return Args.getInstance().get(""+o);
+			}
 		}
-        return Undefined.instance;
-    }
+		return Args.get().length;
+	}
 }
