@@ -69,10 +69,10 @@
   <target name="jar" depends="compile">
     <jar jarfile="${jar.name}" basedir="${dest.dir}">
     </jar>
+    <delete dir="${rhigin.home}/lib" />
     <copy file="${jar.name}"
       tofile="${rhigin.home}/lib/${jar.name}"/>
-    <copy overwrite="no"
-      todir="${rhigin.home}/lib">
+    <copy todir="${rhigin.home}/lib">
       <fileset dir="${lib.dir}" />
     </copy>
   </target>
