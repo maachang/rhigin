@@ -191,10 +191,10 @@ public class JavaScriptable {
 		}
 	}
 	
-	// 配列実装用.
-	public static class GetArray extends JavaScriptable.List {
+	// 読み込み専用配列取得用.
+	public static class ReadArray extends JavaScriptable.List {
 		private final Object array;
-		public GetArray(Object a) {
+		public ReadArray(Object a) {
 			array = a;
 		}
 		@Override

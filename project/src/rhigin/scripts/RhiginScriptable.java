@@ -54,7 +54,7 @@ final class RhiginScriptable implements Scriptable {
             if(value == null) {
                 return NOT_FOUND;
             } else if ((c = value.getClass()).isArray()) {
-                return new JavaScriptable.GetArray(value);
+                return value;
             } else if (c.getPackage().getName().startsWith(RHINO_JS_PACKAGE_NAME)) {
                 return value;
             } else {
