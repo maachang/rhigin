@@ -1,8 +1,8 @@
 package rhigin.http;
 
+import rhigin.scripts.JavaScriptable;
 import rhigin.util.BlankMap;
 import rhigin.util.ConvertGet;
-import rhigin.util.JavaScriptable;
 import rhigin.util.ListMap;
 
 /**

@@ -9,8 +9,6 @@ import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.WrapFactory;
 
-import rhigin.util.JavaScriptable;
-
 @SuppressWarnings("rawtypes")
 final class RhiginWrapFactory extends WrapFactory {
 	private static final RhiginWrapFactory theInstance = new RhiginWrapFactory();

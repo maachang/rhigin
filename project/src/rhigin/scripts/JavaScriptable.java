@@ -1,4 +1,4 @@
-package rhigin.util;
+package rhigin.scripts;
 
 import java.lang.reflect.Array;
 import java.util.AbstractList;
@@ -8,8 +8,11 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
-import rhigin.scripts.RhiginFunction;
+import rhigin.util.BlankScriptable;
 
+/**
+ * javaオブジェクトを rhino の Scriptableに変更するオブジェクト.
+ */
 public class JavaScriptable {
 	// Mapオブジェクト変換.
 	public static abstract class Map implements BlankScriptable {

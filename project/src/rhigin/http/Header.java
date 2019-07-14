@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rhigin.net.ByteArrayIO;
+import rhigin.scripts.JavaScriptable;
 import rhigin.util.ConvertMap;
-import rhigin.util.JavaScriptable;
 
 /**
  * Httpヘッダ情報. 基本HTTPヘッダ情報のみを保持します. (bodyデータは非保持).
