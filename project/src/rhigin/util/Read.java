@@ -1,6 +1,6 @@
 package rhigin.util;
 
-import java.util.Iterator;
+import java.util.AbstractList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +12,7 @@ public class Read {
 	 * 読み込み専用のList.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static final class Arrays extends JavaScriptable.List implements ConvertGet<Integer> {
+	public static final class Arrays extends AbstractList implements ConvertGet<Integer> {
 		private boolean listMode = false;
 		private Object srcList = null;
 		public Arrays(List<Object> srcList) {
@@ -64,7 +64,7 @@ public class Read {
 	 * 読み込み専用のMap.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static final class Maps extends JavaScriptable.Map implements BlankMap, ConvertGet<String> {
+	public static final class Maps implements BlankMap, ConvertGet<String> {
 		Map<String,Object> srcMap = null;
 		public Maps(Map<String,Object> srcMap) {
 			this.srcMap = srcMap;
@@ -100,16 +100,6 @@ public class Read {
 		@Override
 		public Object getOriginal(String n) {
 			return get(n);
-		}
-		@Override
-		public Object[] getIds() {
-			int cnt = 0;
-			Object[] ret = new Object[srcMap.size()];
-			Iterator<String> it = srcMap.keySet().iterator();
-			while(it.hasNext()) {
-				ret[cnt++] = it.next();
-			}
-			return ret;
 		}
 		@Override
 		public Object put(Object name, Object value) {

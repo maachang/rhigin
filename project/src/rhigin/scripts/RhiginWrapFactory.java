@@ -24,7 +24,7 @@ final class RhiginWrapFactory extends WrapFactory {
 		return theInstance;
 	}
 	public Scriptable wrapAsJavaObject(Context cx, Scriptable scope,
-									   Object javaObject, Class staticType) {
+										Object javaObject, Class staticType) {
 		final SecurityManager sm = System.getSecurityManager();
 		final ClassShutter classShutter = RhiginClassShutter.getInstance();
 		if (javaObject instanceof Map) {
@@ -166,7 +166,7 @@ final class RhiginWrapFactory extends WrapFactory {
 		}
 		public boolean has(String name, Scriptable start) {
 			if("length".equals(name) || "push".equals(name)) {
-			  return true;
+				return true;
 			}
 			return super.has(name, start);
 		}  

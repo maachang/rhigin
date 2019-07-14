@@ -9,6 +9,7 @@ import org.mozilla.javascript.Undefined;
 import rhigin.scripts.RhiginFunction;
 
 public class JavaScriptable {
+	// Mapオブジェクト変換.
 	public static abstract class Map implements BlankScriptable {
 		public abstract Object[] getIds();
 		public abstract Object get(Object name);
@@ -17,10 +18,10 @@ public class JavaScriptable {
 		public abstract Object remove(Object name);
 		public boolean has(String name, Scriptable start) {
 			if(this.containsKey(name)) {
-			  return true;
+				return true;
 			}
 			return false;
-		}  
+		}
 		public Object get(String name, Scriptable start) {
 			if(this.containsKey(name)) {
 				return this.get(name);
@@ -51,7 +52,7 @@ public class JavaScriptable {
 				return true;
 			}
 			return false;
-		}  
+		}
 		public Object get(int no, Scriptable start) {
 			if(no >= 0 && this.size() > no) {
 				return this.get(no);
@@ -75,7 +76,7 @@ public class JavaScriptable {
 			  return true;
 			}
 			return false;
-		}  
+		}
 		public Object get(String name, Scriptable start) {
 			if("length".equals(name)) {
 				return this.size();
