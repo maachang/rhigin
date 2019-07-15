@@ -44,7 +44,9 @@ public final class Http {
         }
         
         // bodyファイル格納先のフォルダを作成.
-        FileUtil.mkdirs(HttpConstants.POST_FILE_OUT_ROOT_DIR);
+        if(!FileUtil.isDir(HttpConstants.POST_FILE_OUT_ROOT_DIR)) {
+          FileUtil.mkdirs(HttpConstants.POST_FILE_OUT_ROOT_DIR);
+        }
 
         // nio:サーバーソケット作成.
         ServerSocketChannel ch = NioUtil.createServerSocketChannel(
