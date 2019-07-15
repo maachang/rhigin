@@ -49,7 +49,7 @@ public class HttpWorkerThread extends Thread {
   private volatile boolean endThreadFlag = false;
 
   public HttpWorkerThread(HttpInfo info, MimeType m, int n) {
-    // コンパイルキャッシュ生成.
+    // コンパイルキャッシュは、ワーカースレッド単位で生成する.
     compileCache = new CompileCache(info.getCompileCacheSize(), info.getCompileCacheRootDir());
     no = n;
     mime = m;
@@ -84,7 +84,7 @@ public class HttpWorkerThread extends Thread {
   public void run() {
     LOG.info(" * start rhigin workerThread(" + no + ").");
     
-    // コンパイルキャッシュを require命令に設定.
+    // ワーカー単位のコンパイルキャッシュを require命令に設定.
     RequireFunction.getInstance().setCache(compileCache);
     
     // 実行処理.
@@ -363,7 +363,7 @@ public class HttpWorkerThread extends Thread {
     req.setBody(null);
 
     // Body内容がJSON形式の場合.
-    String contentType = req.getHeader("Content-Type");
+    String contentType = (String)req.get("Content-Type");
     if (contentType.indexOf("application/json") == 0) {
       return Json.decode(v);
     } else if ("application/x-www-form-urlencoded".equals(contentType)) {
@@ -375,7 +375,7 @@ public class HttpWorkerThread extends Thread {
 
   /** GZIP返却許可チェック. **/
   private static final boolean isGzip(Request req) throws IOException {
-    String n = req.getHeader("Accept-Encoding");
+    String n = (String)req.get("Accept-Encoding");
     if (n == null || n.indexOf("gzip") == -1) {
       return false;
     }
@@ -399,10 +399,10 @@ public class HttpWorkerThread extends Thread {
     em.setEndReceive(true);
     em.setEndSend(true);
     if(gzip && fileName.endsWith(".gz")) {
-      header.setHeader("Content-Encoding", "gzip");
-      header.setHeader("Content-Type", mime.get(fileName.substring(0, fileName.length()-3)));
+      header.put("Content-Encoding", "gzip");
+      header.put("Content-Type", mime.get(fileName.substring(0, fileName.length()-3)));
     } else {
-      header.setHeader("Content-Type", mime.get(fileName.substring(0, fileName.length())));
+      header.put("Content-Type", mime.get(fileName.substring(0, fileName.length())));
     }
     try {
       em.setSendData(new ByteArrayInputStream(stateResponse(
@@ -424,7 +424,7 @@ public class HttpWorkerThread extends Thread {
     em.setEndReceive(true);
     em.setEndSend(true);
     if (gzip && body.length() > HttpConstants.NOT_GZIP_BODY_LENGTH) {
-      header.setHeader("Content-Encoding", "gzip");
+      header.put("Content-Encoding", "gzip");
       em.setSendBinary(stateResponse(status, header, pressGzip(body), -1L));
     } else {
       em.setSendBinary(stateResponse(status, header, body));
@@ -439,7 +439,7 @@ public class HttpWorkerThread extends Thread {
     em.setEndReceive(true);
     em.setEndSend(true);
     Response res = new Response();
-    res.setHeader("Location", redirect.getUrl());
+    res.put("Location", redirect.getUrl());
     em.setSendBinary(stateResponse(redirect.getStatus(), res, ""));
   }
 
@@ -483,7 +483,7 @@ public class HttpWorkerThread extends Thread {
     buf = null;
     
     Response header = new Response();
-    header.setHeader("Content-Type", "application/json; charset=UTF-8");
+    header.put("Content-Type", "application/json; charset=UTF-8");
 
     // 処理結果を返却.
     em.setRequest(null);
@@ -619,10 +619,10 @@ public class HttpWorkerThread extends Thread {
             status = Converter.convertInt(args[0]);
             message = "" + args[1];
           } else if(Converter.isNumeric(args[1])) {
-        	  message = "" + args[0];
+            message = "" + args[0];
             status = Converter.convertInt(args[1]);
           } else {
-        	  message = "" + args[0];
+            message = "" + args[0];
             status = Converter.convertInt(args[1]);
           }
         } else {

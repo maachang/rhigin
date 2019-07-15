@@ -32,7 +32,7 @@ public class Request extends Header {
       if (contentLength != null) {
         return contentLength;
       }
-      String ret = this.getHeader("Content-Length");
+      String ret = (String)this.get("Content-Length");
       if (ret == null) {
         return -1;
       }

@@ -100,7 +100,7 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
      * @return
      * @throws IOException
      */
-    public String getHeader(String key) throws IOException {
+    protected String getHeader(String key) throws IOException {
       getHeaderString();
       int p = headersString.indexOf(key + ": ");
       if (p == -1) {

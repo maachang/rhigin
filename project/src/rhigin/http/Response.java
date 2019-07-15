@@ -37,7 +37,7 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
         return status;
     }
 
-    public void setHeader(Map h) {
+    public void setHeaders(Map h) {
         if (h == null) {
             return;
         }
@@ -56,7 +56,7 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
         }
     }
 
-    public Object setHeader(Object k, Object v) {
+    protected Object setHeader(Object k, Object v) {
         if (k != null && v != null) {
             Object ret = header.put(k.toString(), v.toString());
             if(ret != null) {
@@ -66,7 +66,7 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
         return null;
     }
 
-    public Object getHeader(Object k) {
+    protected Object getHeader(Object k) {
         if (k != null) {
             Object ret = header.get(k.toString());
             if(ret != null) {
@@ -76,7 +76,7 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
         return null;
     }
 
-    public Object removeHeader(Object k) {
+    protected Object removeHeader(Object k) {
         if (k != null) {
             Object ret = header.remove(k.toString());
             if(ret != null) {
