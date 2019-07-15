@@ -7,13 +7,16 @@ public class HttpConstants {
 	public static final String ACCESS_PATH = "./application";
 
 	/** メモリで受け取るContent-Type最大値. **/
-	public static final int MAX_CONTENT_LENGTH = 1 * 0x100000;
+	public static final int MAX_CONTENT_LENGTH = 5 * 0x100000;
 	
 	/** 送信Body情報をGZIP圧縮させないサイズ. **/
 	public static final int NOT_GZIP_BODY_LENGTH = 512;
 	
 	/** POST受信時のBody情報ファイル出力を行うための、Content-Type. **/
 	public static final String POST_FILE_OUT_CONTENT_TYPE = "application/rhigin";
+	
+	/** POST受診時のBody情報ファイルディレクトリ. **/
+	public static final String POST_FILE_OUT_ROOT_DIR = "./.bodys/";
 
 	/** デフォルトのバインドポート. **/
 	public static final int BIND_PORT = 3120;

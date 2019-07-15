@@ -4,6 +4,7 @@ import java.nio.channels.ServerSocketChannel;
 
 import rhigin.net.NioCore;
 import rhigin.net.NioUtil;
+import rhigin.util.FileUtil;
 
 /**
  * Httpオブジェクト.
@@ -41,6 +42,9 @@ public final class Http {
         if(httpInfo == null) {
             httpInfo = info;
         }
+        
+        // bodyファイル格納先のフォルダを作成.
+        FileUtil.mkdirs(HttpConstants.POST_FILE_OUT_ROOT_DIR);
 
         // nio:サーバーソケット作成.
         ServerSocketChannel ch = NioUtil.createServerSocketChannel(

@@ -14,7 +14,9 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
 import rhigin.scripts.function.ArgsFunction;
+import rhigin.scripts.function.AtobFunction;
 import rhigin.scripts.function.BinaryFunction;
+import rhigin.scripts.function.BtoaFunction;
 import rhigin.scripts.function.GetClassFunction;
 import rhigin.scripts.function.GetEnvFunction;
 import rhigin.scripts.function.RandomFunction;
@@ -282,6 +284,8 @@ public class ExecuteScript {
 		scope.put("getEnv", scope, GetEnvFunction.getInstance());
 		scope.put("args", scope, ArgsFunction.getInstance());
 		scope.put("random", scope, RandomFunction.getInstance());
+		scope.put("btoa", scope, BtoaFunction.getInstance());
+		scope.put("atob", scope, AtobFunction.getInstance());
 		//ThreadFunction.set(scope);
 		
 		// オリジナルオブジェクトを設定.

@@ -126,7 +126,7 @@ public class HttpWorkerThread extends Thread {
             wait.await(TIMEOUT);
             continue;
           }
-          if (executionRequest(em)) {
+          if (executionRequest(em, tmpBuffer, xor128)) {
             executeScript(em, compileCache, mime);
           }
           em = null;
@@ -148,7 +148,7 @@ public class HttpWorkerThread extends Thread {
   }
 
   /** Request処理. **/
-  private static final boolean executionRequest(HttpElement em)
+  private static final boolean executionRequest(HttpElement em, byte[] tmpBuffer, Xor128 xor128)
     throws IOException {
 
     // 既に受信処理が終わっている場合.
@@ -199,9 +199,31 @@ public class HttpWorkerThread extends Thread {
         return false;
       }
       
-      // 大容量でファイル受信の場合.
+      // 大容量ファイル受信が要求されてる場合.
       if(HttpConstants.POST_FILE_OUT_CONTENT_TYPE.equals(request.getString("Content-Type"))) {
-        
+        HttpPostBodyFile file = em.getHttpPostBodyFile(xor128);
+        if(buffer.size() > 0) {
+          int len;
+          byte[] buf = tmpBuffer;
+          while(true) {
+            len = buffer.read(buf);
+            if(len == 0) {
+              break;
+            }
+            file.write(buf, len);
+          }
+          if(file.getFileLength() >= contentLength) {
+            // 受信完了.
+            file.endWrite();
+            request.setBody(null);
+            em.setEndReceive(true);
+            em.destroyBuffer();
+            return true;
+          } else {
+            // PostのBody受信中.
+            return false;
+          }
+        }
       }
 
       // 指定サイズを超えるBody長.
@@ -393,6 +415,10 @@ public class HttpWorkerThread extends Thread {
 
   /** POSTパラメータを取得. **/
   private static final Object postParams(Request req) throws IOException {
+    // 大容量ファイルの受け取りの場合は、パラメータ解析を行わない.
+    if(HttpConstants.POST_FILE_OUT_CONTENT_TYPE.equals(req.get("Content-Type"))) {
+      return null;
+    }
     String v = new String(req.getBody(), "UTF8");
     req.setBody(null);
 
