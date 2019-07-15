@@ -22,13 +22,9 @@ public final class HttpCall extends NioCall {
 
     /**
      * コンストラクタ.
-     * 
-     * @param info
-     *            Http情報を設定します.
-     * @param mime
-     *            MimeTypeオブジェクトを設定します.
-     * @param wprkerLength
-     *            ワーカースレッド長を設定します.
+     * @param info Http情報を設定します.
+     * @param mime MimeTypeオブジェクトを設定します.
+     * @param wprkerLength ワーカースレッド長を設定します.
      */
     public HttpCall(HttpInfo info, MimeType mime, int workerLength) {
         this.info = info;
@@ -38,7 +34,6 @@ public final class HttpCall extends NioCall {
 
     /**
      * 新しい通信要素を生成.
-     * 
      * @return BaseNioElement 新しい通信要素が返却されます.
      */
     public NioElement createElement() {
@@ -47,7 +42,6 @@ public final class HttpCall extends NioCall {
 
     /**
      * 開始処理.
-     * 
      * @return boolean [true]の場合、正常に処理されました.
      */
     public boolean startNio() {
@@ -106,9 +100,7 @@ public final class HttpCall extends NioCall {
 
     /**
      * Accept処理.
-     * 
-     * @param em
-     *            対象のBaseNioElementオブジェクトが設定されます.
+     * @param em 対象のBaseNioElementオブジェクトが設定されます.
      * @return boolean [true]の場合、正常に処理されました.
      * @exception IOException
      *                IO例外.
@@ -120,14 +112,10 @@ public final class HttpCall extends NioCall {
 
     /**
      * Receive処理.
-     * 
-     * @param em
-     *            対象のBaseNioElementオブジェクトが設定されます.
-     * @param buf
-     *            対象のByteBufferを設定します.
+     * @param em 対象のBaseNioElementオブジェクトが設定されます.
+     * @param buf 対象のByteBufferを設定します.
      * @return boolean [true]の場合、正常に処理されました.
-     * @exception IOException
-     *                IO例外.
+     * @exception IOException IO例外.
      */
     public boolean receive(NioElement em, ByteBuffer buf) throws IOException {
         //LOG.debug(" recv Http nio:" + buf);

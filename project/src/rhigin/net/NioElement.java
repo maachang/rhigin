@@ -154,14 +154,18 @@ public abstract class NioElement {
     }
 
     /**
+     * データお一時受け取り用バイナリを設定.
+     * @param buf SendDataを一時的に受け取るバイナリを取得します.
+     */
+    public void setSendTempBinary(byte[] buf) {
+        dataBinary = buf;
+    }
+
+    /**
      * データ一時受け取り用バイナリを取得.
-     * @param bufLen ByteBuffer.allocateDirectを生成した時のバッファサイズを設定します.
      * @return byte[] SendDataを一時的に受け取るバイナリを取得します.
      */
-    public byte[] getSendTempBinary(int bufLen) {
-      if(dataBinary == null) {
-        dataBinary = new byte[bufLen];
-      }
+    public byte[] getSendTempBinary() {
       return dataBinary;
     }
 

@@ -17,6 +17,7 @@ import rhigin.scripts.function.ArgsFunction;
 import rhigin.scripts.function.BinaryFunction;
 import rhigin.scripts.function.GetClassFunction;
 import rhigin.scripts.function.GetEnvFunction;
+import rhigin.scripts.function.RandomFunction;
 import rhigin.scripts.function.RequireFunction;
 import rhigin.scripts.function.SleepFunction;
 import rhigin.scripts.objects.ConsoleObject;
@@ -280,6 +281,7 @@ public class ExecuteScript {
 		scope.put("sleep", scope, SleepFunction.getInstance());
 		scope.put("getEnv", scope, GetEnvFunction.getInstance());
 		scope.put("args", scope, ArgsFunction.getInstance());
+		scope.put("random", scope, RandomFunction.getInstance());
 		//ThreadFunction.set(scope);
 		
 		// オリジナルオブジェクトを設定.

@@ -16,13 +16,12 @@ public final class JSONObject {
 	// json エンコード.
 	private static final RhiginFunction stringify = new RhiginFunction() {
 		@Override
-	    public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args)
-	    {
+		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if(args.length >= 1) {
 				return Json.encode(args[0]);
 			}
-	        return Undefined.instance;
-	    }
+				return Undefined.instance;
+		}
 		@Override
 		public final String getName() { return "stringify"; }
 	};
@@ -30,13 +29,12 @@ public final class JSONObject {
 	// json デコード.
 	private static final RhiginFunction parse = new RhiginFunction() {
 		@Override
-	    public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args)
-	    {
+		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if(args.length >= 1) {
 				return Json.decode(""+args[0]);
 			}
-	        return Undefined.instance;
-	    }
+			return Undefined.instance;
+		}
 		@Override
 		public final String getName() { return "parse"; }
 	};

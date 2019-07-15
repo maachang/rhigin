@@ -21,6 +21,7 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
     protected String version;
     protected byte[] headers;
     protected String headersString;
+    protected String contntType;
     private List<String> headerList = null;
 
     protected Header() {
@@ -68,6 +69,7 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
     
     public void clear() {
         headerList = null;
+        contntType = null;
     }
     
     /**
@@ -149,6 +151,15 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
         return getMethod();
       } else if ("version".equals(key)) {
         return getVersion();
+      } else if("Content-Type".equals(key)) {
+        if(contntType == null) {
+          try {
+            contntType = getHeader(key.toString());
+          } catch(Exception e) {
+            contntType = null;
+          }
+        }
+        return contntType;
       }
       try {
         return getHeader(key.toString());

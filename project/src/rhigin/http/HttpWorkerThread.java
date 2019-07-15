@@ -24,12 +24,14 @@ import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.ScriptConstants;
 import rhigin.scripts.compile.CompileCache;
 import rhigin.scripts.compile.ScriptElement;
+import rhigin.scripts.function.RandomFunction;
 import rhigin.scripts.function.RequireFunction;
 import rhigin.util.Alphabet;
 import rhigin.util.ArrayMap;
 import rhigin.util.Converter;
 import rhigin.util.FileUtil;
 import rhigin.util.Wait;
+import rhigin.util.Xor128;
 
 /**
  * ワーカースレッド.
@@ -39,26 +41,39 @@ public class HttpWorkerThread extends Thread {
   private static final int TIMEOUT = 1000;
   private static final byte[] BLANK_BINARY = new byte[0];
 
-  private int no;
-  private Queue<HttpElement> queue = null;
-  private Wait wait = null;
-  private CompileCache compileCache;
-  private MimeType mime;
+  private final int no;
+  private final Queue<HttpElement> queue;
+  private final Wait wait;
+  private final CompileCache compileCache;
+  private final MimeType mime;
+  private final byte[] tmpBuffer;
+  private final Xor128 xor128;
 
   private volatile boolean stopFlag = true;
   private volatile boolean endThreadFlag = false;
 
   public HttpWorkerThread(HttpInfo info, MimeType m, int n) {
-    // コンパイルキャッシュは、ワーカースレッド単位で生成する.
-    compileCache = new CompileCache(info.getCompileCacheSize(), info.getCompileCacheRootDir());
     no = n;
     mime = m;
+    // コンパイルキャッシュは、ワーカースレッド単位で生成する.
+    compileCache = new CompileCache(info.getCompileCacheSize(), info.getCompileCacheRootDir());
+    
+    // HttpElement受付用.
     queue = new ConcurrentLinkedQueue<HttpElement>();
     wait = new Wait();
+    
+    // テンポラリバッファを生成.
+    // この情報は、ワーカースレッドで処理される、各HttpElement.sendTempBinaryで利用される.
+    tmpBuffer = new byte[info.getByteBufferLength()];
+    
+    // ランダムオブジェクト.
+    xor128 = new Xor128(System.nanoTime());
   }
 
   public void register(HttpElement em) throws IOException {
+    // ワーカースレッドに登録.
     em.setWorkerNo(no);
+    em.setSendTempBinary(tmpBuffer);
     queue.offer(em);
     wait.signal();
   }
@@ -86,6 +101,9 @@ public class HttpWorkerThread extends Thread {
     
     // ワーカー単位のコンパイルキャッシュを require命令に設定.
     RequireFunction.getInstance().setCache(compileCache);
+    
+    // ワーカー単位でランダムオブジェクトをセット.
+    RandomFunction.getInstance().setXor128(xor128);
     
     // 実行処理.
     ThreadDeath td = execute();
@@ -179,6 +197,11 @@ public class HttpWorkerThread extends Thread {
         // 411エラー.
         errorResponse(em, 411);
         return false;
+      }
+      
+      // 大容量でファイル受信の場合.
+      if(HttpConstants.POST_FILE_OUT_CONTENT_TYPE.equals(request.getString("Content-Type"))) {
+        
       }
 
       // 指定サイズを超えるBody長.
@@ -313,6 +336,11 @@ public class HttpWorkerThread extends Thread {
         redirectResponse(em, redirect);
         return;
       } catch (RhiginException rhiginException) {
+        // HTTPステータスが500エラー以上の場合のみ、エラー表示.
+        if(rhiginException.getStatus() >= 500) {
+          //　スクリプトエラーを表示.
+          LOG.error("scriptError:" + req.getUrl(), rhiginException);
+        }
         errorResponse(em, rhiginException.getStatus(),
           rhiginException.getMessage());
         return;
@@ -327,8 +355,14 @@ public class HttpWorkerThread extends Thread {
         gzip = false;
       }
       sendResponse(gzip, em, res.getStatus(), res, (String)ret);
+    } catch(RhiginException re) {
+      LOG.error("error", re);
+      try {
+        errorResponse(em, re.getStatus(), re.getMessage());
+      } catch(Exception ee) {}
+      return;
     } catch (Exception e) {
-      LOG.info("error", e);
+      LOG.error("error", e);
       try {
         errorResponse(em, 500, e.getMessage());
       } catch (Exception ee) {

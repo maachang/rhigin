@@ -2,6 +2,7 @@ package rhigin.scripts;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
@@ -12,7 +13,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.mozilla.javascript.IdScriptableObject;
+import org.mozilla.javascript.ScriptRuntime;
+
 import rhigin.RhiginException;
+import rhigin.util.Converter;
 
 /**
  * Json変換処理.
@@ -108,6 +113,27 @@ public final class Json {
 				buf.append("[]");
 			} else {
 				encodeJsonArray(buf, base, target);
+			}
+		} else if (target instanceof IdScriptableObject) {
+			// IdScriptableObject = rhino側の型オブジェクトの基底オブジェクト.
+			IdScriptableObject io = (IdScriptableObject)target;
+			if("Date".equals(io.getClassName())) {
+				// NativeDate.
+				try {
+					// 現状リフレクションで直接取得するようにする.
+					// 本来は　ScriptRuntime.toNumber(NativeDate) で取得できるのだけど、
+					// これは rhinoのContextの範囲内でないとエラーになるので.
+					final Method m = io.getClass().getDeclaredMethod("getJSTimeValue");
+					m.setAccessible(true);
+					final Object o = m.invoke(io);
+					buf.append("\"").append(dateToString(new Date(Converter.convertLong(o)))).append("\"");
+				} catch(Exception e) {
+					// エラーの場合は処理しない.
+					buf.append("null");
+				}
+			} else {
+				// それ以外はnullをセット.
+				buf.append("null");
 			}
 		} else {
 			buf.append("\"").append(target.toString()).append("\"");
