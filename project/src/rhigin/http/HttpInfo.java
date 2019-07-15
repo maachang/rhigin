@@ -156,6 +156,10 @@ public class HttpInfo {
         if (o != null && Converter.isNumeric(o)) {
             info.setWorkerThread(Converter.convertInt(o));
         }
+        // ワーカースレッドが 0以下 の場合は、CPU数に応じて割当を行う.
+        if(info.getWorkerThread() <= 0) {
+            info.setWorkerThread(java.lang.Runtime.getRuntime().availableProcessors());
+        }
 
         o = conf.get("compileCacheSize");
         if (o != null && Converter.isNumeric(o)) {

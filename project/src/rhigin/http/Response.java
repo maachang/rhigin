@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import rhigin.scripts.JavaScriptable;
+import rhigin.util.AbstractKeyIterator;
 import rhigin.util.ConvertMap;
 import rhigin.util.Converter;
 import rhigin.util.ListMap;
@@ -14,7 +16,8 @@ import rhigin.util.OList;
 /**
  * Response.
  */
-public class Response extends JavaScriptable.Map implements ConvertMap {
+@SuppressWarnings("rawtypes")
+public class Response extends JavaScriptable.Map implements AbstractKeyIterator.Base<String>, ConvertMap {
     private static final String DEFAULT_CONTENT_TYPE = "application/json; charset=UTF-8";
     protected int status = 200;
     protected ListMap header = new ListMap();
@@ -34,7 +37,6 @@ public class Response extends JavaScriptable.Map implements ConvertMap {
         return status;
     }
 
-    @SuppressWarnings("rawtypes")
     public void setHeader(Map h) {
         if (h == null) {
             return;
@@ -212,5 +214,20 @@ public class Response extends JavaScriptable.Map implements ConvertMap {
 		Object[] ret = new Object[names.length];
 		System.arraycopy(names, 0 , ret, 0, names.length);
 		return ret;
+	}
+	
+	@Override
+	public String getKey(int no) {
+		return (String)header.rawData().get(no)[0];
+	}
+	
+	@Override
+	public int size() {
+		return header.size();
+	}
+
+	@Override
+	public Set keySet() {
+		return new AbstractKeyIterator.KeyIteratorSet<>(this);
 	}
 }

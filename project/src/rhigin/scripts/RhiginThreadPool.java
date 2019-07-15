@@ -12,15 +12,15 @@ public class RhiginThreadPool {
 	public static final RhiginThreadPool getInstance() {
 		return THIS;
 	}
-	
-	private static final int DEF_POOL_LENGTH = 5;
+	// スレッドプーリングサービズ.
 	private ScheduledExecutorService service = null;
 	
 	/**
 	 * デフォルトサイズで、スレッドプールを作成.
 	 */
 	public final void newThreadPool() {
-		newThreadPool(DEF_POOL_LENGTH);
+		// CPU数に合わせて設定.
+		newThreadPool(-1);
 	}
 	
 	/**
@@ -29,6 +29,10 @@ public class RhiginThreadPool {
 	 */
 	public final void newThreadPool(int len) {
 		if(service == null) {
+			if(len <= 0) {
+				// CPU数に合わせて設定.
+				len = java.lang.Runtime.getRuntime().availableProcessors();
+			} 
 			service = Executors.newScheduledThreadPool(len);
 		}
 	}

@@ -11,7 +11,7 @@ public class HttpConstants {
 
 	public static final int BIND_PORT = 3120;
 
-	public static final int WORKER_THREAD = 5;
+	public static final int WORKER_THREAD = -1; // CPU数に応じてスレッド数を割り当てる.
 
 	public static final int COMPILE_CACHE_SIZE = 128;
 

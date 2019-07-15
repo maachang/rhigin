@@ -37,6 +37,7 @@ public final class Http {
      * @throws Exception
      */
     public Http(HttpInfo info, MimeType mime) throws Exception {
+        // httpInfoをシングルトンとして登録.
         if(httpInfo == null) {
             httpInfo = info;
         }

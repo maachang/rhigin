@@ -3,20 +3,25 @@ package rhigin.http;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import rhigin.RhiginException;
 import rhigin.net.ByteArrayIO;
 import rhigin.scripts.JavaScriptable;
+import rhigin.util.AbstractKeyIterator;
 import rhigin.util.ConvertMap;
 
 /**
  * Httpヘッダ情報. 基本HTTPヘッダ情報のみを保持します. (bodyデータは非保持).
  */
-public class Header extends JavaScriptable.Map implements ConvertMap {
+@SuppressWarnings("rawtypes")
+public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Base<String>, ConvertMap {
     protected String method;
     protected String url;
     protected String version;
     protected byte[] headers;
     protected String headersString;
+    private List<String> headerList = null;
 
     protected Header() {
     }
@@ -56,10 +61,14 @@ public class Header extends JavaScriptable.Map implements ConvertMap {
     // 取得ヘッダバイナリを文字列のヘッダに変換.
     protected final void getHeaderString() throws IOException {
       if (headers != null) {
-    	    headersString = new String(headers, "UTF8");
-    	    headers = null;
+        headersString = new String(headers, "UTF8");
+        headers = null;
       }
-	}
+    }
+    
+    public void clear() {
+        headerList = null;
+    }
     
     /**
      * HTTPメソッドを取得.
@@ -105,6 +114,9 @@ public class Header extends JavaScriptable.Map implements ConvertMap {
     }
 
     public List<String> getHeaders() throws IOException {
+      if(headerList != null) {
+        return headerList;
+      }
       getHeaderString();
       int p;
       int b = 0;
@@ -118,6 +130,7 @@ public class Header extends JavaScriptable.Map implements ConvertMap {
         }
         b = p + 2;
       }
+      headerList = ret;
       return ret;
     }
 
@@ -190,5 +203,30 @@ public class Header extends JavaScriptable.Map implements ConvertMap {
 	@Override
 	public Object remove(Object name) {
 		return null;
+	}
+
+	@Override
+	public String getKey(int no) {
+		try {
+			List<String> list = getHeaders();
+			return list.get(no);
+		} catch(Exception e) {
+			throw new RhiginException(500, e);
+		}
+	}
+
+	@Override
+	public int size() {
+		try {
+			List<String> list = getHeaders();
+			return list.size();
+		} catch(Exception e) {
+			throw new RhiginException(500, e);
+		}
+	}
+
+	@Override
+	public Set keySet() {
+		return new AbstractKeyIterator.KeyIteratorSet<>(this);
 	}
 }

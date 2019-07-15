@@ -1,14 +1,17 @@
 package rhigin.http;
 
+import java.util.Set;
+
 import rhigin.scripts.JavaScriptable;
-import rhigin.util.BlankMap;
+import rhigin.util.AbstractKeyIterator;
 import rhigin.util.ConvertGet;
 import rhigin.util.ListMap;
 
 /**
  * Httpパラメータ.
  */
-public class Params extends JavaScriptable.Map implements BlankMap, ConvertGet<Object> {
+@SuppressWarnings("rawtypes")
+public class Params extends JavaScriptable.Map implements AbstractKeyIterator.Base<String>, ConvertGet<Object> {
 	private ListMap map = new ListMap();
 
 	@Override
@@ -86,5 +89,15 @@ public class Params extends JavaScriptable.Map implements BlankMap, ConvertGet<O
 	@Override
 	public Object getOriginal(Object n) {
 		return get(n);
+	}
+
+	@Override
+	public String getKey(int no) {
+		return (String)map.rawData().get(no)[0];
+	}
+
+	@Override
+	public Set keySet() {
+		return new AbstractKeyIterator.KeyIteratorSet<>(this);
 	}
 }

@@ -1,14 +1,16 @@
 package rhigin.http;
 
 import java.io.IOException;
+
 import rhigin.net.ByteArrayIO;
+import rhigin.util.Converter;
 
 /**
  * Request.
  */
 public class Request extends Header {
     protected byte[] body = null;
-    protected Integer contentLength = null;
+    protected Long contentLength = null;
 
     protected Request() {
       super();
@@ -26,7 +28,7 @@ public class Request extends Header {
       return body;
     }
 
-    public int getContentLength() throws IOException {
+    public long getContentLength() throws IOException {
       if (contentLength != null) {
         return contentLength;
       }
@@ -34,7 +36,7 @@ public class Request extends Header {
       if (ret == null) {
         return -1;
       }
-      contentLength = Integer.parseInt(ret);
+      contentLength = Converter.parseLong(ret);
       return contentLength;
     }
 }

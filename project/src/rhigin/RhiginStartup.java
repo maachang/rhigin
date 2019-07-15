@@ -19,10 +19,8 @@ import rhigin.logs.LogFactory;
 import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.RhiginContext;
 import rhigin.scripts.RhiginFunction;
-import rhigin.scripts.RhiginThreadPool;
 import rhigin.scripts.ScriptConstants;
 import rhigin.util.Args;
-import rhigin.util.Converter;
 import rhigin.util.EnvCache;
 import rhigin.util.FileUtil;
 
@@ -95,12 +93,12 @@ public class RhiginStartup {
 		throws Exception {
 		
 		// スレッドプーリングの初期化.
-		if(Converter.isNumeric(config.get("rhigin", "threadPoolSize"))) {
-			RhiginThreadPool.getInstance().newThreadPool(
-				config.getInt("rhigin", "threadPoolSize"));
-		} else {
-			RhiginThreadPool.getInstance().newThreadPool();
-		}
+		//if(Converter.isNumeric(config.get("rhigin", "threadPoolSize"))) {
+		//	RhiginThreadPool.getInstance().newThreadPool(
+		//		config.getInt("rhigin", "threadPoolSize"));
+		//} else {
+		//	RhiginThreadPool.getInstance().newThreadPool();
+		//}
 		
 		// ExecuteScriptにRhiginConfigの要素をセット.
 		ExecuteScript.addOriginals("conf", config);

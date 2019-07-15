@@ -171,8 +171,8 @@ public class HttpWorkerThread extends Thread {
     else if (Alphabet.eq("post",method)) {
 
       // ContentLengthを取得.
-      int contentLength = request.getContentLength();
-      if (contentLength <= -1) {
+      long contentLength = request.getContentLength();
+      if (contentLength <= -1L) {
 
         // 存在しない場合はコネクション強制クローズ.
         // chunkedの受信は対応しない.
@@ -191,7 +191,7 @@ public class HttpWorkerThread extends Thread {
 
       // Body情報が受信完了かチェック.
       if (buffer.size() >= contentLength) {
-        byte[] body = new byte[contentLength];
+        byte[] body = new byte[(int)contentLength];
         buffer.read(body);
         request.setBody(body);
       } else {
@@ -300,6 +300,7 @@ public class HttpWorkerThread extends Thread {
       context.setAttribute("req", req);
       context.setAttribute("res", res);
       context.setAttribute(redirect.getName(), redirect);
+      context.setAttribute(error.getName(), error);
       
       // コンテンツキャッシュセット.
       RequireFunction.getInstance().setCache(cache);
@@ -576,7 +577,7 @@ public class HttpWorkerThread extends Thread {
     STATE_RESPONSE_2 = s2;
   }
   
-  // リダイレクト用メソッド.
+  // [js]リダイレクト用メソッド.
   private static final RhiginFunction redirect = new RhiginFunction() {
     @Override
     public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
@@ -604,5 +605,35 @@ public class HttpWorkerThread extends Thread {
     
     @Override
     public final String getName() { return "redirect"; }
+  };
+  
+  // [js]エラー用メソッド.
+  private static final RhiginFunction error = new RhiginFunction() {
+    @Override
+    public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+      int status = 500;
+      String message = null;
+      if(args.length >= 1) {
+        if(args.length >= 2) {
+          if(Converter.isNumeric(args[0])) {
+            status = Converter.convertInt(args[0]);
+            message = "" + args[1];
+          } else if(Converter.isNumeric(args[1])) {
+        	  message = "" + args[0];
+            status = Converter.convertInt(args[1]);
+          } else {
+        	  message = "" + args[0];
+            status = Converter.convertInt(args[1]);
+          }
+        } else {
+        	message = "" + args[0];
+        }
+        throw new HttpException(status, message);
+      }
+      return Undefined.instance;
+    }
+    
+    @Override
+    public final String getName() { return "error"; }
   };
 }

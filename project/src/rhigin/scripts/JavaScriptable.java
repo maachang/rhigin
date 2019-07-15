@@ -3,11 +3,13 @@ package rhigin.scripts;
 import java.lang.reflect.Array;
 import java.util.AbstractList;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
+import rhigin.util.BlankMap;
 import rhigin.util.BlankScriptable;
 
 /**
@@ -15,30 +17,47 @@ import rhigin.util.BlankScriptable;
  */
 public class JavaScriptable {
 	// Mapオブジェクト変換.
-	public static abstract class Map implements BlankScriptable {
-		public abstract Object[] getIds();
+	@SuppressWarnings("rawtypes")
+	public static abstract class Map implements BlankScriptable, BlankMap {
 		public abstract Object get(Object name);
 		public abstract boolean containsKey(Object name);
 		public abstract Object put(Object name, Object value);
 		public abstract Object remove(Object name);
+		public abstract Set keySet();
+		@Override
 		public boolean has(String name, Scriptable start) {
 			if(this.containsKey(name)) {
 				return true;
 			}
 			return false;
 		}
+		@Override
 		public Object get(String name, Scriptable start) {
 			if(this.containsKey(name)) {
 				return this.get(name);
 			}
 			return Undefined.instance;
 		}
+		@Override
 		public void put(String name, Scriptable start, Object value) {
 			this.put(name, value);
 		}
+		@Override
 		public void delete(String name) {
 			this.remove(name);
 		}
+		@Override
+		public Object[] getIds() {
+			int cnt = 0;
+			final int len = this.size();
+			final Object[] ret = new Object[len];
+			final Iterator it = this.keySet().iterator();
+			while(it.hasNext()) {
+				ret[cnt++] = it.next();
+			}
+			return ret;
+		}
+		@Override
 		public String getClassName() {
 			return "jmap";
 		}
@@ -53,18 +72,21 @@ public class JavaScriptable {
 		public abstract boolean add(Object o);
 		public abstract Object set(int no, Object o);
 		public abstract Object remove(int no);
+		@Override
 		public boolean has(int no, Scriptable start) {
 			if(no >= 0 && this.size() > no) {
 				return true;
 			}
 			return false;
 		}
+		@Override
 		public Object get(int no, Scriptable start) {
 			if(no >= 0 && this.size() > no) {
 				return this.get(no);
 			}
 			return Undefined.instance;
 		}
+		@Override
 		public void put(int no, Scriptable start, Object value) {
 			final int len = (no - this.size()) + 1;
 			if(len > 0) {
@@ -74,15 +96,18 @@ public class JavaScriptable {
 			}
 			this.set(no, value);
 		}
+		@Override
 		public void delete(int no) {
 			this.remove(no);
 		}
+		@Override
 		public boolean has(String name, Scriptable start) {
 			if("length".equals(name) || "push".equals(name)) {
 			  return true;
 			}
 			return false;
 		}
+		@Override
 		public Object get(String name, Scriptable start) {
 			if("length".equals(name)) {
 				return this.size();
@@ -94,6 +119,7 @@ public class JavaScriptable {
 			}
 			return Undefined.instance;
 		}
+		@Override
 		public Object[] getIds() {
 			int len = this.size();
 			Object[] ret = new Object[len];
@@ -102,6 +128,7 @@ public class JavaScriptable {
 			}
 			return ret;
 		}
+		@Override
 		public String getClassName() {
 			return "jlist";
 		}
@@ -137,15 +164,8 @@ public class JavaScriptable {
 			srcMap = m;
 		}
 		@Override
-		public Object[] getIds() {
-			int cnt = 0;
-			final int len = srcMap.size();
-			final Object[] ret = new Object[len];
-			final Iterator it = srcMap.keySet().iterator();
-			while(it.hasNext()) {
-				ret[cnt++] = it.next();
-			}
-			return ret;
+		public void clear() {
+			srcMap.clear();
 		}
 		@Override
 		public Object get(Object name) {
@@ -163,6 +183,18 @@ public class JavaScriptable {
 		public Object remove(Object name) {
 			return srcMap.remove(name);
 		}
+		@Override
+		public Set keySet() {
+			return srcMap.keySet();
+		}
+		@Override
+		public boolean isEmpty() {
+			return srcMap.isEmpty();
+		}
+		@Override
+		public String getClassName() {
+			return "WrapMap";
+		}
 	}
 	
 	// List実装用.
@@ -171,6 +203,10 @@ public class JavaScriptable {
 		private final java.util.List srcList;
 		public GetList(java.util.List l) {
 			srcList = l;
+		}
+		@Override
+		public void clear() {
+			srcList.clear();
 		}
 		@Override
 		public int size() {
@@ -191,6 +227,14 @@ public class JavaScriptable {
 		@Override
 		public Object remove(int no) {
 			return srcList.remove(no);
+		}
+		@Override
+		public boolean isEmpty() {
+			return srcList.isEmpty();
+		}
+		@Override
+		public String getClassName() {
+			return "WrapList";
 		}
 	}
 	
@@ -219,6 +263,14 @@ public class JavaScriptable {
 		@Override
 		public Object remove(int no) {
 			return null;
+		}
+		@Override
+		public boolean isEmpty() {
+			return size() == 0;
+		}
+		@Override
+		public String getClassName() {
+			return "ReadArray";
 		}
 	}
 }

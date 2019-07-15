@@ -1,5 +1,4 @@
 {
   "projectName": "{{projectName}}"
   ,"version": "{{version}}"
-  ,"threadPoolSize": 5
 }

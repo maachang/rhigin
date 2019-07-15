@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
  * ArrayMap.
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class ArrayMap implements Map<String, Object>, ConvertGet<String> {
+public class ArrayMap implements AbstractKeyIterator.Base<String>, Map<String, Object>, ConvertGet<String> {
 	private ListMap list;
 
 	/**
@@ -143,131 +142,18 @@ public class ArrayMap implements Map<String, Object>, ConvertGet<String> {
 		return list;
 	}
 
-	private static class ArrayMapIterator implements Iterator<String> {
-		private ListMap list;
-		private int nowPos;
-		private String target;
-
-		protected ArrayMapIterator(ListMap list) {
-			this.list = list;
-			this.nowPos = -1;
-		}
-
-		private boolean getNext() {
-			if (target == null) {
-				nowPos++;
-				if (list.size() > nowPos) {
-					target = (String)list.rawData().get(nowPos)[0];
-					return true;
-				}
-				return false;
-			}
-			return true;
-		}
-
-		public boolean hasNext() {
-			return getNext();
-		}
-
-		public String next() {
-			if (getNext() == false) {
-				throw new NoSuchElementException();
-			}
-			String ret = target;
-			target = null;
-			return ret;
-		}
-
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
-	}
-
-	static class ArrayMapSet implements Set<String> {
-		private ListMap list;
-
-		protected ArrayMapSet(ListMap list) {
-			this.list = list;
-		}
-
-		public int size() {
-			return list.size();
-		}
-
-		public boolean isEmpty() {
-			return list.size() == 0;
-		}
-
-		public boolean contains(Object o) {
-			if (o == null) {
-				return false;
-			}
-			return list.containsKey(o.toString());
-		}
-
-		public Iterator<String> iterator() {
-			return new ArrayMapIterator(list);
-		}
-
-		public Object[] toArray() {
-			int len = list.size();
-			Object[] ret = new Object[len];
-			OList<Object[]> n = list.rawData();
-			for (int i = 0; i < len; i++) {
-				ret[i] = n.get(i)[0];
-			}
-			return ret;
-		}
-
-		@SuppressWarnings("hiding")
-		public <Object> Object[] toArray(Object[] a) {
-			return null;
-		}
-
-		public boolean add(String e) {
-			return false;
-		}
-
-		public boolean remove(Object o) {
-			return false;
-		}
-
-		public boolean containsAll(Collection<?> c) {
-			return false;
-		}
-
-		public boolean addAll(Collection<? extends String> c) {
-			return false;
-		}
-
-		public boolean retainAll(Collection<?> c) {
-			return false;
-		}
-
-		public boolean removeAll(Collection<?> c) {
-			return false;
-		}
-
-		public void clear() {
-			list.clear();
-		}
-
-		public boolean equals(Object o) {
-			return this.equals(o);
-		}
-
-		public int hashCode() {
-			return -1;
-		}
-	}
-
 	public Set keySet() {
-		return new ArrayMapSet(list);
+		return new AbstractKeyIterator.KeyIteratorSet<>(this);
 	}
 
 	// original 取得.
 	@Override
 	public Object getOriginal(String n) {
 		return get(n);
+	}
+	
+	@Override
+	public String getKey(int no) {
+		return (String)list.rawData().get(no)[0];
 	}
 }
