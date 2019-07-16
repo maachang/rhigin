@@ -6,6 +6,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 
+import rhigin.http.HttpReadBuffer;
 import rhigin.util.AtomicNumber;
 
 /**
@@ -16,7 +17,7 @@ public abstract class NioElement {
     protected final AtomicNumber ops = new AtomicNumber(SelectionKey.OP_READ);
     protected NioSelector selector;
     protected SelectionKey key;
-    protected ByteArrayIO buffer = new ByteArrayIO(NetConstants.NIO_ELEMENT_BUFFER_SIZE);
+    protected HttpReadBuffer buffer = new HttpReadBuffer();
 
     protected NioSendLess less = new NioSendLess();
     protected byte[] dataBinary = null;
@@ -99,9 +100,9 @@ public abstract class NioElement {
 
     /**
      * 受信バッファを取得.
-     * @return ByteArrayIO 受信バッファが返却されます.
+     * @return HttpReadBuffer 受信バッファが返却されます.
      */
-    public ByteArrayIO getBuffer() {
+    public HttpReadBuffer getBuffer() {
       return buffer;
     }
 

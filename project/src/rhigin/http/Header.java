@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import rhigin.RhiginException;
-import rhigin.net.ByteArrayIO;
 import rhigin.scripts.JavaScriptable;
 import rhigin.util.AbstractKeyIterator;
 import rhigin.util.ConvertMap;
@@ -28,7 +27,7 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
     }
 
     // http のendpointが検知された場合にコンストラクタ呼び出し.
-    public Header(ByteArrayIO buffer, int endPoint) throws IOException {
+    public Header(HttpReadBuffer buffer, int endPoint) throws IOException {
       int firstPoint = buffer.indexOf(Analysis.ONE_LINE);
       byte[] b = new byte[firstPoint];
       buffer.read(b);

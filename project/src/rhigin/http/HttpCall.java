@@ -118,19 +118,23 @@ public final class HttpCall extends NioCall {
      * @exception IOException IO例外.
      */
     public boolean receive(NioElement em, ByteBuffer buf) throws IOException {
-        //LOG.debug(" recv Http nio:" + buf);
-
-        HttpElement rem = (HttpElement) em;
-
+        final HttpElement rem = (HttpElement) em;
+        
         // 受信バッファに今回分の情報をセット.
         rem.getBuffer().write(buf);
-
+        
+        // ワーカーNoがElementに設定されてない場合はセットさせる.
         int no = rem.getWorkerNo();
         if (no == -1) {
             no = counter.inc() % workerLength;
             counter.set(no);
+            
+            // 対象のワーカースレッドに登録.
+            worker[no].register(rem);
+        } else {
+          // ワーカースレッドに受信データ存在のシグナル送信.
+          worker[no].signal(rem);
         }
-        worker[no].register(rem);
         return true;
     }
 

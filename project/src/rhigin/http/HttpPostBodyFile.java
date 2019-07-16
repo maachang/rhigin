@@ -46,6 +46,7 @@ public class HttpPostBodyFile {
 		if(!baseDir.endsWith("/")) {
 			baseDir += "/";
 		}
+		// bodyのデータを一時格納するための一意のファイルを作成.
 		String name;
 		OutputStream o = null;
 		try {
@@ -132,7 +133,7 @@ public class HttpPostBodyFile {
 	 */
 	public void write(byte[] b, int len) {
 		try {
-			out.write(b,  0,  len);
+			out.write(b, 0, len);
 		} catch(Exception e) {
 			close();
 			throw new RhiginException(500, e);

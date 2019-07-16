@@ -18,6 +18,12 @@ import rhigin.util.Converter;
 /**
  * スレッド関連のメソッド.
  * setImmediate, setTimeout, setInterval
+ * 
+ * 実装したが、この機能は当面は利用しない。
+ * そもそも、node.jsでは、非同期処理を多様するが、
+ * rhiginでは「js実行」はスレッド上で行ってるので必要がない.
+ * 
+ * なので、これらの機能もあえて使う必要はない.
  */
 public class ThreadFunction {
 	protected static final Object[] BLANK_ARGS = new Object[0];

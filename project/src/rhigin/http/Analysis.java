@@ -2,7 +2,6 @@ package rhigin.http;
 
 import java.io.IOException;
 
-import rhigin.net.ByteArrayIO;
 import rhigin.util.Converter;
 
 /**
@@ -18,7 +17,7 @@ public final class Analysis {
      * Httpヘッダの終端が存在するかチェック.
      * @param buffer
      */
-    public static final int endPoint(ByteArrayIO buffer) {
+    public static final int endPoint(HttpReadBuffer buffer) {
       return buffer.indexOf(END_LINE);
     }
 
@@ -29,7 +28,7 @@ public final class Analysis {
      * @return HttpHeader
      * @exception IOException
      */
-    public static final Header getHeader(ByteArrayIO buffer, int endPoint)
+    public static final Header getHeader(HttpReadBuffer buffer, int endPoint)
       throws IOException {
       return new Header(buffer, endPoint);
     }
@@ -41,7 +40,7 @@ public final class Analysis {
      * @return HttpRequest
      * @exception IOException
      */
-    public static final Request getRequest(ByteArrayIO buffer, int endPoint)
+    public static final Request getRequest(HttpReadBuffer buffer, int endPoint)
       throws IOException {
       return new Request(buffer, endPoint);
     }

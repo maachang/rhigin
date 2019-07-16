@@ -2,7 +2,6 @@ package rhigin.http;
 
 import java.io.IOException;
 
-import rhigin.net.ByteArrayIO;
 import rhigin.util.Converter;
 
 /**
@@ -16,7 +15,7 @@ public class Request extends Header {
       super();
     }
 
-    public Request(ByteArrayIO buffer, int endPoint) throws IOException {
+    public Request(HttpReadBuffer buffer, int endPoint) throws IOException {
       super(buffer, endPoint);
     }
 

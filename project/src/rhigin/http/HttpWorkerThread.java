@@ -16,7 +16,6 @@ import rhigin.RhiginConstants;
 import rhigin.RhiginException;
 import rhigin.logs.Log;
 import rhigin.logs.LogFactory;
-import rhigin.net.ByteArrayIO;
 import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.Json;
 import rhigin.scripts.RhiginContext;
@@ -70,10 +69,24 @@ public class HttpWorkerThread extends Thread {
     xor128 = new Xor128(System.nanoTime());
   }
 
+  /**
+   * ワーカースレッド登録.
+   * @param em
+   * @throws IOException
+   */
   public void register(HttpElement em) throws IOException {
     // ワーカースレッドに登録.
     em.setWorkerNo(no);
     em.setSendTempBinary(tmpBuffer);
+    signal(em);
+  }
+
+  /**
+   * シグナル呼び出し.
+   * @param em
+   * @throws IOException
+   */
+  public void signal(HttpElement em) throws IOException {
     queue.offer(em);
     wait.signal();
   }
@@ -127,7 +140,15 @@ public class HttpWorkerThread extends Thread {
             continue;
           }
           if (executionRequest(em, tmpBuffer, xor128)) {
-            executeScript(em, compileCache, mime);
+            try {
+              executeScript(em, compileCache, mime);
+            } finally {
+              // 大容量Body受付情報が存在する場合は、後片付けをする.
+              if(em.isHttpPostBodyFile()) {
+                HttpPostBodyFile f = em.getHttpPostBodyFile(null);
+                f.close();
+              }
+            }
           }
           em = null;
         }
@@ -157,7 +178,7 @@ public class HttpWorkerThread extends Thread {
     }
 
     // 受信バッファに今回分の情報をセット.
-    final ByteArrayIO buffer = em.getBuffer();
+    final HttpReadBuffer buffer = em.getBuffer();
 
     // Httpリクエストを取得.
     Request request = em.getRequest();
@@ -174,7 +195,7 @@ public class HttpWorkerThread extends Thread {
       em.setRequest(request);
     }
 
-    String method = request.getMethod();
+    final String method = request.getMethod();
 
     // OPTIONの場合は、Optionヘッダを返却.
     //if ("OPTIONS".equals(method)) {
@@ -201,32 +222,28 @@ public class HttpWorkerThread extends Thread {
       
       // 大容量ファイル受信が要求されてる場合.
       if(HttpConstants.POST_FILE_OUT_CONTENT_TYPE.equals(request.getString("Content-Type"))) {
+        // 受信データが存在する場合.
         HttpPostBodyFile file = em.getHttpPostBodyFile(xor128);
         if(buffer.size() > 0) {
           int len;
-          byte[] buf = tmpBuffer;
-          while(true) {
-            len = buffer.read(buf);
-            if(len == 0) {
-              break;
-            }
+          final byte[] buf = tmpBuffer;
+          while((len = buffer.read(buf)) > 0) {
             file.write(buf, len);
           }
+          // 受信完了の場合.
           if(file.getFileLength() >= contentLength) {
-            // 受信完了.
             file.endWrite();
             request.setBody(null);
             em.setEndReceive(true);
             em.destroyBuffer();
             return true;
-          } else {
-            // PostのBody受信中.
-            return false;
           }
         }
+        // PostのBody受信中.
+        return false;
       }
 
-      // 指定サイズを超えるBody長.
+      // 制限以上のBodyデータを超える場合はエラーを返却する.
       if (contentLength > HttpConstants.MAX_CONTENT_LENGTH) {
 
         // 413エラー.
@@ -240,7 +257,6 @@ public class HttpWorkerThread extends Thread {
         buffer.read(body);
         request.setBody(body);
       } else {
-
         // PostのBody受信中.
         return false;
       }

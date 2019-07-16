@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.mozilla.javascript.IdScriptableObject;
-import org.mozilla.javascript.ScriptRuntime;
 
 import rhigin.RhiginException;
 import rhigin.util.Converter;

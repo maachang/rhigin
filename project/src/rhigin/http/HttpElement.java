@@ -77,4 +77,8 @@ public final class HttpElement extends NioElement {
        }
        return httpPostBodyFile;
     }
+    
+    public boolean isHttpPostBodyFile() {
+      return httpPostBodyFile != null;
+    }
 }
