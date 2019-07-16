@@ -298,7 +298,7 @@ public class HttpReadBuffer {
 						// 不一致.
 						if(eqCnt == -1) {
 							// 元に戻す.
-							buf = (np == -1) ? topBuffer : (byte[])array[np];
+							buf = (bp == -1) ? topBuffer : (byte[])array[bp];
 							bufLen = buf.length;
 							break;
 						}
