@@ -131,7 +131,7 @@ public final class HttpCall extends NioCall {
             
             // 対象のワーカースレッドに登録.
             worker[no].register(rem);
-        } else {
+        } else if(!rem.isEndSend()) {
           // ワーカースレッドに受信データ存在のシグナル送信.
           worker[no].signal(rem);
         }
