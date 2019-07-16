@@ -8,7 +8,6 @@ import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +15,7 @@ import java.util.Map;
 import org.mozilla.javascript.IdScriptableObject;
 
 import rhigin.RhiginException;
+import rhigin.util.ArrayMap;
 import rhigin.util.Converter;
 
 /**
@@ -355,8 +355,7 @@ public final class Json {
 		// map.
 		else if (type == TYPE_MAP) {
 			Map<String, Object> ret;
-			ret = new HashMap<String, Object>();
-			// ret = new LinkedHashMap<String, Object>();
+			ret = new ArrayMap();
 			String key = null;
 			for (int i = no + 1; i < len; i++) {
 				value = (String) token.get(i);
