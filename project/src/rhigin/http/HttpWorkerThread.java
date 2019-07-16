@@ -26,7 +26,6 @@ import rhigin.scripts.compile.ScriptElement;
 import rhigin.scripts.function.RandomFunction;
 import rhigin.scripts.function.RequireFunction;
 import rhigin.util.Alphabet;
-import rhigin.util.ArrayMap;
 import rhigin.util.BlankScriptable;
 import rhigin.util.Converter;
 import rhigin.util.FileUtil;

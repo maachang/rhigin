@@ -59,20 +59,7 @@ public class Params extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 	
 	@Override
 	public String toString() {
-		try {
-			String[] list = map.names();
-			int len = list.length;
-			StringBuilder buf = new StringBuilder("{");
-			for(int i = 0; i < len; i ++) {
-				if(i != 0) {
-					buf.append(", ");
-				}
-				buf.append("\"").append(list[i]).append("\": \"").append(get(list[i])).append("\"");
-			}
-			return buf.append("}").toString();
-		} catch(Exception e) {
-		}
-		return "";
+		return super.toString();
 	}
 
 	@Override

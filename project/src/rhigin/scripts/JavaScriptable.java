@@ -61,6 +61,10 @@ public class JavaScriptable {
 		public String getClassName() {
 			return "jmap";
 		}
+		@Override
+		public String toString() {
+			return Json.encode(this);
+		}
 	}
 	
 	// Listオブジェクト変換.
@@ -132,6 +136,10 @@ public class JavaScriptable {
 		public String getClassName() {
 			return "jlist";
 		}
+		@Override
+		public String toString() {
+			return Json.encode(this);
+		}
 	}
 	
 	// List.pushファンクション用.
@@ -197,7 +205,7 @@ public class JavaScriptable {
 		}
 		@Override
 		public String toString() {
-			return srcMap.toString();
+			return Json.encode(this);
 		}
 	}
 	
@@ -242,7 +250,7 @@ public class JavaScriptable {
 		}
 		@Override
 		public String toString() {
-			return srcList.toString();
+			return Json.encode(this);
 		}
 	}
 	
