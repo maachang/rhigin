@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import rhigin.RhiginException;
+import rhigin.net.NioElement;
 import rhigin.scripts.JavaScriptable;
 import rhigin.util.AbstractKeyIterator;
 import rhigin.util.ConvertMap;
@@ -15,6 +16,7 @@ import rhigin.util.ConvertMap;
  */
 @SuppressWarnings("rawtypes")
 public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Base<String>, ConvertMap {
+    protected NioElement element;
     protected String method;
     protected String url;
     protected String version;
@@ -25,7 +27,7 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 
     protected Header() {
     }
-
+    
     // http のendpointが検知された場合にコンストラクタ呼び出し.
     public Header(HttpReadBuffer buffer, int endPoint) throws IOException {
       int firstPoint = buffer.indexOf(Analysis.ONE_LINE);
@@ -66,9 +68,15 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
       }
     }
     
+    // nioElementをセット.
+    protected void setElement(NioElement em) {
+      element = em;
+    }
+    
     public void clear() {
-        headerList = null;
-        contntType = null;
+      element = null;
+      headerList = null;
+      contntType = null;
     }
     
     /**

@@ -266,6 +266,7 @@ public class HttpReadBuffer {
 				cnt = pos;
 			}
 		} else if(topBuffer != null) {
+			// topBufferが存在する場合開始位置を、-1にする.
 			bp = -1;
 		}
 		// toArrayで配列化された内容を元に、検索.

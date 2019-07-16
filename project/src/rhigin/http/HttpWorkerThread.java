@@ -27,6 +27,7 @@ import rhigin.scripts.function.RandomFunction;
 import rhigin.scripts.function.RequireFunction;
 import rhigin.util.Alphabet;
 import rhigin.util.ArrayMap;
+import rhigin.util.BlankScriptable;
 import rhigin.util.Converter;
 import rhigin.util.FileUtil;
 import rhigin.util.Wait;
@@ -193,6 +194,7 @@ public class HttpWorkerThread extends Thread {
       }
       request = Analysis.getRequest(buffer, endPoint);
       em.setRequest(request);
+      request.setElement(em);
     }
 
     final String method = request.getMethod();
@@ -298,7 +300,9 @@ public class HttpWorkerThread extends Thread {
       }
       
       // 実行ファイルのパスが存在しない場合.
-      if (!FileUtil.isFile(path + ".js")) {
+      // ただ / で設定された場合は優先的に [/index.html or /index.htm] を探して、存在する場合はそちらを優先する.
+      if ((req.getUrl().endsWith("/") && (FileUtil.isFile(path + ".html") || FileUtil.isFile(path + ".htm")))
+          || !FileUtil.isFile(path + ".js")) {
         boolean useFlag = false;
         
         // 普通にファイル名として存在するかチェック.
@@ -350,6 +354,10 @@ public class HttpWorkerThread extends Thread {
         params = getParams(req.getUrl());
       } else if ("POST".equals(method)) {
         params = postParams(req);
+      }
+      // パラメータがnullの場合は、空のパラメータをセット.
+      if(params == null) {
+        params = BlankParams;
       }
       
       // レスポンス生成.
@@ -426,7 +434,7 @@ public class HttpWorkerThread extends Thread {
     if (p != -1) {
       return Analysis.paramsAnalysis(url, p + 1);
     }
-    return new ArrayMap();
+    return null;
   }
 
   /** POSTパラメータを取得. **/
@@ -711,5 +719,13 @@ public class HttpWorkerThread extends Thread {
     
     @Override
     public final String getName() { return "error"; }
+  };
+  
+  // 空のパラメータ.
+  private static final BlankScriptable BlankParams = new BlankScriptable() {
+    @Override
+    public String toString() {
+      return "{}";
+    }
   };
 }

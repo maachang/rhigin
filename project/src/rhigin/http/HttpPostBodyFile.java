@@ -32,6 +32,7 @@ public class HttpPostBodyFile {
         (char) '_' };
 	
 	private String fileName = null;
+	private long fileSize = 0L;
 	
 	private FileInputStream in = null;
 	private OutputStream out = null;
@@ -124,6 +125,7 @@ public class HttpPostBodyFile {
 				}
 			} catch(Exception e) {}
 		}
+		fileSize = -1L;
 	}
 	
 	/**
@@ -134,6 +136,7 @@ public class HttpPostBodyFile {
 	public void write(byte[] b, int len) {
 		try {
 			out.write(b, 0, len);
+			fileSize += len;
 		} catch(Exception e) {
 			close();
 			throw new RhiginException(500, e);
@@ -148,6 +151,7 @@ public class HttpPostBodyFile {
 			out.flush();
 			out.close();
 			out = null;
+			fileSize = -1L;
 		} catch(Exception e) {
 			close();
 			throw new RhiginException(500, e);
@@ -183,11 +187,7 @@ public class HttpPostBodyFile {
 	 * @return long
 	 */
 	public long getFileLength() {
-		try {
-			return FileUtil.getFileLength(fileName);
-		} catch(Exception e) {
-			throw new RhiginException(500, e);
-		}
+		return fileSize;
 	}
 	
 	/**

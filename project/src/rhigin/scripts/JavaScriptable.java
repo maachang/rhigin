@@ -195,6 +195,10 @@ public class JavaScriptable {
 		public String getClassName() {
 			return "WrapMap";
 		}
+		@Override
+		public String toString() {
+			return srcMap.toString();
+		}
 	}
 	
 	// List実装用.
@@ -235,6 +239,10 @@ public class JavaScriptable {
 		@Override
 		public String getClassName() {
 			return "WrapList";
+		}
+		@Override
+		public String toString() {
+			return srcList.toString();
 		}
 	}
 	

@@ -38,4 +38,26 @@ public class Request extends Header {
       contentLength = Converter.parseLong(ret);
       return contentLength;
     }
+    
+    @Override
+    public Object get(Object key) {
+      if("isBodyInputStream".equals(key) || "isBodyFile".equals(key)) {
+        return ((HttpElement)element).isHttpPostBodyFile();
+      } else if("inputStream".equals(key) || "body".equals(key) || "bodyFile".equals(key)) {
+        HttpElement em = (HttpElement)element;
+        if(em.isHttpPostBodyFile()) {
+          return em.getHttpPostBodyFile(null).getInputStream();
+        } else {
+          return null;
+        }
+      } else if("bodyName".equals(key) || "bodyFileName".equals(key)) {
+          HttpElement em = (HttpElement)element;
+          if(em.isHttpPostBodyFile()) {
+            return em.getHttpPostBodyFile(null).getFileName();
+          } else {
+            return null;
+          }
+      }
+      return super.get(key);
+    }
 }
