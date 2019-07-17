@@ -365,8 +365,8 @@ public class HttpWorkerThread extends Thread {
       // コンテキスト生成・設定.
       RhiginContext context = new RhiginContext();
       context.setAttribute("params", params);
-      context.setAttribute("req", req);
-      context.setAttribute("res", res);
+      context.setAttribute("request", req);
+      context.setAttribute("response", res);
       context.setAttribute(redirect.getName(), redirect);
       context.setAttribute(error.getName(), error);
       

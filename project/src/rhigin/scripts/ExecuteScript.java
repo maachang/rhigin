@@ -19,6 +19,7 @@ import rhigin.scripts.function.BinaryFunction;
 import rhigin.scripts.function.BtoaFunction;
 import rhigin.scripts.function.GetClassFunction;
 import rhigin.scripts.function.GetEnvFunction;
+import rhigin.scripts.function.HttpClientFunction;
 import rhigin.scripts.function.RandomFunction;
 import rhigin.scripts.function.RequireFunction;
 import rhigin.scripts.function.SleepFunction;
@@ -286,6 +287,8 @@ public class ExecuteScript {
 		scope.put("random", scope, RandomFunction.getInstance());
 		scope.put("btoa", scope, BtoaFunction.getInstance());
 		scope.put("atob", scope, AtobFunction.getInstance());
+		scope.put("httpClient", scope, HttpClientFunction.getInstance());
+		
 		//ThreadFunction.set(scope);
 		
 		// オリジナルオブジェクトを設定.

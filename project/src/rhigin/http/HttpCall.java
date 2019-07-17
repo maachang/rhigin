@@ -126,12 +126,14 @@ public final class HttpCall extends NioCall {
         // ワーカーNoがElementに設定されてない場合はセットさせる.
         int no = rem.getWorkerNo();
         if (no == -1) {
+            // ワーカースレッドに新規登録される場合.
             no = counter.inc() % workerLength;
             counter.set(no);
             
             // 対象のワーカースレッドに登録.
             worker[no].register(rem);
         } else if(!rem.isEndSend()) {
+          // 送信処理が完了してない場合.
           // ワーカースレッドに受信データ存在のシグナル送信.
           worker[no].signal(rem);
         }

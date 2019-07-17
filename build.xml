@@ -64,6 +64,9 @@
       todir="${dest.dir}/res">
       <fileset dir="${src.dir}/res" />
     </copy>
+    <copy overwrite="yes"
+      file="${src.dir}/rhigin/http/client/cacerts"
+      tofile="${dest.dir}/rhigin/http/client/cacerts"/>
   </target>
   
   <!-- ===================================================================== -->
