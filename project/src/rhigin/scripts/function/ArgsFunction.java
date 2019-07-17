@@ -8,7 +8,7 @@ import rhigin.util.Args;
 import rhigin.util.Converter;
 
 /**
- * [Function]: 実行引数I/Oメソッド.
+ * [js]rhigin実行時の引数I/Oメソッド.
  */
 public final class ArgsFunction extends RhiginFunction {
 	private static final ArgsFunction THIS = new ArgsFunction();

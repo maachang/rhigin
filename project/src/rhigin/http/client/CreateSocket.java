@@ -65,8 +65,7 @@ final class CreateSocket {
                     in.close();
                     in = null;
 
-                    TrustManagerFactory tmf = TrustManagerFactory
-                            .getInstance("SunX509");
+                    TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
                     tmf.init(t);
                     t = null;
 

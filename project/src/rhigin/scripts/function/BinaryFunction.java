@@ -8,7 +8,7 @@ import rhigin.scripts.RhiginFunction;
 import rhigin.util.Converter;
 
 /**
- * [Function]: Binary生成メソッド.
+ * [js]Binary生成メソッド.
  */
 public final class BinaryFunction extends RhiginFunction {
 	private static final BinaryFunction THIS = new BinaryFunction();

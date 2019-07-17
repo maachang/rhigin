@@ -10,6 +10,15 @@ import rhigin.RhiginException;
 import rhigin.http.client.HttpClient;
 import rhigin.scripts.RhiginFunction;
 
+/**
+ * [js]HttpClient.
+ * 
+ * httpClient(method, url, params, headers)
+ *   method: Httpメソッド [GET, POST, DELETE, PUT, PATCH, OPTION]
+ *   url: 接続先URL (http://yahoo.co.jp).
+ *   params: パラメータ、Hash や InputStream や String や byte[] など.
+ *   headers: Httpヘッダ. Map で設定.
+ */
 public class HttpClientFunction extends RhiginFunction {
 	private static final HttpClientFunction THIS = new HttpClientFunction();
 	public static final HttpClientFunction getInstance() {

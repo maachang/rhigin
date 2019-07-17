@@ -8,7 +8,7 @@ import rhigin.scripts.RhiginFunction;
 import rhigin.util.Converter;
 
 /**
- * [js] sleep処理.
+ * [js]sleep処理.
  */
 public class SleepFunction extends RhiginFunction {
 	private static final SleepFunction THIS = new SleepFunction();

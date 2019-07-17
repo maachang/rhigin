@@ -8,7 +8,7 @@ import rhigin.scripts.RhiginFunction;
 import rhigin.util.EnvCache;
 
 /**
- * 環境変数を読み込む.
+ * [js]環境変数を読み込む.
  */
 public class GetEnvFunction extends RhiginFunction {
 	private static final GetEnvFunction THIS = new GetEnvFunction();

@@ -12,7 +12,7 @@ import rhigin.scripts.compile.CompileCache;
 import rhigin.scripts.compile.ScriptElement;
 
 /**
- * [Function]: requireメソッド.
+ * [Function]: require.
  */
 public final class RequireFunction extends RhiginFunction {
 	private static final RequireFunction THIS = new RequireFunction();

@@ -6,6 +6,9 @@ import org.mozilla.javascript.Scriptable;
 import rhigin.logs.LogFactory;
 import rhigin.scripts.RhiginFunction;
 
+/**
+ * [js]ログファクトリ用ファンクション.
+ */
 public class LogFactoryFunction extends RhiginFunction {
 	private static final LogFactoryFunction THIS = new LogFactoryFunction();
 	public static final LogFactoryFunction getInstance() {
