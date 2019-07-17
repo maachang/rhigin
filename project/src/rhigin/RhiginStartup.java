@@ -101,7 +101,7 @@ public class RhiginStartup {
 		//}
 		
 		// ExecuteScriptにRhiginConfigの要素をセット.
-		ExecuteScript.addOriginals("conf", config);
+		ExecuteScript.addOriginals("config", config);
 		
 		// 初期設定用のスクリプト実行.
 		if(FileUtil.isFile(STARTUP_JS)) {

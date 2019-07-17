@@ -20,6 +20,7 @@ import rhigin.scripts.function.BtoaFunction;
 import rhigin.scripts.function.GetClassFunction;
 import rhigin.scripts.function.GetEnvFunction;
 import rhigin.scripts.function.HttpClientFunction;
+import rhigin.scripts.function.LogFactoryFunction;
 import rhigin.scripts.function.RandomFunction;
 import rhigin.scripts.function.RequireFunction;
 import rhigin.scripts.function.SleepFunction;
@@ -279,6 +280,7 @@ public class ExecuteScript {
 		scope.put("Xor128", scope, Xor128Object.getInstance());
 		scope.put("JSON", scope, JSONObject.getInstance());
 		scope.put("require", scope, RequireFunction.getInstance());
+		scope.put("logFactory", scope, LogFactoryFunction.getInstance());
 		scope.put("binary", scope, BinaryFunction.getInstance());
 		scope.put("getClass", scope, GetClassFunction.getInstance());
 		scope.put("sleep", scope, SleepFunction.getInstance());
