@@ -29,6 +29,7 @@ import rhigin.scripts.function.SleepFunction;
 import rhigin.scripts.function.SystemTimeFunction;
 import rhigin.scripts.objects.ConsoleObject;
 import rhigin.scripts.objects.JSONObject;
+import rhigin.scripts.objects.JwtObject;
 import rhigin.scripts.objects.LockObject;
 import rhigin.scripts.objects.RwLockObject;
 import rhigin.scripts.objects.Xor128Object;
@@ -284,6 +285,7 @@ public class ExecuteScript {
 		scope.put("console", scope, ConsoleObject.getInstance());
 		scope.put("Xor128", scope, Xor128Object.getInstance());
 		scope.put("JSON", scope, JSONObject.getInstance());
+		scope.put("Jwt", scope, JwtObject.getInstance());
 		scope.put("Lock", scope, LockObject.getInstance());
 		scope.put("RwLock", scope, RwLockObject.getInstance());
 		scope.put("require", scope, RequireFunction.getInstance());
