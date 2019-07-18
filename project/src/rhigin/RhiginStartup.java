@@ -103,6 +103,9 @@ public class RhiginStartup {
 		// ExecuteScriptにRhiginConfigの要素をセット.
 		ExecuteScript.addOriginals("config", config);
 		
+		// サーバIDを取得、設定.
+		RhiginServerId.getInstance().getId();
+		
 		// 初期設定用のスクリプト実行.
 		if(FileUtil.isFile(STARTUP_JS)) {
 			// スクリプト実行用のコンテキスト.

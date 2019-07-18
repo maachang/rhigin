@@ -21,11 +21,16 @@ import rhigin.scripts.function.GetClassFunction;
 import rhigin.scripts.function.GetEnvFunction;
 import rhigin.scripts.function.HttpClientFunction;
 import rhigin.scripts.function.LogFactoryFunction;
+import rhigin.scripts.function.NanoTimeFunction;
 import rhigin.scripts.function.RandomFunction;
 import rhigin.scripts.function.RequireFunction;
+import rhigin.scripts.function.ServerIdFunction;
 import rhigin.scripts.function.SleepFunction;
+import rhigin.scripts.function.SystemTimeFunction;
 import rhigin.scripts.objects.ConsoleObject;
 import rhigin.scripts.objects.JSONObject;
+import rhigin.scripts.objects.LockObject;
+import rhigin.scripts.objects.RwLockObject;
 import rhigin.scripts.objects.Xor128Object;
 import rhigin.util.ListMap;
 import rhigin.util.OList;
@@ -279,6 +284,8 @@ public class ExecuteScript {
 		scope.put("console", scope, ConsoleObject.getInstance());
 		scope.put("Xor128", scope, Xor128Object.getInstance());
 		scope.put("JSON", scope, JSONObject.getInstance());
+		scope.put("Lock", scope, LockObject.getInstance());
+		scope.put("RwLock", scope, RwLockObject.getInstance());
 		scope.put("require", scope, RequireFunction.getInstance());
 		scope.put("logFactory", scope, LogFactoryFunction.getInstance());
 		scope.put("binary", scope, BinaryFunction.getInstance());
@@ -290,6 +297,9 @@ public class ExecuteScript {
 		scope.put("btoa", scope, BtoaFunction.getInstance());
 		scope.put("atob", scope, AtobFunction.getInstance());
 		scope.put("httpClient", scope, HttpClientFunction.getInstance());
+		scope.put("nanoTime", scope, NanoTimeFunction.getInstance());
+		scope.put("systemTime", scope, SystemTimeFunction.getInstance());
+		scope.put("serverId", scope, ServerIdFunction.getInstance());
 		
 		//ThreadFunction.set(scope);
 		

@@ -10,44 +10,53 @@ import rhigin.util.Converter;
 import rhigin.util.Xor128;
 
 /**
- * Xor128乱数発生.
+ * [js]Xor128乱数発生.
  * 高速な処理に対して、精度の高い乱数を発生させます.
+ * 
+ * var r = new Xor128(nanoTime());
+ * // r.setSeet(nanoTime());
+ * var n = r.next();
  */
 public final class Xor128Object {
-	private static final class seetFunction extends RhiginFunction {
+	private static final class Execute extends RhiginFunction {
+		private final int type;
 		private final Xor128 xor128;
-		seetFunction(Xor128 o) {
+		Execute(int t, Xor128 o) {
+			type = t;
 			xor128 = o;
 		}
 		@Override
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
-			if(args.length >= 1 && Converter.isNumeric(args[0])) {
-				xor128.setSeet(Converter.convertLong(args[0]));
+			switch(type) {
+			case 0:
+				if(args.length >= 1 && Converter.isNumeric(args[0])) {
+					xor128.setSeet(Converter.convertLong(args[0]));
+				}
+				break;
+			case 1:
+				return xor128.nextInt();
 			}
 			return Undefined.instance;
 		}
 		@Override
-		public final String getName() { return "seet"; }
-	};
-	private static final class nextIntFunction extends RhiginFunction {
-		private final Xor128 xor128;
-		nextIntFunction(Xor128 o) {
-			xor128 = o;
+		public final String getName() {
+			switch(type) {
+			case 0: return "seet";
+			case 1: return "nextInt";
+			}
+			return "unknown";
 		}
-		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
-			return xor128.nextInt();
-		}
-		@Override
-		public final String getName() { return "nextInt"; }
 	};
 	private static final class Instance extends RhiginFunction {
 		@Override
-		public Scriptable construct(Context arg0, Scriptable arg1, Object[] arg2) {
+		public Scriptable construct(Context ctx, Scriptable thisObj, Object[] args) {
 			Xor128 xor128 = new Xor128();
-			seetFunction f1 = new seetFunction(xor128);
-			nextIntFunction f2 = new nextIntFunction(xor128);
-			return new RhiginObject("Xor128", new RhiginFunction[] {f1, f2});
+			if(args.length >= 1 && Converter.isNumeric(args[0])) {
+				xor128.setSeet(Converter.convertLong(args[0]));
+			}
+			return new RhiginObject("Xor128", new RhiginFunction[] {
+				new Execute(0, xor128), new Execute(1, xor128)
+			});
 		}
 		@Override
 		public final String getName() { return "Xor128"; }

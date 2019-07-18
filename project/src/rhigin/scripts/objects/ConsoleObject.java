@@ -13,15 +13,18 @@ import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginObject;
 
 /**
- * [js]: Consoleオブジェクト.
+ * [js]Consoleオブジェクト.
+ * 
+ * console.log("hogehoge");
+ * console.debug("mogemoge");
  */
 public class ConsoleObject {
 	private static final Log LOG = LogFactory.create("console");
 	
 	// ログ出力用.
-	private static final class out extends RhiginFunction {
-		private int type = 0;
-		out(int t) {
+	private static final class Execute extends RhiginFunction {
+		final int type;
+		Execute(int t) {
 			type = t;
 		}
 		@Override
@@ -80,8 +83,8 @@ public class ConsoleObject {
 	
 	// オブジェクトリスト.
 	private static final RhiginFunction[] list = {
-		new out(0), new out(1), new out(2), new out(3), 
-		new out(4), new out(5), new out(6)
+		new Execute(0), new Execute(1), new Execute(2), new Execute(3), 
+		new Execute(4), new Execute(5), new Execute(6)
 	};
 	
 	// シングルトン.

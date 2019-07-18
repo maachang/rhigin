@@ -1285,4 +1285,65 @@ public final class Converter {
 		}
 		return ret;
 	}
+	
+	// ゼロサプレス.
+	private static final void _z2(StringBuilder buf, String no) {
+		buf.append("00".substring(no.length())).append(no);
+	}
+	
+	/**
+	 * 16バイトデータ(4バイト配列４つ)をUUIDに変換.
+	 * @param n int[4] のデータを設定します.
+	 * @return
+	 */
+	public static final String byte16ToUUID(int[] n) {
+		return byte16ToUUID(n[0], n[1], n[2], n[3]);
+	}
+	
+	/**
+	 * 16バイトデータ(4バイト配列４つ)をUUIDに変換.
+	 * @param a 4バイトデータを設定します.
+	 * @param b 4バイトデータを設定します.
+	 * @param c 4バイトデータを設定します.
+	 * @param d 4バイトデータを設定します.
+	 * @return String uuidが返却されます.
+	 */
+	public static final String byte16ToUUID(int a, int b, int c, int d) {
+		final StringBuilder buf = new StringBuilder();
+		_z2(buf, Integer.toHexString(((a & 0xff000000) >> 24) & 0x00ff));
+		_z2(buf, Integer.toHexString((a & 0x00ff0000) >> 16));
+		_z2(buf, Integer.toHexString((a & 0x0000ff00) >> 8));
+		_z2(buf, Integer.toHexString(a & 0x000000ff));
+		buf.append("-");
+		_z2(buf, Integer.toHexString(((b & 0xff000000) >> 24) & 0x00ff));
+		_z2(buf, Integer.toHexString((b & 0x00ff0000) >> 16));
+		buf.append("-");
+		_z2(buf, Integer.toHexString((b & 0x0000ff00) >> 8));
+		_z2(buf, Integer.toHexString(b & 0x000000ff));
+		buf.append("-");
+		_z2(buf, Integer.toHexString(((c & 0xff000000) >> 24) & 0x00ff));
+		_z2(buf, Integer.toHexString((c & 0x00ff0000) >> 16));
+		buf.append("-");
+		_z2(buf, Integer.toHexString((c & 0x0000ff00) >> 8));
+		_z2(buf, Integer.toHexString(c & 0x000000ff));
+		_z2(buf, Integer.toHexString(((d & 0xff000000) >> 24) & 0x00ff));
+		_z2(buf, Integer.toHexString((d & 0x00ff0000) >> 16));
+		_z2(buf, Integer.toHexString((d & 0x0000ff00) >> 8));
+		_z2(buf, Integer.toHexString(d & 0x000000ff));
+		return buf.toString();
+	}
+	
+	/**
+	 * UUIDを16バイトデータ(4バイト配列４つ)に変換.
+	 * @param n uuidを設定します.
+	 * @return int[] int[4]が返却されます.
+	 */
+	public static final int[] uuidToByte16(String n) {
+		return new int[] {
+			Integer.parseInt(n.substring(0,8), 16),
+			Integer.parseInt(n.substring(9,13) + n.substring(14,18), 16),
+			Integer.parseInt(n.substring(19,23) + n.substring(24,28), 16),
+			Integer.parseInt(n.substring(28), 16)
+		};
+	}
 }

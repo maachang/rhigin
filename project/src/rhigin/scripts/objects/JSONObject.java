@@ -9,39 +9,40 @@ import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginObject;
 
 /**
- * [js]: Jsonオブジェクト.
+ * [js]Jsonオブジェクト.
+ * 
+ * var a = JSON.stringify({hoge: "moge"});
+ * var b = JSON.parse(a);
  */
 public final class JSONObject {
-	
-	// json エンコード.
-	private static final RhiginFunction stringify = new RhiginFunction() {
-		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
-			if(args.length >= 1) {
-				return Json.encode(args[0]);
-			}
-				return Undefined.instance;
+	private static final class Execute extends RhiginFunction {
+		final int type;
+		Execute(int t) {
+			this.type = t;
 		}
 		@Override
-		public final String getName() { return "stringify"; }
-	};
-	
-	// json デコード.
-	private static final RhiginFunction parse = new RhiginFunction() {
-		@Override
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if(args.length >= 1) {
-				return Json.decode(""+args[0]);
+				switch(type) {
+				case 0: return Json.encode(args[0]);
+				case 1: return Json.decode(""+args[0]);
+				}
 			}
 			return Undefined.instance;
 		}
 		@Override
-		public final String getName() { return "parse"; }
+		public final String getName() {
+			switch(type) {
+			case 0: return "stringify";
+			case 1: return "parse";
+			}
+			return "unknown";
+		}
 	};
 	
 	// オブジェクトリスト.
 	private static final RhiginFunction[] list = {
-		stringify, parse
+		new Execute(0), new Execute(1)
 	};
 	
 	// シングルトン.
