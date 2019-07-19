@@ -71,6 +71,11 @@ public class RhiginObject implements BlankScriptable {
 	}
 	
 	@Override
+	public String getClassName() {
+		return name;
+	}
+	
+	@Override
 	public String toString() {
 		return (String)toStringFunction.call(null, null, null, new Object[]{});
 	}

@@ -30,7 +30,7 @@ public abstract class RhiginFunction implements Function {
 
 	@Override
 	public String getClassName() {
-		return null;
+		return getName();
 	}
 
 	@Override
