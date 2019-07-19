@@ -191,6 +191,11 @@ public class MimeType extends JavaScriptable.Map implements AbstractKeyIterator.
 	}
 	
 	@Override
+	public String toString() {
+		return "[mime]";
+	}
+	
+	@Override
 	public String getKey(int no) {
 		if(keys == null) {
 			keys = mimeTable.keySet().toArray();

@@ -13,8 +13,8 @@ import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 import rhigin.RhiginConstants;
-import rhigin.net.ByteArrayIO;
 import rhigin.scripts.Json;
+import rhigin.util.ByteArrayIO;
 import rhigin.util.Converter;
 
 /**

@@ -18,8 +18,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 
-import rhigin.net.ByteArrayIO;
-
 /**
  * ファイルユーティリティ.
  */

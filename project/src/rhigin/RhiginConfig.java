@@ -121,7 +121,7 @@ public class RhiginConfig implements BlankScriptable {
 	 */
 	@Override
 	public String toString() {
-		return "[object Object]";
+		return "[config]";
 	}
 	
 	@Override
