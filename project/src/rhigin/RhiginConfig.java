@@ -84,9 +84,6 @@ public class RhiginConfig implements BlankScriptable {
 	 */
 	@Override
 	public Object get(String name, Scriptable s) {
-		if("toString".equals(name)) {
-			return toStringFunction;
-		}
 		if(has(name)) {
 			return get(name);
 		}
@@ -101,9 +98,6 @@ public class RhiginConfig implements BlankScriptable {
 	 */
 	@Override
 	public boolean has(String name, Scriptable s) {
-		if("toString".equals(name)) {
-			return true;
-		}
 		return has(name);
 	}
 	
@@ -128,6 +122,11 @@ public class RhiginConfig implements BlankScriptable {
 	@Override
 	public String toString() {
 		return "[object Object]";
+	}
+	
+	@Override
+	public Object getDefaultValue(Class<?> clazz) {
+		return toStringFunction.getDefaultValue(clazz);
 	}
 	
 	/**

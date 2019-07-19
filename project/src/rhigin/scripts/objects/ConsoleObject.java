@@ -35,23 +35,23 @@ public class ConsoleObject {
 				Object t = (args.length >= 2) ? args[1] : null;
 				if(t != null && t instanceof Throwable) {
 					switch(type) {
-					case 0: System.out.println(ConsoleObject.toString(ctx, o) + "\r\n" + getStackTrace((Throwable)t)); break;
-					case 1: LOG.trace(ConsoleObject.toString(ctx, o), (Throwable)t); break;
-					case 2: LOG.debug(ConsoleObject.toString(ctx, o), (Throwable)t); break;
-					case 3: LOG.info(ConsoleObject.toString(ctx, o), (Throwable)t); break;
-					case 4: LOG.warn(ConsoleObject.toString(ctx, o), (Throwable)t); break;
-					case 5: LOG.error(ConsoleObject.toString(ctx, o), (Throwable)t); break;
-					case 6: LOG.fatal(ConsoleObject.toString(ctx, o), (Throwable)t); break;
+					case 0: System.out.println(o + "\r\n" + getStackTrace((Throwable)t)); break;
+					case 1: LOG.trace(o, (Throwable)t); break;
+					case 2: LOG.debug(o, (Throwable)t); break;
+					case 3: LOG.info(o, (Throwable)t); break;
+					case 4: LOG.warn(o, (Throwable)t); break;
+					case 5: LOG.error(o, (Throwable)t); break;
+					case 6: LOG.fatal(o, (Throwable)t); break;
 					}
 				} else {
 					switch(type) {
-					case 0: System.out.println(ConsoleObject.toString(ctx, o)); break;
-					case 1: LOG.trace(ConsoleObject.toString(ctx, o)); break;
-					case 2: LOG.debug(ConsoleObject.toString(ctx, o)); break;
-					case 3: LOG.info(ConsoleObject.toString(ctx, o)); break;
-					case 4: LOG.warn(ConsoleObject.toString(ctx, o)); break;
-					case 5: LOG.error(ConsoleObject.toString(ctx, o)); break;
-					case 6: LOG.fatal(ConsoleObject.toString(ctx, o)); break;
+					case 0: System.out.println(o); break;
+					case 1: LOG.trace(o); break;
+					case 2: LOG.debug(o); break;
+					case 3: LOG.info(o); break;
+					case 4: LOG.warn(o); break;
+					case 5: LOG.error(o); break;
+					case 6: LOG.fatal(o); break;
 					}
 				}
 			}
@@ -78,17 +78,6 @@ public class ConsoleObject {
         PrintWriter pw = new PrintWriter(sw);
         t.printStackTrace(pw);
         return sw.toString();
-    }
-    
-    // Scriptable を文字列変換.
-    private static final String toString(Context ctx, Object o) {
-        if(o != null) {
-            if(o instanceof Scriptable) {
-                return "" + Context.jsToJava(o, String.class);
-            }
-            return o.toString();
-        }
-        return "";
     }
 	
 	// オブジェクトリスト.

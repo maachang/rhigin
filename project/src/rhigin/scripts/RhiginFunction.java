@@ -34,8 +34,8 @@ public abstract class RhiginFunction implements Function {
 	}
 
 	@Override
-	public Object getDefaultValue(Class<?> arg0) {
-		return null;
+	public Object getDefaultValue(Class<?> clazz) {
+		return (String.class.equals(clazz)) ? toString() : null;
 	}
 
 	@Override

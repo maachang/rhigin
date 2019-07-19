@@ -28,16 +28,14 @@ public class JavaScriptable {
 		public abstract Set keySet();
 		@Override
 		public boolean has(String name, Scriptable start) {
-			if("toString".equals(name) || this.containsKey(name)) {
+			if(this.containsKey(name)) {
 				return true;
 			}
 			return false;
 		}
 		@Override
 		public Object get(String name, Scriptable start) {
-			if("toString".equals(name)) {
-				return toStringFunction;
-			} else if(this.containsKey(name)) {
+			if(this.containsKey(name)) {
 				return this.get(name);
 			}
 			return Undefined.instance;
@@ -64,6 +62,10 @@ public class JavaScriptable {
 		@Override
 		public String getClassName() {
 			return "jmap";
+		}
+		@Override
+		public Object getDefaultValue(Class<?> clazz) {
+			return toStringFunction.getDefaultValue(clazz);
 		}
 		@Override
 		public String toString() {
@@ -111,16 +113,14 @@ public class JavaScriptable {
 		}
 		@Override
 		public boolean has(String name, Scriptable start) {
-			if("toString".equals(name) || "length".equals(name) || "push".equals(name)) {
+			if("length".equals(name) || "push".equals(name)) {
 			  return true;
 			}
 			return false;
 		}
 		@Override
 		public Object get(String name, Scriptable start) {
-			if("toString".equals(name)) {
-				return toStringFunction;
-			} else if("length".equals(name)) {
+			if("length".equals(name)) {
 				return this.size();
 			} else if("push".equals(name)) {
 				if(pushFunc == null) {
@@ -142,6 +142,10 @@ public class JavaScriptable {
 		@Override
 		public String getClassName() {
 			return "jlist";
+		}
+		@Override
+		public Object getDefaultValue(Class<?> clazz) {
+			return toStringFunction.getDefaultValue(clazz);
 		}
 		@Override
 		public String toString() {

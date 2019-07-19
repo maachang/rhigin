@@ -483,9 +483,9 @@ public class HttpWorkerThread extends Thread {
     em.setEndSend(true);
     if(gzip && fileName.endsWith(".gz")) {
       header.put("Content-Encoding", "gzip");
-      header.put("Content-Type", mime.get(fileName.substring(0, fileName.length()-3)));
+      header.put("Content-Type", mime.getUrl(fileName.substring(0, fileName.length()-3)));
     } else {
-      header.put("Content-Type", mime.get(fileName.substring(0, fileName.length())));
+      header.put("Content-Type", mime.getUrl(fileName.substring(0, fileName.length())));
     }
     try {
       em.setSendData(new ByteArrayInputStream(stateResponse(

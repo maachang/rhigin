@@ -15,6 +15,7 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
 import rhigin.http.HttpInfo;
+import rhigin.http.MimeType;
 import rhigin.logs.LogFactory;
 import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.RhiginContext;
@@ -102,6 +103,10 @@ public class RhiginStartup {
 		
 		// ExecuteScriptにRhiginConfigの要素をセット.
 		ExecuteScript.addOriginals("config", config);
+		
+		// ExecuteScriptにMimeTypeの要素をセット.
+		MimeType mime = MimeType.createMime(config.get("mime"));
+		ExecuteScript.addOriginals("mime", mime);
 		
 		// サーバIDを取得、設定.
 		RhiginServerId.getInstance().getId();

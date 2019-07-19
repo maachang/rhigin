@@ -10,6 +10,7 @@ import rhigin.http.MimeType;
 import rhigin.logs.Log;
 import rhigin.logs.LogFactory;
 import rhigin.net.NioUtil;
+import rhigin.scripts.ExecuteScript;
 import rhigin.util.Converter;
 
 public class Rhigin {
@@ -73,8 +74,8 @@ public class Rhigin {
         // 開始処理.
         HttpInfo httpInfo = RhiginStartup.startup(true, conf);
         
-        // MimeTypeの生成.
-        MimeType mime = MimeType.createMime(conf.get("mime"));
+        // 生成されたMimeTypeを取得.
+        MimeType mime = (MimeType)ExecuteScript.getOriginal().get("mime");
 
         // Httpの生成.
         http = new Http(httpInfo, mime);

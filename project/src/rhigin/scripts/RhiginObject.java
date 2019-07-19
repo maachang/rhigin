@@ -35,9 +35,6 @@ public class RhiginObject implements BlankScriptable {
 	
 	@Override
 	public Object get(String k, Scriptable s) {
-		if("toString".equals(k)) {
-			return toStringFunction;
-		}
 		final int len = list.length;
 		for(int i = 0; i < len; i += 2) {
 			if(list[i].equals(k)) {
@@ -49,9 +46,6 @@ public class RhiginObject implements BlankScriptable {
 	
 	@Override
 	public boolean has(String k, Scriptable s) {
-		if("toString".equals(k)) {
-			return true;
-		}
 		final int len = list.length;
 		for(int i = 0; i < len; i += 2) {
 			if(list[i].equals(k)) {
@@ -72,7 +66,12 @@ public class RhiginObject implements BlankScriptable {
 	}
 	
 	@Override
+	public Object getDefaultValue(Class<?> clazz) {
+		return (String.class.equals(clazz)) ? toString() : null;
+	}
+	
+	@Override
 	public String toString() {
-		return name;
+		return (String)toStringFunction.call(null, null, null, new Object[]{});
 	}
 }

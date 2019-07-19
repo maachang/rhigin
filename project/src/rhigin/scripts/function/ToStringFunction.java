@@ -34,5 +34,17 @@ public class ToStringFunction {
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			return o.toString();
 		}
+		@Override
+		public final String toString() {
+			return o.toString();
+		}
+		@Override
+		public Object getDefaultValue(Class<?> clazz) {
+			if(String.class.equals(clazz)) {
+				return o.toString();
+			}
+			return null;
+		}
+
 	}
 }

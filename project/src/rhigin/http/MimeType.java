@@ -3,13 +3,23 @@ package rhigin.http;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.locks.Lock;
+
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.Undefined;
+
+import rhigin.scripts.JavaScriptable;
+import rhigin.scripts.RhiginFunction;
+import rhigin.util.AbstractKeyIterator;
+import rhigin.util.ConvertMap;
 
 /**
  * MimeType.
  */
 @SuppressWarnings("rawtypes")
-public class MimeType {
+public class MimeType extends JavaScriptable.Map implements AbstractKeyIterator.Base<String>, ConvertMap {
 	
 	/** MimeTypeコンフィグファイル名. **/
 	public static final String MIME_CONF = "mime.conf" ;
@@ -25,6 +35,14 @@ public class MimeType {
 	
 	/** charsetを付加するMimeType. **/
 	private final Map<String,Boolean> charsetMimeTable = new HashMap<String,Boolean>() ;
+	
+	/** mimeTypeのキー群. **/
+	protected Object[] keys = null;
+	
+	/** [js]Mimeファンクション. **/
+	protected Object[] jsList = new Object[]{
+		"getUrl", new Execute(0, this), "isCharset", new Execute(1, this)
+	};
 	
 	/**
 	 * 拡張Mimeタイプ定義を読み込む.
@@ -52,7 +70,6 @@ public class MimeType {
 		}		
 		return ret ;
 	}
-	
 	
 	/**
 	 * コンストラクタ.
@@ -155,7 +172,7 @@ public class MimeType {
 	 * @return String MimeTypeが返却されます.
 	 *                [null]が返却された場合は、スクリプト実行条件が考慮されます.
 	 */
-	public String get(String url) {
+	public String getUrl(String url) {
 		int p = url.lastIndexOf( "." ) ;
 		if( p == -1 || url.lastIndexOf( "/" ) > p ) {
 			return null ;
@@ -174,4 +191,76 @@ public class MimeType {
 		return (ret==null)? false : ret ;
 	}
 	
+	@Override
+	public String getKey(int no) {
+		if(keys == null) {
+			keys = mimeTable.keySet().toArray();
+		}
+		return (String)keys[no];
+	}
+
+	@Override
+	public int size() {
+		return mimeTable.size();
+	}
+
+	@Override
+	public Object get(Object name) {
+		final int len = jsList.length;
+		for(int i = 0; i < len; i += 2) {
+			if(jsList[i].equals(name)) {
+				return jsList[i+1];
+			}
+		}
+		return mimeTable.get(name) ;
+	}
+
+	@Override
+	public boolean containsKey(Object name) {
+		final int len = jsList.length;
+		for(int i = 0; i < len; i += 2) {
+			if(jsList[i].equals(name)) {
+				return true;
+			}
+		}
+		return mimeTable.containsKey(""+name);
+	}
+
+	@Override
+	public Object put(Object name, Object value) {
+		return null;
+	}
+
+	@Override
+	public Object remove(Object name) {
+		return null;
+	}
+
+	@Override
+	public Set keySet() {
+		return mimeTable.keySet();
+	}
+	
+	// [js]mimeファンクション.
+	private static final class Execute extends RhiginFunction {
+		final int type;
+		final MimeType object;
+		Execute(int t, MimeType o) {
+			type = t;
+			object = o;
+		}
+		@Override
+		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			if(args.length >= 1) {
+				if(type == 0) {
+					return object.getUrl(""+args[0]);
+				} else {
+					return object.isCharset(""+args[0]);
+				}
+			}
+			return Undefined.instance;
+		}
+		@Override
+		public final String getName() { return type == 0 ? "getUrl" : "isCharset"; }
+	};
 }

@@ -1,7 +1,5 @@
 package rhigin;
 
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
@@ -56,12 +54,7 @@ public class RhiginConsole {
 					}
 					Object o = ExecuteScript.execute(context, cmd);
 					if(o instanceof Scriptable) {
-						ContextFactory.getGlobal().enterContext();
-						try {
-							System.out.println(Context.jsToJava(o, String.class));
-						} finally {
-							Context.exit();
-						}
+						System.out.println(o);
 					} else if(o instanceof Undefined) {
 						System.out.println("");
 					} else {
