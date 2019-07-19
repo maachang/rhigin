@@ -3,7 +3,6 @@ package rhigin.scripts;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
-import rhigin.scripts.function.ToStringFunction;
 import rhigin.util.BlankScriptable;
 
 /**
@@ -13,7 +12,6 @@ import rhigin.util.BlankScriptable;
 public class RhiginObject implements BlankScriptable {
 	private final Object[] list;
 	private final String name;
-	private final ToStringFunction.Execute toStringFunction = new ToStringFunction.Execute(this);
 	
 	/**
 	 * コンストラクタ.
@@ -67,7 +65,7 @@ public class RhiginObject implements BlankScriptable {
 	
 	@Override
 	public Object getDefaultValue(Class<?> clazz) {
-		return (String.class.equals(clazz)) ? toString() : null;
+		return (clazz == null || String.class.equals(clazz)) ? toString() : null;
 	}
 	
 	@Override
@@ -77,6 +75,6 @@ public class RhiginObject implements BlankScriptable {
 	
 	@Override
 	public String toString() {
-		return (String)toStringFunction.call(null, null, null, new Object[]{});
+		return "[" + name + "]";
 	}
 }

@@ -35,7 +35,7 @@ public abstract class RhiginFunction implements Function {
 
 	@Override
 	public Object getDefaultValue(Class<?> clazz) {
-		return (String.class.equals(clazz)) ? toString() : null;
+		return (clazz == null || String.class.equals(clazz)) ? toString() : Undefined.instance;
 	}
 
 	@Override

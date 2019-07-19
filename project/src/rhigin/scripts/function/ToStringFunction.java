@@ -2,6 +2,7 @@ package rhigin.scripts.function;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.RhiginFunction;
 import rhigin.util.BlankScriptable;
@@ -40,10 +41,7 @@ public class ToStringFunction {
 		}
 		@Override
 		public Object getDefaultValue(Class<?> clazz) {
-			if(String.class.equals(clazz)) {
-				return o.toString();
-			}
-			return null;
+			return (clazz == null || String.class.equals(clazz)) ? o.toString() : Undefined.instance;
 		}
 
 	}
