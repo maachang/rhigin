@@ -10,6 +10,7 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.Json;
+import rhigin.scripts.function.ToStringFunction;
 import rhigin.util.BlankScriptable;
 import rhigin.util.ConvertGet;
 import rhigin.util.FileUtil;
@@ -21,6 +22,7 @@ import rhigin.util.Read;
  */
 public class RhiginConfig implements BlankScriptable {
 	private static final String CONF_CHARSET = "UTF8";
+	private final ToStringFunction.Execute toStringFunction = new ToStringFunction.Execute(this);
 	private String confDir = null;
 	private Map<String, Map<String,Object>> config = null;
 	public RhiginConfig() throws IOException {
@@ -82,6 +84,9 @@ public class RhiginConfig implements BlankScriptable {
 	 */
 	@Override
 	public Object get(String name, Scriptable s) {
+		if("toString".equals(name)) {
+			return toStringFunction;
+		}
 		if(has(name)) {
 			return get(name);
 		}
@@ -96,6 +101,9 @@ public class RhiginConfig implements BlankScriptable {
 	 */
 	@Override
 	public boolean has(String name, Scriptable s) {
+		if("toString".equals(name)) {
+			return true;
+		}
 		return has(name);
 	}
 	

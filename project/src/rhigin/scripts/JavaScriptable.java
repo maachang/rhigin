@@ -9,6 +9,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
+import rhigin.scripts.function.ToStringFunction;
 import rhigin.util.BlankMap;
 import rhigin.util.BlankScriptable;
 
@@ -19,6 +20,7 @@ public class JavaScriptable {
 	// Mapオブジェクト変換.
 	@SuppressWarnings("rawtypes")
 	public static abstract class Map implements BlankScriptable, BlankMap {
+		protected final ToStringFunction.Execute toStringFunction = new ToStringFunction.Execute(this);
 		public abstract Object get(Object name);
 		public abstract boolean containsKey(Object name);
 		public abstract Object put(Object name, Object value);
@@ -26,14 +28,16 @@ public class JavaScriptable {
 		public abstract Set keySet();
 		@Override
 		public boolean has(String name, Scriptable start) {
-			if(this.containsKey(name)) {
+			if("toString".equals(name) || this.containsKey(name)) {
 				return true;
 			}
 			return false;
 		}
 		@Override
 		public Object get(String name, Scriptable start) {
-			if(this.containsKey(name)) {
+			if("toString".equals(name)) {
+				return toStringFunction;
+			} else if(this.containsKey(name)) {
 				return this.get(name);
 			}
 			return Undefined.instance;
@@ -70,6 +74,7 @@ public class JavaScriptable {
 	// Listオブジェクト変換.
 	@SuppressWarnings("rawtypes")
 	public static abstract class List extends AbstractList implements BlankScriptable {
+		protected final ToStringFunction.Execute toStringFunction = new ToStringFunction.Execute(this);
 		private JListPushFunction pushFunc = null;
 		public abstract int size();
 		public abstract Object get(int no);
@@ -106,14 +111,16 @@ public class JavaScriptable {
 		}
 		@Override
 		public boolean has(String name, Scriptable start) {
-			if("length".equals(name) || "push".equals(name)) {
+			if("toString".equals(name) || "length".equals(name) || "push".equals(name)) {
 			  return true;
 			}
 			return false;
 		}
 		@Override
 		public Object get(String name, Scriptable start) {
-			if("length".equals(name)) {
+			if("toString".equals(name)) {
+				return toStringFunction;
+			} else if("length".equals(name)) {
 				return this.size();
 			} else if("push".equals(name)) {
 				if(pushFunc == null) {

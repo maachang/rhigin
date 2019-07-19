@@ -50,7 +50,7 @@ public final class Xor128Object {
 	private static final class Instance extends RhiginFunction {
 		@Override
 		public Scriptable construct(Context ctx, Scriptable thisObj, Object[] args) {
-			Xor128 xor128 = new Xor128();
+			final Xor128 xor128 = new Xor128();
 			if(args.length >= 1 && Converter.isNumeric(args[0])) {
 				xor128.setSeet(Converter.convertLong(args[0]));
 			}

@@ -1,7 +1,6 @@
 package rhigin.http;
 
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -116,12 +115,8 @@ public class HttpPostBodyFile {
 			String fn = fileName; fileName = null;
 			try {
 				// ファイル削除のリトライを行って、削除する.
-				File n = new File(fn);
 				for(int i = 0; i < DELETE_RETRY_COUNT; i ++) {
-					if(n.delete()) {
-						break;
-					}
-					try { Thread.sleep(5); } catch(Exception e) {}
+					FileUtil.removeFile(fn);
 				}
 			} catch(Exception e) {}
 		}

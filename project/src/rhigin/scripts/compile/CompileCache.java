@@ -162,7 +162,7 @@ public class CompileCache {
 				jsName += ".js";
 			}
 			// 現在のファイル時間（存在しない場合は-1)を取得.
-			final long time = FileUtil.getFileTime(jsName);
+			final long time = FileUtil.mtime(jsName);
 			// ベースパス以降を対象とする.
 			final String key = jsName.substring(baseDir.length());
 			// 現在のキャッシュ情報を取得.

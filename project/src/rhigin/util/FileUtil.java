@@ -13,6 +13,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 
 import rhigin.net.ByteArrayIO;
 
@@ -21,6 +25,28 @@ import rhigin.net.ByteArrayIO;
  */
 public final class FileUtil {
 	protected FileUtil() {}
+	
+	// ファイル及びディレクトリの削除.
+	private static final void _deleteFileOrDirectory(String name) throws Exception {
+		Files.delete(Paths.get(name));
+	}
+	
+	// ファイル時間を取得.
+	private static final long _getFileTime(int type, String name) throws Exception {
+		File fp = new File(name);
+		if(fp.exists()) {
+			BasicFileAttributes attrs = Files.readAttributes(Paths.get(name), BasicFileAttributes.class);
+			switch(type) {
+			// ファイル作成時間.
+			case 0: return attrs.creationTime().toMillis();
+			// ファイル最終アクセス時間.
+			case 1: return attrs.lastAccessTime().toMillis();
+			// ファイル最終更新時間.
+			case 2: return attrs.lastModifiedTime().toMillis();
+			}
+		}
+		return -1;
+	}
   
 	/**
 	 * ファイル名の存在チェック.
@@ -112,17 +138,36 @@ public final class FileUtil {
   }
 
   /**
-   * ファイルタイムを取得.
+   * ファイル生成時間を取得.
    * 
-   * @param name
-   *            対象のファイル名を設定します.
+   * @param name 対象のファイル名を設定します.
    * @return long ファイルタイムが返却されます. [-1L]が返却された場合、ファイルは存在しません.
-   * @exception Exception
-   *                例外.
+   * @exception Exception 例外.
    */
-  public static final long getFileTime(String name) throws Exception {
-	  File fp = new File(name);
-	  return (fp.exists()) ? fp.lastModified() : -1L;
+  public static final long birthtime(String name) throws Exception {
+	  return _getFileTime(0, name);
+  }
+
+  /**
+   * 最終アクセス時間を取得.
+   * 
+   * @param name 対象のファイル名を設定します.
+   * @return long ファイルタイムが返却されます. [-1L]が返却された場合、ファイルは存在しません.
+   * @exception Exception 例外.
+   */
+  public static final long atime(String name) throws Exception {
+	  return _getFileTime(1, name);
+  }
+
+  /**
+   * 最終更新時間を取得.
+   * 
+   * @param name 対象のファイル名を設定します.
+   * @return long ファイルタイムが返却されます. [-1L]が返却された場合、ファイルは存在しません.
+   * @exception Exception 例外.
+   */
+  public static final long mtime(String name) throws Exception {
+	  return _getFileTime(2, name);
   }
 
   /**
@@ -323,18 +368,102 @@ public final class FileUtil {
    * @return boolean 削除結果が返されます.
    * @exception 例外.
    */
-  public static final boolean removeFile(String name) throws Exception {
-	  return new File(name).delete();
+  public static final void removeFile(String name) throws Exception {
+	  _deleteFileOrDirectory(name);
+  }
+  
+  // 指定内のフォルダが空でない場合は中身も削除して削除処理.
+  private static final void _delete(String name) throws Exception {
+	  if(isFile(name)) {
+		  _deleteFileOrDirectory(name);
+	  } else {
+		  String[] list = list(name);
+		  if(list != null && list.length > 0) {
+			  if(!name.endsWith("/")) {
+				  name = name + "/";
+			  }
+			  String path;
+			  int len = list.length;
+			  for(int i = 0; i < len; i ++) {
+				  path = name + list[i];
+				  _delete(path);
+				  if(isDir(path)) {
+					  _deleteFileOrDirectory(path);
+				  }
+			  }
+		  }
+	  }
+  }
+  
+  /**
+   * 指定フォルダ内のファイルとフォルダを全削除.
+   * @param name 削除対象のフォルダ名かファイル名を設定します.
+   * @throws Exception 例外.
+   */
+  public static final void delete(String name) throws Exception {
+	  _delete(getFullPath(name));
+  }
+  
+  /**
+   * ファイルリストを取得.
+   * @param name 対象のフォルダ名を設定します.
+   * @return String[] ファイルリストが返却されます.
+   * @exception Exception 例外.
+   */
+  public static final String[] list(String name) throws Exception {
+	  return new File(name).list();
   }
 
   /**
    * ファイル、フォルダの移動.
    * @param src 移動元のファイル名を設定します.
    * @param dest 移動先のファイル名を設定します.
-   * @return boolean [true]が返却された場合、移動は成功しました.
+   * @throws Exception 例外.
    */
-  public static final boolean move(String src, String dest) {
-	  return new File(src).renameTo(new File(dest));
+  public static final void move(String src, String dest) throws Exception {
+	  Files.move(Paths.get(src), Paths.get(dest));
+  }
+  
+  // ファイルのコピー.
+  private static final void _copyFile(String src, String dest) throws Exception {
+	  Files.copy(Paths.get(src), Paths.get(dest),
+		StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+  }
+  
+  // コピー処理.
+  public static final void _copy(String src, String dest) throws Exception {
+	  if(isFile(src)) {
+		  _copyFile(src, dest);
+	  } else {
+		  String[] list = list(src);
+		  if(list != null && list.length > 0) {
+			  if(!src.endsWith("/")) {
+				  src = src + "/";
+			  }
+			  if(!dest.endsWith("/")) {
+				  dest = dest + "/";
+			  }
+			  int len = list.length;
+			  for(int i = 0; i < len; i ++) {
+				  if(isDir(src)) {
+					  if(!isDir(dest + list[i])) {
+						  mkdirs(dest + list[i]);
+					  }
+				  }
+				  _copy(src + list[i], dest + list[i]);
+			  }
+		  }
+	  }
+  }
+  
+  /**
+   * ファイル・フォルダのコピー処理.
+   * @param src コピー元のファイル、フォルダを設定します.
+   * @param dest コピー先のファイル、フォルダを設定します.
+   * @throws Exception 例外.
+   */
+  public static final void copy(String src, String dest) throws Exception {
+	  _copy(getFullPath(src), getFullPath(dest));
   }
 }
 

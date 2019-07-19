@@ -28,6 +28,7 @@ import rhigin.scripts.function.ServerIdFunction;
 import rhigin.scripts.function.SleepFunction;
 import rhigin.scripts.function.SystemTimeFunction;
 import rhigin.scripts.objects.ConsoleObject;
+import rhigin.scripts.objects.FileObject;
 import rhigin.scripts.objects.JSONObject;
 import rhigin.scripts.objects.JwtObject;
 import rhigin.scripts.objects.LockObject;
@@ -288,6 +289,7 @@ public class ExecuteScript {
 		scope.put("Jwt", scope, JwtObject.getInstance());
 		scope.put("Lock", scope, LockObject.getInstance());
 		scope.put("RwLock", scope, RwLockObject.getInstance());
+		scope.put("File", scope, FileObject.getInstance());
 		scope.put("require", scope, RequireFunction.getInstance());
 		scope.put("logFactory", scope, LogFactoryFunction.getInstance());
 		scope.put("binary", scope, BinaryFunction.getInstance());
