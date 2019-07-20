@@ -10,8 +10,8 @@ import rhigin.util.BlankScriptable;
  * Object.method処理を実装する時に利用します.
  */
 public class RhiginObject implements BlankScriptable {
-	private final Object[] list;
-	private final String name;
+	protected Object[] list;
+	protected String name;
 	
 	/**
 	 * コンストラクタ.

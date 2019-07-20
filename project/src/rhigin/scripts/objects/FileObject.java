@@ -1,6 +1,8 @@
 package rhigin.scripts.objects;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 
 import org.mozilla.javascript.Context;
@@ -76,6 +78,8 @@ public class FileObject{
 							new StatsExecite(6, stats), new StatsExecite(7, stats), new StatsExecite(8, stats),
 							new StatsExecite(9, stats)
 						});
+					case 19: return new FileInputStream("" + args[0]);
+					case 20: return new FileOutputStream("" + args[0]);
 					}
 				}
 			} catch(RhiginException re) {
@@ -108,6 +112,8 @@ public class FileObject{
 			case 16: return "fullPath";
 			case 17: return "fileName";
 			case 18: return "stat";
+			case 19: return "inputStream";
+			case 20: return "outputStream";
 			}
 			return "unknown";
 		}
@@ -138,7 +144,8 @@ public class FileObject{
 		new Execute(4), new Execute(5), new Execute(6), new Execute(7),
 		new Execute(8), new Execute(9), new Execute(10), new Execute(11),
 		new Execute(12), new Execute(13), new Execute(14), new Execute(15),
-		new Execute(16), new Execute(17), new Execute(18)
+		new Execute(16), new Execute(17), new Execute(18), new Execute(19),
+		new Execute(20)
 	};
 	
 	// シングルトン.

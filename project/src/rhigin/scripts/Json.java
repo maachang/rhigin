@@ -124,8 +124,7 @@ public final class Json {
 					// これは rhinoのContextの範囲内でないとエラーになるので.
 					final Method m = io.getClass().getDeclaredMethod("getJSTimeValue");
 					m.setAccessible(true);
-					final Object o = m.invoke(io);
-					buf.append("\"").append(dateToString(new Date(Converter.convertLong(o)))).append("\"");
+					buf.append("\"").append(dateToString(new Date(Converter.convertLong(m.invoke(io))))).append("\"");
 				} catch(Exception e) {
 					// エラーの場合は処理しない.
 					buf.append("null");

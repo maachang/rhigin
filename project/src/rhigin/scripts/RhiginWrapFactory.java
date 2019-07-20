@@ -70,11 +70,107 @@ final class RhiginWrapFactory extends WrapFactory {
 		}
 	}
 	// RhiginJavaObject.
-	private static class RhiginJavaObject extends NativeJavaObject {
+	protected static class RhiginJavaObject extends NativeJavaObject {
 		private static final long serialVersionUID = 7074055700134775639L;
 		RhiginJavaObject(Scriptable scope, Object obj, Class type) {
 			super(scope, null, type);
 			javaObject = obj;
+		}
+	}
+	// toString表示対応のScriptableオブジェクトラッパ.
+	protected static class ToStringScriptableWrapper implements Scriptable {
+		String name;
+		Scriptable parent;
+		ToStringScriptableWrapper(String name, Scriptable parent) {
+			System.out.println("name:" + name + " parent:" + parent);
+			this.name = name;
+			this.parent = parent;
+		}
+
+		@Override
+		public void delete(String arg0) {
+			parent.delete(arg0);
+		}
+
+		@Override
+		public void delete(int arg0) {
+			parent.delete(arg0);
+		}
+
+		@Override
+		public Object get(String arg0, Scriptable arg1) {
+			return parent.get(arg0, arg1);
+		}
+
+		@Override
+		public Object get(int arg0, Scriptable arg1) {
+			return parent.get(arg0, arg1);
+		}
+
+		@Override
+		public String getClassName() {
+			return name;
+		}
+
+		@Override
+		public Object getDefaultValue(Class<?> arg0) {
+			return (arg0 == null || String.class.equals(arg0)) ?
+				parent.toString() : parent.getDefaultValue(arg0);
+		}
+
+		@Override
+		public Object[] getIds() {
+			return parent.getIds();
+		}
+
+		@Override
+		public Scriptable getParentScope() {
+			return parent.getParentScope();
+		}
+
+		@Override
+		public Scriptable getPrototype() {
+			return parent.getPrototype();
+		}
+
+		@Override
+		public boolean has(String arg0, Scriptable arg1) {
+			return parent.has(arg0, arg1);
+		}
+
+		@Override
+		public boolean has(int arg0, Scriptable arg1) {
+			return parent.has(arg0, arg1);
+		}
+
+		@Override
+		public boolean hasInstance(Scriptable arg0) {
+			return parent.hasInstance(arg0);
+		}
+
+		@Override
+		public void put(String arg0, Scriptable arg1, Object arg2) {
+			parent.put(arg0, arg1, arg2);
+		}
+
+		@Override
+		public void put(int arg0, Scriptable arg1, Object arg2) {
+			parent.put(arg0, arg1, arg2);
+		}
+
+		@Override
+		public void setParentScope(Scriptable arg0) {
+			parent.setParentScope(arg0);
+		}
+
+		@Override
+		public void setPrototype(Scriptable arg0) {
+			parent.setPrototype(arg0);
+		}
+		
+		@Override
+		public String toString() {
+			return parent.toString();
 		}
 	}
 }

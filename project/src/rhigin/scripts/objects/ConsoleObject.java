@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import org.mozilla.javascript.Context;
+import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
@@ -35,23 +36,23 @@ public class ConsoleObject {
 				Object t = (args.length >= 2) ? args[1] : null;
 				if(t != null && t instanceof Throwable) {
 					switch(type) {
-					case 0: System.out.println(o + "\r\n" + getStackTrace((Throwable)t)); break;
-					case 1: LOG.trace(o, (Throwable)t); break;
-					case 2: LOG.debug(o, (Throwable)t); break;
-					case 3: LOG.info(o, (Throwable)t); break;
-					case 4: LOG.warn(o, (Throwable)t); break;
-					case 5: LOG.error(o, (Throwable)t); break;
-					case 6: LOG.fatal(o, (Throwable)t); break;
+					case 0: System.out.println(jsString(o) + "\r\n" + getStackTrace((Throwable)t)); break;
+					case 1: LOG.trace(jsString(o), (Throwable)t); break;
+					case 2: LOG.debug(jsString(o), (Throwable)t); break;
+					case 3: LOG.info(jsString(o), (Throwable)t); break;
+					case 4: LOG.warn(jsString(o), (Throwable)t); break;
+					case 5: LOG.error(jsString(o), (Throwable)t); break;
+					case 6: LOG.fatal(jsString(o), (Throwable)t); break;
 					}
 				} else {
 					switch(type) {
-					case 0: System.out.println(o); break;
-					case 1: LOG.trace(o); break;
-					case 2: LOG.debug(o); break;
-					case 3: LOG.info(o); break;
-					case 4: LOG.warn(o); break;
-					case 5: LOG.error(o); break;
-					case 6: LOG.fatal(o); break;
+					case 0: System.out.println(jsString(o)); break;
+					case 1: LOG.trace(jsString(o)); break;
+					case 2: LOG.debug(jsString(o)); break;
+					case 3: LOG.info(jsString(o)); break;
+					case 4: LOG.warn(jsString(o)); break;
+					case 5: LOG.error(jsString(o)); break;
+					case 6: LOG.fatal(jsString(o)); break;
 					}
 				}
 			}
@@ -73,12 +74,21 @@ public class ConsoleObject {
 	};
 	
 	// stackTraceを文字出力.
-    private static final String getStackTrace(Throwable t) {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        t.printStackTrace(pw);
-        return sw.toString();
-    }
+	private static final String getStackTrace(Throwable t) {
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		t.printStackTrace(pw);
+		return sw.toString();
+	}
+	
+	private static final String jsString(Object o) {
+		ContextFactory.getGlobal().enterContext();
+		try {
+			return Context.toString(o);
+		} finally {
+			Context.exit();
+		}
+	}
 	
 	// オブジェクトリスト.
 	private static final RhiginFunction[] list = {

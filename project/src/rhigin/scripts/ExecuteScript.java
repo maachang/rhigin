@@ -30,6 +30,7 @@ import rhigin.scripts.function.SystemTimeFunction;
 import rhigin.scripts.objects.ConsoleObject;
 import rhigin.scripts.objects.FileObject;
 import rhigin.scripts.objects.JSONObject;
+import rhigin.scripts.objects.JDateObject;
 import rhigin.scripts.objects.JwtObject;
 import rhigin.scripts.objects.LockObject;
 import rhigin.scripts.objects.RwLockObject;
@@ -61,7 +62,7 @@ public class ExecuteScript {
 	private static final ListMap originalFunctionAndObjectList = new ListMap();
 	
     static {
-    	    // Context初期化.
+         // Context初期化.
         ContextFactory.initGlobal(new ContextFactory() {
             @Override
             protected Context makeContext() {
@@ -103,18 +104,18 @@ public class ExecuteScript {
     // [ThreadLocal]: topLevelオブジェクトを生成・取得.
     private static final ThreadLocal<RhiginTopLevel> topLevels = new ThreadLocal<RhiginTopLevel>();
     private static final RhiginTopLevel getTopLevel() {
-    		RhiginTopLevel ret = topLevels.get();
-	    	if(ret == null) {
+        RhiginTopLevel ret = topLevels.get();
+        if(ret == null) {
             try {
-            		ret = new RhiginTopLevel(ContextFactory.getGlobal().enterContext());
+                ret = new RhiginTopLevel(ContextFactory.getGlobal().enterContext());
             } finally {
-            		Context.exit();
+                Context.exit();
             }
             topLevels.set(ret);
-	    	}
-	    	return ret;
-    	}
-	
+        }
+        return ret;
+    }
+
 	/**
 	 * 指定javascriptをコンパイル.
 	 * @param script 対象のスクリプトを設定します.
@@ -290,6 +291,7 @@ public class ExecuteScript {
 		scope.put("Lock", scope, LockObject.getInstance());
 		scope.put("RwLock", scope, RwLockObject.getInstance());
 		scope.put("File", scope, FileObject.getInstance());
+		scope.put("JDate", scope, JDateObject.getInstance());
 		scope.put("require", scope, RequireFunction.getInstance());
 		scope.put("logFactory", scope, LogFactoryFunction.getInstance());
 		scope.put("binary", scope, BinaryFunction.getInstance());
