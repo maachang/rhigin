@@ -375,8 +375,8 @@ public class HttpWorkerThread extends Thread {
       Object ret = "";
       try {
         // スクリプトの実行.
-        ScriptElement ce = cache.get(path, ScriptConstants.HEADER, ScriptConstants.FOOTER);
-        ret = ExecuteScript.execute(context, ce.getScript());
+        ret = ExecuteScript.execute(
+            context, cache.get(path, ScriptConstants.HEADER, ScriptConstants.FOOTER).getScript());
       } catch (Redirect redirect) {
         redirectResponse(em, redirect);
         return;
@@ -442,7 +442,7 @@ public class HttpWorkerThread extends Thread {
     if(HttpConstants.POST_FILE_OUT_CONTENT_TYPE.equals(req.get("Content-Type"))) {
       return null;
     }
-    String v = new String(req.getBody(), "UTF8");
+    String v = req.getBodyText();
     req.setBody(null);
 
     // Body内容がJSON形式の場合.

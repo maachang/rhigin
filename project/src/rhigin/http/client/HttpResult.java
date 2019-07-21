@@ -100,7 +100,7 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
         if (p == -1) {
             p = contentType.length();
         }
-        return contentType.substring(b, p);
+        return contentType.substring(b, p).trim();
     }
     
     private final String getContentType() {

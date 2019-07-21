@@ -473,6 +473,8 @@ public class HttpClient {
         }
     }
 
+    
+
     // chunked出力.
     private static final void chunkedWrite(byte[] head, OutputStream out, int len)
         throws IOException {

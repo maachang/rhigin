@@ -2,6 +2,7 @@ package rhigin.http;
 
 import java.io.IOException;
 
+import rhigin.RhiginException;
 import rhigin.util.Converter;
 
 /**
@@ -25,6 +26,29 @@ public class Request extends Header {
 
     public byte[] getBody() {
       return body;
+    }
+    
+    public String getBodyText() {
+        try {
+            return new String(body, charset((String)get("Content-Type")));
+        } catch(RhiginException re) {
+            throw re;
+        } catch(Exception e) {
+            throw new RhiginException(500, e);
+        }
+    }
+    
+    private static final String charset(String contentType) {
+        int p = contentType.indexOf(" charset=");
+        if (p == -1) {
+            return "UTF8";
+        }
+        int b = p + 9;
+        p = contentType.indexOf(";", b);
+        if (p == -1) {
+            p = contentType.length();
+        }
+        return contentType.substring(b, p).trim();
     }
 
     public long getContentLength() throws IOException {
