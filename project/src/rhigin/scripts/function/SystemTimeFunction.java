@@ -5,6 +5,11 @@ import org.mozilla.javascript.Scriptable;
 
 import rhigin.scripts.RhiginFunction;
 
+/**
+ * [js]Unix時間を取得します.
+ * 
+ * systemTime();
+ */
 public class SystemTimeFunction extends RhiginFunction {
 	private static final SystemTimeFunction THIS = new SystemTimeFunction();
 	public static final SystemTimeFunction getInstance() {

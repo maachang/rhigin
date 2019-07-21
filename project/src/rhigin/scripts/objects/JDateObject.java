@@ -89,7 +89,7 @@ public class JDateObject extends RhiginFunction {
 		});
 	}
 	
-	// JDate用.
+	// JDate用メソッド群.
 	private static final class Execute extends RhiginFunction {
 		final int type;
 		final java.util.Date date;
@@ -115,6 +115,8 @@ public class JDateObject extends RhiginFunction {
 			case 11: return date.toLocaleString();
 			case 12: return date.getYear() + 1900;
 			case 26: return date.toString();
+			case 27: return date.hashCode();
+			case 99: return date;
 			}
 			if(args.length >= 1) {
 				Object o = args[0];
@@ -134,15 +136,12 @@ public class JDateObject extends RhiginFunction {
 				case 25: date.setYear(Converter.convertInt(o) + 1900);break;
 				}
 			}
-			if(type == 99) {
-				return date;
-			}
 			return Undefined.instance;
 		}
 		@Override
 		public final String getName() {
 			switch(type) {
-			case 0: return "close";
+			case 0: return "clone";
 			case 1: return "getDate";
 			case 2: return "getDay";
 			case 3: return "getHours";
@@ -169,7 +168,8 @@ public class JDateObject extends RhiginFunction {
 			case 24: return "setYear";
 			case 25: return "setFullYear";
 			case 26: return "toString";
-			case 99: return "origin";
+			case 27: return "hashCode";
+			case 99: return "object";
 			}
 			return "unknown";
 		}
@@ -180,13 +180,14 @@ public class JDateObject extends RhiginFunction {
 		}
 	}
 	
+	// JDate用クラス.
 	private static final class JDateClass extends RhiginObject {
 		public JDateClass(String name, RhiginFunction[] list) {
 			super(name, list);
 		}
 		@Override
 		public String toString() {
-			return ((Execute)get("origin", null)).date.toString();
+			return ((Execute)get("object", null)).date.toString();
 		}
 	}
 }

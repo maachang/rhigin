@@ -3,6 +3,7 @@ package rhigin.http.client;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -216,8 +217,7 @@ public class HttpClient {
             // リクエスト送信.
             socket = createSocket(urlArray);
             out = new BufferedOutputStream(socket.getOutputStream());
-            out.write(createHttpRequest(method, urlArray, (String) params,
-                    header));
+            createHttpRequest(out, method, urlArray, params, header);
             out.flush();
 
             // レスポンス受信.
@@ -327,13 +327,20 @@ public class HttpClient {
     }
 
     // HTTPリクエストを作成.
-    private static final byte[] createHttpRequest(String method, String[] urlArray, String params, Map header)
+    private static final void createHttpRequest(
+        OutputStream out, String method, String[] urlArray, Object params, Map header)
         throws IOException {
         byte[] b = null;
         String url = urlArray[3];
-        if ("GET".equals(method) || "DELETE".equals(method)
-                || "OPTIONS".equals(method)) {
-            if (params != null && params.length() != 0) {
+        if ("GET".equals(method) || "DELETE".equals(method) || "OPTIONS".equals(method)) {
+            if (params instanceof byte[]) {
+                if(((byte[])params).length > 0) {
+                    params = new String((byte[])params, "UTF8");
+                } else {
+                    params = "";
+                }
+            }
+            if (params instanceof String && ((String)params).length() != 0) {
                 url += ((url.indexOf("?") != -1) ? "&" : "?") + params;
                 params = "";
             }
@@ -385,35 +392,118 @@ public class HttpClient {
                 buf.append(k).append(": ").append(v).append("\r\n");
             }
         }
-
+        // post系の場合.
+        boolean chunked = false;
         if ("POST".equals(method) || "PUT".equals(method) || "PATCH".equals(method)) {
             if (header != null && !header.containsKey("Content-Type")) {
                 buf.append("Content-Type: ")
                         .append("application/x-www-form-urlencoded")
                         .append("\r\n");
             }
-            b = params.getBytes("UTF8");
-            buf.append("Content-Length: ").append(b.length).append("\r\n");
+            if(params instanceof String) {
+                String pms = (String)params;
+                if(pms.length() > 0) {
+                    b = ((String)params).getBytes("UTF8");
+                    buf.append("Content-Length: ").append(b.length).append("\r\n");
+                } else {
+                    b = null;
+                    buf.append("Content-Length: 0\r\n");
+                }
+            } else if(params instanceof byte[]) {
+               b = (byte[])params;
+               if(b.length > 0) {
+                    buf.append("Content-Length: ").append(b.length).append("\r\n");
+                } else {
+                    b = null;
+                    buf.append("Content-Length: 0\r\n");
+                }
+            } else if(params instanceof InputStream) {
+                if(params instanceof FileInputStream) {
+                    buf.append("Content-Length: ")
+                        .append(((InputStream)params).available()).append("\r\n");
+                } else {
+                    buf.append("Transfer-Encoding: chunked\r\n");
+                    chunked = true;
+                }
+            }
         }
+        // ヘッダ終端.
         buf.append("\r\n");
-
+        
         // binary 変換.
         String s = buf.toString();
-
         buf = null;
-        byte[] n = s.getBytes("UTF8");
+        byte[] h = s.getBytes("UTF8");
         s = null;
-
-        if (b == null) {
-            return n;
+        
+        // ヘッダ出力.
+        out.write(h);
+        h = null;
+        
+        // バイナリ出力.
+        if (b != null) {
+            // body出力.
+            out.write(b);
+            return;
         }
-
-        byte[] ret = new byte[n.length + b.length];
-        System.arraycopy(n, 0, ret, 0, n.length);
-        System.arraycopy(b, 0, ret, n.length, b.length);
-        return ret;
+        
+        // パラメータがinputStreamの場合.
+        if(params instanceof InputStream) {
+            int len;
+            InputStream in = (InputStream)params;
+            
+            // 送信タイプがchunkedの場合.
+            if(chunked) {
+                final byte[] head = new byte[3];
+                b = new byte[1024 - 7];
+                while((len = in.read(b)) != -1) {
+                    chunkedWrite(head, out, len);
+                    out.write(b, 0, len);
+                    out.write(CFLF, 0, 2);
+                }
+            // 送信タイプがContent-Lengthの場合.
+            } else {
+                b = new byte[1024];
+                while((len = in.read(b)) != -1) {
+                    out.write(b, 0, len);
+                }
+            }
+            b = null;
+            out.flush();
+        }
     }
 
+    // chunked出力.
+    private static final void chunkedWrite(byte[] head, OutputStream out, int len)
+        throws IOException {
+        int bufLen = 0;
+        while(true) {
+            switch(len & 0x0f) {
+            case 0: head[bufLen++] = (byte)('0'); break;
+            case 1: head[bufLen++] = (byte)('1'); break;
+            case 2: head[bufLen++] = (byte)('2'); break;
+            case 3: head[bufLen++] = (byte)('3'); break;
+            case 4: head[bufLen++] = (byte)('4'); break;
+            case 5: head[bufLen++] = (byte)('5'); break;
+            case 6: head[bufLen++] = (byte)('6'); break;
+            case 7: head[bufLen++] = (byte)('7'); break;
+            case 8: head[bufLen++] = (byte)('8'); break;
+            case 9: head[bufLen++] = (byte)('9'); break;
+            case 10: head[bufLen++] = (byte)('a'); break;
+            case 11: head[bufLen++] = (byte)('b'); break;
+            case 12: head[bufLen++] = (byte)('c'); break;
+            case 13: head[bufLen++] = (byte)('d'); break;
+            case 14: head[bufLen++] = (byte)('e'); break;
+            case 15: head[bufLen++] = (byte)('f'); break;
+            }
+            if((len = len >> 8) == 0) {
+                break;
+            }
+        }
+        out.write(head, 0, bufLen);
+        out.write(CFLF, 0, 2);
+    }
+    
     private static final byte[] CFLF = ("\r\n").getBytes();
     private static final byte[] END_HEADER = ("\r\n\r\n").getBytes();
 

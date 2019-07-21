@@ -13,6 +13,7 @@
   <!-- ===================================================================== -->
   <property name="project.name" value="rhigin"/>
   <property name="version" value="0.0.1"/>
+  <property name="bin.dir" value="bin/"/>
   <property name="lib.dir" value="project/lib/"/>
   <property name="src.dir" value="project/src/"/>
   <property name="dest.dir" value="project/classes"/>
@@ -82,6 +83,16 @@
       <fileset dir="${lib.dir}" />
     </copy>
   </target>
+
+  <!-- ===================================================================== -->
+  <!-- create archive zip                                                       -->
+  <!-- ===================================================================== -->
+	<target name="archive">
+		<zip destfile="${project.name}-${version}.zip" 
+			 basedir="${bin.dir}"
+			 update="true"
+		/>
+	</target>
   
   <!-- ===================================================================== -->
   <!-- make javadoc.                                                         -->
@@ -113,6 +124,7 @@
   <target name="clean">
     <delete dir="${dest.dir}" />
     <delete file="${jar.name}" />
+    <delete file="${project.name}-${version}.zip" />
     <delete dir="${doc.dir}" />
     <delete dir="${rhigin.home}/lib" />
   </target>

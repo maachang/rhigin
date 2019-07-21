@@ -1,8 +1,10 @@
 package rhigin.scripts.objects;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.mozilla.javascript.Context;
@@ -63,9 +65,17 @@ public class FileObject{
 						break;
 					case 14: return FileUtil.getFile(""+args[0]);
 					case 15: if(args.length >= 3) {
-							FileUtil.setFile(Converter.convertBool(args[0]), ""+args[1], toBinary(args[2]));
+							if(args[2] instanceof InputStream) {
+								setFileByInputStream(Converter.convertBool(args[0]), ""+args[1], (InputStream)args[2]);
+							} else {
+								FileUtil.setFile(Converter.convertBool(args[0]), ""+args[1], toBinary(args[2]));
+							}
 						} else if(args.length >= 2) {
-							FileUtil.setFile(true, ""+args[0], toBinary(args[1]));
+							if(args[1] instanceof InputStream) {
+								setFileByInputStream(true, ""+args[0], (InputStream)args[1]);
+							} else {
+								FileUtil.setFile(true, ""+args[0], toBinary(args[1]));
+							}
 						}
 						break;
 					case 16: return FileUtil.getFullPath(""+args[0]);
@@ -120,7 +130,9 @@ public class FileObject{
 		
 		private static final byte[] toBinary(Object o)
 			throws Exception {
-			if(o instanceof String) {
+			if (o == null) {
+				throw new IOException("There is no binary to output.");
+			} else if(o instanceof String) {
 				return ((String)o).getBytes("UTF8");
 			} else if(o instanceof byte[]) {
 				return (byte[])o;
@@ -134,7 +146,32 @@ public class FileObject{
 				}
 				return bo.toByteArray();
 			}
-			throw new RhiginException(500, "引数がバイナリではありません");
+			throw new RhiginException(500, "Argument is not binary.");
+		}
+		
+		// inputStreamでファイル出力.
+		private static final void setFileByInputStream(boolean newFile, String name, InputStream in) throws Exception {
+			if (in == null) {
+				throw new IOException("There is no inputStream to output.");
+			}
+			BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(name, !newFile));
+			try {
+				int len;
+				byte[] b = new byte[1024];
+				while((len = in.read(b)) != -1) {
+					bo.write(b, 0, len);
+				}
+				bo.flush();
+				bo.close();
+				bo = null;
+			} finally {
+				if (bo != null) {
+					try {
+						bo.close();
+					} catch (Exception e) {
+					}
+				}
+			}
 		}
 	};
 	

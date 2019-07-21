@@ -5,6 +5,11 @@ import org.mozilla.javascript.Scriptable;
 
 import rhigin.scripts.RhiginFunction;
 
+/**
+ * [js]ナノタイムを取得します.
+ *
+ * nanoTime();
+ */
 public class NanoTimeFunction extends RhiginFunction {
 	private static final NanoTimeFunction THIS = new NanoTimeFunction();
 	public static final NanoTimeFunction getInstance() {
