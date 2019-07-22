@@ -19,6 +19,7 @@ import rhigin.scripts.function.BinaryFunction;
 import rhigin.scripts.function.BtoaFunction;
 import rhigin.scripts.function.GetClassFunction;
 import rhigin.scripts.function.GetEnvFunction;
+import rhigin.scripts.function.GlobalFunction;
 import rhigin.scripts.function.HttpClientFunction;
 import rhigin.scripts.function.LogFactoryFunction;
 import rhigin.scripts.function.NanoTimeFunction;
@@ -302,6 +303,7 @@ public class ExecuteScript {
 		scope.put("File", scope, FileObject.getInstance());
 		scope.put("JDate", scope, JDateObject.getInstance());
 		scope.put("require", scope, RequireFunction.getInstance());
+		scope.put("global", scope, GlobalFunction.getInstance());
 		scope.put("logFactory", scope, LogFactoryFunction.getInstance());
 		scope.put("binary", scope, BinaryFunction.getInstance());
 		scope.put("getClass", scope, GetClassFunction.getInstance());
