@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.zip.GZIPOutputStream;
@@ -22,11 +23,9 @@ import rhigin.scripts.RhiginContext;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.ScriptConstants;
 import rhigin.scripts.compile.CompileCache;
-import rhigin.scripts.compile.ScriptElement;
 import rhigin.scripts.function.RandomFunction;
 import rhigin.scripts.function.RequireFunction;
 import rhigin.util.Alphabet;
-import rhigin.util.BlankScriptable;
 import rhigin.util.Converter;
 import rhigin.util.FileUtil;
 import rhigin.util.Wait;
@@ -278,7 +277,8 @@ public class HttpWorkerThread extends Thread {
   }
 
   /** Response処理. **/
-  private static final void executeScript(HttpElement em, CompileCache cache, MimeType mime) {
+  @SuppressWarnings("rawtypes")
+private static final void executeScript(HttpElement em, CompileCache cache, MimeType mime) {
     // 既に送信処理が終わっている場合.
     if (em.isEndSend()) {
       return;
@@ -356,7 +356,10 @@ public class HttpWorkerThread extends Thread {
       }
       // パラメータがnullの場合は、空のパラメータをセット.
       if(params == null) {
-        params = BlankParams;
+        params = new Params();
+      // パラメータがMapの場合.
+      } else if(params instanceof Map) {
+        params = new Params((Map)params);
       }
       
       // レスポンス生成.
@@ -718,13 +721,5 @@ public class HttpWorkerThread extends Thread {
     
     @Override
     public final String getName() { return "error"; }
-  };
-  
-  // 空のパラメータ.
-  private static final BlankScriptable BlankParams = new BlankScriptable() {
-    @Override
-    public String toString() {
-      return "{}";
-    }
   };
 }

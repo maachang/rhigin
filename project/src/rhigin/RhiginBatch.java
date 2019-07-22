@@ -18,7 +18,7 @@ import rhigin.util.FileUtil;
 import rhigin.util.Xor128;
 
 /**
- * Rhiginコンソール起動用.
+ * Rhiginバッチ実行.
  */
 public class RhiginBatch {
 	public static final void main(String[] args) throws Exception {

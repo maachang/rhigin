@@ -27,10 +27,11 @@ import rhigin.scripts.function.RequireFunction;
 import rhigin.scripts.function.ServerIdFunction;
 import rhigin.scripts.function.SleepFunction;
 import rhigin.scripts.function.SystemTimeFunction;
+import rhigin.scripts.function.ValidateFunction;
 import rhigin.scripts.objects.ConsoleObject;
 import rhigin.scripts.objects.FileObject;
-import rhigin.scripts.objects.JSONObject;
 import rhigin.scripts.objects.JDateObject;
+import rhigin.scripts.objects.JSONObject;
 import rhigin.scripts.objects.JwtObject;
 import rhigin.scripts.objects.LockObject;
 import rhigin.scripts.objects.RwLockObject;
@@ -61,61 +62,63 @@ public class ExecuteScript {
 	/** originalFunctionAndObject. **/
 	private static final ListMap originalFunctionAndObjectList = new ListMap();
 	
-    static {
-         // Context初期化.
-        ContextFactory.initGlobal(new ContextFactory() {
-            @Override
-            protected Context makeContext() {
-                Context ctx = super.makeContext();
-                ctx.setLanguageVersion(SCRIPT_LANGUAGE_VERSION);
-                ctx.setOptimizationLevel(SCRIPT_COMPILE_OPTIMIZE_LEVEL);
-                ctx.setClassShutter(RhiginClassShutter.getInstance());
-                ctx.setWrapFactory(RhiginWrapFactory.getInstance());
-                return ctx;
-            }
-            @Override
-            protected Object doTopCall(final Callable callable,
-                                       final Context cx, final Scriptable scope,
-                                       final Scriptable thisObj, final Object[] args) {
-                AccessControlContext accCtxt = null;
-                Scriptable global = ScriptableObject.getTopLevelScope(scope);
-                Scriptable globalProto = global.getPrototype();
-                if (globalProto instanceof RhiginTopLevel) {
-                    accCtxt = ((RhiginTopLevel) globalProto).getAccessContext();
-                }
-                if (accCtxt != null) {
-                    return AccessController.doPrivileged(new PrivilegedAction<Object>() {
-                        public Object run() {
-                            return superDoTopCall(callable, cx, scope, thisObj, args);
-                        }
-                    }, accCtxt);
-                } else {
-                    return superDoTopCall(callable, cx, scope, thisObj, args);
-                }
-            }
-            private Object superDoTopCall(Callable callable,
-                                          Context cx, Scriptable scope,
-                                          Scriptable thisObj, Object[] args) {
-                return super.doTopCall(callable, cx, scope, thisObj, args);
-            }
-        });
-    }
-    
-    // [ThreadLocal]: topLevelオブジェクトを生成・取得.
-    private static final ThreadLocal<RhiginTopLevel> topLevels = new ThreadLocal<RhiginTopLevel>();
-    private static final RhiginTopLevel getTopLevel() {
-        RhiginTopLevel ret = topLevels.get();
-        if(ret == null) {
-            try {
-                ret = new RhiginTopLevel(ContextFactory.getGlobal().enterContext());
-            } finally {
-                Context.exit();
-            }
-            topLevels.set(ret);
-        }
-        return ret;
-    }
+	static {
+		// Context初期化.
+		ContextFactory.initGlobal(new ContextFactory() {
+			@Override
+			protected Context makeContext() {
+				final Context ctx = super.makeContext();
+				ctx.setLanguageVersion(SCRIPT_LANGUAGE_VERSION);
+				ctx.setOptimizationLevel(SCRIPT_COMPILE_OPTIMIZE_LEVEL);
+				ctx.setClassShutter(RhiginClassShutter.getInstance());
+				ctx.setWrapFactory(RhiginWrapFactory.getInstance());
+				return ctx;
+			}
+			@Override
+			protected Object doTopCall(final Callable callable, final Context cx, final Scriptable scope, final Scriptable thisObj, final Object[] args) {
+				AccessControlContext accCtxt = null;
+				final Scriptable global = ScriptableObject.getTopLevelScope(scope);
+				final Scriptable globalProto = global.getPrototype();
+				if (globalProto instanceof RhiginTopLevel) {
+					accCtxt = ((RhiginTopLevel) globalProto).getAccessContext();
+				}
+				if (accCtxt != null) {
+					return AccessController.doPrivileged(new PrivilegedAction<Object>() {
+						public Object run() {
+							return superDoTopCall(callable, cx, scope, thisObj, args);
+						}
+					}, accCtxt);
+				} else {
+					return superDoTopCall(callable, cx, scope, thisObj, args);
+				}
+			}
+			private Object superDoTopCall(Callable callable, Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+				return super.doTopCall(callable, cx, scope, thisObj, args);
+			}
+		});
+	}
 
+	// [ThreadLocal]: topLevelオブジェクトを生成・取得.
+	private static final ThreadLocal<RhiginTopLevel> topLevels = new ThreadLocal<RhiginTopLevel>();
+	private static final RhiginTopLevel getTopLevel() {
+		RhiginTopLevel ret = topLevels.get();
+		if(ret == null) {
+			try {
+				ret = new RhiginTopLevel(ContextFactory.getGlobal().enterContext());
+			} finally {
+				Context.exit();
+			}
+			topLevels.set(ret);
+		}
+		return ret;
+	}
+	
+	// [ThreadLocal]: RhiginContextオブジェクトのカレントスレッド管理.
+	private static final ThreadLocal<RhiginContext> currentRhiginContext = new ThreadLocal<RhiginContext>();
+	public static final RhiginContext currentRhiginContext() {
+		return currentRhiginContext.get();
+	}
+	
 	/**
 	 * 指定javascriptをコンパイル.
 	 * @param script 対象のスクリプトを設定します.
@@ -126,6 +129,8 @@ public class ExecuteScript {
 		throws Exception {
 		return compile(script, null);
 	}
+	
+	
 	
 	/**
 	 * 指定javascriptをコンパイル.
@@ -201,6 +206,7 @@ public class ExecuteScript {
 	public static final Object execute(RhiginContext context, Script compiled)
 		throws Exception {
 		Context ctx = ContextFactory.getGlobal().enterContext();
+		currentRhiginContext.set(context);
 		try {
 			// 実行処理.
 			Scriptable scope = new RhiginScriptable(context);
@@ -209,6 +215,7 @@ public class ExecuteScript {
 			return compiled.exec(ctx, scope);
 		} finally {
 			Context.exit();
+			currentRhiginContext.set(null);
 		}
 	}
 	
@@ -266,6 +273,7 @@ public class ExecuteScript {
 		name = (name == null || name.isEmpty()) ? NO_SCRIPT_NAME : name;
 		Context ctx = ContextFactory.getGlobal().enterContext();
 		ctx.setOptimizationLevel(SCRIPT_NOT_COMPILE_OPTIMIZE_LEVEL);
+		currentRhiginContext.set(context);
 		try {
 			// 対象ソースをコンパイル.
 			Scriptable scope = new RhiginScriptable(context);
@@ -276,6 +284,7 @@ public class ExecuteScript {
 			return compiled.exec(ctx, scope);
 		} finally {
 			Context.exit();
+			currentRhiginContext.set(null);
 		}
 	}
 	
@@ -306,6 +315,7 @@ public class ExecuteScript {
 		scope.put("nanoTime", scope, NanoTimeFunction.getInstance());
 		scope.put("systemTime", scope, SystemTimeFunction.getInstance());
 		scope.put("serverId", scope, ServerIdFunction.getInstance());
+		scope.put("validate", scope, ValidateFunction.getInstance());
 		
 		//ThreadFunction.set(scope);
 		

@@ -15,7 +15,7 @@ import rhigin.util.ConsoleInKey;
 import rhigin.util.Xor128;
 
 /**
- * Rhiginコンソール起動用.
+ * Rhiginコンソール.
  */
 public class RhiginConsole {
 	public static final void main(String[] args) throws Exception {

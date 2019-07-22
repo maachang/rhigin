@@ -13,43 +13,46 @@ import rhigin.net.NioUtil;
 import rhigin.scripts.ExecuteScript;
 import rhigin.util.Converter;
 
+/**
+ * rhiginメインオブジェクト.
+ */
 public class Rhigin {
-	
-	// RhiginHttpオブジェクトをシャットダウン.
-	public static final class ShutdownHttp extends CallbackShutdown {
-		protected Log log;
-	    protected Http http;
-
-	    public ShutdownHttp(Log log, Http http) {
-	    	this.log = log;
-	        this.http = http;
-	    }
-
-	    /**
-	     * シャットダウンフック：Http 終了コールを呼び出す.
-	     */
-	    public final void execution() {
-	        log.info("start shutdown Rhigin.");
-
-	        // 各サービス停止.
-	        http.stop();
-	        while (!http.isExit()) {
-	            try {
-	                Thread.sleep(5);
-	            } catch (Exception e) {
-	            }
-	        }
-	        // シャットダウン時の処理終了コールバック.
-	        if(http.exitCall() != null) {
-	            http.exitCall().call();
-	        }
-	        log.info("end shutdown Rhigin.");
-	    }
-	}
-
-	// ロガー.
-	private static Log LOG = null;
-
+    
+    // RhiginHttpオブジェクトをシャットダウン.
+    public static final class ShutdownHttp extends CallbackShutdown {
+        protected Log log;
+        protected Http http;
+        
+        public ShutdownHttp(Log log, Http http) {
+            this.log = log;
+            this.http = http;
+        }
+        
+        /**
+         * シャットダウンフック：Http 終了コールを呼び出す.
+         */
+        public final void execution() {
+            log.info("start shutdown Rhigin.");
+            
+            // 各サービス停止.
+            http.stop();
+            while (!http.isExit()) {
+                try {
+                    Thread.sleep(5);
+                } catch (Exception e) {
+                }
+            }
+            // シャットダウン時の処理終了コールバック.
+            if(http.exitCall() != null) {
+                http.exitCall().call();
+            }
+            log.info("end shutdown Rhigin.");
+        }
+     }
+    
+    // ロガー.
+    private static Log LOG = null;
+    
     /** Main. **/
     public static final void main(String[] args) {
         RhiginConfig conf = RhiginStartup.initLogFactory(true, args);
