@@ -189,7 +189,6 @@ public class HttpWorkerThread extends Thread {
       // HTTPリクエストが存在しない場合は、新規作成.
       int endPoint = Analysis.endPoint(buffer);
       if (endPoint == -1) {
-
         // 受信途中の場合.
         return false;
       }
@@ -211,15 +210,15 @@ public class HttpWorkerThread extends Thread {
     // POSTの場合は、ContentLength分の情報を取得.
     //else if ("POST".equals(method)) {
     else if (Alphabet.eq("post",method)) {
-
       // ContentLengthを取得.
       long contentLength = request.getContentLength();
       if (contentLength <= -1L) {
-
         // 存在しない場合はコネクション強制クローズ.
         // chunkedの受信は対応しない.
-        // 411エラー.
-        errorResponse(em, 411);
+        // 通信クローズ.
+        if (em != null) {
+          em.clear();
+        }
         return false;
       }
       
@@ -246,11 +245,12 @@ public class HttpWorkerThread extends Thread {
         return false;
       }
 
-      // 制限以上のBodyデータを超える場合はエラーを返却する.
+      // 制限以上のBodyデータを超える場合は通信切断する.
       if (contentLength > HttpConstants.MAX_CONTENT_LENGTH) {
-
-        // 413エラー.
-        errorResponse(em, 413);
+        // 通信クローズ.
+        if (em != null) {
+          em.clear();
+        }
         return false;
       }
 
@@ -264,12 +264,13 @@ public class HttpWorkerThread extends Thread {
         return false;
       }
     }
-    // POST,GET以外の場合は処理しない.
+    // POST, GET以外の場合は処理しない.
     //else if (!"GET".equals(method)) {
     else if(!Alphabet.eq("get",method)) {
-
-      // 405エラー.
-      errorResponse(em, 405);
+      // 通信クローズ.
+      if (em != null) {
+        em.clear();
+      }
       return false;
     }
 

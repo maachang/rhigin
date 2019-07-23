@@ -340,7 +340,7 @@ public class ExecuteScript {
 		scope.put("validate", scope, ValidateFunction.getInstance());
 		
 		// entityの登録.
-		EntityFunctions.putLibrary(scope);
+		EntityFunctions.regFunctions(scope);
 		
 		// オリジナルオブジェクトを設定.
 		Object[] kv;

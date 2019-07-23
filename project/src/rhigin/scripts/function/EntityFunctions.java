@@ -13,13 +13,13 @@ import rhigin.util.Converter;
  */
 public class EntityFunctions {
 	// entity管理.
-	private static final ThreadLocal<Entity> entityLocal = new ThreadLocal<Entity>();
+	private static final ThreadLocal<Entity> local = new ThreadLocal<Entity>();
 	
 	/**
 	 * スクリプト終了時に呼び出します.
 	 */
 	public static final void exit() {
-		entityLocal.set(null);
+		local.set(null);
 	}
 	
 	// entity.
@@ -37,10 +37,10 @@ public class EntityFunctions {
 		@Override
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if(args.length >= 2) {
-				Entity entity = entityLocal.get();
+				Entity entity = local.get();
 				if(entity == null) {
 					entity = new Entity();
-					entityLocal.set(entity);
+					local.set(entity);
 				}
 				entity.expose(args);
 			}
@@ -63,10 +63,10 @@ public class EntityFunctions {
 		@Override
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if(args.length >= 2) {
-				Entity entity = entityLocal.get();
+				Entity entity = local.get();
 				if(entity == null) {
 					entity = new Entity();
-					entityLocal.set(entity);
+					local.set(entity);
 				}
 				return entity.entity(Converter.convertString(args[0]), args[1]);
 			}
@@ -78,8 +78,8 @@ public class EntityFunctions {
 	 * スコープにライブラリを登録.
 	 * @param scope 登録先のスコープを設定します.
 	 */
-	public static final void putLibrary(Scriptable scope) {
-		scope.put(ExposeFunction.getInstance().getName(), scope, ExposeFunction.getInstance());
-		scope.put(EntityFunction.getInstance().getName(), scope, EntityFunction.getInstance());
+	public static final void regFunctions(Scriptable scope) {
+		scope.put("expose", scope, ExposeFunction.getInstance());
+		scope.put("entity", scope, EntityFunction.getInstance());
 	}
 }
