@@ -326,7 +326,13 @@ private static final void executeScript(HttpElement em, CompileCache cache, Mime
             } else if(FileUtil.isFile(path + ".gz")) {
               path += ".gz"; useFlag = true;
             } else if(FileUtil.isFile(path)) {
-              useFlag = true;
+              // ただし[.js]に対しては、サーバ実行なので、中身が見れないようにする.
+              // 例外として[/@file.js] のように、ファイルの頭にアットマークの場合は表示対象とする.
+              if(path.endsWith(".js") && path.indexOf("/@") == -1) {
+                useFlag = false;
+              } else {
+                useFlag = true;
+              }
             }
           } else {
             // gzip非対応.
@@ -337,7 +343,13 @@ private static final void executeScript(HttpElement em, CompileCache cache, Mime
                 path += ".htm"; useFlag = true;
               }
             } else if(FileUtil.isFile(path)) {
-              useFlag = true;
+              // ただし[.js]に対しては、サーバ実行なので、中身が見れないようにする.
+              // 例外として[/@file.js] のように、ファイルの頭にアットマークの場合は表示対象とする.
+              if(path.endsWith(".js") && path.indexOf("/@") == -1) {
+                useFlag = false;
+              } else {
+                useFlag = true;
+              }
             }
           }
           if(!useFlag) {
