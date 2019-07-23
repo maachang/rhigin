@@ -18,6 +18,7 @@ import rhigin.scripts.function.ArgsFunction;
 import rhigin.scripts.function.AtobFunction;
 import rhigin.scripts.function.BinaryFunction;
 import rhigin.scripts.function.BtoaFunction;
+import rhigin.scripts.function.EntityFunctions;
 import rhigin.scripts.function.GetClassFunction;
 import rhigin.scripts.function.GetEnvFunction;
 import rhigin.scripts.function.GlobalFunction;
@@ -117,6 +118,11 @@ public class ExecuteScript {
 	
 	// [ThreadLocal]: RhiginContextオブジェクトのカレントスレッド管理.
 	private static final ThreadLocal<RhiginContext> currentRhiginContext = new ThreadLocal<RhiginContext>();
+	
+	/**
+	 * カレントのRhiginContextを取得.
+	 * @return RhiginContext カレントのRhiginContextが返却されます.
+	 */
 	public static final RhiginContext currentRhiginContext() {
 		return currentRhiginContext.get();
 	}
@@ -195,6 +201,7 @@ public class ExecuteScript {
 			return ctx.compileReader(getScript(r, headerScript, footerScript), name, lineNo, null);
 		} finally {
 			Context.exit();
+			EntityFunctions.exit();
 		}
 	}
 	
@@ -222,6 +229,7 @@ public class ExecuteScript {
 			return ret;
 		} finally {
 			Context.exit();
+			EntityFunctions.exit();
 			currentRhiginContext.set(null);
 		}
 	}
@@ -296,6 +304,7 @@ public class ExecuteScript {
 			return ret;
 		} finally {
 			Context.exit();
+			EntityFunctions.exit();
 			currentRhiginContext.set(null);
 		}
 	}
@@ -330,7 +339,8 @@ public class ExecuteScript {
 		scope.put("serverId", scope, ServerIdFunction.getInstance());
 		scope.put("validate", scope, ValidateFunction.getInstance());
 		
-		//ThreadFunction.set(scope);
+		// entityの登録.
+		EntityFunctions.putLibrary(scope);
 		
 		// オリジナルオブジェクトを設定.
 		Object[] kv;

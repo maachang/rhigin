@@ -10,6 +10,7 @@ import java.util.Map;
 import rhigin.RhiginException;
 import rhigin.http.Validate.ConditionsChecker;
 import rhigin.http.Validate.TypeConvert;
+import rhigin.util.Converter;
 
 /**
  * Entityコンポーネント.
@@ -67,12 +68,37 @@ public class Entity {
      * name   type   option
      * "name" string
      */
-    public void expose(String name,String... params) {
+    public void expose(Object... params) {
+        EntityColumn n;
+        List<EntityColumn> list = new ArrayList<EntityColumn>();
+        int len = params.length;
+        for(int i = 1; i < len; i+= 3) {
+            n = new EntityColumn(
+                Converter.convertString(params[i+0]),
+                Converter.convertString(params[i+1]),
+                Converter.convertString(params[i+2]));
+            list.add(n);
+        }
+        entityList.put(Converter.convertString(params[0]), list);
+    }
+    
+    /**
+     * Entity公開データ生成
+     * @param name 対象のEntity名を設定します.
+     * @param params 設計データ群を設置します.
+     *               データ群の設定値は以下の通り.
+     * name   type   option
+     * "name" string
+     */
+    public void expose(String name,Object... params) {
         EntityColumn n;
         List<EntityColumn> list = new ArrayList<EntityColumn>();
         int len = params.length;
         for(int i = 0; i < len; i+= 3) {
-            n = new EntityColumn(params[i+0],params[i+1],params[i+2]);
+            n = new EntityColumn(
+                Converter.convertString(params[i+0]),
+                Converter.convertString(params[i+1]),
+                Converter.convertString(params[i+2]));
             list.add(n);
         }
         entityList.put(name,list);
@@ -87,7 +113,7 @@ public class Entity {
     public Object entity(String name,Object value) {
         List<EntityColumn> list = entityList.get(name);
         if(list == null) {
-            throw new RhiginException(500, "指定Entity名 " + name + " は存在しません");
+            throw new RhiginException(500, "Specified Entity Name '" + name + "' does not exist.");
         }
         
         return make(list,value);
@@ -109,7 +135,7 @@ public class Entity {
             }
             return ret;
         } else if(!(value instanceof Map)) {
-            throw new RhiginException(500, "Entity対象の情報がMap形式ではありません");
+            throw new RhiginException(500, "Entity target information is not in Map format.");
         }
         
         Object v;
@@ -147,7 +173,7 @@ public class Entity {
                     String key = c.srcType.substring(1);
                     List<EntityColumn> nlist = entityList.get(key);
                     if(nlist == null) {
-                        throw new RhiginException(500, "指定名 " + key + " のEntity名は存在しません");
+                        throw new RhiginException(500, "Entity name of specified name '" + key + "' does not exist.");
                     }
                     
                     Object res = make(nlist,((Map)value).get(c.name));
@@ -179,7 +205,7 @@ public class Entity {
         }
         
         if(buf.size() != 0) {
-            throw new RhiginException(500, "括弧の終端が閉じていません");
+            throw new RhiginException(500, "End of parenthesis not closed.");
         }
         
         return out;
