@@ -23,4 +23,7 @@ public class RhiginConstants {
 	
 	/** ログパス. **/
 	public static final String DIR_LOG = "./log/";
+	
+	/** main.js **/
+	public static final String MAIN_JS = "main.js";
 }

@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -293,59 +294,65 @@ private static final void executeScript(HttpElement em, CompileCache cache, Mime
       // アクセス対象のパスを取得.
       String path = HttpConstants.ACCESS_PATH + getPath(req.getUrl());
       
-      // 最後が / で終わっている場合.
-      if(path.endsWith("/")) {
-        path += "index";
-      }
-      
-      // 実行ファイルのパスが存在しない場合.
-      // ただ / で設定された場合は優先的に [/index.html or /index.htm] を探して、存在する場合はそちらを優先する.
-      if ((req.getUrl().endsWith("/") && (FileUtil.isFile(path + ".html") || FileUtil.isFile(path + ".htm")))
-          || !FileUtil.isFile(path + ".js")) {
-        boolean useFlag = false;
-        
-        // 普通にファイル名として存在するかチェック.
-        if(gzip) {
-          // gzip対応.
-          if(path.endsWith("/index")) {
-            if(FileUtil.isFile(path + ".html.gz")) {
-              path += ".html.gz"; useFlag = true;
-            } else if(FileUtil.isFile(path + ".html")) {
-              path += ".html"; useFlag = true;
-               } else if(FileUtil.isFile(path + ".htm.gz")) {
-              path += ".htm.gz"; useFlag = true;
-            } else if(FileUtil.isFile(path + ".htm")) {
-              path += ".htm"; useFlag = true;
-            }
-          } else if(FileUtil.isFile(path + ".gz")) {
-            path += ".gz"; useFlag = true;
-          } else if(FileUtil.isFile(path)) {
-             useFlag = true;
-           }
-        } else {
-          // gzip非対応.
-          if(path.endsWith("/index")) {
-            if(FileUtil.isFile(path + ".html")) {
-              path += ".html"; useFlag = true;
-            } else if(FileUtil.isFile(path + ".htm")) {
-              path += ".htm"; useFlag = true;
-            }
-          } else if(FileUtil.isFile(path)) {
-             useFlag = true;
-           }
+      // main.jsが存在する場合は、urlに関係なくmain.jsを実行.
+      if(!FileUtil.isFile(path + RhiginConstants.MAIN_JS)) {
+        // 最後が / で終わっている場合.
+        if(path.endsWith("/")) {
+          path += "index";
         }
-        if(!useFlag) {
-          // 存在しない場合.
-          errorResponse(em, 404);
-         } else {
-           // 存在する場合は、ファイル転送.
-           Response res = new Response();
-           res.setStatus(200);
-           sendFile(gzip, path, em, mime, 200, res);
-         }
-        return;
+        
+        // 実行ファイルのパスが存在しない場合.
+        // ただ / で設定された場合は優先的に [/index.html or /index.htm] を探して、存在する場合はそちらを優先する.
+        if ((req.getUrl().endsWith("/") && (FileUtil.isFile(path + ".html") || FileUtil.isFile(path + ".htm")))
+            || !FileUtil.isFile(path + ".js")) {
+          boolean useFlag = false;
+          
+          // 普通にファイル名として存在するかチェック.
+          if(gzip) {
+            // gzip対応.
+            if(path.endsWith("/index")) {
+              if(FileUtil.isFile(path + ".html.gz")) {
+                path += ".html.gz"; useFlag = true;
+              } else if(FileUtil.isFile(path + ".html")) {
+                path += ".html"; useFlag = true;
+                } else if(FileUtil.isFile(path + ".htm.gz")) {
+                path += ".htm.gz"; useFlag = true;
+              } else if(FileUtil.isFile(path + ".htm")) {
+                path += ".htm"; useFlag = true;
+              }
+            } else if(FileUtil.isFile(path + ".gz")) {
+              path += ".gz"; useFlag = true;
+            } else if(FileUtil.isFile(path)) {
+              useFlag = true;
+            }
+          } else {
+            // gzip非対応.
+            if(path.endsWith("/index")) {
+              if(FileUtil.isFile(path + ".html")) {
+                path += ".html"; useFlag = true;
+              } else if(FileUtil.isFile(path + ".htm")) {
+                path += ".htm"; useFlag = true;
+              }
+            } else if(FileUtil.isFile(path)) {
+              useFlag = true;
+            }
+          }
+          if(!useFlag) {
+            // 存在しない場合.
+            errorResponse(em, 404);
+          } else {
+            // 存在する場合は、ファイル転送.
+            Response res = new Response();
+            res.setStatus(200);
+            sendFile(gzip, path, em, mime, 200, res);
+          }
+          return;
+        }
+        path += ".js";
+      } else {
+        // main.jsを実行させる.
+        path = path + RhiginConstants.MAIN_JS;
       }
-      path += ".js";
       
       String method = req.getMethod();
       Object params = null;
@@ -393,16 +400,22 @@ private static final void executeScript(HttpElement em, CompileCache cache, Mime
           rhiginException.getMessage());
         return;
       }
-      if (ret == null) {
-        ret = "";
-        gzip = false;
-      } else if(!(ret instanceof String)) {
-        ret = Json.encode(ret);
-      } else if(((String)ret).length() == 0) {
-        ret = "";
-        gzip = false;
+      // 戻り値がInputStreamでない場合.
+      if(!(ret instanceof InputStream)) {
+        if (ret == null) {
+          ret = "";
+          gzip = false;
+        } else if(!(ret instanceof String)) {
+          ret = Json.encode(ret);
+        } else if(((String)ret).length() == 0) {
+          ret = "";
+          gzip = false;
+        }
+        sendResponse(gzip, em, res.getStatus(), res, (String)ret);
+      // 戻り値がInputStreamの場合.
+      } else {
+        sendResponse(em, res.getStatus(), res, (InputStream)ret);
       }
-      sendResponse(gzip, em, res.getStatus(), res, (String)ret);
     } catch(RhiginException re) {
       LOG.error("error", re);
       try {
@@ -502,7 +515,7 @@ private static final void executeScript(HttpElement em, CompileCache cache, Mime
     }
   }
 
-  /** レスポンス送信. **/
+  /** [byte[]]レスポンス送信. **/
   private static final void sendResponse(boolean gzip, HttpElement em,
       int status, Response header, String body) throws IOException {
     em.setRequest(null);
@@ -515,6 +528,34 @@ private static final void executeScript(HttpElement em, CompileCache cache, Mime
     } else {
       em.setSendBinary(stateResponse(status, header, body));
     }
+  }
+
+  /** [inputStream]レスポンス送信. **/
+  private static final void sendResponse(HttpElement em,
+      int status, Response header, InputStream body) throws IOException {
+     em.setRequest(null);
+      em.destroyBuffer();
+      em.setEndReceive(true);
+      em.setEndSend(true);
+      try {
+        Long len;
+        // 直接ファイルの場合は、そのまま転送.
+        if(body instanceof FileInputStream) {
+            len = (long)body.available();
+        // それ以外の場合はchunked転送.
+        } else {
+            len = null;
+            body = new HttpChunkedInputStream(Http.getHttpInfo().getByteBufferLength(), body);
+        }
+        em.setSendData(new ByteArrayInputStream(stateResponse(
+          status, header, BLANK_BINARY, len)));
+        em.setSendData(body);
+        em.startWrite();
+      } catch(IOException io) {
+        throw io;
+      } catch(Exception e) {
+        throw new IOException(e);
+      }
   }
 
   /** リダイレクト送信. **/
@@ -582,20 +623,29 @@ private static final void executeScript(HttpElement em, CompileCache cache, Mime
   /** ステータス指定Response返却用バイナリの生成. **/
   private static final byte[] stateResponse(int state, Response header,
       String b) throws IOException {
-    return stateResponse(state, header, b.getBytes("UTF8"), -1);
+    return stateResponse(state, header, b.getBytes("UTF8"), -1L);
   }
 
   /** ステータス指定Response返却用バイナリの生成. **/
   private static final byte[] stateResponse(int state, Response header,
-    byte[] b, long contentLength) throws IOException {
-    contentLength = contentLength == -1L ? b.length : contentLength;
-    byte[] stateBinary = new StringBuilder(String.valueOf(state))
+    byte[] b, Long contentLength) throws IOException {
+    if(contentLength != null && contentLength == -1L) {
+        contentLength = (long)b.length;
+    }
+    final byte[] stateBinary = new StringBuilder(String.valueOf(state))
         .append(" ").append(Status.getMessage(state)).toString()
         .getBytes("UTF8");
-
-    byte[] foot = (new StringBuilder(String.valueOf(contentLength))
-        .append("\r\n").append(Response.headers(header))
-        .append("\r\n").toString()).getBytes("UTF8");
+    
+    StringBuilder buf = new StringBuilder(String.valueOf(contentLength))
+        .append("\r\n").append(Response.headers(header));
+    if(contentLength == null) {
+        // content-lengthが存在しない場合はchunked転送.
+        buf.append("Transfer-Encoding: chunked\r\n");
+    }
+    buf.append("\r\n");
+    final byte[] foot = buf.toString().getBytes("UTF8");
+    buf = null;
+    
     int all = STATE_RESPONSE_1.length + stateBinary.length
         + STATE_RESPONSE_2.length + foot.length + b.length;
     byte[] ret = new byte[all];

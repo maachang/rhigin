@@ -12,6 +12,17 @@ import rhigin.util.Converter;
 
 /**
  * Validate処理.
+ * validation(
+ *     "name",          "String", "not null",   // name文字パラメータで、必須情報.
+ *     "age",           "Number", "",           // age数値パラメータ.
+ *     "comment",       "String", "max 128",    // comment文字パラメータで、最大文字が128文字.
+ *     "X-Test-Code",   "String", "not null"    // X-Test-CodeHttpヘッダパラメータで、必須.
+ * );
+ * 
+ * また、先頭に[method]を設定した場合、許可する条件として設定します. ※何も定義していない場合は、全てのmethodが有効です.
+ *
+ * validate( "POST", ・・・・・・・ );
+ * 上記の場合、POSTのみ許可.
  */
 public class Validate {
 	private static boolean documentMode = false;

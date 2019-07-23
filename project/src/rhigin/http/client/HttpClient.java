@@ -458,9 +458,12 @@ public class HttpClient {
                 b = new byte[1024 - 7];
                 while((len = in.read(b)) != -1) {
                     chunkedWrite(head, out, len);
+                    out.write(CFLF, 0, 2);
                     out.write(b, 0, len);
                     out.write(CFLF, 0, 2);
                 }
+                chunkedWrite(head, out, 0);
+                out.write(CFLF, 0, 2);
             // 送信タイプがContent-Lengthの場合.
             } else {
                 b = new byte[1024];
@@ -498,12 +501,11 @@ public class HttpClient {
             case 14: head[bufLen++] = (byte)('e'); break;
             case 15: head[bufLen++] = (byte)('f'); break;
             }
-            if((len = len >> 8) == 0) {
+            if((len = len >> 4) == 0) {
                 break;
             }
         }
         out.write(head, 0, bufLen);
-        out.write(CFLF, 0, 2);
     }
     
     private static final byte[] CFLF = ("\r\n").getBytes();
