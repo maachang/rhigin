@@ -476,8 +476,6 @@ public class HttpClient {
         }
     }
 
-    
-
     // chunked出力.
     private static final void chunkedWrite(byte[] head, OutputStream out, int len)
         throws IOException {
@@ -513,32 +511,26 @@ public class HttpClient {
 
     // データ受信.
     private static final HttpResult receive(String url, InputStream in)
-            throws IOException {
+        throws IOException {
         int len;
         final byte[] binary = new byte[4096];
         ByteArrayIO buffer = new ByteArrayIO();
-
         int p;
         int bodyLength = 0;
         boolean gzip = false;
         byte[] b = null;
         int status = -1;
         HttpResult result = null;
-
         // chunked用.
         int chunkedLength = -1;
         ByteArrayIO chunkedBuffer = null;
-
         try {
             while ((len = in.read(binary)) != -1) {
                 buffer.write(binary, 0, len);
-
                 // データ生成が行われていない場合.
                 if (result == null) {
-
                     // ステータス取得が行われていない.
                     if (status == -1) {
-
                         // ステータスが格納されている１行目の情報を取得.
                         if ((p = buffer.indexOf(CFLF)) != -1) {
                             b = new byte[p + 2];
@@ -550,7 +542,6 @@ public class HttpClient {
                             continue;
                         }
                     }
-
                     // ヘッダ終端が存在.
                     if ((p = buffer.indexOf(END_HEADER)) != -1) {
                         b = new byte[p + 2];
@@ -558,7 +549,6 @@ public class HttpClient {
                         buffer.skip(2);
                         result = new HttpResult(url, status, b);
                         b = null;
-
                         // content-length.
                         String value = result.getHeader("Content-Length");
                         if (Converter.isNumeric(value)) {
@@ -572,28 +562,23 @@ public class HttpClient {
                                 chunkedBuffer = new ByteArrayIO();
                             }
                         }
-
                         // gzip.
                         value = result.getHeader("Content-Encoding");
                         if ("gzip".equals(value)) {
                             gzip = true;
                         }
-
                     } else {
                         continue;
                     }
                 }
-
                 // ヘッダ受信が完了し、Body情報の取得中.
                 if (bodyLength == 0) {
-
                     // 0byteデータ.
                     result.setResponseBody(new byte[0]);
                     return result;
                 }
                 // bodyサイズが設定されている.
                 else if (bodyLength > 0) {
-
                     if (buffer.size() >= bodyLength) {
                         b = new byte[bodyLength];
                         buffer.read(b);
@@ -605,37 +590,29 @@ public class HttpClient {
                         b = null;
                         return result;
                     }
-
                 }
                 // chunked受信.
                 else if (bodyLength == -1) {
                     boolean breakFlag = false;
                     while (!breakFlag) {
-
                         // chunkedLengthを取得.
                         if (chunkedLength == -1) {
-
                             // chunkedLengthデータ長が存在する場合.
                             if ((p = buffer.indexOf(CFLF)) != -1) {
-                                chunkedLength = getChunkedLength(p, buffer,
-                                        binary);
+                                chunkedLength = getChunkedLength(p, buffer, binary);
                             } else {
-
                                 // 次の受信待ち.
                                 breakFlag = true;
                                 continue;
                             }
                         }
-
                         // chunkedデータ分受信した場合.
                         if (buffer.size() >= chunkedLength + 2) {
-
                             // データの終端.
                             if (chunkedLength == 0) {
                                 b = chunkedBuffer.toByteArray();
                                 if (gzip) {
-                                    result.setResponseBody(ungzip(b, binary,
-                                            buffer));
+                                    result.setResponseBody(ungzip(b, binary, buffer));
                                 } else {
                                     result.setResponseBody(b);
                                 }
@@ -654,7 +631,6 @@ public class HttpClient {
                             chunkedBuffer.write(b, 0, chunkedLength);
                             chunkedLength = -1;
                         } else {
-
                             // 次の受信待ち.
                             breakFlag = true;
                             continue;
@@ -667,14 +643,12 @@ public class HttpClient {
             if (buffer != null) {
                 try {
                     buffer.close();
-                } catch (Exception e) {
-                }
+                } catch (Exception e) {}
             }
             if (chunkedBuffer != null) {
                 try {
                     chunkedBuffer.close();
-                } catch (Exception e) {
-                }
+                } catch (Exception e) {}
             }
         }
     }
@@ -703,10 +677,39 @@ public class HttpClient {
 
     // chunkedデータ長を取得.
     private static final int getChunkedLength(int p, ByteArrayIO io, byte[] o)
-            throws IOException {
+        throws IOException {
         io.read(o, 0, p);
         io.skip(2);
-        String s = new String(o, 0, p, "UTF8");
-        return Integer.parseInt(s, 16);
+        //String s = new String(o, 0, p, "UTF8");
+        //return Integer.parseInt(s, 16);
+        int ret = 0;
+        int shift = 0;
+        for(int i = p - 1; i >= 0; i --, shift += 4) {
+            switch((char)o[i]) {
+            case '0' : break;
+            case '1' : ret += (1 << shift); break;
+            case '2' : ret += (2 << shift); break;
+            case '3' : ret += (3 << shift); break;
+            case '4' : ret += (4 << shift); break;
+            case '5' : ret += (5 << shift); break;
+            case '6' : ret += (6 << shift); break;
+            case '7' : ret += (7 << shift); break;
+            case '8' : ret += (8 << shift); break;
+            case '9' : ret += (9 << shift); break;
+            case 'a' : ret += (10 << shift); break;
+            case 'b' : ret += (11 << shift); break;
+            case 'c' : ret += (12 << shift); break;
+            case 'd' : ret += (13 << shift); break;
+            case 'e' : ret += (14 << shift); break;
+            case 'f' : ret += (15 << shift); break;
+            case 'A' : ret += (10 << shift); break;
+            case 'B' : ret += (11 << shift); break;
+            case 'C' : ret += (12 << shift); break;
+            case 'D' : ret += (13 << shift); break;
+            case 'E' : ret += (14 << shift); break;
+            case 'F' : ret += (15 << shift); break;
+            }
+        }
+        return ret;
     }
 }
