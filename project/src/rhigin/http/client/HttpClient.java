@@ -463,7 +463,7 @@ public class HttpClient {
                     out.write(CFLF, 0, 2);
                 }
                 chunkedWrite(head, out, 0);
-                out.write(CFLF, 0, 2);
+                out.write(END_HEADER, 0, 4);
             // 送信タイプがContent-Lengthの場合.
             } else {
                 b = new byte[1024];

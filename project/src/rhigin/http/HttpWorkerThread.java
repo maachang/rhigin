@@ -11,6 +11,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.zip.GZIPOutputStream;
 
 import org.mozilla.javascript.Context;
+import org.mozilla.javascript.ContextFactory;
+import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
@@ -533,7 +535,7 @@ private static final void executeScript(HttpElement em, CompileCache cache, Mime
   /** [inputStream]レスポンス送信. **/
   private static final void sendResponse(HttpElement em,
       int status, Response header, InputStream body) throws IOException {
-     em.setRequest(null);
+      em.setRequest(null);
       em.destroyBuffer();
       em.setEndReceive(true);
       em.setEndSend(true);
@@ -547,6 +549,7 @@ private static final void executeScript(HttpElement em, CompileCache cache, Mime
             len = null;
             body = new HttpChunkedInputStream(Http.getHttpInfo().getByteBufferLength(), body);
         }
+        System.out.println("len:" + len);
         em.setSendData(new ByteArrayInputStream(stateResponse(
           status, header, BLANK_BINARY, len)));
         em.setSendData(body);

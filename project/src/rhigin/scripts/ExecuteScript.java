@@ -9,6 +9,7 @@ import java.security.PrivilegedAction;
 import org.mozilla.javascript.Callable;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
+import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.Script;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
@@ -213,7 +214,12 @@ public class ExecuteScript {
 			Scriptable scope = new RhiginScriptable(context);
 			scope.setPrototype(getTopLevel());
 			settingRhiginObject(ctx, scope);
-			return compiled.exec(ctx, scope);
+			final Object ret = compiled.exec(ctx, scope);
+			// 戻り値がNativeJavaObjectの場合は、アンラップ.
+			if(ret instanceof NativeJavaObject) {
+				return ((NativeJavaObject)ret).unwrap();
+			}
+			return ret;
 		} finally {
 			Context.exit();
 			currentRhiginContext.set(null);
@@ -282,7 +288,12 @@ public class ExecuteScript {
 			settingRhiginObject(ctx, scope);
 			Script compiled = ctx.compileReader(getScript(r, headerScript, footerScript), name, lineNo, null);
 			// 実行処理.
-			return compiled.exec(ctx, scope);
+			final Object ret = compiled.exec(ctx, scope);
+			// 戻り値がNativeJavaObjectの場合は、アンラップ.
+			if(ret instanceof NativeJavaObject) {
+				return ((NativeJavaObject)ret).unwrap();
+			}
+			return ret;
 		} finally {
 			Context.exit();
 			currentRhiginContext.set(null);
