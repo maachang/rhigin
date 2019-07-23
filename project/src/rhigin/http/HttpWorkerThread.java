@@ -549,7 +549,6 @@ private static final void executeScript(HttpElement em, CompileCache cache, Mime
             len = null;
             body = new HttpChunkedInputStream(Http.getHttpInfo().getByteBufferLength(), body);
         }
-        System.out.println("len:" + len);
         em.setSendData(new ByteArrayInputStream(stateResponse(
           status, header, BLANK_BINARY, len)));
         em.setSendData(body);
