@@ -46,7 +46,7 @@ public class Rhigin {
             if(http.exitCall() != null) {
                 http.exitCall().call();
             }
-            log.info("end shutdown Rhigin.");
+            log.info("end shutdown Rhigin version (" + RhiginConstants.VERSION + ").");
         }
      }
     
@@ -58,7 +58,7 @@ public class Rhigin {
         RhiginConfig conf = RhiginStartup.initLogFactory(true, args);
         LOG = LogFactory.create();
         try {
-            LOG.info("start rhigin.");
+            LOG.info("start rhigin version (" + RhiginConstants.VERSION + ").");
             NioUtil.initNet();
             Rhigin rhigin = new Rhigin();
             rhigin.execute(conf);

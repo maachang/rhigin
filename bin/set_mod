@@ -1,0 +1,11 @@
+#!/bin/sh
+chmod 755 rbatch
+chmod 755 rcons
+chmod 755 rdown
+chmod 755 rhigin
+chmod 755 rid
+chmod 755 rproj
+chmod 755 sub/
+chmod 755 sub/classpath.sh
+
+rm -Rf ./set_mod

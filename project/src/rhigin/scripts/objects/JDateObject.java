@@ -190,4 +190,12 @@ public class JDateObject extends RhiginFunction {
 			return ((Execute)get("object", null)).date.toString();
 		}
 	}
+	
+	/**
+	 * スコープにライブラリを登録.
+	 * @param scope 登録先のスコープを設定します.
+	 */
+	public static final void regFunctions(Scriptable scope) {
+		scope.put("JDate", scope, JDateObject.getInstance());
+	}
 }

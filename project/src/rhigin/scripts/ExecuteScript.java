@@ -313,13 +313,16 @@ public class ExecuteScript {
 	private static final void settingRhiginObject(Context ctx, Scriptable scope)
 		throws Exception {
 		
+		// オブジェクトの登録.
+		ConsoleObject.regFunctions(scope);
+		Xor128Object.regFunctions(scope);
+		JSONObject.regFunctions(scope);
+		JwtObject.regFunctions(scope);
+		FileObject.regFunctions(scope);
+		JDateObject.regFunctions(scope);
+		LockObjects.regFunctions(scope);
+		
 		// rhigin用の基本オブジェクトを設定.
-		scope.put("console", scope, ConsoleObject.getInstance());
-		scope.put("Xor128", scope, Xor128Object.getInstance());
-		scope.put("JSON", scope, JSONObject.getInstance());
-		scope.put("Jwt", scope, JwtObject.getInstance());
-		scope.put("File", scope, FileObject.getInstance());
-		scope.put("JDate", scope, JDateObject.getInstance());
 		scope.put("require", scope, RequireFunction.getInstance());
 		scope.put("gc", scope, GcFunction.getInstance());
 		scope.put("global", scope, GlobalFunction.getInstance());
@@ -337,9 +340,6 @@ public class ExecuteScript {
 		scope.put("systemTime", scope, SystemTimeFunction.getInstance());
 		scope.put("serverId", scope, ServerIdFunction.getInstance());
 		scope.put("validate", scope, ValidateFunction.getInstance());
-		
-		// Lockオブジェクトの登録.
-		LockObjects.regFunctions(scope);
 		
 		// entityの登録.
 		EntityFunctions.regFunctions(scope);

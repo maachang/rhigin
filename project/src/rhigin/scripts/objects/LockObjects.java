@@ -59,7 +59,6 @@ public class LockObjects {
 					if(t instanceof ThreadDeath) {
 						throw (ThreadDeath)t;
 					}
-					t.printStackTrace();
 				}
 			}
 		}
@@ -83,14 +82,19 @@ public class LockObjects {
 					map = null;
 				}
 				if(map != null) {
-					r = (KeyWeakReference<? extends Object[]>)map.get(k);
-					if(r == null || r.get() == null) {
+					// 別の処理で新たに対象名でロック処理が利用されていない場合.
+					r = (KeyWeakReference<? extends Object>)map.get(k);
+					if(r != null && r.get() == null) {
 						while(true) {
 							if(!map.remove(k, r)) {
 								Thread.sleep(5);
-							} else {
-								break;
+								// 別の処理で新たに対象名でロック処理が利用されている場合は削除しない.
+								r = (KeyWeakReference<? extends Object>)map.get(k);
+								if(r != null && r.get() == null) {
+									continue;
+								}
 							}
+							break;
 						}
 					}
 				}
@@ -127,6 +131,7 @@ public class LockObjects {
 			return "Lock";
 		}
 		
+		// new Object() で呼ばれる.
 		@Override
 		public Scriptable construct(Context ctx, Scriptable thisObject, Object[] args) {
 			Lock lock = null;
@@ -209,6 +214,7 @@ public class LockObjects {
 			return "RwLock";
 		}
 		
+		// new Object() で呼ばれる.
 		@Override
 		public Scriptable construct(Context ctx, Scriptable thisObject, Object[] args) {
 			ReadWriteLock lock = null;
@@ -285,6 +291,7 @@ public class LockObjects {
 	 */
 	public static final void init() {
 		if(Http.isWebServerMode()) {
+			// Webサーバ起動時のみ、クリーナは実行される.
 			cleanLocks = new CleanLocks();
 			cleanLocks.start();
 		}

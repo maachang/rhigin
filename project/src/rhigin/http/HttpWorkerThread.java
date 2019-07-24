@@ -113,10 +113,10 @@ public class HttpWorkerThread extends Thread {
     LOG.info(" * start rhigin workerThread(" + no + ").");
     
     // ワーカー単位のコンパイルキャッシュを require命令に設定.
-    RequireFunction.getInstance().setCache(compileCache);
+    RequireFunction.init(compileCache);
     
     // ワーカー単位でランダムオブジェクトをセット.
-    RandomFunction.getInstance().setXor128(xor128);
+    RandomFunction.init(xor128);
     
     // 実行処理.
     ThreadDeath td = execute();
@@ -393,8 +393,6 @@ private static final void executeScript(HttpElement em, CompileCache cache, Mime
       context.setAttribute(redirect.getName(), redirect);
       context.setAttribute(error.getName(), error);
       
-      // コンテンツキャッシュセット.
-      RequireFunction.getInstance().setCache(cache);
       Object ret = "";
       try {
         // スクリプトの実行.

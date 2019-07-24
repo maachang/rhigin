@@ -65,4 +65,12 @@ public final class Xor128Object {
 	public static final RhiginFunction getInstance() {
 		return THIS;
 	}
+	
+	/**
+	 * スコープにライブラリを登録.
+	 * @param scope 登録先のスコープを設定します.
+	 */
+	public static final void regFunctions(Scriptable scope) {
+		scope.put("Xor128", scope, Xor128Object.getInstance());
+	}
 }

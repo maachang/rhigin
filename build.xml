@@ -127,6 +127,7 @@
     <delete file="${project.name}-${version}.zip" />
     <delete dir="${doc.dir}" />
     <delete dir="${rhigin.home}/lib" />
+    <delete file=".ant-targets-build.xml" />
   </target>
 
 </project>

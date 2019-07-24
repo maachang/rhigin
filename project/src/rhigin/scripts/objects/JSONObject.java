@@ -50,4 +50,12 @@ public final class JSONObject {
 	public static final RhiginObject getInstance() {
 		return THIS;
 	}
+	
+	/**
+	 * スコープにライブラリを登録.
+	 * @param scope 登録先のスコープを設定します.
+	 */
+	public static final void regFunctions(Scriptable scope) {
+		scope.put("JSON", scope, JSONObject.getInstance());
+	}
 }

@@ -175,22 +175,6 @@ public class FileObject{
 		}
 	};
 	
-	// オブジェクトリスト.
-	private static final RhiginFunction[] list = {
-		new Execute(0), new Execute(1), new Execute(2), new Execute(3),
-		new Execute(4), new Execute(5), new Execute(6), new Execute(7),
-		new Execute(8), new Execute(9), new Execute(10), new Execute(11),
-		new Execute(12), new Execute(13), new Execute(14), new Execute(15),
-		new Execute(16), new Execute(17), new Execute(18), new Execute(19),
-		new Execute(20)
-	};
-	
-	// シングルトン.
-	private static final RhiginObject THIS = new RhiginObject("File", list);
-	public static final RhiginObject getInstance() {
-		return THIS;
-	}
-	
 	// stats.
 	private static final class StatsExecite extends RhiginFunction {
 		final int type;
@@ -236,4 +220,28 @@ public class FileObject{
 			return "unknown";
 		}
 	};
+	
+	// オブジェクトリスト.
+	private static final RhiginFunction[] list = {
+		new Execute(0), new Execute(1), new Execute(2), new Execute(3),
+		new Execute(4), new Execute(5), new Execute(6), new Execute(7),
+		new Execute(8), new Execute(9), new Execute(10), new Execute(11),
+		new Execute(12), new Execute(13), new Execute(14), new Execute(15),
+		new Execute(16), new Execute(17), new Execute(18), new Execute(19),
+		new Execute(20)
+	};
+	
+	// シングルトン.
+	private static final RhiginObject THIS = new RhiginObject("File", list);
+	public static final RhiginObject getInstance() {
+		return THIS;
+	}
+	
+	/**
+	 * スコープにライブラリを登録.
+	 * @param scope 登録先のスコープを設定します.
+	 */
+	public static final void regFunctions(Scriptable scope) {
+		scope.put("File", scope, FileObject.getInstance());
+	}
 }

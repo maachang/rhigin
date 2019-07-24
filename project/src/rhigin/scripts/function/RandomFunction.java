@@ -16,7 +16,7 @@ public class RandomFunction extends RhiginFunction {
 	}
 	// threadローカルでXor128を管理.
 	private final ThreadLocal<Xor128> xor128 = new ThreadLocal<Xor128>();
-	public final void setXor128(Xor128 x) {
+	protected final void setXor128(Xor128 x) {
 		xor128.set(x);
 	}
 	
@@ -33,6 +33,21 @@ public class RandomFunction extends RhiginFunction {
 			xor128.set(r);
 		}
 		return r.nextInt();
+	}
+	
+	/**
+	 * 初期化.
+	 */
+	public static final void init() {
+		init(new Xor128(System.nanoTime()));
+	}
+	
+	/**
+	 * 初期化.
+	 * @param xor128 xor128乱数発生オブジェクトを設定します.
+	 */
+	public static final void init(Xor128 xor128) {
+		RandomFunction.getInstance().setXor128(xor128);
 	}
 
 }

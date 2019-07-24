@@ -22,7 +22,7 @@ public final class RequireFunction extends RhiginFunction {
 	
 	// threadローカルでCompileCacaheを管理.
 	private final ThreadLocal<CompileCache> cache = new ThreadLocal<CompileCache>();
-	public final void setCache(CompileCache c) {
+	protected final void setCache(CompileCache c) {
 		cache.set(c);
 	}
 	public final CompileCache getCache() {
@@ -64,5 +64,13 @@ public final class RequireFunction extends RhiginFunction {
 		} catch(Exception e) {
 			throw new RhiginException(500, e);
 		}
+	}
+	
+	/**
+	 * 初期化処理.
+	 * @param cache スクリプトコンパイルキャッシュを設定します.
+	 */
+	public static final void init(CompileCache cache) {
+		RequireFunction.getInstance().setCache(cache);
 	}
 }

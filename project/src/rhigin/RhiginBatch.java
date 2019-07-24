@@ -15,7 +15,6 @@ import rhigin.scripts.compile.CompileCache;
 import rhigin.scripts.function.RandomFunction;
 import rhigin.scripts.function.RequireFunction;
 import rhigin.util.FileUtil;
-import rhigin.util.Xor128;
 
 /**
  * Rhiginバッチ実行.
@@ -49,11 +48,10 @@ public class RhiginBatch {
 		// コンパイルキャッシュを require命令に設定.
 		CompileCache cache = new CompileCache(
 			httpInfo.getCompileCacheSize(), httpInfo.getCompileCacheRootDir());
-		RequireFunction.getInstance().setCache(cache);
+		RequireFunction.init(cache);
 		
 		// ランダムオブジェクトをセット.
-		Xor128 xor128 = new Xor128(System.nanoTime());
-		RandomFunction.getInstance().setXor128(xor128);
+		RandomFunction.init();
 		
 		Reader r = null;
 		try {

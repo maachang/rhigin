@@ -12,7 +12,6 @@ import rhigin.scripts.compile.CompileCache;
 import rhigin.scripts.function.RandomFunction;
 import rhigin.scripts.function.RequireFunction;
 import rhigin.util.ConsoleInKey;
-import rhigin.util.Xor128;
 
 /**
  * Rhiginコンソール.
@@ -33,11 +32,10 @@ public class RhiginConsole {
 		// コンパイルキャッシュを require命令に設定.
 		CompileCache cache = new CompileCache(
 			httpInfo.getCompileCacheSize(), httpInfo.getCompileCacheRootDir());
-		RequireFunction.getInstance().setCache(cache);
+		RequireFunction.init(cache);
 		
 		// ランダムオブジェクトをセット.
-		Xor128 xor128 = new Xor128(System.nanoTime());
-		RandomFunction.getInstance().setXor128(xor128);
+		RandomFunction.init();
 		
 		System.out.println("" + RhiginConstants.NAME + " console version (" + RhiginConstants.VERSION + ")");
 		System.out.println("");

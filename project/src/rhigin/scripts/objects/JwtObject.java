@@ -59,4 +59,12 @@ public final class JwtObject {
 	public static final RhiginObject getInstance() {
 		return THIS;
 	}
+	
+	/**
+	 * スコープにライブラリを登録.
+	 * @param scope 登録先のスコープを設定します.
+	 */
+	public static final void regFunctions(Scriptable scope) {
+		scope.put("Jwt", scope, JwtObject.getInstance());
+	}
 }
