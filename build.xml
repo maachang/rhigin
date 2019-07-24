@@ -92,6 +92,10 @@
 			 basedir="${bin.dir}"
 			 update="true"
 		/>
+    <zip destfile="${project.name}-${version}_src.zip" 
+			 basedir="${src.dir}"
+			 update="true"
+		/>
 	</target>
   
   <!-- ===================================================================== -->
@@ -125,6 +129,7 @@
     <delete dir="${dest.dir}" />
     <delete file="${jar.name}" />
     <delete file="${project.name}-${version}.zip" />
+    <delete file="${project.name}-${version}_src.zip" />
     <delete dir="${doc.dir}" />
     <delete dir="${rhigin.home}/lib" />
     <delete file=".ant-targets-build.xml" />
