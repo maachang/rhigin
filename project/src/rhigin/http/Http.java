@@ -23,12 +23,31 @@ public final class Http {
     /** HttpInfo. **/
     private static HttpInfo httpInfo = null;
     
+    /** webサーバモード. **/
+    private static boolean webServer = false;
+    
     /**
      * HttpInfoを取得.
      * @return
      */
     public static final HttpInfo getHttpInfo() {
     	return httpInfo;
+    }
+
+    /**
+     * WebServerモードを設定.
+     * @param mode [true]の場合、WebServerモードです.
+     */
+    public static final void setWebServerMode(boolean mode) {
+        webServer = mode;
+    }
+
+    /**
+     * Webサーバモードを取得.
+     * @return boolean [true]の場合Webサーバです.
+     */
+    public static final boolean isWebServerMode() {
+        return webServer;
     }
 
     /**

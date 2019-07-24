@@ -19,6 +19,7 @@ import rhigin.scripts.function.AtobFunction;
 import rhigin.scripts.function.BinaryFunction;
 import rhigin.scripts.function.BtoaFunction;
 import rhigin.scripts.function.EntityFunctions;
+import rhigin.scripts.function.GcFunction;
 import rhigin.scripts.function.GetClassFunction;
 import rhigin.scripts.function.GetEnvFunction;
 import rhigin.scripts.function.GlobalFunction;
@@ -36,8 +37,7 @@ import rhigin.scripts.objects.FileObject;
 import rhigin.scripts.objects.JDateObject;
 import rhigin.scripts.objects.JSONObject;
 import rhigin.scripts.objects.JwtObject;
-import rhigin.scripts.objects.LockObject;
-import rhigin.scripts.objects.RwLockObject;
+import rhigin.scripts.objects.LockObjects;
 import rhigin.scripts.objects.Xor128Object;
 import rhigin.util.ListMap;
 import rhigin.util.OList;
@@ -318,11 +318,10 @@ public class ExecuteScript {
 		scope.put("Xor128", scope, Xor128Object.getInstance());
 		scope.put("JSON", scope, JSONObject.getInstance());
 		scope.put("Jwt", scope, JwtObject.getInstance());
-		scope.put("Lock", scope, LockObject.getInstance());
-		scope.put("RwLock", scope, RwLockObject.getInstance());
 		scope.put("File", scope, FileObject.getInstance());
 		scope.put("JDate", scope, JDateObject.getInstance());
 		scope.put("require", scope, RequireFunction.getInstance());
+		scope.put("gc", scope, GcFunction.getInstance());
 		scope.put("global", scope, GlobalFunction.getInstance());
 		scope.put("logFactory", scope, LogFactoryFunction.getInstance());
 		scope.put("binary", scope, BinaryFunction.getInstance());
@@ -338,6 +337,9 @@ public class ExecuteScript {
 		scope.put("systemTime", scope, SystemTimeFunction.getInstance());
 		scope.put("serverId", scope, ServerIdFunction.getInstance());
 		scope.put("validate", scope, ValidateFunction.getInstance());
+		
+		// Lockオブジェクトの登録.
+		LockObjects.regFunctions(scope);
 		
 		// entityの登録.
 		EntityFunctions.regFunctions(scope);

@@ -27,7 +27,7 @@ public class RhiginConsole {
 	public void console(RhiginConfig conf, ConsoleInKey console)
 		throws Exception {
 		// 開始処理.
-		HttpInfo httpInfo = RhiginStartup.startup(false, conf);
+		HttpInfo httpInfo = RhiginStartup.startup(conf);
 		
 		// コンパイルキャッシュ生成.
 		// コンパイルキャッシュを require命令に設定.

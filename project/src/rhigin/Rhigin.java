@@ -75,7 +75,7 @@ public class Rhigin {
     /** 起動処理. **/
     protected final void execute(RhiginConfig conf) throws Exception {
         // 開始処理.
-        HttpInfo httpInfo = RhiginStartup.startup(true, conf);
+        HttpInfo httpInfo = RhiginStartup.startup(conf);
         
         // 生成されたMimeTypeを取得.
         MimeType mime = (MimeType)ExecuteScript.getOriginal().get("mime");

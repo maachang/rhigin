@@ -14,6 +14,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
+import rhigin.http.Http;
 import rhigin.http.HttpInfo;
 import rhigin.http.MimeType;
 import rhigin.logs.LogFactory;
@@ -21,6 +22,7 @@ import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.RhiginContext;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.ScriptConstants;
+import rhigin.scripts.objects.LockObjects;
 import rhigin.util.Args;
 import rhigin.util.EnvCache;
 import rhigin.util.FileUtil;
@@ -48,6 +50,12 @@ public class RhiginStartup {
 		Args.set(args);
 		RhiginConfig config = null;
 		try {
+			// webServerモードをセット.
+			Http.setWebServerMode(server);
+			
+			// function, objectの初期化.
+			initRhiginScriptFunctionObject();
+			
 			// 環境変数から、rhigin起動環境を取得.
 			String rhiginEnv = EnvCache.get(RhiginConstants.ENV_ENV);
 			
@@ -90,7 +98,7 @@ public class RhiginStartup {
 	 * @return HttpInfo
 	 * @exception Exception
 	 */
-	public static final HttpInfo startup(boolean server, RhiginConfig config)
+	public static final HttpInfo startup(RhiginConfig config)
 		throws Exception {
 		
 		// スレッドプーリングの初期化.
@@ -147,6 +155,11 @@ public class RhiginStartup {
 		HttpInfo httpInfo = new HttpInfo();
 		HttpInfo.load(httpInfo, config.get("http"));
 		return httpInfo;
+	}
+	
+	// rhiginスクリプトでのfunction, Objectの初期化処理.
+	private static final void initRhiginScriptFunctionObject() {
+		LockObjects.init();
 	}
 	
 	// scopeからスタートアップオブジェクト追加先を取得.
