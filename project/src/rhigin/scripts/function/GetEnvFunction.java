@@ -30,4 +30,12 @@ public class GetEnvFunction extends RhiginFunction {
 		}
 		return Undefined.instance;
 	}
+	
+	/**
+	 * スコープにライブラリを登録.
+	 * @param scope 登録先のスコープを設定します.
+	 */
+	public static final void regFunctions(Scriptable scope) {
+		scope.put("getEnv", scope, GetEnvFunction.getInstance());
+	}
 }

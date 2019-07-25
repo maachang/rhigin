@@ -49,5 +49,12 @@ public class RandomFunction extends RhiginFunction {
 	public static final void init(Xor128 xor128) {
 		RandomFunction.getInstance().setXor128(xor128);
 	}
-
+	
+	/**
+	 * スコープにライブラリを登録.
+	 * @param scope 登録先のスコープを設定します.
+	 */
+	public static final void regFunctions(Scriptable scope) {
+		scope.put("random", scope, RandomFunction.getInstance());
+	}
 }

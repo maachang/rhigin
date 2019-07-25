@@ -102,12 +102,7 @@ public class RhiginStartup {
 		throws Exception {
 		
 		// スレッドプーリングの初期化.
-		//if(Converter.isNumeric(config.get("rhigin", "threadPoolSize"))) {
-		//	RhiginThreadPool.getInstance().newThreadPool(
-		//		config.getInt("rhigin", "threadPoolSize"));
-		//} else {
-		//	RhiginThreadPool.getInstance().newThreadPool();
-		//}
+		//ThreadFunction.init(config);
 		
 		// ExecuteScriptにRhiginConfigの要素をセット.
 		ExecuteScript.addOriginals("config", config);

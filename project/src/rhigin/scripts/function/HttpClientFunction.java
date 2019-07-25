@@ -53,4 +53,12 @@ public class HttpClientFunction extends RhiginFunction {
 		}
 		return Undefined.instance;
 	}
+	
+	/**
+	 * スコープにライブラリを登録.
+	 * @param scope 登録先のスコープを設定します.
+	 */
+	public static final void regFunctions(Scriptable scope) {
+		scope.put("httpClient", scope, HttpClientFunction.getInstance());
+	}
 }

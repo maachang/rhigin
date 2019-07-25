@@ -22,12 +22,18 @@ public final class BinaryFunction extends RhiginFunction {
 	}
 
 	@Override
-    public final Object call(Context ctx, Scriptable scope, Scriptable thisObj,
-                       Object[] args)
-    {
+	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		if(args.length >= 1 && Converter.isFloat(args[0])) {
 			return new byte[Converter.convertInt(args[0])];
 		}
-        return Undefined.instance;
-    }
+		return Undefined.instance;
+	}
+	
+	/**
+	 * スコープにライブラリを登録.
+	 * @param scope 登録先のスコープを設定します.
+	 */
+	public static final void regFunctions(Scriptable scope) {
+		scope.put("binary", scope, BinaryFunction.getInstance());
+	}
 }

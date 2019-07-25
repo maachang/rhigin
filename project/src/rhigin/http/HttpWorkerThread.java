@@ -428,16 +428,19 @@ private static final void executeScript(HttpElement em, CompileCache cache, Mime
         sendResponse(em, res.getStatus(), res, (InputStream)ret);
       }
     } catch(RhiginException re) {
-      LOG.error("error", re);
-      try {
-        errorResponse(em, re.getStatus(), re.getMessage());
-      } catch(Exception ee) {}
-      return;
+      if(!em.isEndSend()) {
+        LOG.error("error", re);
+        try {
+          errorResponse(em, re.getStatus(), re.getMessage());
+        } catch(Exception ee) {}
+      }
     } catch (Exception e) {
-      LOG.error("error", e);
-      try {
-        errorResponse(em, 500, e.getMessage());
-      } catch (Exception ee) {
+      if(!em.isEndSend()) {
+        LOG.error("error", e);
+        try {
+          errorResponse(em, 500, e.getMessage());
+        } catch (Exception ee) {
+        }
       }
     }
   }

@@ -27,4 +27,12 @@ public class LogFactoryFunction extends RhiginFunction {
 		}
 		return LogFactory.create();
 	}
+	
+	/**
+	 * スコープにライブラリを登録.
+	 * @param scope 登録先のスコープを設定します.
+	 */
+	public static final void regFunctions(Scriptable scope) {
+		scope.put("logFactory", scope, LogFactoryFunction.getInstance());
+	}
 }

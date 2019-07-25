@@ -24,4 +24,12 @@ public class GlobalFunction extends RhiginFunction {
 	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		return ExecuteScript.currentRhiginContext();
 	}
+	
+	/**
+	 * スコープにライブラリを登録.
+	 * @param scope 登録先のスコープを設定します.
+	 */
+	public static final void regFunctions(Scriptable scope) {
+		scope.put("global", scope, GlobalFunction.getInstance());
+	}
 }

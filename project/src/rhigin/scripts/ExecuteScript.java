@@ -15,9 +15,8 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
 import rhigin.scripts.function.ArgsFunction;
-import rhigin.scripts.function.AtobFunction;
+import rhigin.scripts.function.Base64Functions;
 import rhigin.scripts.function.BinaryFunction;
-import rhigin.scripts.function.BtoaFunction;
 import rhigin.scripts.function.EntityFunctions;
 import rhigin.scripts.function.GcFunction;
 import rhigin.scripts.function.GetClassFunction;
@@ -323,25 +322,22 @@ public class ExecuteScript {
 		LockObjects.regFunctions(scope);
 		
 		// rhigin用の基本オブジェクトを設定.
-		scope.put("require", scope, RequireFunction.getInstance());
-		scope.put("gc", scope, GcFunction.getInstance());
-		scope.put("global", scope, GlobalFunction.getInstance());
-		scope.put("logFactory", scope, LogFactoryFunction.getInstance());
-		scope.put("binary", scope, BinaryFunction.getInstance());
-		scope.put("getClass", scope, GetClassFunction.getInstance());
-		scope.put("sleep", scope, SleepFunction.getInstance());
-		scope.put("getEnv", scope, GetEnvFunction.getInstance());
-		scope.put("args", scope, ArgsFunction.getInstance());
-		scope.put("random", scope, RandomFunction.getInstance());
-		scope.put("btoa", scope, BtoaFunction.getInstance());
-		scope.put("atob", scope, AtobFunction.getInstance());
-		scope.put("httpClient", scope, HttpClientFunction.getInstance());
-		scope.put("nanoTime", scope, NanoTimeFunction.getInstance());
-		scope.put("systemTime", scope, SystemTimeFunction.getInstance());
-		scope.put("serverId", scope, ServerIdFunction.getInstance());
-		scope.put("validate", scope, ValidateFunction.getInstance());
-		
-		// entityの登録.
+		RequireFunction.regFunctions(scope);
+		GcFunction.regFunctions(scope);
+		GlobalFunction.regFunctions(scope);
+		LogFactoryFunction.regFunctions(scope);
+		BinaryFunction.regFunctions(scope);
+		GetClassFunction.regFunctions(scope);
+		SleepFunction.regFunctions(scope);
+		GetEnvFunction.regFunctions(scope);
+		ArgsFunction.regFunctions(scope);
+		RandomFunction.regFunctions(scope);
+		Base64Functions.regFunctions(scope);
+		HttpClientFunction.regFunctions(scope);
+		NanoTimeFunction.regFunctions(scope);
+		SystemTimeFunction.regFunctions(scope);
+		ServerIdFunction.regFunctions(scope);
+		ValidateFunction.regFunctions(scope);
 		EntityFunctions.regFunctions(scope);
 		
 		// オリジナルオブジェクトを設定.

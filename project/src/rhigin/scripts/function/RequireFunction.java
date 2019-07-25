@@ -73,4 +73,12 @@ public final class RequireFunction extends RhiginFunction {
 	public static final void init(CompileCache cache) {
 		RequireFunction.getInstance().setCache(cache);
 	}
+	
+	/**
+	 * スコープにライブラリを登録.
+	 * @param scope 登録先のスコープを設定します.
+	 */
+	public static final void regFunctions(Scriptable scope) {
+		scope.put("require", scope, RequireFunction.getInstance());
+	}
 }

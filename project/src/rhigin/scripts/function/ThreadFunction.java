@@ -10,6 +10,7 @@ import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
+import rhigin.RhiginConfig;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginThreadPool;
 import rhigin.util.AtomicNumber;
@@ -30,6 +31,7 @@ public class ThreadFunction {
 	private static final AtomicNumber ids = new AtomicNumber(0);
 	private static final Map<String, ScheduledFuture<?>> idMap = new ConcurrentHashMap<String, ScheduledFuture<?>>();
 	
+	// 実行IDを取得.
 	private static final String getId() {
 		int ret = ids.inc();
 		if(ids.get() >= 0x7fffffff) {
@@ -42,6 +44,7 @@ public class ThreadFunction {
 			toString();
 	}
 	
+	// 非同期処理を行う.
 	private static final RhiginFunction setImmediate = new RhiginFunction() {
 		@Override
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
@@ -62,6 +65,7 @@ public class ThreadFunction {
 		public final String getName() { return "setImmediate"; }
 	};
 	
+	// 指定時間後に実行.
 	private static final RhiginFunction setTimeout = new RhiginFunction() {
 		@Override
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
@@ -89,6 +93,7 @@ public class ThreadFunction {
 		public final String getName() { return "setTimeout"; }
 	};
 	
+	// setTimeout処理をクリア.
 	private static final RhiginFunction clearTimeout = new RhiginFunction() {
 		@Override
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
@@ -106,6 +111,7 @@ public class ThreadFunction {
 		public final String getName() { return "clearTimeout"; }
 	};
 	
+	// インターバル実行.
 	private static final RhiginFunction setInterval = new RhiginFunction() {
 		@Override
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
@@ -133,6 +139,7 @@ public class ThreadFunction {
 		public final String getName() { return "setInterval"; }
 	};
 	
+	// インターバルクリア.
 	private static final RhiginFunction clearInterval = new RhiginFunction() {
 		@Override
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
@@ -150,7 +157,23 @@ public class ThreadFunction {
 		public final String getName() { return "clearInterval"; }
 	};
 	
-	public static final void set(Scriptable scope) {
+	/**
+	 * 初期処理.
+	 */
+	public static final void init(RhiginConfig config) {
+		if(Converter.isNumeric(config.get("rhigin", "threadPoolSize"))) {
+			RhiginThreadPool.getInstance().newThreadPool(
+				config.getInt("rhigin", "threadPoolSize"));
+		} else {
+			RhiginThreadPool.getInstance().newThreadPool();
+		}
+	}
+	
+	/**
+	 * スコープにライブラリを登録.
+	 * @param scope 登録先のスコープを設定します.
+	 */
+	public static final void regFunctions(Scriptable scope) {
 		scope.put("setImmediate", scope, setImmediate);
 		scope.put("setTimeout", scope, setTimeout);
 		scope.put("clearTimeout", scope, clearTimeout);

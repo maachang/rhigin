@@ -25,4 +25,12 @@ public class GcFunction extends RhiginFunction {
 		System.gc();
 		return Undefined.instance;
 	}
+	
+	/**
+	 * スコープにライブラリを登録.
+	 * @param scope 登録先のスコープを設定します.
+	 */
+	public static final void regFunctions(Scriptable scope) {
+		scope.put("gc", scope, GcFunction.getInstance());
+	}
 }

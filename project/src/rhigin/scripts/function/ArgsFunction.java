@@ -33,4 +33,12 @@ public final class ArgsFunction extends RhiginFunction {
 		}
 		return Args.get().length;
 	}
+	
+	/**
+	 * スコープにライブラリを登録.
+	 * @param scope 登録先のスコープを設定します.
+	 */
+	public static final void regFunctions(Scriptable scope) {
+		scope.put("args", scope, ArgsFunction.getInstance());
+	}
 }

@@ -20,7 +20,7 @@ import rhigin.util.BlankScriptable;
  *  hasの場合は[true]を返却されます.
  *  
  */
-public class ToStringFunction {
+public abstract class ToStringFunction {
 	// jsで呼び出すtoStringファンクション.
 	public static class Execute extends RhiginFunction {
 		final BlankScriptable o;
@@ -43,6 +43,5 @@ public class ToStringFunction {
 		public Object getDefaultValue(Class<?> clazz) {
 			return (clazz == null || String.class.equals(clazz)) ? o.toString() : Undefined.instance;
 		}
-
 	}
 }

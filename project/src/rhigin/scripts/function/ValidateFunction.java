@@ -33,5 +33,12 @@ public class ValidateFunction extends RhiginFunction {
 		context.setAttribute("params", newParams);
 		return newParams;
 	}
-
+	
+	/**
+	 * スコープにライブラリを登録.
+	 * @param scope 登録先のスコープを設定します.
+	 */
+	public static final void regFunctions(Scriptable scope) {
+		scope.put("validate", scope, ValidateFunction.getInstance());
+	}
 }

@@ -6,6 +6,9 @@ import org.mozilla.javascript.Scriptable;
 import rhigin.RhiginServerId;
 import rhigin.scripts.RhiginFunction;
 
+/**
+ * [js]サーバIDを取得.
+ */
 public class ServerIdFunction extends RhiginFunction {
 	private static final ServerIdFunction THIS = new ServerIdFunction();
 	public static final ServerIdFunction getInstance() {
@@ -20,5 +23,13 @@ public class ServerIdFunction extends RhiginFunction {
 	@Override
 	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		return RhiginServerId.getInstance().getId();
+	}
+	
+	/**
+	 * スコープにライブラリを登録.
+	 * @param scope 登録先のスコープを設定します.
+	 */
+	public static final void regFunctions(Scriptable scope) {
+		scope.put("serverId", scope, ServerIdFunction.getInstance());
 	}
 }
