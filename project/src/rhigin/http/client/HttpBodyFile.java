@@ -1,4 +1,4 @@
-package rhigin.http;
+package rhigin.http.client;
 
 import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
@@ -7,13 +7,12 @@ import java.io.OutputStream;
 
 import rhigin.RhiginException;
 import rhigin.util.FileUtil;
-import rhigin.util.Xor128;
 
 /**
- * 大容量のPOST受付処理でのBody情報.
+ * body受信用ファイル管理オブジェクト.
  */
-public class HttpPostBodyFile {
-	private static final String NAME_HEAD = "post_data_";
+final class HttpBodyFile {
+	private static final String NAME_HEAD = "body_data";
 	private static final char[] NAME_CODE = new char[]{(char) 'A', (char) 'B', (char) 'C',
 		(char) 'D', (char) 'E', (char) 'F', (char) 'G', (char) 'H',
 		(char) 'I', (char) 'J', (char) 'K', (char) 'L', (char) 'M',
@@ -35,13 +34,22 @@ public class HttpPostBodyFile {
 	private FileInputStream in = null;
 	private OutputStream out = null;
 	
+	private Rand rand = new Rand();
+	
 	/**
 	 * コンストラクタ.
-	 * @param workerId
 	 * @param baseDir
-	 * @param rand
 	 */
-	public HttpPostBodyFile(int workerId, String baseDir, Xor128 rand) {
+	public HttpBodyFile() {
+		this("./");
+	}
+	
+	/**
+	 * コンストラクタ.
+	 * @param baseDir
+	 */
+	public HttpBodyFile(String baseDir) {
+		rand.seet(System.nanoTime());
 		if(!baseDir.endsWith("/")) {
 			baseDir += "/";
 		}
@@ -50,7 +58,7 @@ public class HttpPostBodyFile {
 		OutputStream o = null;
 		try {
 			while(true) {
-				if(FileUtil.isFile(name = getFileName(workerId, baseDir, rand))) {
+				if(FileUtil.isFile(name = getFileName(baseDir, rand))) {
 					continue;
 				}
 				o = new BufferedOutputStream(new FileOutputStream(name));
@@ -68,9 +76,9 @@ public class HttpPostBodyFile {
 	}
 	
 	// ファイル名を取得.
-	private static final String getFileName(int workerId, String baseDir, Xor128 rand) {
+	private static final String getFileName(String baseDir, Rand rand) {
 		StringBuilder buf = new StringBuilder(baseDir)
-			.append(NAME_HEAD).append(workerId).append("_");
+			.append(NAME_HEAD).append("_");
 		int code = rand.nextInt();
 		int cnt = 0;
 		while(true) {
@@ -187,5 +195,41 @@ public class HttpPostBodyFile {
 	 */
 	public String getFileName() {
 		return fileName;
+	}
+	
+	/** ランダムファイル. **/
+	private static final class Rand {
+		private int a = 123456789;
+		private int b = 362436069;
+		private int c = 521288629;
+		private int d = 88675123;
+		public void seet(long t) {
+			int s = (int)(t & 0x00000000ffffffffL);
+			a=s=1812433253*(s^(s>>30))+1;
+			b=s=1812433253*(s^(s>>30))+2;
+			c=s=1812433253*(s^(s>>30))+3;
+			d=s=1812433253*(s^(s>>30))+4;
+		}
+		public final int nextInt() {
+			int t, r;
+			t = a;
+			r = t;
+			t <<= 11;
+			t ^= r;
+			r = t;
+			r >>= 8;
+			t ^= r;
+			r = b;
+			a = r;
+			r = c;
+			b = r;
+			r = d;
+			c = r;
+			t ^= r;
+			r >>= 19;
+			r ^= t;
+			d = r;
+			return r;
+		}
 	}
 }

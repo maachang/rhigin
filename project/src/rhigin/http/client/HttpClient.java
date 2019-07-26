@@ -15,6 +15,7 @@ import java.util.zip.GZIPInputStream;
 
 import rhigin.RhiginConstants;
 import rhigin.scripts.Json;
+import rhigin.util.ArrayMap;
 import rhigin.util.ByteArrayIO;
 import rhigin.util.Converter;
 
@@ -23,148 +24,80 @@ import rhigin.util.Converter;
  */
 @SuppressWarnings("rawtypes")
 public class HttpClient {
+    private static final int MAX_BINARY_BODY_LENGTH = 0x00100000;
     private static final int TIMEOUT = 30000;
     private static final int MAX_RETRY = 9;
     private static final String USER_AGENT = RhiginConstants.NAME;
-
+    
     protected HttpClient() {
     }
-
+    
     /**
      * [GET]HttpClient接続.
      * @param url 対象のURLを設定します.
+     * @oaram option 対象のオプションを設定します.
+     *               params: パラメータを設定する場合は、この名前で設定します.
+     *               header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
+     *               bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
      * @return HttpResult 返却データが返されます.
      */
-    public static final HttpResult get(String url) throws IOException {
-        return connect("GET", url, null, null);
-    }
-
-    /**
-     * [GET]HttpClient接続.
-     * @param url 対象のURLを設定します.
-     * @oaram params 対象のパラメータを設定します.
-     * @return HttpResult 返却データが返されます.
-     */
-    public static final HttpResult get(String url, Object params)
+    public static final HttpResult get(String url, Map option)
         throws IOException {
-        return connect("GET", url, params, null);
-    }
-
-    /**
-     * [GET]HttpClient接続.
-     * @param url 対象のURLを設定します.
-     * @param header 対象のヘッダを設定します.
-     * @return HttpResult 返却データが返されます.
-     */
-    public static final HttpResult get(String url, Map header)
-        throws IOException {
-        return connect("GET", url, null, header);
-    }
-
-    /**
-     * [GET]HttpClient接続.
-     * @param url 対象のURLを設定します.
-     * @oaram params 対象のパラメータを設定します.
-     * @param header 対象のヘッダを設定します.
-     * @return HttpResult 返却データが返されます.
-     */
-    public static final HttpResult get(String url, Object params, Map header)
-        throws IOException {
-        return connect("GET", url, params, header);
+        return connect("GET", url, option);
     }
 
     /**
      * [POST]HttpClient接続.
      * @param url 対象のURLを設定します.
-     * @oaram params 対象のパラメータを設定します.
+     * @oaram option 対象のオプションを設定します.
+     *               params: パラメータを設定する場合は、この名前で設定します.
+     *               header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
+     *               bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
      * @return HttpResult 返却データが返されます.
      */
-    public static final HttpResult post(String url, Object params)
+    public static final HttpResult post(String url, Map option)
         throws IOException {
-        return connect("POST", url, params, null);
-    }
-
-    /**
-     * [POST]HttpClient接続.
-     * @param url 対象のURLを設定します.
-     * @oaram params 対象のパラメータを設定します.
-     * @param header 対象のヘッダを設定します.
-     * @return HttpResult 返却データが返されます.
-     */
-    public static final HttpResult post(String url, Object params, Map header)
-        throws IOException {
-        return connect("POST", url, params, header);
+        return connect("POST", url, option);
     }
 
     /**
      * [JSON]HttpClient接続.
      * @param url 対象のURLを設定します.
-     * @oaram params 対象のパラメータを設定します.
+     * @oaram option 対象のオプションを設定します.
+     *               params: パラメータを設定する場合は、この名前で設定します.
+     *               header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
+     *               bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
      * @return HttpResult 返却データが返されます.
      */
-    public static final HttpResult json(String url, Object params)
+    public static final HttpResult json(String url, Map option)
         throws IOException {
-        return connect("JSON", url, params, null);
-    }
-
-    /**
-     * [JSON]HttpClient接続.
-     * @param url 対象のURLを設定します.
-     * @oaram params 対象のパラメータを設定します.
-     * @param header 対象のヘッダを設定します.
-     * @return HttpResult 返却データが返されます.
-     */
-    public static final HttpResult json(String url, Object params, Map header)
-        throws IOException {
-        return connect("JSON", url, params, header);
+        return connect("JSON", url, option);
     }
 
     /**
      * HttpClient接続.
      * @param method 対象のMethodを設定します.
      * @param url 対象のURLを設定します.
-     * @return HttpResult 返却データが返されます.
-     */
-    public static final HttpResult connect(String method, String url)
-        throws IOException {
-        return connect(method, url, null, null);
-    }
-
-    /**
-     * HttpClient接続.
-     * @param method 対象のMethodを設定します.
-     * @param url 対象のURLを設定します.
-     * @oaram params 対象のパラメータを設定します.
-     * @return HttpResult 返却データが返されます.
-     */
-    public static final HttpResult connect(String method, String url, Object params)
-        throws IOException {
-        return connect(method, url, params, null);
-    }
-
-    /**
-     * HttpClient接続.
-     * @param method 対象のMethodを設定します.
-     * @param url 対象のURLを設定します.
-     * @param header 対象のヘッダを設定します.
-     * @return HttpResult 返却データが返されます.
-     */
-    public static final HttpResult connect(String method, String url, Map header)
-        throws IOException {
-        return connect(method, url, null, header);
-    }
-
-    /**
-     * HttpClient接続.
-     * @param method 対象のMethodを設定します.
-     * @param url 対象のURLを設定します.
-     * @oaram params 対象のパラメータを設定します.
-     * @param header 対象のヘッダを設定します.
+     * @oaram option 対象のオプションを設定します.
+     *               params: パラメータを設定する場合は、この名前で設定します.
+     *               header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
+     *               bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
      * @return HttpResult 返却データが返されます.
      */
     @SuppressWarnings("unchecked")
-	public static final HttpResult connect(String method, String url, Object params, Map header)
+	public static final HttpResult connect(String method, String url, Map option)
         throws IOException {
+        Object params = null;
+        Map header = null;
+        boolean bodyFile = false;
+        if(option != null) {
+            params = option.get("params");
+            header = (Map)option.get("header");
+            params = Boolean.TRUE.equals(option.get("bodyFile"));
+        }
+        if(header == null) {
+            header = new ArrayMap();
+        }
         HttpResult ret = null;
         method = method.toUpperCase();
         // methodがJSONの場合は、POSTでJSON送信用の処理に変換する.
@@ -175,7 +108,7 @@ public class HttpClient {
         }
         int cnt = 0;
         while (true) {
-            ret = _connect(method, url, params, header);
+            ret = _connect(bodyFile, method, url, params, header);
             int status = ret.getStatus();
             if (!(status == 301 || status == 302 || status == 303
                     || status == 307 || status == 308)) {
@@ -199,7 +132,8 @@ public class HttpClient {
     }
 
     // 接続処理.
-    private static final HttpResult _connect(String method, String url, Object params, Map header)
+    private static final HttpResult _connect(
+        boolean bodyFile, String method, String url, Object params, Map header)
         throws IOException {
         Socket socket = null;
         InputStream in = null;
@@ -222,7 +156,7 @@ public class HttpClient {
 
             // レスポンス受信.
             in = new BufferedInputStream(socket.getInputStream());
-            HttpResult ret = receive(url, in);
+            HttpResult ret = receive(bodyFile, url, in);
             in.close();
             in = null;
             out.close();
@@ -510,7 +444,7 @@ public class HttpClient {
     private static final byte[] END_HEADER = ("\r\n\r\n").getBytes();
 
     // データ受信.
-    private static final HttpResult receive(String url, InputStream in)
+    private static final HttpResult receive(boolean bodyFileFlg, String url, InputStream in)
         throws IOException {
         int len;
         final byte[] binary = new byte[4096];
@@ -520,13 +454,19 @@ public class HttpClient {
         boolean gzip = false;
         byte[] b = null;
         int status = -1;
+        HttpBodyFile bodyFile = null;
         HttpResult result = null;
         // chunked用.
         int chunkedLength = -1;
         ByteArrayIO chunkedBuffer = null;
         try {
             while ((len = in.read(binary)) != -1) {
-                buffer.write(binary, 0, len);
+                // Content-Lengthが設定されていて、bodyFileが有効な場合.
+                if(bodyLength != -1 && bodyFile != null) {
+                    bodyFile.write(binary, len);
+                } else {
+                    buffer.write(binary, 0, len);
+                }
                 // データ生成が行われていない場合.
                 if (result == null) {
                     // ステータス取得が行われていない.
@@ -571,6 +511,35 @@ public class HttpClient {
                         continue;
                     }
                 }
+                // バッファに受信中のデータが、一定量を超える場合.
+                // または recvFileFlag が onの場合.
+                // ただし、bodyファイルが生成されていない場合のみ対象.
+                if(bodyFile == null && (
+                    bodyFileFlg ||
+                    (bodyLength != -1 && MAX_BINARY_BODY_LENGTH <= buffer.size()) ||
+                    (bodyLength == -1 && MAX_BINARY_BODY_LENGTH <= chunkedBuffer.size())
+                )) {
+                    // bodyデータが空の場合は処理しない.
+                    if (bodyLength == 0) {
+                        // 0byteデータ.
+                        result.setResponseBody(new byte[0]);
+                        return result;
+                    }
+                    
+                    // バッファに受信中のデータを出力.
+                    int bufLen;
+                    bodyFile = new HttpBodyFile();
+                    byte[] buf = binary;
+                    ByteArrayIO io = (bodyLength != -1) ? buffer : chunkedBuffer;
+                    while((bufLen = io.read(buf)) != 0) {
+                        bodyFile.write(buf, bufLen);
+                    }
+                    if(chunkedBuffer != null) {
+                        chunkedBuffer.close();
+                        chunkedBuffer = null;
+                    }
+                }
+                
                 // ヘッダ受信が完了し、Body情報の取得中.
                 if (bodyLength == 0) {
                     // 0byteデータ.
@@ -579,7 +548,10 @@ public class HttpClient {
                 }
                 // bodyサイズが設定されている.
                 else if (bodyLength > 0) {
-                    if (buffer.size() >= bodyLength) {
+                    if (bodyFile != null) {
+                        result.setReponseBodyFile(bodyFile);
+                        bodyFile = null;
+                    } else if (buffer.size() >= bodyLength) {
                         b = new byte[bodyLength];
                         buffer.read(b);
                         if (gzip) {
@@ -588,8 +560,8 @@ public class HttpClient {
                             result.setResponseBody(b);
                         }
                         b = null;
-                        return result;
                     }
+                    return result;
                 }
                 // chunked受信.
                 else if (bodyLength == -1) {
@@ -610,13 +582,18 @@ public class HttpClient {
                         if (buffer.size() >= chunkedLength + 2) {
                             // データの終端.
                             if (chunkedLength == 0) {
-                                b = chunkedBuffer.toByteArray();
-                                if (gzip) {
-                                    result.setResponseBody(ungzip(b, binary, buffer));
+                                if (bodyFile != null) {
+                                    result.setReponseBodyFile(bodyFile);
+                                    bodyFile = null;
                                 } else {
-                                    result.setResponseBody(b);
+                                    b = chunkedBuffer.toByteArray();
+                                    if (gzip) {
+                                        result.setResponseBody(ungzip(b, binary, buffer));
+                                    } else {
+                                        result.setResponseBody(b);
+                                    }
+                                    b = null;
                                 }
-                                b = null;
                                 return result;
                             }
                             // chunkedデータが受信されている.
@@ -628,8 +605,13 @@ public class HttpClient {
                             // データ取得.
                             buffer.read(b, 0, chunkedLength);
                             buffer.skip(2);
-                            chunkedBuffer.write(b, 0, chunkedLength);
+                            if(bodyFile != null) {
+                                bodyFile.write(b, chunkedLength);
+                            } else {
+                                chunkedBuffer.write(b, 0, chunkedLength);
+                            }
                             chunkedLength = -1;
+                            b = null;
                         } else {
                             // 次の受信待ち.
                             breakFlag = true;
@@ -649,6 +631,9 @@ public class HttpClient {
                 try {
                     chunkedBuffer.close();
                 } catch (Exception e) {}
+            }
+            if(bodyFile != null) {
+                bodyFile.close();
             }
         }
     }

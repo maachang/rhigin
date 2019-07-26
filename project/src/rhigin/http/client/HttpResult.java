@@ -1,6 +1,8 @@
 package rhigin.http.client;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -18,36 +20,72 @@ import rhigin.util.ConvertMap;
 public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterator.Base<String>, ConvertMap {
     private byte[] headers = null;
     private String headersString = null;
-
+    
     private byte[] body = null;
     private int status = -1;
     private String url = null;
     private String contentType = null;
-
+    private HttpBodyFile bodyFile = null;
+    
+    /**
+     * コンストラクタ.
+     * @param url
+     * @param status
+     * @param header
+     */
     protected HttpResult(String url, int status, byte[] header) {
         this.url = url;
         this.status = status;
         this.headers = header;
     }
-
+    
+    @Override
+    protected void finalize() throws Exception {
+        clear();
+    }
+    
+    /**
+     * クリア.
+     */
     public void clear() {
+        HttpBodyFile bf = bodyFile; bodyFile = null;
+        if(bodyFile != null) {
+            bf.close(); bf = null;
+        }
         url = null;
         headers = null;
         headersString = null;
         body = null;
         status = -1;
     }
-
+    
+    /**
+     * urlを取得.
+     * @return String urlが返却されます.
+     */
     public String getUrl() {
         return url;
     }
-
+    
+    /**
+     * HTTPステータス取得.
+     * @return int HTTPステータスが返却されます.
+     */
     public int getStatus() {
         return status;
     }
-
-    protected String getHeader(String key) throws IOException {
-        convertString();
+    
+    /**
+     * HTTPヘッダを取得.
+     * @param key キー名を設定します.
+     * @return String 要素が返却されます.
+     */
+    protected String getHeader(String key) {
+        try {
+            convertString();
+        } catch(Exception e) {
+            throw new RhiginException(500, e);
+        }
         if (headersString == null) {
             return null;
         }
@@ -62,9 +100,17 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
         }
         return headersString.substring(p + key.length() + 2, end);
     }
-
-    public List<String> getHeaders() throws IOException {
-        convertString();
+    
+    /**
+     * HTTPヘッダのキー名一覧を取得.
+     * @return List<String> HTTPヘッダのキー名一覧が返却されます.
+     */
+    public List<String> getHeaders() {
+        try {
+            convertString();
+        } catch(Exception e) {
+            throw new RhiginException(500, e);
+        }
         if (headersString == null) {
             return null;
         }
@@ -113,63 +159,136 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
         }
         return contentType;
     }
-
+    
+    /**
+     * binaryレスポンスボディをセット.
+     * @param body
+     */
     protected void setResponseBody(byte[] body) {
         this.body = body;
     }
-
+    
+    /**
+     * ファイルレスポンスボディをセット.
+     * @param body
+     */
+    protected void setReponseBodyFile(HttpBodyFile body) {
+        this.bodyFile = body;
+    }
+    
+    /**
+     * レスポンスボディサイズを取得.
+     * @return long レスポンスボディサイズが返却されます.
+     */
+    public long responseBodySize() {
+        if(body != null) {
+            return (long)body.length;
+        } else if(bodyFile != null) {
+            return bodyFile.getFileLength();
+        }
+        return -1L;
+    }
+    
+    /**
+     * レスポンスボディバイナリを取得.
+     * @return byte[] レスポンスボディバイナリが返却されます.
+     */
     public byte[] responseBody() {
         return body;
     }
     
-    public String responseText() {
-        try {
-            String charset = charset(getContentType());
-            return new String(body, charset);
-        } catch(Exception e) {
-            throw new RhiginException(500, e);
+    /**
+     * レスポンスボディInputStreamを取得.
+     * @return InputStream レスポンスボディInputStreamが返却されます.
+     */
+    public InputStream responseInputStream() {
+        if(bodyFile != null) {
+            return bodyFile.getInputStream();
+        } else if(body != null) {
+            return new ByteArrayInputStream(body);
         }
+        return null;
     }
-
+    
+    /**
+     * レスポンスボディを取得.
+     * @return String レスポンスボディが返却されます.
+     */
+    public String responseText() {
+        if(body != null) {
+            try {
+                String charset = charset(getContentType());
+                return new String(body, charset);
+            } catch(Exception e) {
+                throw new RhiginException(500, e);
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * 文字列返却.
+     * @return String 文字列が返却されます.
+     */
     public String toString() {
         return Json.encode(this);
     }
     
-	@Override
-	public String getKey(int no) {
-		try {
-			List<String> list = getHeaders();
-			return list.get(no);
-		} catch(Exception e) {
-			throw new RhiginException(500, e);
-		}
-	}
-
-	@Override
-	public int size() {
-		try {
-			List<String> list = getHeaders();
-			return list.size();
-		} catch(Exception e) {
-			throw new RhiginException(500, e);
-		}
-	}
-	
-	@Override
-	public Set keySet() {
-		return new AbstractKeyIterator.KeyIteratorSet<>(this);
-	}
-
-	@Override
-	public Object get(Object key) {
+    /**
+     * HTTPヘッダキー名を取得.
+     * @param no 対象の項番を設定します.
+     * @return String HTTPヘッダキー名が返却されます.
+     */
+    @Override
+    public String getKey(int no) {
+        try {
+            return getHeaders().get(no);
+        } catch(Exception e) {
+            throw new RhiginException(500, e);
+        }
+    }
+    
+    /**
+     * HTTPヘッダ数を取得.
+     * @return int HTTPヘッダ数が返却されます.
+     */
+    @Override
+    public int size() {
+        try {
+            return getHeaders().size();
+        } catch(Exception e) {
+            throw new RhiginException(500, e);
+        }
+    }
+    
+    /**
+     * KeySetを取得.
+     * @return KeySet KeySet が返却されます.
+     */
+    @Override
+    public Set keySet() {
+        return new AbstractKeyIterator.KeyIteratorSet<>(this);
+    }
+    
+    /**
+     * 情報を取得.
+     * @param key キー名を設定します.
+     * @return Object 情報が返却されます.
+     */
+    @Override
+    public Object get(Object key) {
         if (key == null) {
             return null;
         } else if ("url".equals(key)) {
             return getUrl();
         } else if ("status".equals(key)) {
             return getStatus();
+        } else if ("size".equals(key) || "bodySize".equals(key)) {
+            return responseBodySize();
         } else if ("body".equals(key)) {
             return responseBody();
+        } else if ("inputStream".equals(key) || "bodyFile".equals(key)) {
+            return responseInputStream();
         } else if ("text".equals(key)) {
             return responseText();
         } else if("Content-Type".equals(key)) {
@@ -181,19 +300,24 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
             return null;
         }
     }
-
-	@Override
-	public boolean containsKey(Object name) {
-		return get(name) != null;
-	}
-
-	@Override
-	public Object put(Object name, Object value) {
-		return null;
-	}
-
-	@Override
-	public Object remove(Object name) {
-		return null;
-	}
+    
+    /**
+     * 指定キー名が存在するかチェック.
+     * @param key チェック対象のキー名を設定します.
+     * @return boolean [true]の場合、キーの情報は存在します.
+     */
+    @Override
+    public boolean containsKey(Object name) {
+        return get(name) != null;
+    }
+    
+    @Override
+    public Object put(Object name, Object value) {
+        return null;
+    }
+    
+    @Override
+    public Object remove(Object name) {
+        return null;
+    }
 }

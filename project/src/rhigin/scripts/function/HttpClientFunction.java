@@ -9,6 +9,7 @@ import org.mozilla.javascript.Undefined;
 import rhigin.RhiginException;
 import rhigin.http.client.HttpClient;
 import rhigin.scripts.RhiginFunction;
+import rhigin.util.ArrayMap;
 
 /**
  * [js]HttpClient.
@@ -16,8 +17,10 @@ import rhigin.scripts.RhiginFunction;
  * httpClient(method, url, params, headers)
  *   method: Httpメソッド [GET, POST, DELETE, PUT, PATCH, OPTION]
  *   url: 接続先URL (http://yahoo.co.jp).
- *   params: パラメータ、Hash や InputStream や String や byte[] など.
- *   headers: Httpヘッダ. Map で設定.
+ *   option: Mapで設定.
+ *               params: パラメータを設定する場合は、この名前で設定します.
+ *               header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
+ *               bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
  */
 public class HttpClientFunction extends RhiginFunction {
 	private static final HttpClientFunction THIS = new HttpClientFunction();
@@ -30,23 +33,29 @@ public class HttpClientFunction extends RhiginFunction {
 		return "httpClient";
 	}
 
+	/**
+     * HttpClient接続.
+     * @param ctx
+     * @param scope
+     * @param thisObj
+     * @param args
+     *        args[0]: [String] method 対象のMethodを設定します.
+     *        args[1]: [String] url 対象のURLを設定します.
+     *        args[2]: [Map] option 対象のオプションを設定します.
+     *               params: パラメータを設定する場合は、この名前で設定します.
+     *               header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
+     *               bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
+     * @return HttpResult 返却データが返されます.
+	 */
 	@Override
 	@SuppressWarnings("rawtypes")
 	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		if(args.length >= 2) {
 			String method = "" + args[0];
 			String url = "" + args[1];
-			Object params = null;
-			Map headers = null;
-			
-			if(args.length >= 3) {
-				params = args[2];
-				if(args.length >= 4 && args[3] instanceof Map) {
-					headers = (Map)args[3];
-				}
-			}
+			Map option = (args.length >= 3 && args[2] instanceof Map) ? (Map)args[2] : null;
 			try {
-				return HttpClient.connect(method, url, params, headers);
+				return HttpClient.connect(method, url, option);
 			} catch(Exception e) {
 				throw new RhiginException(500, e);
 			}

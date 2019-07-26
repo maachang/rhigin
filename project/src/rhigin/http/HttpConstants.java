@@ -7,7 +7,7 @@ public class HttpConstants {
 	public static final String ACCESS_PATH = "./application";
 
 	/** メモリで受け取るContent-Type最大値. **/
-	public static final int MAX_CONTENT_LENGTH = 5 * 0x100000;
+	public static final int MAX_CONTENT_LENGTH = 5 * 0x00100000;
 	
 	/** 送信Body情報をGZIP圧縮させないサイズ. **/
 	public static final int NOT_GZIP_BODY_LENGTH = 512;
