@@ -9,12 +9,11 @@ import org.mozilla.javascript.Undefined;
 import rhigin.RhiginException;
 import rhigin.http.client.HttpClient;
 import rhigin.scripts.RhiginFunction;
-import rhigin.util.ArrayMap;
 
 /**
  * [js]HttpClient.
  * 
- * httpClient(method, url, params, headers)
+ * httpClient(method, url, option)
  *   method: Httpメソッド [GET, POST, DELETE, PUT, PATCH, OPTION]
  *   url: 接続先URL (http://yahoo.co.jp).
  *   option: Mapで設定.

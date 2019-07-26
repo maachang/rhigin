@@ -503,10 +503,7 @@ public class HttpClient {
                             }
                         }
                         // gzip.
-                        value = result.getHeader("Content-Encoding");
-                        if ("gzip".equals(value)) {
-                            gzip = true;
-                        }
+                        gzip = result.isGzip();
                     } else {
                         continue;
                     }

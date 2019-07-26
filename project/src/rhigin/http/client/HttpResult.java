@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.zip.GZIPInputStream;
 
 import rhigin.RhiginException;
 import rhigin.scripts.JavaScriptable;
@@ -203,11 +204,28 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
      */
     public InputStream responseInputStream() {
         if(bodyFile != null) {
+            // gzip圧縮されている場合.
+            if(isGzip()) {
+                try {
+                    return new GZIPInputStream(bodyFile.getInputStream());
+                } catch(Exception e) {
+                    throw new RhiginException(500, e);
+                }
+            }
             return bodyFile.getInputStream();
         } else if(body != null) {
             return new ByteArrayInputStream(body);
         }
         return null;
+    }
+    
+    // 受信データがGZIP圧縮されているかチェック.
+    protected final boolean isGzip() {
+        String value = getHeader("Content-Encoding");
+        if ("gzip".equals(value)) {
+            return true;
+        }
+        return false;
     }
     
     /**
