@@ -1,6 +1,7 @@
 package rhigin.http.client;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -178,6 +179,33 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
     }
     
     /**
+     * 受信条件を取得.
+     * @return String 受信条件が返却されます.
+     *         "binary" の場合は byte[] で受信されています.
+     *         "inputStream" の場合は InputStream で受信されています.
+     *         "" の場合は、受信Bodyは存在しません.
+     */
+    public String responseType() {
+        if(body != null) {
+            return "binary";
+        } else if(bodyFile != null) {
+            return "inputStream";
+        }
+        return "";
+    }
+    
+    /**
+     * 受信条件がGZIPか取得.
+     * @return boolean [true]の場合GZIP圧縮されています.
+     */
+    public boolean isGzip() {
+        if(bodyFile != null && isResponseGzip()) {
+            return true;
+        }
+        return false;
+    }
+    
+    /**
      * レスポンスボディサイズを取得.
      * @return long レスポンスボディサイズが返却されます.
      */
@@ -195,7 +223,34 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
      * @return byte[] レスポンスボディバイナリが返却されます.
      */
     public byte[] responseBody() {
-        return body;
+        if(body != null) {
+            // バイナリで受信している場合は、そのまま返却.
+            return body;
+        }
+        // inputStreamで受信している場合は、バイナリに展開.
+        InputStream in = null;
+        try {
+            in = responseInputStream();
+            if(in != null) {
+                int len;
+                byte[] buf = new byte[1024];
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                while((len = in.read(buf)) != -1) {
+                    out.write(buf, 0, len);
+                }
+                out.flush();
+                in.close();
+                in = null;
+                return out.toByteArray();
+            }
+        } catch(Exception e) {
+            throw new RhiginException(500, e);
+        } finally {
+            if(in != null) {
+                try { in.close(); } catch(Exception e) {}
+            }
+        }
+        return null;
     }
     
     /**
@@ -205,7 +260,7 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
     public InputStream responseInputStream() {
         if(bodyFile != null) {
             // gzip圧縮されている場合.
-            if(isGzip()) {
+            if(isResponseGzip()) {
                 try {
                     return new GZIPInputStream(bodyFile.getInputStream());
                 } catch(Exception e) {
@@ -220,8 +275,8 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
     }
     
     // 受信データがGZIP圧縮されているかチェック.
-    protected final boolean isGzip() {
-        String value = getHeader("Content-Encoding");
+    protected final boolean isResponseGzip() {
+        final String value = getHeader("Content-Encoding");
         if ("gzip".equals(value)) {
             return true;
         }
@@ -233,10 +288,11 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
      * @return String レスポンスボディが返却されます.
      */
     public String responseText() {
-        if(body != null) {
+        final byte[] b = responseBody();
+        if(b != null) {
             try {
                 String charset = charset(getContentType());
-                return new String(body, charset);
+                return new String(b, charset);
             } catch(Exception e) {
                 throw new RhiginException(500, e);
             }
@@ -303,12 +359,16 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
             return getStatus();
         } else if ("size".equals(key) || "bodySize".equals(key)) {
             return responseBodySize();
-        } else if ("body".equals(key)) {
+        } else if ("body".equals(key) || "response".equals(key)) {
             return responseBody();
         } else if ("inputStream".equals(key) || "bodyFile".equals(key)) {
             return responseInputStream();
         } else if ("text".equals(key)) {
             return responseText();
+        } else if ("type".equals(key)) {
+            return responseType();
+        } else if ("gzip".equals(key) || "isGzip".equals(key)) {
+            return isGzip();
         } else if("Content-Type".equals(key)) {
             return getContentType();
         }

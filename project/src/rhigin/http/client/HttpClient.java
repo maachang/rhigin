@@ -503,7 +503,7 @@ public class HttpClient {
                             }
                         }
                         // gzip.
-                        gzip = result.isGzip();
+                        gzip = result.isResponseGzip();
                     } else {
                         continue;
                     }
