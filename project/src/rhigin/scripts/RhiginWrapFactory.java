@@ -82,7 +82,6 @@ final class RhiginWrapFactory extends WrapFactory {
 		String name;
 		Scriptable parent;
 		ToStringScriptableWrapper(String name, Scriptable parent) {
-			System.out.println("name:" + name + " parent:" + parent);
 			this.name = name;
 			this.parent = parent;
 		}

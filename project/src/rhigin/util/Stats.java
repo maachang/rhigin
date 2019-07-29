@@ -114,4 +114,12 @@ public class Stats {
 	public long birthtime() throws IOException {
 		return Files.readAttributes(path, BasicFileAttributes.class).creationTime().toMillis();
 	}
+	
+	/**
+	 * パスを取得.
+	 * @return
+	 */
+	public Path getPath() {
+		return path;
+	}
 }

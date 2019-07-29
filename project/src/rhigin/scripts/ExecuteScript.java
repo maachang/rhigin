@@ -9,10 +9,10 @@ import java.security.PrivilegedAction;
 import org.mozilla.javascript.Callable;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
-import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.Script;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.Wrapper;
 
 import rhigin.scripts.function.ArgsFunction;
 import rhigin.scripts.function.Base64Functions;
@@ -221,9 +221,9 @@ public class ExecuteScript {
 			scope.setPrototype(getTopLevel());
 			settingRhiginObject(ctx, scope);
 			final Object ret = compiled.exec(ctx, scope);
-			// 戻り値がNativeJavaObjectの場合は、アンラップ.
-			if(ret instanceof NativeJavaObject) {
-				return ((NativeJavaObject)ret).unwrap();
+			// 戻り値がWrapperの場合は、アンラップ.
+			if(ret instanceof Wrapper) {
+				return ((Wrapper)ret).unwrap();
 			}
 			return ret;
 		} finally {
@@ -296,9 +296,9 @@ public class ExecuteScript {
 			Script compiled = ctx.compileReader(getScript(r, headerScript, footerScript), name, lineNo, null);
 			// 実行処理.
 			final Object ret = compiled.exec(ctx, scope);
-			// 戻り値がNativeJavaObjectの場合は、アンラップ.
-			if(ret instanceof NativeJavaObject) {
-				return ((NativeJavaObject)ret).unwrap();
+			// 戻り値がWrapperの場合は、アンラップ.
+			if(ret instanceof Wrapper) {
+				return ((Wrapper)ret).unwrap();
 			}
 			return ret;
 		} finally {

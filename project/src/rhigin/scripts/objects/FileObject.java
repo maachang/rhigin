@@ -10,6 +10,7 @@ import java.io.InputStream;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
+import org.mozilla.javascript.Wrapper;
 
 import rhigin.RhiginException;
 import rhigin.scripts.RhiginFunction;
@@ -82,11 +83,11 @@ public class FileObject{
 					case 17: return FileUtil.getFileName(""+args[0]);
 					case 18:
 						Stats stats = new Stats("" + args[0]);
-						return new RhiginObject("Stats", new RhiginFunction[] {
-							new StatsExecite(0, stats), new StatsExecite(1, stats), new StatsExecite(2, stats),
-							new StatsExecite(3, stats), new StatsExecite(4, stats), new StatsExecite(5, stats),
-							new StatsExecite(6, stats), new StatsExecite(7, stats), new StatsExecite(8, stats),
-							new StatsExecite(9, stats)
+						return new JStatsObject("Stats", new RhiginFunction[] {
+							new StatsExecute(0, stats), new StatsExecute(1, stats), new StatsExecute(2, stats),
+							new StatsExecute(3, stats), new StatsExecute(4, stats), new StatsExecute(5, stats),
+							new StatsExecute(6, stats), new StatsExecute(7, stats), new StatsExecute(8, stats),
+							new StatsExecute(9, stats), new StatsExecute(99, stats)
 						});
 					case 19: return new FileInputStream("" + args[0]);
 					case 20: return new FileOutputStream("" + args[0]);
@@ -176,10 +177,10 @@ public class FileObject{
 	};
 	
 	// stats.
-	private static final class StatsExecite extends RhiginFunction {
+	private static final class StatsExecute extends RhiginFunction {
 		final int type;
 		final Stats stats;
-		StatsExecite(int t, Stats stats) {
+		StatsExecute(int t, Stats stats) {
 			this.type = t;
 			this.stats = stats;
 		}
@@ -197,6 +198,7 @@ public class FileObject{
 				case 7: return ctx.newObject(scope, "Date", new Object[] {stats.atime()});
 				case 8: return ctx.newObject(scope, "Date", new Object[] {stats.mtime()});
 				case 9: return ctx.newObject(scope, "Date", new Object[] {stats.birthtime()});
+				case 99: return stats;
 				}
 				return Undefined.instance;
 			} catch(Exception e) {
@@ -216,6 +218,7 @@ public class FileObject{
 			case 7: return "atime";
 			case 8: return "mtime";
 			case 9: return "birthtime";
+			case 99: return "object";
 			}
 			return "unknown";
 		}
@@ -235,6 +238,17 @@ public class FileObject{
 	private static final RhiginObject THIS = new RhiginObject("File", list);
 	public static final RhiginObject getInstance() {
 		return THIS;
+	}
+	
+	// JDate用クラス.
+	private static final class JStatsObject extends RhiginObject implements Wrapper {
+		public JStatsObject(String name, RhiginFunction[] list) {
+			super(name, list);
+		}
+		@Override
+		public Object unwrap() {
+			return ((StatsExecute)get("object", null)).stats.getPath();
+		}
 	}
 	
 	/**

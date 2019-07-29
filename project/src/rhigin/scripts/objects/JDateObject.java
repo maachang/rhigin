@@ -3,6 +3,7 @@ package rhigin.scripts.objects;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
+import org.mozilla.javascript.Wrapper;
 
 import rhigin.RhiginException;
 import rhigin.scripts.RhiginFunction;
@@ -85,6 +86,7 @@ public class JDateObject extends RhiginFunction {
 			new Execute(24, date),
 			new Execute(25, date),
 			new Execute(26, date),
+			new Execute(27, date),
 			new Execute(99, date)
 		});
 	}
@@ -181,13 +183,17 @@ public class JDateObject extends RhiginFunction {
 	}
 	
 	// JDate用クラス.
-	private static final class JDateClass extends RhiginObject {
+	private static final class JDateClass extends RhiginObject implements Wrapper {
 		public JDateClass(String name, RhiginFunction[] list) {
 			super(name, list);
 		}
 		@Override
 		public String toString() {
 			return ((Execute)get("object", null)).date.toString();
+		}
+		@Override
+		public Object unwrap() {
+			return ((Execute)get("object", null)).date;
 		}
 	}
 	
