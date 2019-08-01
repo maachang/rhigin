@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.mozilla.javascript.IdScriptableObject;
+import org.mozilla.javascript.Undefined;
 import org.mozilla.javascript.Wrapper;
 
 import rhigin.RhiginException;
@@ -86,6 +87,12 @@ public final class Json {
 
 	/** [encodeJSON]jsonコンバート. **/
 	private static final void _encode(StringBuilder buf, Object base, Object target) {
+		// null or undefined の場合.
+		if (target == null || target instanceof Undefined) {
+			// nullで表現.
+			buf.append("null");
+			return;
+		}
 		// rhinoのjavaオブジェクトwrapper対応.
 		if (target instanceof Wrapper) {
 			target = ((Wrapper)target).unwrap();
@@ -110,8 +117,6 @@ public final class Json {
 					.append("\"");
 		} else if (target instanceof Boolean) {
 			buf.append(target);
-		} else if (target == null) {
-			buf.append("null");
 		} else if (target.getClass().isArray()) {
 			if (Array.getLength(target) == 0) {
 				buf.append("[]");
