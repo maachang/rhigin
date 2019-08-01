@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.mozilla.javascript.IdScriptableObject;
+import org.mozilla.javascript.Wrapper;
 
 import rhigin.RhiginException;
 import rhigin.util.ArrayMap;
@@ -85,6 +86,10 @@ public final class Json {
 
 	/** [encodeJSON]jsonコンバート. **/
 	private static final void _encode(StringBuilder buf, Object base, Object target) {
+		// rhinoのjavaオブジェクトwrapper対応.
+		if (target instanceof Wrapper) {
+			target = ((Wrapper)target).unwrap();
+		}
 		if (target instanceof Map) {
 			encodeJsonMap(buf, base, (Map) target);
 		} else if (target instanceof List) {

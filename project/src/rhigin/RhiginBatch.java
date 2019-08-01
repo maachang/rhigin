@@ -46,7 +46,7 @@ public class RhiginBatch {
 		
 		// コンパイルキャッシュ生成.
 		// コンパイルキャッシュを require命令に設定.
-		CompileCache cache = new CompileCache(
+		final CompileCache cache = new CompileCache(
 			httpInfo.getCompileCacheSize(), httpInfo.getCompileCacheRootDir());
 		RequireFunction.init(cache);
 		
@@ -56,7 +56,7 @@ public class RhiginBatch {
 		Reader r = null;
 		try {
 			r = new BufferedReader(new InputStreamReader(new FileInputStream(args[0]), "UTF8"));
-			Script script = ExecuteScript.compile(r, args[0], ScriptConstants.HEADER, ScriptConstants.FOOTER, 0);
+			final Script script = ExecuteScript.compile(r, args[0], ScriptConstants.HEADER, ScriptConstants.FOOTER, 0);
 			r.close(); r = null;
 			ExecuteScript.execute(new RhiginContext(), script);
 			return true;
