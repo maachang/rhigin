@@ -2,7 +2,6 @@ package rhigin.scripts.function;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.RhiginFunction;
 
@@ -22,7 +21,7 @@ public class GetClassFunction extends RhiginFunction {
 		if(args.length >= 1) {
 			return args[0] == null ? "null" : args[0].getClass().getName();
 		}
-		return Undefined.instance;
+		return argsException();
 	}
 	
 	/**

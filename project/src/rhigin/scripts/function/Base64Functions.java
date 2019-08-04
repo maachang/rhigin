@@ -2,7 +2,6 @@ package rhigin.scripts.function;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.RhiginFunction;
 import rhigin.util.Base64;
@@ -34,7 +33,7 @@ public class Base64Functions {
 				}
 				return Base64.atob(""+args[0]);
 			}
-			return Undefined.instance;
+			return argsException();
 		}
 	}
 	
@@ -58,7 +57,7 @@ public class Base64Functions {
 				}
 				return Base64.btoa(""+args[0]);
 			}
-			return Undefined.instance;
+			return argsException();
 		}
 	}
 	

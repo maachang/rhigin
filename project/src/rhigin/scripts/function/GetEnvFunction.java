@@ -2,7 +2,6 @@ package rhigin.scripts.function;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.RhiginFunction;
 import rhigin.util.EnvCache;
@@ -28,7 +27,7 @@ public class GetEnvFunction extends RhiginFunction {
 		if(args.length >= 1) {
 			return EnvCache.get(""+args[0]);
 		}
-		return Undefined.instance;
+		return argsException();
 	}
 	
 	/**

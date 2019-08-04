@@ -2,7 +2,6 @@ package rhigin.scripts.function;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.RhiginFunction;
 import rhigin.util.Converter;
@@ -26,7 +25,7 @@ public final class BinaryFunction extends RhiginFunction {
 		if(args.length >= 1 && Converter.isFloat(args[0])) {
 			return new byte[Converter.convertInt(args[0])];
 		}
-		return Undefined.instance;
+		return argsException();
 	}
 	
 	/**

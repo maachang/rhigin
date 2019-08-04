@@ -36,14 +36,12 @@ public class EntityFunctions {
 
 		@Override
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
-			if(args.length >= 2) {
-				Entity entity = local.get();
-				if(entity == null) {
-					entity = new Entity();
-					local.set(entity);
-				}
-				entity.expose(args);
+			Entity entity = local.get();
+			if(entity == null) {
+				entity = new Entity();
+				local.set(entity);
 			}
+			entity.expose(args);
 			return Undefined.instance;
 		}
 	}
@@ -70,7 +68,7 @@ public class EntityFunctions {
 				}
 				return entity.entity(Converter.convertString(args[0]), args[1]);
 			}
-			return Undefined.instance;
+			return argsException();
 		}
 	}
 	

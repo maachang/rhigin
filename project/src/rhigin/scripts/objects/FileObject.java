@@ -48,9 +48,9 @@ public class FileObject{
 							FileUtil.setFileString(true, ""+args[0], ""+args[1], "UTF8");
 						}
 						break;
-					case 4: FileUtil.removeFile(""+args[0]);
-					case 5: FileUtil.removeFile(""+args[0]);
-					case 6: FileUtil.delete(""+args[0]);
+					case 4: FileUtil.removeFile(""+args[0]); return Undefined.instance;
+					case 5: FileUtil.removeFile(""+args[0]); return Undefined.instance;
+					case 6: FileUtil.delete(""+args[0]); return Undefined.instance;
 					case 7: return FileUtil.list(""+args[0]);
 					case 8: return FileUtil.getFileLength(""+args[0]);
 					case 9: return FileUtil.birthtime(""+args[0]);
@@ -98,7 +98,7 @@ public class FileObject{
 			} catch(Exception e) {
 				throw new RhiginException(500, e);
 			}
-			return Undefined.instance;
+			return argsError(args);
 		}
 		
 		@Override
@@ -127,6 +127,28 @@ public class FileObject{
 			case 20: return "outputStream";
 			}
 			return "unknown";
+		}
+		
+		// 引数チェック.
+		private final Object argsError(Object[] args) {
+			if(!(args.length >= 1)) {
+				argsException("File");
+			}
+			switch(type) {
+			case 12: if(!(args.length >= 2)) {
+					argsException("File");
+				}
+				break;
+			case 13: if(!(args.length >= 2)) {
+					argsException("File");
+				}
+				break;
+			case 15: if(!(args.length >= 2)) {
+					argsException("File");
+				}
+				break;
+			}
+			return Undefined.instance;
 		}
 		
 		private static final byte[] toBinary(Object o)

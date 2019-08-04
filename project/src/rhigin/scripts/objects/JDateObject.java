@@ -138,7 +138,7 @@ public class JDateObject extends RhiginFunction {
 				case 25: date.setYear(Converter.convertInt(o) + 1900);break;
 				}
 			}
-			return Undefined.instance;
+			return argsError(args);
 		}
 		@Override
 		public final String getName() {
@@ -174,6 +174,27 @@ public class JDateObject extends RhiginFunction {
 			case 99: return "object";
 			}
 			return "unknown";
+		}
+		private final Object argsError(Object[] args) {
+			switch(type) {
+			case 13:
+			case 14:
+			case 15:
+			case 16:
+			case 17:
+			case 18:
+			case 19:
+			case 20:
+			case 21:
+			case 22:
+			case 23:
+			case 24:
+			case 25:
+				if(!(args.length >= 1)) {
+					argsException("JDate");
+				}
+			}
+			return Undefined.instance;
 		}
 		
 		@Override

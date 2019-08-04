@@ -36,7 +36,7 @@ public final class Xor128Object {
 			case 1:
 				return xor128.nextInt();
 			}
-			return Undefined.instance;
+			return argsError(args, args.length);
 		}
 		@Override
 		public final String getName() {
@@ -45,6 +45,15 @@ public final class Xor128Object {
 			case 1: return "nextInt";
 			}
 			return "unknown";
+		}
+		private final Object argsError(Object[] args, int len) {
+			switch(type) {
+			case 0:if(!(len >= 1 && Converter.isNumeric(args[0]))) {
+					argsException("Xor128");
+				}
+				break;
+			}
+			return Undefined.instance;
 		}
 	};
 	private static final class Instance extends RhiginFunction {

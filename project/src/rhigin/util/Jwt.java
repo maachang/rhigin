@@ -72,7 +72,7 @@ public class Jwt {
 	 */
 	public static final Object payload(String jwt) {
 		int p = jwt.indexOf(".");
-		if(p == -1) {
+		if(p == -1 || !JWT_HEADER.equals(jwt.substring(0, p))) {
 			return null;
 		}
 		int pp = jwt.indexOf(".", p + 1);
@@ -95,7 +95,11 @@ public class Jwt {
 	 * @return boolean
 	 */
 	public static final boolean validate(String key, String jwt) {
-		int p = jwt.lastIndexOf(".");
+		int p = jwt.indexOf(".");
+		if(p == -1 || !JWT_HEADER.equals(jwt.substring(0, p))) {
+			return false;
+		}
+		p = jwt.lastIndexOf(".");
 		if(p == -1) {
 			return false;
 		}

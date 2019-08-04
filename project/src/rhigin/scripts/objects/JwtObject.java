@@ -26,17 +26,17 @@ public final class JwtObject {
 			if(args.length >= 1) {
 				switch(type) {
 				case 0: if(args.length >= 2) {
-					return Jwt.create(""+args[0], args[1]);
+						return Jwt.create(""+args[0], args[1]);
 					}
 					break;
 				case 1: return Jwt.payload(""+args[0]);
 				case 2: if(args.length >= 2) {
-						return Jwt.validate("" + args[0],  "" + args[1]);
+						return Jwt.validate("" + args[0], "" + args[1]);
 					}
 					break;
 				}
 			}
-			return Undefined.instance;
+			return argsError(args);
 		}
 		@Override
 		public final String getName() {
@@ -46,6 +46,23 @@ public final class JwtObject {
 			case 2: return "validate";
 			}
 			return "unknown";
+		}
+		private final Object argsError(Object[] args) {
+			switch(type) {
+			case 0: if(!(args.length >= 2)) {
+					argsException("Jwt");
+				}
+				break;
+			case 1: if(!(args.length >= 1)) {
+					argsException("Jwt");
+				}
+				break;
+			case 2: if(!(args.length >= 2)) {
+					argsException("Jwt");
+				}
+				break;
+			}
+			return Undefined.instance;
 		}
 	};
 	

@@ -4,7 +4,6 @@ import java.util.Map;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.Undefined;
 
 import rhigin.RhiginException;
 import rhigin.http.client.HttpClient;
@@ -59,7 +58,7 @@ public class HttpClientFunction extends RhiginFunction {
 				throw new RhiginException(500, e);
 			}
 		}
-		return Undefined.instance;
+		return argsException();
 	}
 	
 	/**

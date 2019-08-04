@@ -28,7 +28,7 @@ public final class JSONObject {
 				case 1: return Json.decode(""+args[0]);
 				}
 			}
-			return Undefined.instance;
+			return argsError(args);
 		}
 		@Override
 		public final String getName() {
@@ -37,6 +37,16 @@ public final class JSONObject {
 			case 1: return "parse";
 			}
 			return "unknown";
+		}
+		private final Object argsError(Object[] args) {
+			switch(type) {
+			case 0:
+			case 1:
+				if(!(args.length >= 1)) {
+					argsException("JSON");
+				}
+			}
+			return Undefined.instance;
 		}
 	};
 	

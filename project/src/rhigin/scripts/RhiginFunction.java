@@ -5,6 +5,8 @@ import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
+import rhigin.RhiginException;
+
 /**
  * Rhigin用Function.
  * jsに組み込みたいオリジナルのFunctionを作成したい場合に、継承して実装します.
@@ -111,5 +113,22 @@ public abstract class RhiginFunction implements Function {
 	 */
 	public String getName() {
 		return "";
+	}
+	
+	/**
+	 * 引数エラーを返却.
+	 */
+	protected Object argsException() {
+		return argsException(null);
+	}
+	
+	/**
+	 * 引数エラーを返却.
+	 */
+	protected Object argsException(String objName) {
+		if(objName == null) {
+			throw new RhiginException(500, "Insufficient arguments for " + getName() + ".");
+		}
+		throw new RhiginException(500, "Insufficient arguments for " + objName + "." + getName() + ".");
 	}
 }
