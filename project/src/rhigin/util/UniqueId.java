@@ -6,7 +6,7 @@ import java.math.BigInteger;
  * ユニークID生成処理.
  */
 public class UniqueId {
-	private static final String _CODE64 = "abcdefghijklmnopqrstuvwxyz+ABCDEFGHIJKLMNOPQRSTUVWXYZ-0123456789";
+	private static final String _CODE64 = "abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ@0123456789";
 	private static final BigInteger _BI64 = new BigInteger("64");
 	private static final BigInteger[] _L64;
 	static {
