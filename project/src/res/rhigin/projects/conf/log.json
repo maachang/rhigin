@@ -1,10 +1,10 @@
 {
-  "level": "DEBUG"
-  ,"maxFileSize": 1048576
+  "level": "INFO"
+  ,"maxFileSize": 5242880
   ,"logDir": "./log"
   ,"system": {
-    "level": "DEBUG"
-    ,"maxFileSize": 1048576
+    "level": "INFO"
+    ,"maxFileSize": 5242880
   }
   ,"console": {
     "level": "DEBUG"
