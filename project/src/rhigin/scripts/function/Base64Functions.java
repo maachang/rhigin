@@ -1,8 +1,12 @@
 package rhigin.scripts.function;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
+import rhigin.RhiginException;
 import rhigin.scripts.RhiginFunction;
 import rhigin.util.Base64;
 
@@ -54,6 +58,24 @@ public class Base64Functions {
 			if(args.length >= 1) {
 				if(args[0] instanceof byte[]) {
 					return Base64.encode((byte[])args[0]);
+				} else if(args[0] instanceof InputStream) {
+					try {
+						int len;
+						byte[] bin = new byte[1024];
+						InputStream in = (InputStream)args[0];
+						ByteArrayOutputStream out = new ByteArrayOutputStream();
+						while((len = in.read(bin)) != -1) {
+							out.write(bin, 0, len);
+						}
+						out.flush();
+						bin = out.toByteArray();
+						out.close();
+						out = null;
+						in = null;
+						return Base64.encode(bin);
+					} catch(Exception e) {
+						throw new RhiginException(500, e);
+					}
 				}
 				return Base64.btoa(""+args[0]);
 			}
