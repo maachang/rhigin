@@ -37,6 +37,7 @@ import rhigin.scripts.objects.JDateObject;
 import rhigin.scripts.objects.JSONObject;
 import rhigin.scripts.objects.JwtObject;
 import rhigin.scripts.objects.LockObjects;
+import rhigin.scripts.objects.UniqueIdObject;
 import rhigin.scripts.objects.Xor128Object;
 import rhigin.util.ListMap;
 import rhigin.util.OList;
@@ -320,6 +321,7 @@ public class ExecuteScript {
 		FileObject.regFunctions(scope);
 		JDateObject.regFunctions(scope);
 		LockObjects.regFunctions(scope);
+		UniqueIdObject.regFunctions(scope);
 		
 		// rhigin用の基本オブジェクトを設定.
 		RequireFunction.regFunctions(scope);

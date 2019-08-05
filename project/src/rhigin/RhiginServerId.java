@@ -29,7 +29,7 @@ public class RhiginServerId {
 	 */
 	public synchronized String createId() {
 		try {
-			String id = uuid.getId(CREATE_SERVER_ID_COUNT);
+			String id = uuid.getId(CREATE_SERVER_ID_COUNT).getUUID();
 			FileUtil.setFileString(true, SERVER_ID_FILE, id, "UTF8");
 			nowId = id;
 			return id;

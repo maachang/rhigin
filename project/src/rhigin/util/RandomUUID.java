@@ -22,11 +22,19 @@ public class RandomUUID {
 	}
 	
 	/**
+	 * コンストラクタ.
+	 * @param xor128 ランダムオブジェクトを設定します.
+	 */
+	public RandomUUID(Xor128 xor128) {
+		this.xor128 = xor128;
+	}
+	
+	/**
 	 * ID生成.
 	 * @param count 追加生成する乱数回数を設定します.
-	 * @return String uuid が返却されます.
+	 * @return RandomUUID このオブジェクトが返却されます.
 	 */
-	public String getId(int count) {
+	public RandomUUID getId(int count) {
 		int no = xor128.nextInt();
 		int exitCnt = count;
 		boolean befFlg = false;
@@ -47,9 +55,25 @@ public class RandomUUID {
 			}
 			no = xor128.nextInt();
 		}
-
-		// UUID返却指定の場合.
+		return this;
+	}
+	
+	/**
+	 * UUIDで取得.
+	 * @return String uuid が返却されます.
+	 */
+	public String getUUID() {
 		return Converter.byte16ToUUID(
 			xor128.nextInt(), xor128.nextInt(), xor128.nextInt(), xor128.nextInt());
+	}
+	
+	/**
+	 * intの配列で取得.
+	 * @return int[] int[4]の配列が返却されます.
+	 */
+	public int[] getInt4() {
+		return new int[] {
+			xor128.nextInt(), xor128.nextInt(), xor128.nextInt(), xor128.nextInt()
+		};
 	}
 }
