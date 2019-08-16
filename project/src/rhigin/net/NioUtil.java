@@ -70,7 +70,7 @@ public final class NioUtil {
 
     // サーバーソケットBind.
     if (addr == null || (addr = addr.trim()).length() == 0) {
-      ch.socket().bind(new InetSocketAddress(port), backlog);
+      ch.socket().bind(new InetSocketAddress("0.0.0.0", port), backlog);
     } else {
       ch.socket().bind(new InetSocketAddress(addr, port), backlog);
     }

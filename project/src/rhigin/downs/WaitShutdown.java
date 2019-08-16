@@ -3,6 +3,7 @@ package rhigin.downs;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 /**
  * サーバーシャットダウン監視処理. ShutdownClientから、シャットダウン通知が来るまで待機します.
@@ -49,9 +50,10 @@ public class WaitShutdown {
         if (port <= 0 || port > 65535) {
             port = ShutdownSignal.DEFAULT_PORT;
         }
-        connection = new DatagramSocket(port,
-                InetAddress.getByName(ShutdownSignal.LOCAL_ADDRESS));
+        connection = new DatagramSocket(null);
         connection.setSoTimeout(RECEIVE_TIMEOUT);
+        connection.setReuseAddress(true);
+        connection.bind(new InetSocketAddress(InetAddress.getByName(ShutdownSignal.LOCAL_ADDRESS), port));
     }
 
     /**

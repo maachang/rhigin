@@ -3,6 +3,7 @@ package rhigin.downs;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 /**
  * シャットダウンシグナル送信.
@@ -23,7 +24,7 @@ public class ShutdownSignal {
      * シャットダウン送信内容.
      */
     public static final byte[] SHUTDOWN_BINARY = { (byte) 0x76, (byte) 0x19,
-            (byte) 0x10, (byte) 0xd0 };
+        (byte) 0x10, (byte) 0xd0 };
 
     /**
      * デフォルトタイムアウト.
@@ -48,7 +49,9 @@ public class ShutdownSignal {
             timeout = DEF_TIMEOUT;
         }
         // 規定条件を送信.
-        DatagramSocket s = new DatagramSocket();
+        DatagramSocket s = new DatagramSocket(null);
+        s.setReuseAddress(true);
+        s.bind(new InetSocketAddress(InetAddress.getByName(LOCAL_ADDRESS), 0));
         s.send(new DatagramPacket(SHUTDOWN_BINARY, 0, SHUTDOWN_BINARY.length,
                 InetAddress.getByName(LOCAL_ADDRESS), port));
         boolean ret = true;

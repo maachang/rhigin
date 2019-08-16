@@ -1,6 +1,5 @@
 package rhigin.scripts;
 
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -18,7 +17,9 @@ import org.mozilla.javascript.Wrapper;
 
 import rhigin.RhiginException;
 import rhigin.util.ArrayMap;
+import rhigin.util.ConvertException;
 import rhigin.util.Converter;
+import rhigin.util.DateConvert;
 
 /**
  * Json変換処理.
@@ -56,23 +57,18 @@ public final class Json {
 		if (json == null) {
 			return null;
 		}
-
 		List<Object> list;
 		int[] n = new int[1];
 		while (true) {
 			// token解析が必要な場合.
 			if (json.startsWith("[") || json.startsWith("{")) {
-
 				// JSON形式をToken化.
 				list = analysisJsonToken(json);
-
 				// Token解析処理.
 				if ("[".equals(list.get(0))) {
-
 					// List解析.
 					return createJsonInfo(n, list, TYPE_ARRAY, 0, list.size());
 				} else {
-
 					// Map解析.
 					return createJsonInfo(n, list, TYPE_MAP, 0, list.size());
 				}
@@ -456,7 +452,17 @@ public final class Json {
 		try {
 			return _getISO8601().parse(s);
 		} catch (Exception e) {
-			throw new RhiginException(500, e);
+			try {
+				return DateConvert.getTimestamp(s);
+			} catch(Exception ee) {
+				try {
+					return DateConvert.getWebTimestamp(s);
+				} catch(ConvertException ce) {
+					throw ce;
+				} catch(Exception ewe) {
+					throw new RhiginException(500, ewe);
+				}
+			}
 		}
 	}
 
@@ -499,15 +505,14 @@ public final class Json {
 	}
 
 	// 日付フォーマットを管理.
-	private static final ThreadLocal<WeakReference<SimpleDateFormat>> iso8601 = new ThreadLocal<WeakReference<SimpleDateFormat>>();
+	private static final ThreadLocal<SimpleDateFormat> iso8601 = new ThreadLocal<SimpleDateFormat>();
 
 	private static final SimpleDateFormat _getISO8601() {
-		WeakReference<SimpleDateFormat> n = iso8601.get();
-		if (n == null || n.get() == null) {
-			n = new WeakReference<SimpleDateFormat>(new SimpleDateFormat(
-					"yyyy-MM-dd'T'HH:mm:ssXXX"));
-			iso8601.set(n);
+		SimpleDateFormat ret = iso8601.get();
+		if (ret == null) {
+			ret = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+			iso8601.set(ret);
 		}
-		return n.get();
+		return ret;
 	}
 }

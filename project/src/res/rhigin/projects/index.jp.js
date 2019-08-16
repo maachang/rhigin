@@ -1,6 +1,7 @@
 /**
  * このjsは、rhiginが起動したときに最初に読み込まれて実行されます.
- * このjsで `addOriginals` ファンクションを利用して、js実行時に利用できる処理を登録したり `removeOriginals` で削除することができます.
+ * このjsで `addOriginals` ファンクションを利用して、js実行時に利用できる
+ * 処理を登録したり `removeOriginals` で削除することができます.
  * 
  * ＜例＞
  * var a = "hoge";

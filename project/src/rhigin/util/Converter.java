@@ -262,8 +262,7 @@ public final class Converter {
 	/**
 	 * 日付変換.
 	 * 
-	 * @param n
-	 *            変換対象の条件を設定します.
+	 * @param n　変換対象の条件を設定します.
 	 * @return 変換された内容が返却されます.
 	 */
 	public static final java.sql.Date convertSqlDate(Object o) {
@@ -298,8 +297,7 @@ public final class Converter {
 	/**
 	 * 時間変換.
 	 * 
-	 * @param n
-	 *            変換対象の条件を設定します.
+	 * @param n　変換対象の条件を設定します.
 	 * @return 変換された内容が返却されます.
 	 */
 	public static final java.sql.Time convertSqlTime(Object o) {
@@ -324,8 +322,7 @@ public final class Converter {
 	/**
 	 * 日付時間変換.
 	 * 
-	 * @param n
-	 *            変換対象の条件を設定します.
+	 * @param n　変換対象の条件を設定します.
 	 * @return 変換された内容が返却されます.
 	 */
 	public static final java.sql.Timestamp convertSqlTimestamp(Object o) {
@@ -353,8 +350,7 @@ public final class Converter {
 	/**
 	 * 通常日付変換.
 	 * 
-	 * @param n
-	 *            変換対象の条件を設定します.
+	 * @param n　変換対象の条件を設定します.
 	 * @return 変換された内容が返却されます.
 	 * @exception Exception
 	 *                例外.
