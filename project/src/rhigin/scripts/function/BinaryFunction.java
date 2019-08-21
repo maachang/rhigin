@@ -3,6 +3,7 @@ package rhigin.scripts.function;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
+import rhigin.RhiginException;
 import rhigin.scripts.RhiginFunction;
 import rhigin.util.Converter;
 
@@ -22,8 +23,19 @@ public final class BinaryFunction extends RhiginFunction {
 
 	@Override
 	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
-		if(args.length >= 1 && Converter.isFloat(args[0])) {
-			return new byte[Converter.convertInt(args[0])];
+		if(args.length >= 1) {
+			if(Converter.isFloat(args[0])) {
+				return new byte[Converter.convertInt(args[0])];
+			} else if(args[0] instanceof String) {
+				try {
+					if(args.length >= 2) {
+						return ((String)args[0]).getBytes("" + args[1]);
+					}
+					return ((String)args[0]).getBytes("UTF8");
+				} catch(Exception e) {
+					throw new RhiginException(500, e);
+				}
+			}
 		}
 		return argsException();
 	}
