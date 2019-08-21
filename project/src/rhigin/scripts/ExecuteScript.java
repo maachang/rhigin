@@ -32,6 +32,8 @@ import rhigin.scripts.function.SleepFunction;
 import rhigin.scripts.function.SystemTimeFunction;
 import rhigin.scripts.function.ValidateFunction;
 import rhigin.scripts.objects.ConsoleObject;
+import rhigin.scripts.objects.FCipherObject;
+import rhigin.scripts.objects.FCompObject;
 import rhigin.scripts.objects.FileObject;
 import rhigin.scripts.objects.JDateObject;
 import rhigin.scripts.objects.JSONObject;
@@ -322,6 +324,8 @@ public class ExecuteScript {
 		JDateObject.regFunctions(scope);
 		LockObjects.regFunctions(scope);
 		UniqueIdObject.regFunctions(scope);
+		FCipherObject.regFunctions(scope);
+		FCompObject.regFunctions(scope);
 		
 		// rhigin用の基本オブジェクトを設定.
 		RequireFunction.regFunctions(scope);
