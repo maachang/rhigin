@@ -25,6 +25,22 @@ public class RhiginException extends RuntimeException {
 		super(message, e);
 		this.status = status;
 	}
+	
+	public RhiginException() {
+		this(500);
+	}
+
+	public RhiginException(String m) {
+		this(500, m);
+	}
+
+	public RhiginException(Throwable e) {
+		this(500, e);
+	}
+
+	public RhiginException(String m, Throwable e) {
+		this(500, m, e);
+	}
 
 	public int getStatus() {
 		return status;

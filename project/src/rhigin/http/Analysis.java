@@ -2,104 +2,103 @@ package rhigin.http;
 
 import java.io.IOException;
 
+import rhigin.net.NioReadBuffer;
 import rhigin.util.Converter;
 
 /**
  * Httpリクエスト解析.
  */
 public final class Analysis {
-    public static final byte[] ONE_LINE = "\r\n".getBytes();
-    public static final byte[] END_LINE = "\r\n\r\n".getBytes();
-    public static final int ONE_LINE_LENGTH = ONE_LINE.length;
-    public static final int END_LINE_LENGTH = END_LINE.length;
+	public static final byte[] ONE_LINE = "\r\n".getBytes();
+	public static final byte[] END_LINE = "\r\n\r\n".getBytes();
+	public static final int ONE_LINE_LENGTH = ONE_LINE.length;
+	public static final int END_LINE_LENGTH = END_LINE.length;
 
-    /**
-     * Httpヘッダの終端が存在するかチェック.
-     * @param buffer
-     */
-    public static final int endPoint(HttpReadBuffer buffer) {
-      return buffer.indexOf(END_LINE);
-    }
+	/**
+	 * Httpヘッダの終端が存在するかチェック.
+	 * @param buffer
+	 */
+	public static final int endPoint(NioReadBuffer buffer) {
+		return buffer.indexOf(END_LINE);
+	}
 
-    /**
-     * HttpHeaderオブジェクトの生成.
-     * @param buffer
-     * @param endPoint
-     * @return HttpHeader
-     * @exception IOException
-     */
-    public static final Header getHeader(HttpReadBuffer buffer, int endPoint)
-      throws IOException {
-      return new Header(buffer, endPoint);
-    }
+	/**
+	 * HttpHeaderオブジェクトの生成.
+	 * @param buffer
+	 * @param endPoint
+	 * @return HttpHeader
+	 * @exception IOException
+	 */
+	public static final Header getHeader(NioReadBuffer buffer, int endPoint)
+		throws IOException {
+		return new Header(buffer, endPoint);
+	}
 
-    /**
-     * HttpRequestオブジェクトの生成.
-     * @param buffer
-     * @param endPoint
-     * @return HttpRequest
-     * @exception IOException
-     */
-    public static final Request getRequest(HttpReadBuffer buffer, int endPoint)
-      throws IOException {
-      return new Request(buffer, endPoint);
-    }
+	/**
+	 * HttpRequestオブジェクトの生成.
+	 * @param buffer
+	 * @param endPoint
+	 * @return HttpRequest
+	 * @exception IOException
+	 */
+	public static final Request getRequest(NioReadBuffer buffer, int endPoint)
+		throws IOException {
+		return new Request(buffer, endPoint);
+	}
 
-    /**
-     * パラメータ変換処理. POSTのデータおよび、GETのデータを解析します.
-     * @param body 対象のBody情報を設定します.
-     * @param cset 対象のキャラクタセットを設定します.
-     * @param pos 対象のポジションを設定します.
-     * @return Params 変換結果を返却します.
-     * @exception IOException IO例外.
-     */
-    public static final Params paramsAnalysis(String body, int pos)
-      throws IOException {
-      return paramsAnalysis(body, "UTF8", pos);
-    }
+	/**
+	 * パラメータ変換処理. POSTのデータおよび、GETのデータを解析します.
+	 * @param body 対象のBody情報を設定します.
+	 * @param cset 対象のキャラクタセットを設定します.
+	 * @param pos 対象のポジションを設定します.
+	 * @return Params 変換結果を返却します.
+	 * @exception IOException IO例外.
+	 */
+	public static final Params paramsAnalysis(String body, int pos)
+		throws IOException {
+		return paramsAnalysis(body, "UTF8", pos);
+	}
 
-    /**
-     * パラメータ変換処理. POSTのデータおよび、GETのデータを解析します.
-     * @param body 対象のBody情報を設定します.
-     * @param cset 対象のキャラクタセットを設定します.
-     * @param pos 対象のポジションを設定します.
-     * @return Params 変換結果を返却します.
-     * @exception IOException IO例外.
-     */
+	/**
+	 * パラメータ変換処理. POSTのデータおよび、GETのデータを解析します.
+	 * @param body 対象のBody情報を設定します.
+	 * @param cset 対象のキャラクタセットを設定します.
+	 * @param pos 対象のポジションを設定します.
+	 * @return Params 変換結果を返却します.
+	 * @exception IOException IO例外.
+	 */
 	public static final Params paramsAnalysis(String body, String cset, int pos)
-      throws IOException {
-      // パラメータバイナリを解析.
-      int p, n;
-      String k;
-      int b = pos;
-      Params ret = new Params();
-      while (true) {
-        if ((n = body.indexOf("&", b)) == -1) {
-          k = body.substring(b);
-          if ((p = k.indexOf("=")) == -1) {
-            break;
-          }
-          if (k.indexOf("%") != -1) {
-            ret.put(Converter.urlDecode(k.substring(0, p), cset),
-                    Converter.urlDecode(k.substring(p + 1), cset));
-          } else {
-            ret.put(k.substring(0, p), k.substring(p + 1));
-          }
-          break;
-        }
-        k = body.substring(b, n);
-        if ((p = k.indexOf("=")) == -1) {
-          b = n + 1;
-          continue;
-        }
-        if (k.indexOf("%") != -1) {
-          ret.put(Converter.urlDecode(k.substring(0, p), cset),
-                  Converter.urlDecode(k.substring(p + 1), cset));
-        } else {
-          ret.put(k.substring(0, p), k.substring(p + 1));
-        }
-        b = n + 1;
-      }
-      return ret;
-    }
+		throws IOException {
+		// パラメータバイナリを解析.
+		int p, n;
+		String k;
+		int b = pos;
+		Params ret = new Params();
+		while (true) {
+			if ((n = body.indexOf("&", b)) == -1) {
+				k = body.substring(b);
+				if ((p = k.indexOf("=")) == -1) {
+					break;
+				}
+				if (k.indexOf("%") != -1) {
+					ret.put(Converter.urlDecode(k.substring(0, p), cset), Converter.urlDecode(k.substring(p + 1), cset));
+				} else {
+					ret.put(k.substring(0, p), k.substring(p + 1));
+				}
+				break;
+			}
+			k = body.substring(b, n);
+			if ((p = k.indexOf("=")) == -1) {
+				b = n + 1;
+				continue;
+			}
+			if (k.indexOf("%") != -1) {
+				ret.put(Converter.urlDecode(k.substring(0, p), cset), Converter.urlDecode(k.substring(p + 1), cset));
+			} else {
+				ret.put(k.substring(0, p), k.substring(p + 1));
+			}
+			b = n + 1;
+		}
+		return ret;
+	}
 }

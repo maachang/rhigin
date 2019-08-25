@@ -29,26 +29,26 @@ public class JDateObject extends RhiginFunction {
 	public Scriptable construct(Context ctx, Scriptable thisObject, Object[] args) {
 		java.util.Date date = null;
 		if(args.length >= 1) {
-			if(Converter.isNumeric(args[0])) {
+			if(args.length >= 6) {
+				if(Converter.isNumeric(args[0]) && Converter.isNumeric(args[1]) && Converter.isNumeric(args[2])
+						 && Converter.isNumeric(args[3]) && Converter.isNumeric(args[4]) && Converter.isNumeric(args[5])) {
+					date = new java.util.Date(Converter.convertInt(args[0]) - 1900, Converter.convertInt(args[1]), Converter.convertInt(args[2])
+							, Converter.convertInt(args[3]), Converter.convertInt(args[4]), Converter.convertInt(args[5]));
+				}
+			} else if(args.length >= 5) {
+				if(Converter.isNumeric(args[0]) && Converter.isNumeric(args[1]) && Converter.isNumeric(args[2])
+						 && Converter.isNumeric(args[3]) && Converter.isNumeric(args[4])) {
+					date = new java.util.Date(Converter.convertInt(args[0]) - 1900, Converter.convertInt(args[1]), Converter.convertInt(args[2])
+							, Converter.convertInt(args[3]), Converter.convertInt(args[4]));
+				}
+			} else if(args.length >= 3) {
+				if(Converter.isNumeric(args[0]) && Converter.isNumeric(args[1]) && Converter.isNumeric(args[2])) {
+					date = new java.util.Date(Converter.convertInt(args[0]) - 1900, Converter.convertInt(args[1]), Converter.convertInt(args[2]));
+				}
+			} else if(Converter.isNumeric(args[0])) {
 				date = new java.util.Date(Converter.convertLong(args[0]));
 			} else {
 				date = new java.util.Date("" + args[0]);
-			}
-		} else if(args.length == 3) {
-			if(Converter.isNumeric(args[0]) && Converter.isNumeric(args[1]) && Converter.isNumeric(args[2])) {
-				date = new java.util.Date(Converter.convertInt(args[0]) + 1900, Converter.convertInt(args[1]), Converter.convertInt(args[2]));
-			}
-		} else if(args.length == 5) {
-			if(Converter.isNumeric(args[0]) && Converter.isNumeric(args[1]) && Converter.isNumeric(args[2])
-					 && Converter.isNumeric(args[3]) && Converter.isNumeric(args[4])) {
-				date = new java.util.Date(Converter.convertInt(args[0]) + 1900, Converter.convertInt(args[1]), Converter.convertInt(args[2])
-						, Converter.convertInt(args[3]), Converter.convertInt(args[4]));
-			}
-		} else if(args.length == 6) {
-			if(Converter.isNumeric(args[0]) && Converter.isNumeric(args[1]) && Converter.isNumeric(args[2])
-					 && Converter.isNumeric(args[3]) && Converter.isNumeric(args[4]) && Converter.isNumeric(args[5])) {
-				date = new java.util.Date(Converter.convertInt(args[0]) + 1900, Converter.convertInt(args[1]), Converter.convertInt(args[2])
-						, Converter.convertInt(args[3]), Converter.convertInt(args[4]), Converter.convertInt(args[5]));
 			}
 		} else {
 			date = new java.util.Date();
@@ -135,7 +135,7 @@ public class JDateObject extends RhiginFunction {
 				case 22: date.setSeconds(Converter.convertInt(o));break;
 				case 23: date.setTime(Converter.convertLong(o));break;
 				case 24: date.setYear(Converter.convertInt(o));break;
-				case 25: date.setYear(Converter.convertInt(o) + 1900);break;
+				case 25: date.setYear(Converter.convertInt(o) - 1900);break;
 				}
 			}
 			return argsError(args);

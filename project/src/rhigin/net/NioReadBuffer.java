@@ -1,4 +1,4 @@
-package rhigin.http;
+package rhigin.net;
 
 import java.nio.ByteBuffer;
 import java.util.Queue;
@@ -7,9 +7,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import rhigin.util.AtomicNumber;
 
 /**
- * Atomicにデータ受信を行うためのHttp受信用バッファ.
+ * Atomicにデータ受信を行うためのNio受信用バッファ.
  */
-public class HttpReadBuffer {
+public class NioReadBuffer {
 	private final Queue<byte[]> buffer = new ConcurrentLinkedQueue<byte[]>();
 	private final AtomicNumber bufferLength = new AtomicNumber(0);
 	private byte[] topBuffer = null;

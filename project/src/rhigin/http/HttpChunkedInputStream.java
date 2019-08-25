@@ -70,46 +70,46 @@ public class HttpChunkedInputStream extends InputStream {
 		return in.available();
 	}
 	
-    // chunkedヘッダ長を取得.
-    private static final int chunkedHeadLength(int len) {
-       int ret = 0;
-        while(true) {
-            ret ++;
-            if((len = len >> 4) == 0) {
-                break;
-            }
-        }
-        return ret;
-    }
+	// chunkedヘッダ長を取得.
+	private static final int chunkedHeadLength(int len) {
+		int ret = 0;
+		while(true) {
+			ret ++;
+			if((len = len >> 4) == 0) {
+				break;
+			}
+		}
+		return ret;
+	}
 
-    // chunked出力.
-    private static final int chunkedWrite(byte[] out, int len, int chunkedLength)
-        throws IOException {
-        int position = chunkedLength - chunkedHeadLength(len);
-        int off = position;
-        int shift = 0;
-        for(; off < chunkedLength; off ++, shift += 4) {
-            switch((len & (0x0f << shift)) >> shift) {
-            case 0: out[off] = (byte)('0'); break;
-            case 1: out[off] = (byte)('1'); break;
-            case 2: out[off] = (byte)('2'); break;
-            case 3: out[off] = (byte)('3'); break;
-            case 4: out[off] = (byte)('4'); break;
-            case 5: out[off] = (byte)('5'); break;
-            case 6: out[off] = (byte)('6'); break;
-            case 7: out[off] = (byte)('7'); break;
-            case 8: out[off] = (byte)('8'); break;
-            case 9: out[off] = (byte)('9'); break;
-            case 10: out[off] = (byte)('a'); break;
-            case 11: out[off] = (byte)('b'); break;
-            case 12: out[off] = (byte)('c'); break;
-            case 13: out[off] = (byte)('d'); break;
-            case 14: out[off] = (byte)('e'); break;
-            case 15: out[off] = (byte)('f'); break;
-            }
-        }
-        out[chunkedLength] = CFLF[0];
-        out[chunkedLength + 1] = CFLF[1];
-        return position;
-    }
+	// chunked出力.
+	private static final int chunkedWrite(byte[] out, int len, int chunkedLength)
+		throws IOException {
+		int position = chunkedLength - chunkedHeadLength(len);
+		int off = position;
+		int shift = 0;
+		for(; off < chunkedLength; off ++, shift += 4) {
+			switch((len & (0x0f << shift)) >> shift) {
+			case 0: out[off] = (byte)('0'); break;
+			case 1: out[off] = (byte)('1'); break;
+			case 2: out[off] = (byte)('2'); break;
+			case 3: out[off] = (byte)('3'); break;
+			case 4: out[off] = (byte)('4'); break;
+			case 5: out[off] = (byte)('5'); break;
+			case 6: out[off] = (byte)('6'); break;
+			case 7: out[off] = (byte)('7'); break;
+			case 8: out[off] = (byte)('8'); break;
+			case 9: out[off] = (byte)('9'); break;
+			case 10: out[off] = (byte)('a'); break;
+			case 11: out[off] = (byte)('b'); break;
+			case 12: out[off] = (byte)('c'); break;
+			case 13: out[off] = (byte)('d'); break;
+			case 14: out[off] = (byte)('e'); break;
+			case 15: out[off] = (byte)('f'); break;
+			}
+		}
+		out[chunkedLength] = CFLF[0];
+		out[chunkedLength + 1] = CFLF[1];
+		return position;
+	}
 }
