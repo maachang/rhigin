@@ -193,4 +193,90 @@ public class Time12SequenceId {
 		return (((int) value[10] & 0x000000ff) << 8)
 			| (((int) value[11] & 0x000000ff) << 0);
 	}
+	
+	/**
+	 * バイナリを16進数文字列に変換.
+	 * @param b
+	 * @return
+	 */
+	public static final String toString(byte[] b) {
+		int i, j;
+		int len = b.length;
+		StringBuilder buf = new StringBuilder(len << 1);
+		for(i = 0; i < len; i ++) {
+			for(j = 4; j >= 0; j -= 4) {
+				switch(((b[i] & (0x0f << j)) >> j) & 0x0f) {
+				case 0: buf.append("0"); break;
+				case 1: buf.append("1"); break;
+				case 2: buf.append("2"); break;
+				case 3: buf.append("3"); break;
+				case 4: buf.append("4"); break;
+				case 5: buf.append("5"); break;
+				case 6: buf.append("6"); break;
+				case 7: buf.append("7"); break;
+				case 8: buf.append("8"); break;
+				case 9: buf.append("9"); break;
+				case 10: buf.append("A"); break;
+				case 11: buf.append("B"); break;
+				case 12: buf.append("C"); break;
+				case 13: buf.append("D"); break;
+				case 14: buf.append("E"); break;
+				case 15: buf.append("F"); break;
+				}
+			}
+		}
+		return buf.toString();
+	}
+	
+	/**
+	 * 16進数文字列をバイナリに変換.
+	 * @param s
+	 * @return
+	 */
+	public static final byte[] toBinary(String s) {
+		byte[] ret = new byte[12];
+		toBinary(ret, s);
+		return ret;
+	}
+	
+	/**
+	 * 16進数文字列をバイナリに変換.
+	 * @param o
+	 * @param s
+	 */
+	public static final void toBinary(byte[] o, String s) {
+		if(s.length() != 24) {
+			return;
+		}
+		int i, j, c;
+		for(i = 0, c = 0; i < 24; i += 2, c ++) {
+			o[c] = 0;
+			for(j = 0; j < 2; j ++) {
+				switch(s.charAt(i+j)) {
+				case '0' : break;
+				case '1' : o[c] |= (1 << (4 * (1-j))); break;
+				case '2' : o[c] |= (2 << (4 * (1-j))); break;
+				case '3' : o[c] |= (3 << (4 * (1-j))); break;
+				case '4' : o[c] |= (4 << (4 * (1-j))); break;
+				case '5' : o[c] |= (5 << (4 * (1-j))); break;
+				case '6' : o[c] |= (6 << (4 * (1-j))); break;
+				case '7' : o[c] |= (7 << (4 * (1-j))); break;
+				case '8' : o[c] |= (8 << (4 * (1-j))); break;
+				case '9' : o[c] |= (9 << (4 * (1-j))); break;
+				case 'a' : o[c] |= (10 << (4 * (1-j))); break;
+				case 'A' : o[c] |= (10 << (4 * (1-j))); break;
+				case 'b' : o[c] |= (11 << (4 * (1-j))); break;
+				case 'B' : o[c] |= (11 << (4 * (1-j))); break;
+				case 'c' : o[c] |= (12 << (4 * (1-j))); break;
+				case 'C' : o[c] |= (12 << (4 * (1-j))); break;
+				case 'd' : o[c] |= (13 << (4 * (1-j))); break;
+				case 'D' : o[c] |= (13 << (4 * (1-j))); break;
+				case 'e' : o[c] |= (14 << (4 * (1-j))); break;
+				case 'E' : o[c] |= (14 << (4 * (1-j))); break;
+				case 'f' : o[c] |= (15 << (4 * (1-j))); break;
+				case 'F' : o[c] |= (15 << (4 * (1-j))); break;
+				}
+			}
+		}
+	}
 }
