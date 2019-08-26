@@ -11,6 +11,8 @@ public final class NioUtil {
 	 * ネットワーク初期定義.
 	 */
 	public static final void initNet() {
+		// guiをoff.
+		System.setProperty("java.awt.headless", "true");
 		// IPV4で処理.
 		System.setProperty("java.net.preferIPv4Stack", ""+NetConstants.NET_IPV4_FLAG);
 		// DNSキャッシュは300秒.

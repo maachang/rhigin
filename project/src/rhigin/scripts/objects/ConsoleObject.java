@@ -29,8 +29,7 @@ public class ConsoleObject {
 			type = t;
 		}
 		@Override
-	    public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args)
-	    {
+		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if(args.length>= 1) {
 				Object o = (args.length >= 1) ? args[0] : null;
 				Object t = (args.length >= 2) ? args[1] : null;

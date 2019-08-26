@@ -36,8 +36,7 @@ public final class Json {
 	/**
 	 * JSON変換.
 	 * 
-	 * @param target
-	 *            対象のターゲットオブジェクトを設定します.
+	 * @param target 対象のターゲットオブジェクトを設定します.
 	 * @return String 変換されたJSON情報が返されます.
 	 */
 	public static final String encode(Object target) {
@@ -49,8 +48,7 @@ public final class Json {
 	/**
 	 * JSON形式から、オブジェクト変換2.
 	 * 
-	 * @param json
-	 *            対象のJSON情報を設定します.
+	 * @param json 対象のJSON情報を設定します.
 	 * @return Object 変換されたJSON情報が返されます.
 	 */
 	public static final Object decode(String json) {
