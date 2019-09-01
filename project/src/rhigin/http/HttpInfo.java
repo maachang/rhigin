@@ -157,8 +157,10 @@ public class HttpInfo {
 			info.setWorkerThread(Converter.convertInt(o));
 		}
 		// ワーカースレッドが 0以下 の場合は、CPU数に応じて割当を行う.
+		// CPU数に対する
 		if(info.getWorkerThread() <= 0) {
-			info.setWorkerThread(java.lang.Runtime.getRuntime().availableProcessors());
+			info.setWorkerThread(java.lang.Runtime.getRuntime().availableProcessors() *
+				HttpConstants.WORKER_CPU_COEFFICIENT);
 		}
 
 		o = conf.get("compileCacheSize");

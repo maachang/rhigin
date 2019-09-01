@@ -16,6 +16,7 @@ import java.util.zip.GZIPOutputStream;
 
 import rhigin.RhiginConstants;
 import rhigin.util.Converter;
+import rhigin.util.FileUtil;
 
 /**
  * RhiginLogファクトリ.
@@ -258,6 +259,12 @@ public class LogFactory {
 			if(outDir.lastIndexOf("/") != outDir.length() - 1) {
 				outDir = outDir + "/";
 			}
+		}
+		// ログ出力先フォルダが存在しない場合は作成する.
+		if(outDir != null && outDir.length() != 0 && !FileUtil.isDir(outDir)) {
+			try {
+				FileUtil.mkdirs(outDir);
+			} catch(Exception e) {}
 		}
 	}
 

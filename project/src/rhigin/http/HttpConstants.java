@@ -23,6 +23,10 @@ public class HttpConstants {
 
 	/** デフォルトのワーカースレッド数. **/
 	public static final int WORKER_THREAD = -1; // CPU数に応じてスレッド数を割り当てる.
+	
+	/** CPU数に応じたワーカースレッド係数(1cpuに４スレッド). **/
+	public static final int WORKER_CPU_COEFFICIENT = 4;
+	
 
 	/** デフォルトのコンパイルキャッシュ数. **/
 	public static final int COMPILE_CACHE_SIZE = 128;
