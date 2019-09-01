@@ -2,6 +2,7 @@ package rhigin.net;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
@@ -16,8 +17,9 @@ public abstract class NioElement {
 	protected final AtomicNumber ops = new AtomicNumber(SelectionKey.OP_READ);
 	protected NioSelector selector;
 	protected SelectionKey key;
+	protected InetSocketAddress access;
 	protected NioReadBuffer buffer = new NioReadBuffer();
-
+	
 	protected NioSendLess less = new NioSendLess();
 	protected byte[] dataBinary = null;
 
@@ -32,6 +34,7 @@ public abstract class NioElement {
 		connectionFlag = false;
 		dataBinary = null;
 		selector = null;
+		access = null;
 		if (less != null) {
 		less.clear();
 		less = null;
@@ -78,6 +81,7 @@ public abstract class NioElement {
 		this.key = ret;
 		this.selector = selector;
 		this.connectionFlag = true;
+		this.access = (InetSocketAddress)channel.getRemoteAddress();
 		return ret;
 	}
 
@@ -186,5 +190,13 @@ public abstract class NioElement {
 	 */
 	public int interestOps() {
 		return ops.get();
+	}
+	
+	/**
+	 * アクセス先の接続情報を取得.
+	 * @return InetSocketAddress リモートアクセス情報が返却されます.
+	 */
+	public InetSocketAddress getRemoteAddress() {
+		return access;
 	}
 }

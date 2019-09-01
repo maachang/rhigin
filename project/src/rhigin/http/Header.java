@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import rhigin.RhiginException;
-import rhigin.net.NioReadBuffer;
 import rhigin.net.NioElement;
+import rhigin.net.NioReadBuffer;
 import rhigin.scripts.JavaScriptable;
 import rhigin.util.AbstractKeyIterator;
 import rhigin.util.ConvertMap;
@@ -100,7 +100,23 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 	 * @return
 	 */
 	public String getVersion() {
-	  return version;
+		return version;
+	}
+	
+	/**
+	 * リモートアドレスを取得.
+	 * @return
+	 */
+	public String getRemoteAddress() {
+		return element.getRemoteAddress().getHostString();
+	}
+	
+	/**
+	 * リモートポートを取得.
+	 * @return
+	 */
+	public int getRemotePort() {
+		return element.getRemoteAddress().getPort();
 	}
 	
 	/**
@@ -158,6 +174,10 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 			return getMethod();
 		} else if ("version".equals(key)) {
 			return getVersion();
+		} else if ("address".equals(key)) {
+			return getRemoteAddress();
+		} else if ("port".equals(key)) {
+			return getRemotePort();
 		} else if("Content-Type".equals(key)) {
 			if(contntType == null) {
 				try {
