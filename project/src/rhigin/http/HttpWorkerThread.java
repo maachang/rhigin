@@ -491,7 +491,7 @@ public class HttpWorkerThread extends Thread {
 	private static final void successResponse(boolean gzip, HttpElement em, int status, Response response, Object value)
 		throws IOException {
 		StringBuilder buf = new StringBuilder(
-			"{\"result\":true,\"status\":").append(status).append(",");
+			"{\"success\":true,\"status\":").append(status).append(",");
 		if(value == null) {
 			buf.append("\"value\":null");
 		} else {
@@ -621,7 +621,7 @@ public class HttpWorkerThread extends Thread {
 	private static final void errorResponse(HttpElement em, int status,
 		String message) throws IOException {
 		StringBuilder buf = new StringBuilder(
-				"{\"result\": false, \"status\": ").append(status);
+				"{\"success\":false,\"status\":").append(status);
 		if (message == null) {
 			message = Status.getMessage(status);
 		}
@@ -635,8 +635,8 @@ public class HttpWorkerThread extends Thread {
 		message = Converter.changeString(message,"{","｛");
 		message = Converter.changeString(message,"}","｝");
 		
-		String res = buf.append(", \"value\": \"").append(message)
-				.append("\"").append("}").toString();
+		String res = buf.append(",\"value\":\"").append(message)
+				.append("\"}").toString();
 		buf = null;
 		
 		Response header = new Response();
