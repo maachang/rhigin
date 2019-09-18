@@ -14,6 +14,8 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
+import fugin.server.HttpElement;
+import fugin.server.HttpResponse;
 import rhigin.RhiginConstants;
 import rhigin.RhiginException;
 import rhigin.logs.Log;
@@ -414,18 +416,16 @@ public class HttpWorkerThread extends Thread {
 			}
 			// 戻り値がInputStreamでない場合.
 			if(!(ret instanceof InputStream)) {
-				if (ret == null) {
-					ret = "";
-					gzip = false;
-				} else if(!(ret instanceof String)) {
-					ret = Json.encode(ret);
-				} else if(((String)ret).length() == 0) {
+				if (ret == null ||
+					(ret instanceof String && ((String)ret).length() == 0)) {
 					ret = "";
 					gzip = false;
 				}
-				sendResponse(gzip, em, res.getStatus(), res, (String)ret);
+				// success形式で返却.
+				successResponse(gzip, em, res.getStatus(), res, ret);
 			// 戻り値がInputStreamの場合.
 			} else {
+				// バイナリ返却.
 				sendResponse(em, res.getStatus(), res, (InputStream)ret);
 			}
 		} catch(RhiginException re) {
@@ -485,6 +485,21 @@ public class HttpWorkerThread extends Thread {
 		} else {
 			return Analysis.paramsAnalysis(v, 0);
 		}
+	}
+	
+	/** 正常結果をJSON返却. **/
+	private static final void successResponse(boolean gzip, HttpElement em, int status, Response response, Object value)
+		throws IOException {
+		StringBuilder buf = new StringBuilder(
+			"{\"result\":true,\"status\":").append(status).append(",");
+		if(value == null) {
+			buf.append("\"value\":null");
+		} else {
+			buf.append("\"value\":").append(Json.encode(value));
+		}
+		buf.append("}");
+		response.setHeader("Content-Type", "application/json; charset=UTF-8");
+		sendResponse(gzip, em, status, response, buf.toString());
 	}
 
 	/** GZIP返却許可チェック. **/
@@ -620,7 +635,7 @@ public class HttpWorkerThread extends Thread {
 		message = Converter.changeString(message,"{","｛");
 		message = Converter.changeString(message,"}","｝");
 		
-		String res = buf.append(", \"message\": \"").append(message)
+		String res = buf.append(", \"value\": \"").append(message)
 				.append("\"").append("}").toString();
 		buf = null;
 		
