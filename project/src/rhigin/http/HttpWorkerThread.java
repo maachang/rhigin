@@ -633,8 +633,8 @@ public class HttpWorkerThread extends Thread {
 		message = Converter.changeString(message,"{","｛");
 		message = Converter.changeString(message,"}","｝");
 		
-		String res = buf.append(",\"value\":\"").append(message)
-				.append("\"}").toString();
+		String res = buf.append(",\"value\":{\"message\":\"").append(message)
+			.append("\"}}").toString();
 		buf = null;
 		
 		Response header = new Response();
