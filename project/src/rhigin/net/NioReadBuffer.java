@@ -111,29 +111,27 @@ public class NioReadBuffer {
 		// 前回読み込み中のTOPデータが存在する場合.
 		buf = topBuffer; topBuffer = null;
 		if(buf != null) {
-			bufLen = buf.length;
-			if(len <= ret + bufLen) {
-				etcLen = len - ret;
+			if(len < (bufLen = buf.length)) {
+				etcLen = len;
 				System.arraycopy(buf, 0, b, off, etcLen);
 				etcBuf = new byte[bufLen - etcLen];
 				System.arraycopy(buf, etcLen, etcBuf, 0, bufLen - etcLen);
 				topBuffer = etcBuf;
-				ret += etcLen;
-				bufferLength.remove(ret);
+				ret = etcLen;
+				bufferLength.remove(etcLen);
 				return ret;
 			}
 			System.arraycopy(buf, 0, b, off, bufLen);
 			off += bufLen;
-			ret += bufLen;
+			ret = bufLen;
+			bufferLength.remove(bufLen);
 			if(len <= ret) {
-				bufferLength.remove(ret);
 				return ret;
 			}
 		}
 		// 断片化されたバイナリを結合.
 		while((buf = buffer.poll()) != null) {
-			bufLen = buf.length;
-			if(len <= ret + bufLen) {
+			if(len < ret + (bufLen = buf.length)) {
 				// １つの塊のデータの読み込みに対して、残りが発生する場合.
 				// 次の処理で読み込む.
 				etcLen = len - ret;
@@ -142,16 +140,17 @@ public class NioReadBuffer {
 				System.arraycopy(buf, etcLen, etcBuf, 0, bufLen - etcLen);
 				topBuffer = etcBuf;
 				ret += etcLen;
-				break;
+				bufferLength.remove(etcLen);
+				return ret;
 			}
 			System.arraycopy(buf, 0, b, off, bufLen);
 			off += bufLen;
 			ret += bufLen;
+			bufferLength.remove(bufLen);
 			if(len <= ret) {
-				break;
+				return ret;
 			}
 		}
-		bufferLength.remove(ret);
 		return ret;
 	}
 	
@@ -169,26 +168,24 @@ public class NioReadBuffer {
 		// 前回読み込み中のTOPデータが存在する場合.
 		buf = topBuffer; topBuffer = null;
 		if(buf != null) {
-			bufLen = buf.length;
-			if(len <= ret + bufLen) {
-				etcLen = len - ret;
+			if(len < (bufLen = buf.length)) {
+				etcLen = len;
 				etcBuf = new byte[bufLen - etcLen];
 				System.arraycopy(buf, etcLen, etcBuf, 0, bufLen - etcLen);
 				topBuffer = etcBuf;
-				ret += etcLen;
-				bufferLength.remove(ret);
+				ret = etcLen;
+				bufferLength.remove(etcLen);
 				return ret;
 			}
-			ret += bufLen;
+			ret = bufLen;
+			bufferLength.remove(bufLen);
 			if(len <= ret) {
-				bufferLength.remove(ret);
 				return ret;
 			}
 		}
 		// 断片化されたバイナリを結合.
 		while((buf = buffer.poll()) != null) {
-			bufLen = buf.length;
-			if(len <= ret + bufLen) {
+			if(len < ret + (bufLen = buf.length)) {
 				// １つの塊のデータの読み込みに対して、残りが発生する場合.
 				// 次の処理で読み込む.
 				etcLen = len - ret;
@@ -196,14 +193,15 @@ public class NioReadBuffer {
 				System.arraycopy(buf, etcLen, etcBuf, 0, bufLen - etcLen);
 				topBuffer = etcBuf;
 				ret += etcLen;
-				break;
+				bufferLength.remove(etcLen);
+				return ret;
 			}
 			ret += bufLen;
+			bufferLength.remove(bufLen);
 			if(len <= ret) {
-				break;
+				return ret;
 			}
 		}
-		bufferLength.remove(ret);
 		return ret;
 	}
 	
