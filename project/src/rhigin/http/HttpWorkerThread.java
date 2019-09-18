@@ -14,8 +14,6 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
-import fugin.server.HttpElement;
-import fugin.server.HttpResponse;
 import rhigin.RhiginConstants;
 import rhigin.RhiginException;
 import rhigin.logs.Log;
