@@ -6,6 +6,7 @@ package rhigin;
 public class RhiginException extends RuntimeException {
 	private static final long serialVersionUID = -3354862673253639272L;
 	protected int status;
+
 	public RhiginException(int status) {
 		super();
 		this.status = status;
@@ -25,7 +26,7 @@ public class RhiginException extends RuntimeException {
 		super(message, e);
 		this.status = status;
 	}
-	
+
 	public RhiginException() {
 		this(500);
 	}

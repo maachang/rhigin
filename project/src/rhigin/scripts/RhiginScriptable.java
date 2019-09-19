@@ -29,7 +29,7 @@ final class RhiginScriptable implements Scriptable {
 		this.context = (c == null) ? new RhiginContext() : c;
 		this.indexedProps = indexedProps;
 	}
-	
+
 	public RhiginContext getContext() {
 		return context;
 	}
@@ -49,7 +49,7 @@ final class RhiginScriptable implements Scriptable {
 		} else {
 			Class c;
 			Object value = context.getAttribute(name);
-			if(value == null) {
+			if (value == null) {
 				return NOT_FOUND;
 			} else if ((c = value.getClass()).isArray()) {
 				return value;
@@ -168,25 +168,16 @@ final class RhiginScriptable implements Scriptable {
 					hint = "object";
 				} else if (typeHint == ScriptRuntime.FunctionClass) {
 					hint = "function";
-				} else if (typeHint == ScriptRuntime.BooleanClass
-						|| typeHint == Boolean.TYPE) {
+				} else if (typeHint == ScriptRuntime.BooleanClass || typeHint == Boolean.TYPE) {
 					hint = "boolean";
-				} else if (typeHint == ScriptRuntime.NumberClass ||
-						typeHint == ScriptRuntime.ByteClass ||
-						typeHint == Byte.TYPE ||
-						typeHint == ScriptRuntime.ShortClass ||
-						typeHint == Short.TYPE ||
-						typeHint == ScriptRuntime.IntegerClass ||
-						typeHint == Integer.TYPE ||
-						typeHint == ScriptRuntime.FloatClass ||
-						typeHint == Float.TYPE ||
-						typeHint == ScriptRuntime.DoubleClass ||
-						typeHint == Double.TYPE) {
+				} else if (typeHint == ScriptRuntime.NumberClass || typeHint == ScriptRuntime.ByteClass
+						|| typeHint == Byte.TYPE || typeHint == ScriptRuntime.ShortClass || typeHint == Short.TYPE
+						|| typeHint == ScriptRuntime.IntegerClass || typeHint == Integer.TYPE
+						|| typeHint == ScriptRuntime.FloatClass || typeHint == Float.TYPE
+						|| typeHint == ScriptRuntime.DoubleClass || typeHint == Double.TYPE) {
 					hint = "number";
 				} else {
-					throw Context.reportRuntimeError(
-							"Invalid JavaScript value of type " +
-									typeHint.toString());
+					throw Context.reportRuntimeError("Invalid JavaScript value of type " + typeHint.toString());
 				}
 				args[0] = hint;
 			}
@@ -204,8 +195,7 @@ final class RhiginScriptable implements Scriptable {
 				if (!(v instanceof Scriptable)) {
 					return v;
 				}
-				if (typeHint == ScriptRuntime.ScriptableClass
-						|| typeHint == ScriptRuntime.FunctionClass) {
+				if (typeHint == ScriptRuntime.ScriptableClass || typeHint == ScriptRuntime.FunctionClass) {
 					return v;
 				}
 				if (tryToString && v instanceof Wrapper) {
@@ -218,14 +208,14 @@ final class RhiginScriptable implements Scriptable {
 			}
 		}
 		String arg = (typeHint == null) ? "undefined" : typeHint.getName();
-		throw Context.reportRuntimeError(
-				"Cannot find default value for object " + arg);
+		throw Context.reportRuntimeError("Cannot find default value for object " + arg);
 	}
 
 	public boolean hasInstance(Scriptable instance) {
 		Scriptable proto = instance.getPrototype();
 		while (proto != null) {
-			if (proto.equals(this)) return true;
+			if (proto.equals(this))
+				return true;
 			proto = proto.getPrototype();
 		}
 		return false;
@@ -235,8 +225,8 @@ final class RhiginScriptable implements Scriptable {
 		ArrayList<String> list = new ArrayList<String>();
 		list.ensureCapacity(context.size());
 		Iterator<String> it = context.keys();
-		while(it.hasNext()) {
-				list.add(it.next());
+		while (it.hasNext()) {
+			list.add(it.next());
 		}
 		String[] res = new String[list.size()];
 		list.toArray(res);
@@ -250,8 +240,7 @@ final class RhiginScriptable implements Scriptable {
 				return njb;
 			}
 			Object obj = njb.unwrap();
-			if (obj instanceof Number || obj instanceof String ||
-					obj instanceof Boolean || obj instanceof Character) {
+			if (obj instanceof Number || obj instanceof String || obj instanceof Boolean || obj instanceof Character) {
 				return njb;
 			} else {
 				return obj;

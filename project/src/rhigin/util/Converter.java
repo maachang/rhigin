@@ -19,7 +19,8 @@ import java.util.Map;
  * 変換処理系.
  */
 public final class Converter {
-	private Converter() {}
+	private Converter() {
+	}
 
 	/** char文字のチェックを行う配列. **/
 	public static final byte[] CHECK_CHAR = new byte[65536];
@@ -107,8 +108,7 @@ public final class Converter {
 	 */
 	public static final boolean isFloat(Object n) {
 		if (Converter.isNumeric(n)) {
-			if (n instanceof Float || n instanceof Double
-					|| n instanceof BigDecimal) {
+			if (n instanceof Float || n instanceof Double || n instanceof BigDecimal) {
 				return true;
 			} else if (n instanceof String) {
 				return ((String) n).indexOf(".") != -1;
@@ -262,7 +262,8 @@ public final class Converter {
 	/**
 	 * 日付変換.
 	 * 
-	 * @param n　変換対象の条件を設定します.
+	 * @param n
+	 *            変換対象の条件を設定します.
 	 * @return 変換された内容が返却されます.
 	 */
 	public static final java.sql.Date convertSqlDate(Object o) {
@@ -297,7 +298,8 @@ public final class Converter {
 	/**
 	 * 時間変換.
 	 * 
-	 * @param n　変換対象の条件を設定します.
+	 * @param n
+	 *            変換対象の条件を設定します.
 	 * @return 変換された内容が返却されます.
 	 */
 	public static final java.sql.Time convertSqlTime(Object o) {
@@ -322,7 +324,8 @@ public final class Converter {
 	/**
 	 * 日付時間変換.
 	 * 
-	 * @param n　変換対象の条件を設定します.
+	 * @param n
+	 *            変換対象の条件を設定します.
 	 * @return 変換された内容が返却されます.
 	 */
 	public static final java.sql.Timestamp convertSqlTimestamp(Object o) {
@@ -350,7 +353,8 @@ public final class Converter {
 	/**
 	 * 通常日付変換.
 	 * 
-	 * @param n　変換対象の条件を設定します.
+	 * @param n
+	 *            変換対象の条件を設定します.
 	 * @return 変換された内容が返却されます.
 	 * @exception Exception
 	 *                例外.
@@ -404,11 +408,9 @@ public final class Converter {
 
 		if (isNumeric(s)) {
 			return "0".equals(s) ? false : true;
-		} else if (eqEng(s, start, (len -= start), "true")
-				|| eqEng(s, start, len, "t") || eqEng(s, start, len, "on")) {
+		} else if (eqEng(s, start, (len -= start), "true") || eqEng(s, start, len, "t") || eqEng(s, start, len, "on")) {
 			return true;
-		} else if (eqEng(s, start, len, "false") || eqEng(s, start, len, "f")
-				|| eqEng(s, start, len, "off")) {
+		} else if (eqEng(s, start, len, "false") || eqEng(s, start, len, "f") || eqEng(s, start, len, "off")) {
 			return false;
 		}
 		throw new ConvertException("Boolean変換に失敗しました:" + s);
@@ -699,8 +701,7 @@ public final class Converter {
 	 *            置き換え先の文字条件を設定します.
 	 * @return String 文字列が返却されます.
 	 */
-	public static final String changeString(String src, int off, int len,
-			String s, String d) {
+	public static final String changeString(String src, int off, int len, String s, String d) {
 		int j, k;
 		char t = s.charAt(0);
 		int lenS = s.length();
@@ -807,8 +808,7 @@ public final class Converter {
 	 * @exception IOException
 	 *                例外.
 	 */
-	public static final String urlDecode(String info, String charset)
-			throws IOException {
+	public static final String urlDecode(String info, String charset) throws IOException {
 		int len;
 		if (info == null || (len = info.length()) <= 0) {
 			return "";
@@ -822,8 +822,7 @@ public final class Converter {
 		for (int i = 0; i < len; i++) {
 			c = info.charAt(i);
 			if (c == '%') {
-				bin[j] = (byte) ((hexChar(info.charAt(i + 1)) << 4) | hexChar(info
-						.charAt(i + 2)));
+				bin[j] = (byte) ((hexChar(info.charAt(i + 1)) << 4) | hexChar(info.charAt(i + 2)));
 				i += 2;
 				j++;
 			} else if (c == '+') {
@@ -848,8 +847,7 @@ public final class Converter {
 	 * @exception IOException
 	 *                例外.
 	 */
-	public static final String urlEncode(String info, String charset)
-			throws IOException {
+	public static final String urlEncode(String info, String charset) throws IOException {
 		int len;
 		if (info == null || (len = info.length()) <= 0) {
 			return "";
@@ -865,8 +863,7 @@ public final class Converter {
 		char c;
 		for (int i = 0; i < len; i++) {
 			c = info.charAt(i);
-			if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
-					|| (c >= '0' && c <= '9') || (c == '.') || (c == '-')
+			if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || (c == '.') || (c == '-')
 					|| (c == '_')) {
 				buf.append(c);
 			} else if (c == ' ') {
@@ -909,40 +906,104 @@ public final class Converter {
 	/** Hex文字列変換. **/
 	private static final void toHex(StringBuilder buf, byte b) {
 		switch ((b & 0x000000f0) >> 4) {
-		case 0: buf.append("0"); break;
-		case 1: buf.append("1"); break;
-		case 2: buf.append("2"); break;
-		case 3: buf.append("3"); break;
-		case 4: buf.append("4"); break;
-		case 5: buf.append("5"); break;
-		case 6: buf.append("6"); break;
-		case 7: buf.append("7"); break;
-		case 8: buf.append("8"); break;
-		case 9: buf.append("9"); break;
-		case 10: buf.append("A"); break;
-		case 11: buf.append("B"); break;
-		case 12: buf.append("C"); break;
-		case 13: buf.append("D"); break;
-		case 14: buf.append("E"); break;
-		case 15: buf.append("F"); break;
+		case 0:
+			buf.append("0");
+			break;
+		case 1:
+			buf.append("1");
+			break;
+		case 2:
+			buf.append("2");
+			break;
+		case 3:
+			buf.append("3");
+			break;
+		case 4:
+			buf.append("4");
+			break;
+		case 5:
+			buf.append("5");
+			break;
+		case 6:
+			buf.append("6");
+			break;
+		case 7:
+			buf.append("7");
+			break;
+		case 8:
+			buf.append("8");
+			break;
+		case 9:
+			buf.append("9");
+			break;
+		case 10:
+			buf.append("A");
+			break;
+		case 11:
+			buf.append("B");
+			break;
+		case 12:
+			buf.append("C");
+			break;
+		case 13:
+			buf.append("D");
+			break;
+		case 14:
+			buf.append("E");
+			break;
+		case 15:
+			buf.append("F");
+			break;
 		}
 		switch (b & 0x0000000f) {
-		case 0: buf.append("0"); break;
-		case 1: buf.append("1"); break;
-		case 2: buf.append("2"); break;
-		case 3: buf.append("3"); break;
-		case 4: buf.append("4"); break;
-		case 5: buf.append("5"); break;
-		case 6: buf.append("6"); break;
-		case 7: buf.append("7"); break;
-		case 8: buf.append("8"); break;
-		case 9: buf.append("9"); break;
-		case 10: buf.append("A"); break;
-		case 11: buf.append("B"); break;
-		case 12: buf.append("C"); break;
-		case 13: buf.append("D"); break;
-		case 14: buf.append("E"); break;
-		case 15: buf.append("F"); break;
+		case 0:
+			buf.append("0");
+			break;
+		case 1:
+			buf.append("1");
+			break;
+		case 2:
+			buf.append("2");
+			break;
+		case 3:
+			buf.append("3");
+			break;
+		case 4:
+			buf.append("4");
+			break;
+		case 5:
+			buf.append("5");
+			break;
+		case 6:
+			buf.append("6");
+			break;
+		case 7:
+			buf.append("7");
+			break;
+		case 8:
+			buf.append("8");
+			break;
+		case 9:
+			buf.append("9");
+			break;
+		case 10:
+			buf.append("A");
+			break;
+		case 11:
+			buf.append("B");
+			break;
+		case 12:
+			buf.append("C");
+			break;
+		case 13:
+			buf.append("D");
+			break;
+		case 14:
+			buf.append("E");
+			break;
+		case 15:
+			buf.append("F");
+			break;
 		}
 	}
 
@@ -960,23 +1021,55 @@ public final class Converter {
 		char[] mM = Alphabet._mM;
 		for (int i = len - 1; i >= 0; i--) {
 			switch (mM[s.charAt(i)]) {
-			case '0': break;
-			case '1': ret |= 1 << n; break;
-			case '2': ret |= 2 << n; break;
-			case '3': ret |= 3 << n; break;
-			case '4': ret |= 4 << n; break;
-			case '5': ret |= 5 << n; break;
-			case '6': ret |= 6 << n; break;
-			case '7': ret |= 7 << n; break;
-			case '8': ret |= 8 << n; break;
-			case '9': ret |= 9 << n; break;
-			case 'a': ret |= 10 << n; break;
-			case 'b': ret |= 11 << n; break;
-			case 'c': ret |= 12 << n; break;
-			case 'd': ret |= 13 << n; break;
-			case 'e': ret |= 14 << n; break;
-			case 'f': ret |= 15 << n; break;
-			default: throw new IOException("16進文字列に不正な文字列を検知:" + s);
+			case '0':
+				break;
+			case '1':
+				ret |= 1 << n;
+				break;
+			case '2':
+				ret |= 2 << n;
+				break;
+			case '3':
+				ret |= 3 << n;
+				break;
+			case '4':
+				ret |= 4 << n;
+				break;
+			case '5':
+				ret |= 5 << n;
+				break;
+			case '6':
+				ret |= 6 << n;
+				break;
+			case '7':
+				ret |= 7 << n;
+				break;
+			case '8':
+				ret |= 8 << n;
+				break;
+			case '9':
+				ret |= 9 << n;
+				break;
+			case 'a':
+				ret |= 10 << n;
+				break;
+			case 'b':
+				ret |= 11 << n;
+				break;
+			case 'c':
+				ret |= 12 << n;
+				break;
+			case 'd':
+				ret |= 13 << n;
+				break;
+			case 'e':
+				ret |= 14 << n;
+				break;
+			case 'f':
+				ret |= 15 << n;
+				break;
+			default:
+				throw new IOException("16進文字列に不正な文字列を検知:" + s);
 			}
 			n += 4;
 		}
@@ -1032,15 +1125,11 @@ public final class Converter {
 			buf.append(_TIMESTAMP_TO_WEEK[cal.get(Calendar.DAY_OF_WEEK)]);
 			tmp = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
 			if (mode) {
-				buf.append("00".substring(tmp.length())).append(tmp)
-						.append("-");
-				buf.append(_TIMESTAMP_TO_MONTH[cal.get(Calendar.MONTH)])
-						.append("-");
+				buf.append("00".substring(tmp.length())).append(tmp).append("-");
+				buf.append(_TIMESTAMP_TO_MONTH[cal.get(Calendar.MONTH)]).append("-");
 			} else {
-				buf.append("00".substring(tmp.length())).append(tmp)
-						.append(" ");
-				buf.append(_TIMESTAMP_TO_MONTH[cal.get(Calendar.MONTH)])
-						.append(" ");
+				buf.append("00".substring(tmp.length())).append(tmp).append(" ");
+				buf.append(_TIMESTAMP_TO_MONTH[cal.get(Calendar.MONTH)]).append(" ");
 			}
 			tmp = String.valueOf(cal.get(Calendar.YEAR));
 			buf.append("0000".substring(tmp.length())).append(tmp).append(" ");
@@ -1069,8 +1158,7 @@ public final class Converter {
 	 * @param date
 	 *            出力対象の日付オブジェクトを設定します.
 	 */
-	public static final void createTimestamp(StringBuilder buf, boolean mode,
-			java.util.Date date) {
+	public static final void createTimestamp(StringBuilder buf, boolean mode, java.util.Date date) {
 		try {
 			String tmp;
 			Calendar cal = new GregorianCalendar(DateConvert.GMT_TIMEZONE);
@@ -1078,15 +1166,11 @@ public final class Converter {
 			buf.append(_TIMESTAMP_TO_WEEK[cal.get(Calendar.DAY_OF_WEEK)]);
 			tmp = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
 			if (mode) {
-				buf.append("00".substring(tmp.length())).append(tmp)
-						.append("-");
-				buf.append(_TIMESTAMP_TO_MONTH[cal.get(Calendar.MONTH)])
-						.append("-");
+				buf.append("00".substring(tmp.length())).append(tmp).append("-");
+				buf.append(_TIMESTAMP_TO_MONTH[cal.get(Calendar.MONTH)]).append("-");
 			} else {
-				buf.append("00".substring(tmp.length())).append(tmp)
-						.append(" ");
-				buf.append(_TIMESTAMP_TO_MONTH[cal.get(Calendar.MONTH)])
-						.append(" ");
+				buf.append("00".substring(tmp.length())).append(tmp).append(" ");
+				buf.append(_TIMESTAMP_TO_MONTH[cal.get(Calendar.MONTH)]).append(" ");
 			}
 			tmp = String.valueOf(cal.get(Calendar.YEAR));
 			buf.append("0000".substring(tmp.length())).append(tmp).append(" ");
@@ -1113,8 +1197,7 @@ public final class Converter {
 	 * @exception Exception
 	 *                例外.
 	 */
-	public static final Date convertTimestamp(String timestamp)
-			throws Exception {
+	public static final Date convertTimestamp(String timestamp) throws Exception {
 		return DateConvert.getWebTimestamp(timestamp);
 	}
 
@@ -1187,8 +1270,7 @@ public final class Converter {
 	 *            設定対象のオフセット値を設定します.
 	 * @return int マッチする位置が返却されます. [-1]の場合は情報は存在しません.
 	 */
-	public static final int indexOfEng(final String buf, final String chk,
-			final int off) {
+	public static final int indexOfEng(final String buf, final String chk, final int off) {
 		return Alphabet.indexOf(buf, chk, off);
 	}
 
@@ -1241,8 +1323,7 @@ public final class Converter {
 	 * @exception Exception
 	 *                例外.
 	 */
-	public static final Map<String, Object> toMap(Object... list)
-			throws Exception {
+	public static final Map<String, Object> toMap(Object... list) throws Exception {
 		Map<String, Object> ret = new HashMap<String, Object>();
 		int len = list.length;
 		for (int i = 0; i < len; i += 2) {
@@ -1273,35 +1354,41 @@ public final class Converter {
 	 *            対象の長さを設定します.
 	 * @return byte[] ASCII型で変換された文字列が返却されます.
 	 */
-	public static final byte[] toAsciiBytes(final String string, final int off,
-			final int len) {
+	public static final byte[] toAsciiBytes(final String string, final int off, final int len) {
 		final byte[] ret = new byte[len];
 		for (int i = off; i < len; i++) {
 			ret[i] = (byte) (string.charAt(i) & 0x00ff);
 		}
 		return ret;
 	}
-	
+
 	// ゼロサプレス.
 	private static final void _z2(StringBuilder buf, String no) {
 		buf.append("00".substring(no.length())).append(no);
 	}
-	
+
 	/**
 	 * 16バイトデータ(4バイト配列４つ)をUUIDに変換.
-	 * @param n int[4] のデータを設定します.
+	 * 
+	 * @param n
+	 *            int[4] のデータを設定します.
 	 * @return
 	 */
 	public static final String byte16ToUUID(int[] n) {
 		return byte16ToUUID(n[0], n[1], n[2], n[3]);
 	}
-	
+
 	/**
 	 * 16バイトデータ(4バイト配列４つ)をUUIDに変換.
-	 * @param a 4バイトデータを設定します.
-	 * @param b 4バイトデータを設定します.
-	 * @param c 4バイトデータを設定します.
-	 * @param d 4バイトデータを設定します.
+	 * 
+	 * @param a
+	 *            4バイトデータを設定します.
+	 * @param b
+	 *            4バイトデータを設定します.
+	 * @param c
+	 *            4バイトデータを設定します.
+	 * @param d
+	 *            4バイトデータを設定します.
 	 * @return String uuidが返却されます.
 	 */
 	public static final String byte16ToUUID(int a, int b, int c, int d) {
@@ -1328,269 +1415,272 @@ public final class Converter {
 		_z2(buf, Integer.toHexString(d & 0x000000ff));
 		return buf.toString();
 	}
-	
+
 	/**
 	 * UUIDを16バイトデータ(4バイト配列４つ)に変換.
-	 * @param n uuidを設定します.
+	 * 
+	 * @param n
+	 *            uuidを設定します.
 	 * @return int[] int[4]が返却されます.
 	 */
 	public static final int[] uuidToByte16(String n) {
-		return new int[] {
-			Integer.parseInt(n.substring(0,8), 16),
-			Integer.parseInt(n.substring(9,13) + n.substring(14,18), 16),
-			Integer.parseInt(n.substring(19,23) + n.substring(24,28), 16),
-			Integer.parseInt(n.substring(28), 16)
-		};
+		return new int[] { Integer.parseInt(n.substring(0, 8), 16),
+				Integer.parseInt(n.substring(9, 13) + n.substring(14, 18), 16),
+				Integer.parseInt(n.substring(19, 23) + n.substring(24, 28), 16),
+				Integer.parseInt(n.substring(28), 16) };
 	}
 
-    /**
-     * チェック情報単位で情報を区切ります.
-     * @param out 区切られた情報が格納されます.
-     * @param mode 区切られた時の文字列が無い場合に、無視するかチェックします.
-     *            [true]の場合は、無視しません. [false]の場合は、無視します.
-     * @param str 区切り対象の情報を設置します.
-     * @param check 区切り対象の文字情報をセットします.
-     *            区切り対象文字を複数設定する事により、それらに対応した区切りとなります.
-     */
-    public static final void cutString(List<String> out, boolean mode, String str, String check) {
-        int i, j;
-        int len;
-        int lenJ;
-        int s = -1;
-        char strCode;
-        char[] checkCode = null;
-        String tmp = null;
-        if (out == null || str == null || (len = str.length()) <= 0
-                || check == null || check.length() <= 0) {
-            throw new IllegalArgumentException();
-        }
-        out.clear();
-        lenJ = check.length();
-        checkCode = new char[lenJ];
-        check.getChars(0, lenJ, checkCode, 0);
-        if (lenJ == 1) {
-            for (i = 0, s = -1; i < len; i++) {
-                strCode = str.charAt(i);
-                s = (s == -1) ? i : s;
-                if (strCode == checkCode[0]) {
-                    if (s < i) {
-                        tmp = str.substring(s, i);
-                        out.add(tmp);
-                        tmp = null;
-                        s = -1;
-                    } else if (mode == true) {
-                        out.add("");
-                        s = -1;
-                    } else {
-                        s = -1;
-                    }
-                }
-            }
-        } else {
-            for (i = 0, s = -1; i < len; i++) {
-                strCode = str.charAt(i);
-                s = (s == -1) ? i : s;
-                for (j = 0; j < lenJ; j++) {
-                    if (strCode == checkCode[j]) {
-                        if (s < i) {
-                            tmp = str.substring(s, i);
-                            out.add(tmp);
-                            tmp = null;
-                            s = -1;
-                        } else if (mode == true) {
-                            out.add("");
-                            s = -1;
-                        } else {
-                            s = -1;
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-        if (s != -1) {
-            tmp = str.substring(s, len);
-            out.add(tmp);
-            tmp = null;
-        }
-        checkCode = null;
-        tmp = null;
-    }
-    
-    /**
-     * チェック情報単位で情報を区切ります。
-     * @param out  区切られた情報が格納されます.
-     * @param cote コーテーション対応であるか設定します.
-     *            [true]を設定した場合、各コーテーション ( ",' ) で囲った情報内は 区切り文字と判別しません.
-     *            [false]を設定した場合、コーテーション対応を行いません.
-     * @param coteFlg コーテーションが入っている場合に、コーテーションを範囲に含むか否かを 設定します.
-     *            [true]を設定した場合、コーテーション情報も範囲に含みます.
-     *            [false]を設定した場合、コーテーション情報を範囲としません.
-     * @param str 区切り対象の情報を設置します.
-     * @param check 区切り対象の文字情報をセットします.
-     *            区切り対象文字を複数設定する事により、それらに対応した区切りとなります.
-     */
-    public static final void cutString(List<String> out, boolean cote, boolean coteFlg, String str, String check) {
-        int i, j;
-        int len;
-        int lenJ;
-        int s = -1;
-        char coteChr;
-        char nowChr;
-        char strCode;
-        char[] checkCode = null;
-        String tmp = null;
-        if (cote == false) {
-            cutString(out, false, str, check);
-        } else {
-            if (out == null || str == null || (len = str.length()) <= 0
-                    || check == null || check.length() <= 0) {
-                throw new IllegalArgumentException();
-            }
-            out.clear();
-            lenJ = check.length();
-            checkCode = new char[lenJ];
-            check.getChars(0, lenJ, checkCode, 0);
-            if (lenJ == 1) {
-                int befCode = -1;
-                boolean yenFlag = false;
-                for (i = 0, s = -1, coteChr = 0; i < len; i++) {
-                    strCode = str.charAt(i);
-                    nowChr = strCode;
-                    s = (s == -1) ? i : s;
-                    if (coteChr == 0) {
-                        if (nowChr == '\'' || nowChr == '\"') {
-                            coteChr = nowChr;
-                            if (s < i) {
-                                tmp = str.substring(s, i);
-                                out.add(tmp);
-                                tmp = null;
-                                s = -1;
-                            } else {
-                                s = -1;
-                            }
-                        } else if (strCode == checkCode[0]) {
-                            if (s < i) {
-                                tmp = str.substring(s, i);
-                                out.add(tmp);
-                                tmp = null;
-                                s = -1;
-                            } else {
-                                s = -1;
-                            }
-                        }
-                    } else {
-                        if (befCode != '\\' && coteChr == nowChr) {
-                            yenFlag = false;
-                            coteChr = 0;
-                            if (s == i && coteFlg == true) {
-                                out.add(new StringBuilder().append(strCode)
-                                        .append(strCode).toString());
-                                s = -1;
-                            } else if (s < i) {
-                                if (coteFlg == true) {
-                                    tmp = str.substring(s - 1, i + 1);
-                                } else {
-                                    tmp = str.substring(s, i);
-                                }
-                                out.add(tmp);
-                                tmp = null;
-                                s = -1;
-                            } else {
-                                s = -1;
-                            }
-                        } else if (strCode == '\\' && befCode == '\\') {
-                            yenFlag = true;
-                        } else {
-                            yenFlag = false;
-                        }
-                    }
-                    if (yenFlag) {
-                        yenFlag = false;
-                        befCode = -1;
-                    } else {
-                        befCode = strCode;
-                    }
-                }
-            } else {
-                int befCode = -1;
-                boolean yenFlag = false;
-                for (i = 0, s = -1, coteChr = 0; i < len; i++) {
-                    strCode = str.charAt(i);
-                    nowChr = strCode;
-                    s = (s == -1) ? i : s;
-                    if (coteChr == 0) {
-                        if (nowChr == '\'' || nowChr == '\"') {
-                            coteChr = nowChr;
-                            if (s < i) {
-                                tmp = str.substring(s, i);
-                                out.add(tmp);
-                                tmp = null;
-                                s = -1;
-                            } else {
-                                s = -1;
-                            }
-                        } else {
-                            for (j = 0; j < lenJ; j++) {
-                                if (strCode == checkCode[j]) {
-                                    if (s < i) {
-                                        tmp = str.substring(s, i);
-                                        out.add(tmp);
-                                        tmp = null;
-                                        s = -1;
-                                    } else {
-                                        s = -1;
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                    } else {
-                        if (befCode != '\\' && coteChr == nowChr) {
-                            coteChr = 0;
-                            yenFlag = false;
-                            if (s == i && coteFlg == true) {
-                                out.add(new StringBuilder().append(strCode)
-                                        .append(strCode).toString());
-                                s = -1;
-                            } else if (s < i) {
-                                if (coteFlg == true) {
-                                    tmp = str.substring(s - 1, i + 1);
-                                } else {
-                                    tmp = str.substring(s, i);
-                                }
+	/**
+	 * チェック情報単位で情報を区切ります.
+	 * 
+	 * @param out
+	 *            区切られた情報が格納されます.
+	 * @param mode
+	 *            区切られた時の文字列が無い場合に、無視するかチェックします. [true]の場合は、無視しません.
+	 *            [false]の場合は、無視します.
+	 * @param str
+	 *            区切り対象の情報を設置します.
+	 * @param check
+	 *            区切り対象の文字情報をセットします. 区切り対象文字を複数設定する事により、それらに対応した区切りとなります.
+	 */
+	public static final void cutString(List<String> out, boolean mode, String str, String check) {
+		int i, j;
+		int len;
+		int lenJ;
+		int s = -1;
+		char strCode;
+		char[] checkCode = null;
+		String tmp = null;
+		if (out == null || str == null || (len = str.length()) <= 0 || check == null || check.length() <= 0) {
+			throw new IllegalArgumentException();
+		}
+		out.clear();
+		lenJ = check.length();
+		checkCode = new char[lenJ];
+		check.getChars(0, lenJ, checkCode, 0);
+		if (lenJ == 1) {
+			for (i = 0, s = -1; i < len; i++) {
+				strCode = str.charAt(i);
+				s = (s == -1) ? i : s;
+				if (strCode == checkCode[0]) {
+					if (s < i) {
+						tmp = str.substring(s, i);
+						out.add(tmp);
+						tmp = null;
+						s = -1;
+					} else if (mode == true) {
+						out.add("");
+						s = -1;
+					} else {
+						s = -1;
+					}
+				}
+			}
+		} else {
+			for (i = 0, s = -1; i < len; i++) {
+				strCode = str.charAt(i);
+				s = (s == -1) ? i : s;
+				for (j = 0; j < lenJ; j++) {
+					if (strCode == checkCode[j]) {
+						if (s < i) {
+							tmp = str.substring(s, i);
+							out.add(tmp);
+							tmp = null;
+							s = -1;
+						} else if (mode == true) {
+							out.add("");
+							s = -1;
+						} else {
+							s = -1;
+						}
+						break;
+					}
+				}
+			}
+		}
+		if (s != -1) {
+			tmp = str.substring(s, len);
+			out.add(tmp);
+			tmp = null;
+		}
+		checkCode = null;
+		tmp = null;
+	}
 
-                                out.add(tmp);
-                                tmp = null;
-                                s = -1;
-                            } else {
-                                s = -1;
-                            }
-                        } else if (strCode == '\\' && befCode == '\\') {
-                            yenFlag = true;
-                        } else {
-                            yenFlag = false;
-                        }
-                    }
-                    if (yenFlag) {
-                        yenFlag = false;
-                        befCode = -1;
-                    } else {
-                        befCode = strCode;
-                    }
-                }
-            }
-            if (s != -1) {
-                if (coteChr != 0 && coteFlg == true) {
-                    tmp = str.substring(s - 1, len) + (char) coteChr;
-                } else {
-                    tmp = str.substring(s, len);
-                }
-                out.add(tmp);
-                tmp = null;
-            }
-            checkCode = null;
-            tmp = null;
-        }
-    }
+	/**
+	 * チェック情報単位で情報を区切ります。
+	 * 
+	 * @param out
+	 *            区切られた情報が格納されます.
+	 * @param cote
+	 *            コーテーション対応であるか設定します. [true]を設定した場合、各コーテーション ( ",' ) で囲った情報内は
+	 *            区切り文字と判別しません. [false]を設定した場合、コーテーション対応を行いません.
+	 * @param coteFlg
+	 *            コーテーションが入っている場合に、コーテーションを範囲に含むか否かを 設定します.
+	 *            [true]を設定した場合、コーテーション情報も範囲に含みます. [false]を設定した場合、コーテーション情報を範囲としません.
+	 * @param str
+	 *            区切り対象の情報を設置します.
+	 * @param check
+	 *            区切り対象の文字情報をセットします. 区切り対象文字を複数設定する事により、それらに対応した区切りとなります.
+	 */
+	public static final void cutString(List<String> out, boolean cote, boolean coteFlg, String str, String check) {
+		int i, j;
+		int len;
+		int lenJ;
+		int s = -1;
+		char coteChr;
+		char nowChr;
+		char strCode;
+		char[] checkCode = null;
+		String tmp = null;
+		if (cote == false) {
+			cutString(out, false, str, check);
+		} else {
+			if (out == null || str == null || (len = str.length()) <= 0 || check == null || check.length() <= 0) {
+				throw new IllegalArgumentException();
+			}
+			out.clear();
+			lenJ = check.length();
+			checkCode = new char[lenJ];
+			check.getChars(0, lenJ, checkCode, 0);
+			if (lenJ == 1) {
+				int befCode = -1;
+				boolean yenFlag = false;
+				for (i = 0, s = -1, coteChr = 0; i < len; i++) {
+					strCode = str.charAt(i);
+					nowChr = strCode;
+					s = (s == -1) ? i : s;
+					if (coteChr == 0) {
+						if (nowChr == '\'' || nowChr == '\"') {
+							coteChr = nowChr;
+							if (s < i) {
+								tmp = str.substring(s, i);
+								out.add(tmp);
+								tmp = null;
+								s = -1;
+							} else {
+								s = -1;
+							}
+						} else if (strCode == checkCode[0]) {
+							if (s < i) {
+								tmp = str.substring(s, i);
+								out.add(tmp);
+								tmp = null;
+								s = -1;
+							} else {
+								s = -1;
+							}
+						}
+					} else {
+						if (befCode != '\\' && coteChr == nowChr) {
+							yenFlag = false;
+							coteChr = 0;
+							if (s == i && coteFlg == true) {
+								out.add(new StringBuilder().append(strCode).append(strCode).toString());
+								s = -1;
+							} else if (s < i) {
+								if (coteFlg == true) {
+									tmp = str.substring(s - 1, i + 1);
+								} else {
+									tmp = str.substring(s, i);
+								}
+								out.add(tmp);
+								tmp = null;
+								s = -1;
+							} else {
+								s = -1;
+							}
+						} else if (strCode == '\\' && befCode == '\\') {
+							yenFlag = true;
+						} else {
+							yenFlag = false;
+						}
+					}
+					if (yenFlag) {
+						yenFlag = false;
+						befCode = -1;
+					} else {
+						befCode = strCode;
+					}
+				}
+			} else {
+				int befCode = -1;
+				boolean yenFlag = false;
+				for (i = 0, s = -1, coteChr = 0; i < len; i++) {
+					strCode = str.charAt(i);
+					nowChr = strCode;
+					s = (s == -1) ? i : s;
+					if (coteChr == 0) {
+						if (nowChr == '\'' || nowChr == '\"') {
+							coteChr = nowChr;
+							if (s < i) {
+								tmp = str.substring(s, i);
+								out.add(tmp);
+								tmp = null;
+								s = -1;
+							} else {
+								s = -1;
+							}
+						} else {
+							for (j = 0; j < lenJ; j++) {
+								if (strCode == checkCode[j]) {
+									if (s < i) {
+										tmp = str.substring(s, i);
+										out.add(tmp);
+										tmp = null;
+										s = -1;
+									} else {
+										s = -1;
+									}
+									break;
+								}
+							}
+						}
+					} else {
+						if (befCode != '\\' && coteChr == nowChr) {
+							coteChr = 0;
+							yenFlag = false;
+							if (s == i && coteFlg == true) {
+								out.add(new StringBuilder().append(strCode).append(strCode).toString());
+								s = -1;
+							} else if (s < i) {
+								if (coteFlg == true) {
+									tmp = str.substring(s - 1, i + 1);
+								} else {
+									tmp = str.substring(s, i);
+								}
+
+								out.add(tmp);
+								tmp = null;
+								s = -1;
+							} else {
+								s = -1;
+							}
+						} else if (strCode == '\\' && befCode == '\\') {
+							yenFlag = true;
+						} else {
+							yenFlag = false;
+						}
+					}
+					if (yenFlag) {
+						yenFlag = false;
+						befCode = -1;
+					} else {
+						befCode = strCode;
+					}
+				}
+			}
+			if (s != -1) {
+				if (coteChr != 0 && coteFlg == true) {
+					tmp = str.substring(s - 1, len) + (char) coteChr;
+				} else {
+					tmp = str.substring(s, len);
+				}
+				out.add(tmp);
+				tmp = null;
+			}
+			checkCode = null;
+			tmp = null;
+		}
+	}
 }

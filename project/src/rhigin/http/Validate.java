@@ -11,50 +11,52 @@ import rhigin.util.Alphabet;
 import rhigin.util.Converter;
 
 /**
- * Validate処理.
- * validation(
- *     "name",          "String", "not null",   // name文字パラメータで、必須情報.
- *     "age",           "Number", "",           // age数値パラメータ.
- *     "comment",       "String", "max 128",    // comment文字パラメータで、最大文字が128文字.
- *     "X-Test-Code",   "String", "not null"    // X-Test-CodeHttpヘッダパラメータで、必須.
- * );
+ * Validate処理. validation( "name", "String", "not null", // name文字パラメータで、必須情報.
+ * "age", "Number", "", // age数値パラメータ. "comment", "String", "max 128", //
+ * comment文字パラメータで、最大文字が128文字. "X-Test-Code", "String", "not null" //
+ * X-Test-CodeHttpヘッダパラメータで、必須. );
  * 
  * また、先頭に[method]を設定した場合、許可する条件として設定します. ※何も定義していない場合は、全てのmethodが有効です.
  *
- * validate( "POST", ・・・・・・・ );
- * 上記の場合、POSTのみ許可.
+ * validate( "POST", ・・・・・・・ ); 上記の場合、POSTのみ許可.
  */
 public class Validate {
 	private static boolean documentMode = false;
+
 	/**
 	 * Validateのドキュメント出力フラグをセット.
-	 * @param m [true]の場合、ドキュメント出力となります.
+	 * 
+	 * @param m
+	 *            [true]の場合、ドキュメント出力となります.
 	 */
 	public static final void setDocumentMode(boolean m) {
 		documentMode = m;
 	}
-	
+
 	/**
 	 * Validateのドキュメント出力フラグを取得.
+	 * 
 	 * @return boolean [true]が返却された場合、ドキュメント出力可能です.
 	 */
 	public static final boolean isDocumentMode() {
 		return documentMode;
 	}
-	
+
 	// validate判断条件のチェック.
 	public static final class ConditionsChecker {
-		protected ConditionsChecker(){}
-		
+		protected ConditionsChecker() {
+		}
+
 		// パラメータ変換.
-		public static final Object check(String[] renameOut,String column, String type, Object value, String conditions) {
+		public static final Object check(String[] renameOut, String column, String type, Object value,
+				String conditions) {
 			if (!Converter.useString(conditions)) {
 				return value;
 			}
 
 			// 情報をカット.
 			List<String> list = new ArrayList<String>();
-			Converter.cutString(list, true, false, conditions," 　\t_");
+			Converter.cutString(list, true, false, conditions, " 　\t_");
 			if (list.size() == 0) {
 				return value;
 			}
@@ -70,7 +72,7 @@ public class Validate {
 				}
 
 				// バリデーションなし.
-				if (Alphabet.eq("none",list.get(pos))) {
+				if (Alphabet.eq("none", list.get(pos))) {
 					notFlag = false;
 					continue;
 				}
@@ -139,44 +141,43 @@ public class Validate {
 				}
 
 				o[0] = value;
-				if(defaultValue(o,notFlag,list,pos,column,type,conditions)) {
+				if (defaultValue(o, notFlag, list, pos, column, type, conditions)) {
 					value = o[0];
 					o[0] = null;
 					pos += 1;
 					notFlag = false;
 					continue;
 				}
-				
+
 				o[0] = null;
-				if(renameValue(o,notFlag,list,pos,column,type,conditions)) {
-					if(o[0] != null) {
-						renameOut[0] = (String)o[0];
+				if (renameValue(o, notFlag, list, pos, column, type, conditions)) {
+					if (o[0] != null) {
+						renameOut[0] = (String) o[0];
 					}
 					o[0] = null;
 					pos += 1;
 					notFlag = false;
 					continue;
 				}
-				
+
 				throw new RhiginException(500, "The validate condition for '" + column + "' is unknown:" + conditions);
 			}
-			
+
 			if (notFlag) {
 				throw new RhiginException(500, "The validate condition for '" + column + "' is unknown:" + conditions);
 			}
-			
+
 			return value;
 		}
 
 		// not.
 		private static final boolean not(String a) {
-			return Alphabet.eq("not",a);
+			return Alphabet.eq("not", a);
 		}
 
 		// null.
-		private static final boolean isNull(boolean notFlag, String a,
-				String column, String conditions, Object value) {
-			if (Alphabet.eq("null",a)) {
+		private static final boolean isNull(boolean notFlag, String a, String column, String conditions, Object value) {
+			if (Alphabet.eq("null", a)) {
 				if (notFlag && value == null) {
 					throw new RhiginException(400, "The value of '" + column + "' is null:" + conditions);
 				}
@@ -186,64 +187,52 @@ public class Validate {
 		}
 
 		// date.
-		private static final boolean date(boolean notFlag, String a, String column,
-				String conditions, Object value) {
-			return exp(DATE_EXP, "date", notFlag, a, column, conditions, value,
-				" is not a date format.");
+		private static final boolean date(boolean notFlag, String a, String column, String conditions, Object value) {
+			return exp(DATE_EXP, "date", notFlag, a, column, conditions, value, " is not a date format.");
 		}
 
 		// time.
-		private static final boolean time(boolean notFlag, String a, String column,
-				String conditions, Object value) {
-			return exp(TIME_EXP, "time", notFlag, a, column, conditions, value,
-				" is not a time format.");
+		private static final boolean time(boolean notFlag, String a, String column, String conditions, Object value) {
+			return exp(TIME_EXP, "time", notFlag, a, column, conditions, value, " is not a time format.");
 		}
 
 		// zip.
-		private static final boolean zip(boolean notFlag, String a, String column,
-				String conditions, Object value) {
-			return exp(ZIP_EXP, "zip", notFlag, a, column, conditions, value,
-				" is not a zip code format.");
+		private static final boolean zip(boolean notFlag, String a, String column, String conditions, Object value) {
+			return exp(ZIP_EXP, "zip", notFlag, a, column, conditions, value, " is not a zip code format.");
 		}
 
 		// tel.
-		private static final boolean tel(boolean notFlag, String a, String column,
-				String conditions, Object value) {
-			return exp(TEL_EXP, "tel", notFlag, a, column, conditions, value,
-				" is not a phone number format.");
+		private static final boolean tel(boolean notFlag, String a, String column, String conditions, Object value) {
+			return exp(TEL_EXP, "tel", notFlag, a, column, conditions, value, " is not a phone number format.");
 		}
 
 		// ipv4.
-		private static final boolean ipv4(boolean notFlag, String a, String column,
-				String conditions, Object value) {
+		private static final boolean ipv4(boolean notFlag, String a, String column, String conditions, Object value) {
 			return exp(IPV4_EXP, "ipv4", notFlag, a, column, conditions, value,
-				" is not in the format of IP address (IPV4).");
+					" is not in the format of IP address (IPV4).");
 		}
 
 		// url.
-		private static final boolean url(boolean notFlag, String a, String column,
-				String conditions, Object value) {
-			return exp(URL_EXP, "url", notFlag, a, column, conditions, value,
-				" is not a URL format.");
+		private static final boolean url(boolean notFlag, String a, String column, String conditions, Object value) {
+			return exp(URL_EXP, "url", notFlag, a, column, conditions, value, " is not a URL format.");
 		}
 
 		// email.
-		private static final boolean email(boolean notFlag, String a,
-				String column, String conditions, Object value) {
-			return exp(EMAIL_EXP, "email", notFlag, a, column, conditions, value,
-				" is not an email address format.");
+		private static final boolean email(boolean notFlag, String a, String column, String conditions, Object value) {
+			return exp(EMAIL_EXP, "email", notFlag, a, column, conditions, value, " is not an email address format.");
 		}
 
 		// min [number].
-		private static final boolean min(boolean notFlag, List<String> list,
-				int pos, String column, String conditions, Object value) {
-			if(Alphabet.eq("min",list.get(pos))) {
+		private static final boolean min(boolean notFlag, List<String> list, int pos, String column, String conditions,
+				Object value) {
+			if (Alphabet.eq("min", list.get(pos))) {
 				if (value == null) {
 					throw new RhiginException(400, "The value of '" + column + "' is null.");
 				}
 				int len = list.size();
 				if (pos + 1 >= len) {
-					throw new RhiginException(500, "Condition definition of '" + column + "' is not numeric:" + conditions);
+					throw new RhiginException(500,
+							"Condition definition of '" + column + "' is not numeric:" + conditions);
 				}
 				String b = list.get(pos + 1);
 				boolean eq;
@@ -253,7 +242,8 @@ public class Validate {
 						throw new RhiginException(400, "Length of '" + column + "' is out of condition:" + conditions);
 					}
 				} else {
-					throw new RhiginException(500, "Condition definition of '" + column + "' is not numeric:" + conditions);
+					throw new RhiginException(500,
+							"Condition definition of '" + column + "' is not numeric:" + conditions);
 				}
 				return true;
 			}
@@ -261,15 +251,16 @@ public class Validate {
 		}
 
 		// max [number].
-		private static final boolean max(boolean notFlag, List<String> list,
-				int pos, String column, String conditions, Object value) {
-			if(Alphabet.eq("max",list.get(pos))) {
+		private static final boolean max(boolean notFlag, List<String> list, int pos, String column, String conditions,
+				Object value) {
+			if (Alphabet.eq("max", list.get(pos))) {
 				if (value == null) {
 					throw new RhiginException(400, "The value of '" + column + "' is null.");
 				}
 				int len = list.size();
 				if (pos + 1 >= len) {
-					throw new RhiginException(500, "Condition definition of '" + column + "' is not numeric:" + conditions);
+					throw new RhiginException(500,
+							"Condition definition of '" + column + "' is not numeric:" + conditions);
 				}
 				String b = list.get(pos + 1);
 				boolean eq;
@@ -279,43 +270,46 @@ public class Validate {
 						throw new RhiginException(400, "Length of '" + column + "' is out of condition:" + conditions);
 					}
 				} else {
-					throw new RhiginException(500, "Condition definition of '" + column + "' is not numeric:" + conditions);
+					throw new RhiginException(500,
+							"Condition definition of '" + column + "' is not numeric:" + conditions);
 				}
 				return true;
 			}
 			return false;
 		}
-		
+
 		// default [value].
-		private static final boolean defaultValue(Object[] out,boolean notFlag, List<String> list,
-				int pos, String column, String type, String conditions) {
-			if(Alphabet.eq("default",list.get(pos))) {
-				if(notFlag) {
+		private static final boolean defaultValue(Object[] out, boolean notFlag, List<String> list, int pos,
+				String column, String type, String conditions) {
+			if (Alphabet.eq("default", list.get(pos))) {
+				if (notFlag) {
 					throw new RhiginException(400, "not condition of '" + column + "' is wrong:" + conditions);
 				} else if (out[0] != null) {
 					return true;
 				}
 				int len = list.size();
 				if (pos + 1 >= len) {
-					throw new RhiginException(500, "Condition definition of '" + column + "' is not numeric:" + conditions);
+					throw new RhiginException(500,
+							"Condition definition of '" + column + "' is not numeric:" + conditions);
 				}
 				String b = list.get(pos + 1);
-				out[0] = TypeConvert.convert(column,type,b);
+				out[0] = TypeConvert.convert(column, type, b);
 				return true;
 			}
 			return false;
 		}
 
 		// rename [value].
-		private static final boolean renameValue(Object[] out,boolean notFlag,List<String> list,
-				int pos, String column, String type, String conditions) {
-			if(Alphabet.eq("rename",list.get(pos))) {
-				if(notFlag) {
+		private static final boolean renameValue(Object[] out, boolean notFlag, List<String> list, int pos,
+				String column, String type, String conditions) {
+			if (Alphabet.eq("rename", list.get(pos))) {
+				if (notFlag) {
 					throw new RhiginException(400, "not condition of '" + column + "' is wrong:" + conditions);
 				}
 				int len = list.size();
 				if (pos + 1 >= len) {
-					throw new RhiginException(500, "Condition definition of '" + column + "' is not numeric:" + conditions);
+					throw new RhiginException(500,
+							"Condition definition of '" + column + "' is not numeric:" + conditions);
 				}
 				out[0] = list.get(pos + 1);
 				return true;
@@ -324,15 +318,16 @@ public class Validate {
 		}
 
 		// range [number] [number].
-		private static final boolean range(boolean notFlag, List<String> list,
-				int pos, String column, String conditions, Object value) {
-			if(Alphabet.eq("range",list.get(pos))) {
+		private static final boolean range(boolean notFlag, List<String> list, int pos, String column,
+				String conditions, Object value) {
+			if (Alphabet.eq("range", list.get(pos))) {
 				if (value == null) {
 					throw new RhiginException(400, "The value of '" + column + "' is null.");
 				}
 				int len = list.size();
 				if (pos + 2 >= len) {
-					throw new RhiginException(500, "Condition definition of '" + column + "' is not numeric:" + conditions);
+					throw new RhiginException(500,
+							"Condition definition of '" + column + "' is not numeric:" + conditions);
 				}
 				String b = list.get(pos + 1);
 				String c = list.get(pos + 2);
@@ -344,7 +339,8 @@ public class Validate {
 						throw new RhiginException(400, "Length of '" + column + "' is out of condition:" + conditions);
 					}
 				} else {
-					throw new RhiginException(500, "Condition definition of '" + column + "' is not numeric:" + conditions);
+					throw new RhiginException(500,
+							"Condition definition of '" + column + "' is not numeric:" + conditions);
 				}
 				if (Converter.isNumeric(c)) {
 					eq = n.length() > Converter.convertInt(c);
@@ -352,7 +348,8 @@ public class Validate {
 						throw new RhiginException(400, "Length of '" + column + "' is out of condition:" + conditions);
 					}
 				} else {
-					throw new RhiginException(500, "Condition definition of '" + column + "' is not numeric:" + conditions);
+					throw new RhiginException(500,
+							"Condition definition of '" + column + "' is not numeric:" + conditions);
 				}
 				return true;
 			}
@@ -362,27 +359,22 @@ public class Validate {
 		// exp.
 		private static final Pattern DATE_EXP = Pattern
 				.compile("^\\d{2,4}\\/([1][0-2]|[0][1-9]|[1-9])\\/([3][0-1]|[1-2][0-9]|[0][1-9]|[1-9])$");
-		private static final Pattern TIME_EXP = Pattern
-				.compile("^([0-1][0-9]|[2][0-3]|[0-9])\\:([0-5][0-9]|[0-9])$");
+		private static final Pattern TIME_EXP = Pattern.compile("^([0-1][0-9]|[2][0-3]|[0-9])\\:([0-5][0-9]|[0-9])$");
 		private static final Pattern ZIP_EXP = Pattern.compile("^\\d{3}-\\d{4}$");
-		private static final Pattern TEL_EXP = Pattern
-				.compile("^[0-9]+\\-[0-9]+\\-[0-9]+$");
-		private static final Pattern IPV4_EXP = Pattern
-				.compile("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$");
-		private static final Pattern URL_EXP = Pattern
-				.compile("https?://[\\w/:%#\\$&\\?\\(\\)~\\.=\\+\\-]+");
-		private static final Pattern EMAIL_EXP = Pattern
-				.compile("\\w{1,}[@][\\w\\-]{1,}([.]([\\w\\-]{1,})){1,3}$");
+		private static final Pattern TEL_EXP = Pattern.compile("^[0-9]+\\-[0-9]+\\-[0-9]+$");
+		private static final Pattern IPV4_EXP = Pattern.compile("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$");
+		private static final Pattern URL_EXP = Pattern.compile("https?://[\\w/:%#\\$&\\?\\(\\)~\\.=\\+\\-]+");
+		private static final Pattern EMAIL_EXP = Pattern.compile("\\w{1,}[@][\\w\\-]{1,}([.]([\\w\\-]{1,})){1,3}$");
 
 		// exp.
-		private static final boolean exp(Pattern p, String m, boolean notFlag,
-				String a, String column, String conditions, Object value,String message) {
-			if(Alphabet.eq(m,a)) {
+		private static final boolean exp(Pattern p, String m, boolean notFlag, String a, String column,
+				String conditions, Object value, String message) {
+			if (Alphabet.eq(m, a)) {
 				if (value == null) {
 					throw new RhiginException(400, "The value of '" + column + "' is null.");
 				}
 				Matcher mc = p.matcher(Converter.convertString(value));
-				if(notFlag) {
+				if (notFlag) {
 					if (mc.find()) {
 						throw new RhiginException(400, column + " " + message + "");
 					}
@@ -394,10 +386,10 @@ public class Validate {
 			return false;
 		}
 	}
-	
+
 	// タイプ判別.
 	public static final class TypeConvert {
-		
+
 		// タイプコード.
 		protected static final int STRING = 0;
 		protected static final int BOOL = 1;
@@ -408,15 +400,16 @@ public class Validate {
 		protected static final int DATE = 20;
 		protected static final int JSON = 30;
 		protected static final int ARRAY = 31;
-		
-		protected TypeConvert(){}
-		
+
+		protected TypeConvert() {
+		}
+
 		// パラメータ変換.
 		public static final Object convert(String column, String type, Object value) {
 			int code = typeByCode(type);
-			return convert(column,code,type,value);
+			return convert(column, code, type, value);
 		}
-		
+
 		// 指定タイプに対して、タイプコード変換.
 		public static final int typeByCode(String type) {
 			if ("string".equals(type)) {
@@ -441,22 +434,22 @@ public class Validate {
 				return STRING;
 			}
 		}
-		
+
 		// パラメータ変換.
 		public static final Object convert(String column, int typeCode, String type, Object value) {
 			try {
 				if (value == null) {
 					value = null;
 				}
-				switch(typeCode) {
-				case STRING :
+				switch (typeCode) {
+				case STRING:
 					try {
 						value = Converter.convertString(value);
-					} catch(Exception e) {
+					} catch (Exception e) {
 						value = null;
 					}
 					break;
-				case NUMBER :
+				case NUMBER:
 					if (Converter.isNumeric(value)) {
 						if (Converter.isFloat(value)) {
 							value = Converter.convertDouble(value);
@@ -473,14 +466,14 @@ public class Validate {
 						value = null;
 					}
 					break;
-				case INTEGER :
+				case INTEGER:
 					if (Converter.isNumeric(value)) {
 						value = Converter.convertInt(value);
 					} else {
 						value = null;
 					}
 					break;
-				case LONG :
+				case LONG:
 					if (Converter.isNumeric(value)) {
 						value = Converter.convertLong(value);
 					} else {
@@ -494,24 +487,24 @@ public class Validate {
 						value = null;
 					}
 					break;
-				case DATE :
+				case DATE:
 					try {
 						value = Converter.convertDate(value);
-					} catch(Exception e) {
+					} catch (Exception e) {
 						value = null;
 					}
 					break;
-				case BOOL :
+				case BOOL:
 					try {
 						value = Converter.convertBool(value);
-					} catch(Exception e) {
+					} catch (Exception e) {
 						value = null;
 					}
 					break;
-				case JSON :
+				case JSON:
 					try {
 						value = Json.decode(Converter.convertString(value));
-					} catch(Exception e) {
+					} catch (Exception e) {
 						value = null;
 					}
 					break;
@@ -524,7 +517,7 @@ public class Validate {
 				default:
 					try {
 						value = Converter.convertString(value);
-					} catch(Exception e) {
+					} catch (Exception e) {
 						value = null;
 					}
 					break;
@@ -532,21 +525,25 @@ public class Validate {
 			} catch (RhiginException he) {
 				throw he;
 			} catch (Exception e) {
-				throw new RhiginException(500, "The conversion condition " +
-					type + " failed for the target column '" + column + "':"
-					+ value, e);
+				throw new RhiginException(500,
+						"The conversion condition " + type + " failed for the target column '" + column + "':" + value,
+						e);
 			}
 			return value;
 		}
 	}
-	
+
 	/**
 	 * validate実行.
-	 * @param request httpRequestを設定します.
-	 * @param params httpパラメータを設定します.
-	 * @param args validate条件を設定します.
+	 * 
+	 * @param request
+	 *            httpRequestを設定します.
+	 * @param params
+	 *            httpパラメータを設定します.
+	 * @param args
+	 *            validate条件を設定します.
 	 * @return 生成された新しいパラメータが返却されます.
-   */
+	 */
 	public static final Params execute(Request request, Params params, Object... args) {
 		int i, j;
 		final int len = args.length;
@@ -571,25 +568,23 @@ public class Validate {
 		// descriptionを読み飛ばす.
 		// ドキュメントのみに利用.
 		for (i = off; i < len; i++) {
-			if(Converter.convertString(args[i]).startsWith("@")) {
-				off ++;
+			if (Converter.convertString(args[i]).startsWith("@")) {
+				off++;
 			} else {
 				break;
 			}
 		}
-		
+
 		// validate処理.
 		Params newParams = new Params();
 		for (i = off; i < len; i += 3) {
-			oneValidate(newParams, params, request,
-				Converter.convertString(args[i + 0]),
-				Converter.convertString(args[i + 1]),
-				Converter.convertString(args[i + 2]));
+			oneValidate(newParams, params, request, Converter.convertString(args[i + 0]),
+					Converter.convertString(args[i + 1]), Converter.convertString(args[i + 2]));
 			// descriptionを読み飛ばす.
 			// ドキュメントのみに利用.
-			for(j = i + 3; j < len; j ++) {
-				if(Converter.convertString(args[j]).startsWith("@")) {
-					i ++;
+			for (j = i + 3; j < len; j++) {
+				if (Converter.convertString(args[j]).startsWith("@")) {
+					i++;
 				} else {
 					break;
 				}
@@ -605,7 +600,8 @@ public class Validate {
 	}
 
 	// 1つのvalidation処理.
-	private static final void oneValidate(Params newParams, Params params, Request request, String column, String type, String conditions) {
+	private static final void oneValidate(Params newParams, Params params, Request request, String column, String type,
+			String conditions) {
 		Object value = null;
 		if (!Converter.useString(column)) {
 			throw new RhiginException(500, "Invalid column name in validation.");
@@ -623,7 +619,7 @@ public class Validate {
 			try {
 				// HTTPヘッダ情報を取得.
 				value = request.getHeader(column);
-				
+
 				// カラム名の[X-]を取り、-を抜いて、最初の文字を小文字に変換.
 				// [X-Test-Code] -> testCode.
 				column = Converter.changeString(column.substring(2), "-", "");
@@ -638,9 +634,9 @@ public class Validate {
 		// typeデータ変換.
 		value = TypeConvert.convert(column, type, value);
 		// データチェック.
-		String[] renameColumn = new String[]{null};
+		String[] renameColumn = new String[] { null };
 		value = ConditionsChecker.check(renameColumn, column, type, value, conditions);
-		if(renameColumn[0] != null) {
+		if (renameColumn[0] != null) {
 			column = renameColumn[0];
 		}
 		// データセット.

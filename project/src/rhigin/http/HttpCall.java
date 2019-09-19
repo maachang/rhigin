@@ -22,9 +22,13 @@ public final class HttpCall extends NioCall {
 
 	/**
 	 * コンストラクタ.
-	 * @param info Http情報を設定します.
-	 * @param mime MimeTypeオブジェクトを設定します.
-	 * @param wprkerLength ワーカースレッド長を設定します.
+	 * 
+	 * @param info
+	 *            Http情報を設定します.
+	 * @param mime
+	 *            MimeTypeオブジェクトを設定します.
+	 * @param wprkerLength
+	 *            ワーカースレッド長を設定します.
 	 */
 	public HttpCall(HttpInfo info, MimeType mime, int workerLength) {
 		this.info = info;
@@ -34,6 +38,7 @@ public final class HttpCall extends NioCall {
 
 	/**
 	 * 新しい通信要素を生成.
+	 * 
 	 * @return BaseNioElement 新しい通信要素が返却されます.
 	 */
 	public NioElement createElement() {
@@ -42,6 +47,7 @@ public final class HttpCall extends NioCall {
 
 	/**
 	 * 開始処理.
+	 * 
 	 * @return boolean [true]の場合、正常に処理されました.
 	 */
 	public boolean startNio() {
@@ -100,39 +106,45 @@ public final class HttpCall extends NioCall {
 
 	/**
 	 * Accept処理.
-	 * @param em 対象のBaseNioElementオブジェクトが設定されます.
+	 * 
+	 * @param em
+	 *            対象のBaseNioElementオブジェクトが設定されます.
 	 * @return boolean [true]の場合、正常に処理されました.
 	 * @exception IOException
-	 *				IO例外.
+	 *                IO例外.
 	 */
 	public boolean accept(NioElement em) throws IOException {
-		//LOG.debug(" accept Http nio");
+		// LOG.debug(" accept Http nio");
 		return true;
 	}
 
 	/**
 	 * Receive処理.
-	 * @param em 対象のBaseNioElementオブジェクトが設定されます.
-	 * @param buf 対象のByteBufferを設定します.
+	 * 
+	 * @param em
+	 *            対象のBaseNioElementオブジェクトが設定されます.
+	 * @param buf
+	 *            対象のByteBufferを設定します.
 	 * @return boolean [true]の場合、正常に処理されました.
-	 * @exception IOException IO例外.
+	 * @exception IOException
+	 *                IO例外.
 	 */
 	public boolean receive(NioElement em, ByteBuffer buf) throws IOException {
 		final HttpElement rem = (HttpElement) em;
-		
+
 		// 受信バッファに今回分の情報をセット.
 		rem.getBuffer().write(buf);
-		
+
 		// ワーカーNoがElementに設定されてない場合はセットさせる.
 		int no = rem.getWorkerNo();
 		if (no == -1) {
 			// ワーカースレッドに新規登録される場合.
 			no = counter.inc() % workerLength;
 			counter.set(no);
-			
+
 			// 対象のワーカースレッドに登録.
 			worker[no].register(rem);
-		} else if(!rem.isEndSend()) {
+		} else if (!rem.isEndSend()) {
 			// 送信処理が完了してない場合.
 			// ワーカースレッドに受信データ存在のシグナル送信.
 			worker[no].signal(rem);
@@ -141,4 +153,3 @@ public final class HttpCall extends NioCall {
 	}
 
 }
-

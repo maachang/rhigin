@@ -32,7 +32,7 @@ public class HttpInfo {
 
 	/** コンパイルキャッシュサイズ. **/
 	private int compileCacheSize = HttpConstants.COMPILE_CACHE_SIZE;
-	
+
 	/** コンパイルキャッシュルートディレクトリ. **/
 	private String compileCacheRootDir = HttpConstants.COMPILE_ROOT_DIR;
 
@@ -112,12 +112,12 @@ public class HttpInfo {
 	 * Http設定データを取得.
 	 * 
 	 * @param info
-	 *			データセット先のHttpInfoオブジェクトを設定します.
+	 *            データセット先のHttpInfoオブジェクトを設定します.
 	 * @param conf
-	 *			対象のコンフィグファイルを設定します.
+	 *            対象のコンフィグファイルを設定します.
 	 */
-	public static final void load(HttpInfo info, Map<String,Object> conf) throws Exception {
-		if(conf == null) {
+	public static final void load(HttpInfo info, Map<String, Object> conf) throws Exception {
+		if (conf == null) {
 			return;
 		}
 		Object o = null;
@@ -144,7 +144,7 @@ public class HttpInfo {
 
 		o = conf.get("localAddress");
 		if (o != null) {
-			info.setLocalAddress(""+ o);
+			info.setLocalAddress("" + o);
 		}
 
 		o = conf.get("localPort");
@@ -158,9 +158,9 @@ public class HttpInfo {
 		}
 		// ワーカースレッドが 0以下 の場合は、CPU数に応じて割当を行う.
 		// CPU数に対する
-		if(info.getWorkerThread() <= 0) {
-			info.setWorkerThread(java.lang.Runtime.getRuntime().availableProcessors() *
-				HttpConstants.WORKER_CPU_COEFFICIENT);
+		if (info.getWorkerThread() <= 0) {
+			info.setWorkerThread(
+					java.lang.Runtime.getRuntime().availableProcessors() * HttpConstants.WORKER_CPU_COEFFICIENT);
 		}
 
 		o = conf.get("compileCacheSize");
@@ -170,7 +170,7 @@ public class HttpInfo {
 
 		o = conf.get("compileCacheRootDir");
 		if (o != null) {
-			info.setCompileCacheRootDir(""+ o);
+			info.setCompileCacheRootDir("" + o);
 		}
 	}
 }

@@ -1,5 +1,5 @@
 package rhigin.util;
-	
+
 /**
  * FCompBuffer.
  */
@@ -15,6 +15,7 @@ public class FCompBuffer {
 
 	/**
 	 * コンストラクタ.
+	 * 
 	 * @param capacity
 	 */
 	public FCompBuffer(int capacity) {
@@ -23,26 +24,31 @@ public class FCompBuffer {
 
 	/**
 	 * オブジェクトリセット.
-	 * @param length リセットするバイナリ長を設定します.
+	 * 
+	 * @param length
+	 *            リセットするバイナリ長を設定します.
 	 */
-	public void reset( int length ) {
-		if( data == null || data.length != length ) {
-			data = new byte[ length ] ;
+	public void reset(int length) {
+		if (data == null || data.length != length) {
+			data = new byte[length];
 		}
 	}
 
 	/**
 	 * オブジェクト再利用.
-	 * @param length 再利用時のバイナリ長を設定します.
+	 * 
+	 * @param length
+	 *            再利用時のバイナリ長を設定します.
 	 */
-	public void clear( int length ) {
-		if( data == null || data.length < length ) {
-			data = new byte[ length ] ;
+	public void clear(int length) {
+		if (data == null || data.length < length) {
+			data = new byte[length];
 		}
 	}
 
 	/**
 	 * データ取得.
+	 * 
 	 * @return
 	 */
 	public byte[] getData() {
@@ -51,6 +57,7 @@ public class FCompBuffer {
 
 	/**
 	 * データ長取得.
+	 * 
 	 * @return
 	 */
 	public int getLength() {
@@ -59,6 +66,7 @@ public class FCompBuffer {
 
 	/**
 	 * データ長設定.
+	 * 
 	 * @param length
 	 */
 	public void setLength(int length) {
@@ -67,6 +75,7 @@ public class FCompBuffer {
 
 	/**
 	 * 現在のバイナリデータを取得.
+	 * 
 	 * @return
 	 */
 	public byte[] toByteArray() {

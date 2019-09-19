@@ -25,6 +25,7 @@ public class NioCore extends Thread {
 
 	/**
 	 * コンストラクタ.
+	 * 
 	 * @param byteBufferLength
 	 * @param socketSendBuffer
 	 * @param socketRecvBuffer
@@ -33,9 +34,8 @@ public class NioCore extends Thread {
 	 * @param server
 	 * @param call
 	 */
-	public NioCore(int byteBufferLength, int socketSendBuffer,
-		int socketRecvBuffer, boolean keepAlive, boolean tcpNoDeley,
-		ServerSocketChannel server, NioCall call) {
+	public NioCore(int byteBufferLength, int socketSendBuffer, int socketRecvBuffer, boolean keepAlive,
+			boolean tcpNoDeley, ServerSocketChannel server, NioCall call) {
 		this.byteBufferLength = byteBufferLength;
 		this.socketSendBuffer = socketSendBuffer;
 		this.socketRecvBuffer = socketRecvBuffer;
@@ -84,7 +84,8 @@ public class NioCore extends Thread {
 			if (selector != null) {
 				try {
 					selector.close();
-				} catch (Exception e) {}
+				} catch (Exception e) {
+				}
 			}
 			// サーバーソケットクローズ.
 			try {
@@ -94,7 +95,8 @@ public class NioCore extends Thread {
 			// [call] 終了処理.
 			try {
 				call.endNio();
-			} catch (Exception e) {}
+			} catch (Exception e) {
+			}
 			exitFlag = true;
 		}
 		if (d != null) {
@@ -123,16 +125,22 @@ public class NioCore extends Thread {
 		NioElement em = null;
 		NioSendLess sl = null;
 		while (!endFlag && !stopFlag) {
-			key = null; em = null; sl = null;
+			key = null;
+			em = null;
+			sl = null;
 			try {
 				while (!endFlag && !stopFlag) {
-					key = null; em = null; sl = null;
+					key = null;
+					em = null;
+					sl = null;
 					if (!selector.select(SELECTOR_TIMEOUT)) {
 						continue;
 					}
 					it = selector.iterator();
 					while (it.hasNext()) {
-						key = null; em = null; sl = null;
+						key = null;
+						em = null;
+						sl = null;
 						try {
 							// 今回処理対象の内容を取得.
 							key = it.next();

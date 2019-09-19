@@ -12,10 +12,11 @@ import rhigin.scripts.RhiginFunction;
  */
 public class NanoTimeFunction extends RhiginFunction {
 	private static final NanoTimeFunction THIS = new NanoTimeFunction();
+
 	public static final NanoTimeFunction getInstance() {
 		return THIS;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "nanoTime";
@@ -25,10 +26,12 @@ public class NanoTimeFunction extends RhiginFunction {
 	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		return System.nanoTime();
 	}
-	
+
 	/**
 	 * スコープにライブラリを登録.
-	 * @param scope 登録先のスコープを設定します.
+	 * 
+	 * @param scope
+	 *            登録先のスコープを設定します.
 	 */
 	public static final void regFunctions(Scriptable scope) {
 		scope.put("nanoTime", scope, NanoTimeFunction.getInstance());

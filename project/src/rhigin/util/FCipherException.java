@@ -7,10 +7,11 @@ import rhigin.RhiginException;
  */
 public class FCipherException extends RhiginException {
 	private static final long serialVersionUID = -7995238015802434505L;
+
 	public FCipherException() {
 		super(500);
 	}
-	
+
 	public FCipherException(String message) {
 		super(500, message);
 	}

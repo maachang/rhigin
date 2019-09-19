@@ -59,7 +59,7 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 	protected Object setHeader(Object k, Object v) {
 		if (k != null && v != null) {
 			Object ret = header.put(k.toString(), v.toString());
-			if(ret != null) {
+			if (ret != null) {
 				return ret;
 			}
 		}
@@ -69,7 +69,7 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 	protected Object getHeader(Object k) {
 		if (k != null) {
 			Object ret = header.get(k.toString());
-			if(ret != null) {
+			if (ret != null) {
 				return ret;
 			}
 		}
@@ -79,7 +79,7 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 	protected Object removeHeader(Object k) {
 		if (k != null) {
 			Object ret = header.remove(k.toString());
-			if(ret != null) {
+			if (ret != null) {
 				return ret;
 			}
 		}
@@ -93,10 +93,10 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 		OList<Object[]> raw = h.header.rawData();
 		StringBuilder buf = new StringBuilder();
 		int len = raw.size();
-		if(len > 0) {
+		if (len > 0) {
 			Object[] kv = null;
 			for (int i = 0; i < len; i++) {
-				kv = (Object[])raw.get(i);
+				kv = (Object[]) raw.get(i);
 				buf.append(kv[0]).append(": ").append(kv[1]).append("\r\n");
 			}
 		}
@@ -106,14 +106,16 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 
 	/**
 	 * 取得.
-	 * @param key d対象のキーを設定します.
+	 * 
+	 * @param key
+	 *            d対象のキーを設定します.
 	 * @return Object キーに対する要素情報が返却されます.
 	 */
 	@Override
 	public Object get(Object key) {
 		if ("state".equals(key) || "status".equals(key)) {
 			return getStatus();
-		} else if("Content-Type".equals(key)) {
+		} else if ("Content-Type".equals(key)) {
 			return ContentType;
 		}
 		return getHeader(key);
@@ -121,8 +123,11 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 
 	/**
 	 * 登録.
-	 * @param key 対象のキーを設定します.
-	 * @param value 対象の要素を設定します.
+	 * 
+	 * @param key
+	 *            対象のキーを設定します.
+	 * @param value
+	 *            対象の要素を設定します.
 	 * @return Object 前回登録されていた内容が返却されます.
 	 */
 	@Override
@@ -131,9 +136,9 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 			int ret = getStatus();
 			setStatus(Converter.convertInt(value));
 			return ret;
-		} else if("Content-Type".equals(key)) {
+		} else if ("Content-Type".equals(key)) {
 			String ret = ContentType;
-			ContentType = ""+value;
+			ContentType = "" + value;
 			return ret;
 		}
 		return setHeader(key, value);
@@ -141,7 +146,9 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 
 	/**
 	 * 削除.
-	 * @param key 対象のキーを設定します.
+	 * 
+	 * @param key
+	 *            対象のキーを設定します.
 	 * @return Object キーに対する要素情報が返却されます.
 	 */
 	@Override
@@ -150,7 +157,7 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 			int ret = getStatus();
 			setStatus(200);
 			return ret;
-		} else if("Content-Type".equals(key)) {
+		} else if ("Content-Type".equals(key)) {
 			String ret = ContentType;
 			ContentType = DEFAULT_CONTENT_TYPE;
 			return ret;
@@ -160,7 +167,9 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 
 	/**
 	 * 存在確認.
-	 * @param key 対象のキーを設定します.
+	 * 
+	 * @param key
+	 *            対象のキーを設定します.
 	 * @return Object キーに対する要素情報が返却されます.
 	 */
 	@Override
@@ -175,14 +184,15 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 
 	/**
 	 * ヘッダ一覧を取得.
+	 * 
 	 * @return List<String> ヘッダ一覧が返却されます.
 	 */
 	public List<String> getHeaders() {
 		OList<Object[]> list = header.rawData();
 		int len = list.size();
 		List<String> ret = new ArrayList<String>();
-		for(int i = 0; i < len; i ++) {
-			ret.add(""+list.get(i)[0]);
+		for (int i = 0; i < len; i++) {
+			ret.add("" + list.get(i)[0]);
 		}
 		return ret;
 	}
@@ -195,19 +205,19 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 	@Override
 	public Object[] getIds() {
 		String[] names = header.names();
-		if(names == null) {
+		if (names == null) {
 			return new Object[] {};
 		}
 		Object[] ret = new Object[names.length];
-		System.arraycopy(names, 0 , ret, 0, names.length);
+		System.arraycopy(names, 0, ret, 0, names.length);
 		return ret;
 	}
-	
+
 	@Override
 	public String getKey(int no) {
-		return (String)header.rawData().get(no)[0];
+		return (String) header.rawData().get(no)[0];
 	}
-	
+
 	@Override
 	public int size() {
 		return header.size();

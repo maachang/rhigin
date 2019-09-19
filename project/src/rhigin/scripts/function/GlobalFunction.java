@@ -11,10 +11,11 @@ import rhigin.scripts.RhiginFunction;
  */
 public class GlobalFunction extends RhiginFunction {
 	private static final GlobalFunction THIS = new GlobalFunction();
+
 	public static final GlobalFunction getInstance() {
 		return THIS;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "global";
@@ -24,10 +25,12 @@ public class GlobalFunction extends RhiginFunction {
 	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		return ExecuteScript.currentRhiginContext();
 	}
-	
+
 	/**
 	 * スコープにライブラリを登録.
-	 * @param scope 登録先のスコープを設定します.
+	 * 
+	 * @param scope
+	 *            登録先のスコープを設定します.
 	 */
 	public static final void regFunctions(Scriptable scope) {
 		scope.put("global", scope, GlobalFunction.getInstance());

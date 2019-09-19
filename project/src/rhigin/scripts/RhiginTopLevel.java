@@ -12,10 +12,11 @@ import org.mozilla.javascript.JavaAdapter;
 final class RhiginTopLevel extends ImporterTopLevel {
 	private static final long serialVersionUID = 2594663122275499379L;
 	private AccessControlContext accCtxt;
+
 	RhiginTopLevel(Context ctx) {
 		super(ctx, System.getSecurityManager() != null);
 		JavaAdapter.init(ctx, this, false);
-		
+
 		if (System.getSecurityManager() != null) {
 			try {
 				AccessController.checkPermission(new AllPermission());
@@ -24,6 +25,7 @@ final class RhiginTopLevel extends ImporterTopLevel {
 			}
 		}
 	}
+
 	AccessControlContext getAccessContext() {
 		return accCtxt;
 	}

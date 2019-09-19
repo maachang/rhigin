@@ -11,10 +11,11 @@ import rhigin.scripts.RhiginFunction;
  */
 public class ServerIdFunction extends RhiginFunction {
 	private static final ServerIdFunction THIS = new ServerIdFunction();
+
 	public static final ServerIdFunction getInstance() {
 		return THIS;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "serverId";
@@ -24,10 +25,12 @@ public class ServerIdFunction extends RhiginFunction {
 	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		return RhiginServerId.getInstance().getId();
 	}
-	
+
 	/**
 	 * スコープにライブラリを登録.
-	 * @param scope 登録先のスコープを設定します.
+	 * 
+	 * @param scope
+	 *            登録先のスコープを設定します.
 	 */
 	public static final void regFunctions(Scriptable scope) {
 		scope.put("serverId", scope, ServerIdFunction.getInstance());

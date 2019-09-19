@@ -11,10 +11,11 @@ import rhigin.scripts.RhiginFunction;
  */
 public class GcFunction extends RhiginFunction {
 	private static final GcFunction THIS = new GcFunction();
+
 	public static final GcFunction getInstance() {
 		return THIS;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "gc";
@@ -25,10 +26,12 @@ public class GcFunction extends RhiginFunction {
 		System.gc();
 		return Undefined.instance;
 	}
-	
+
 	/**
 	 * スコープにライブラリを登録.
-	 * @param scope 登録先のスコープを設定します.
+	 * 
+	 * @param scope
+	 *            登録先のスコープを設定します.
 	 */
 	public static final void regFunctions(Scriptable scope) {
 		scope.put("gc", scope, GcFunction.getInstance());

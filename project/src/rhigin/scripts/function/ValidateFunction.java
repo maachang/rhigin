@@ -15,10 +15,11 @@ import rhigin.scripts.RhiginFunction;
  */
 public class ValidateFunction extends RhiginFunction {
 	private static final ValidateFunction THIS = new ValidateFunction();
+
 	public static final ValidateFunction getInstance() {
 		return THIS;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "validate";
@@ -27,16 +28,18 @@ public class ValidateFunction extends RhiginFunction {
 	@Override
 	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		final RhiginContext context = ExecuteScript.currentRhiginContext();
-		final Request req = (Request)context.getAttribute("request");
-		final Params pms = (Params)context.getAttribute("params");
+		final Request req = (Request) context.getAttribute("request");
+		final Params pms = (Params) context.getAttribute("params");
 		final Params newParams = Validate.execute(req, pms, args);
 		context.setAttribute("params", newParams);
 		return newParams;
 	}
-	
+
 	/**
 	 * スコープにライブラリを登録.
-	 * @param scope 登録先のスコープを設定します.
+	 * 
+	 * @param scope
+	 *            登録先のスコープを設定します.
 	 */
 	public static final void regFunctions(Scriptable scope) {
 		scope.put("validate", scope, ValidateFunction.getInstance());

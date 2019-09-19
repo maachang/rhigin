@@ -7,6 +7,7 @@ import rhigin.RhiginException;
  */
 public class HttpException extends RhiginException {
 	private static final long serialVersionUID = 7317119139199782998L;
+
 	public HttpException(int status) {
 		super(status);
 	}
@@ -22,7 +23,7 @@ public class HttpException extends RhiginException {
 	public HttpException(int status, String message, Throwable e) {
 		super(status, message, e);
 	}
-	
+
 	public static final void error(int status, String message) {
 		error(status, message, null);
 	}

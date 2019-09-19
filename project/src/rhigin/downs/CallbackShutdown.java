@@ -8,29 +8,30 @@ import rhigin.util.AtomicNumber;
  */
 public abstract class CallbackShutdown {
 
-    /**
-     * シャットダウン実行フラグ.
-     */
-    protected final AtomicNumber isShutdown = new AtomicNumber(0);
+	/**
+	 * シャットダウン実行フラグ.
+	 */
+	protected final AtomicNumber isShutdown = new AtomicNumber(0);
 
-    /**
-     * シャットダウン実行フラグを取得.
-     * @return boolean [true]の場合、既に実行されました.
-     */
-    public boolean isShutdown() {
-        return isShutdown.get() != 0;
-    }
+	/**
+	 * シャットダウン実行フラグを取得.
+	 * 
+	 * @return boolean [true]の場合、既に実行されました.
+	 */
+	public boolean isShutdown() {
+		return isShutdown.get() != 0;
+	}
 
-    /**
-     * シャットダウン完了フラグを設定.
-     */
-    protected void exitShutdown() {
-        isShutdown.set(1);
-    }
+	/**
+	 * シャットダウン完了フラグを設定.
+	 */
+	protected void exitShutdown() {
+		isShutdown.set(1);
+	}
 
-    /**
-     * シャットダウンを実行するコールバックメソッド. ※利用する場合はこのメソッドを実装してください.
-     */
-    public abstract void execution();
+	/**
+	 * シャットダウンを実行するコールバックメソッド. ※利用する場合はこのメソッドを実装してください.
+	 */
+	public abstract void execution();
 
 }

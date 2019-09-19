@@ -22,8 +22,7 @@ import rhigin.util.DateConvert;
 import rhigin.util.ObjectList;
 
 /**
- * Json変換処理.
- * Rhino専用に改造.
+ * Json変換処理. Rhino専用に改造.
  */
 @SuppressWarnings("rawtypes")
 public final class Json {
@@ -36,7 +35,8 @@ public final class Json {
 	/**
 	 * JSON変換.
 	 * 
-	 * @param target 対象のターゲットオブジェクトを設定します.
+	 * @param target
+	 *            対象のターゲットオブジェクトを設定します.
 	 * @return String 変換されたJSON情報が返されます.
 	 */
 	public static final String encode(Object target) {
@@ -48,7 +48,8 @@ public final class Json {
 	/**
 	 * JSON形式から、オブジェクト変換2.
 	 * 
-	 * @param json 対象のJSON情報を設定します.
+	 * @param json
+	 *            対象のJSON情報を設定します.
 	 * @return Object 変換されたJSON情報が返されます.
 	 */
 	public static final Object decode(String json) {
@@ -89,15 +90,14 @@ public final class Json {
 		}
 		// rhinoのjavaオブジェクトwrapper対応.
 		if (target instanceof Wrapper) {
-			target = ((Wrapper)target).unwrap();
+			target = ((Wrapper) target).unwrap();
 		}
 		if (target instanceof Map) {
 			encodeJsonMap(buf, base, (Map) target);
 		} else if (target instanceof List) {
 			encodeJsonList(buf, base, (List) target);
-		} else if (target instanceof Long || target instanceof Short
-				|| target instanceof Integer || target instanceof Float
-				|| target instanceof Double || target instanceof BigInteger
+		} else if (target instanceof Long || target instanceof Short || target instanceof Integer
+				|| target instanceof Float || target instanceof Double || target instanceof BigInteger
 				|| target instanceof BigDecimal) {
 			buf.append(target);
 		} else if (target instanceof Character || target instanceof String) {
@@ -107,8 +107,7 @@ public final class Json {
 		} else if (target instanceof char[]) {
 			buf.append("\"").append(new String((char[]) target)).append("\"");
 		} else if (target instanceof java.util.Date) {
-			buf.append("\"").append(dateToString((java.util.Date) target))
-					.append("\"");
+			buf.append("\"").append(dateToString((java.util.Date) target)).append("\"");
 		} else if (target instanceof Boolean) {
 			buf.append(target);
 		} else if (target.getClass().isArray()) {
@@ -119,17 +118,17 @@ public final class Json {
 			}
 		} else if (target instanceof IdScriptableObject) {
 			// IdScriptableObject = rhino側の型オブジェクトの基底オブジェクト.
-			IdScriptableObject io = (IdScriptableObject)target;
-			if("Date".equals(io.getClassName())) {
+			IdScriptableObject io = (IdScriptableObject) target;
+			if ("Date".equals(io.getClassName())) {
 				// NativeDate.
 				try {
 					// 現状リフレクションで直接取得するようにする.
-					// 本来は　ScriptRuntime.toNumber(NativeDate) で取得できるのだけど、
+					// 本来は ScriptRuntime.toNumber(NativeDate) で取得できるのだけど、
 					// これは rhinoのContextの範囲内でないとエラーになるので.
 					final Method m = io.getClass().getDeclaredMethod("getJSTimeValue");
 					m.setAccessible(true);
 					buf.append("\"").append(dateToString(new Date(Converter.convertLong(m.invoke(io))))).append("\"");
-				} catch(Exception e) {
+				} catch (Exception e) {
 					// エラーの場合は処理しない.
 					buf.append("null");
 				}
@@ -210,8 +209,7 @@ public final class Json {
 			return json;
 		}
 		// 文字列コーテーション区切り.
-		if ((json.startsWith("\"") && json.endsWith("\""))
-				|| (json.startsWith("\'") && json.endsWith("\'"))) {
+		if ((json.startsWith("\"") && json.endsWith("\"")) || (json.startsWith("\'") && json.endsWith("\'"))) {
 			json = json.substring(1, len - 1);
 
 			// ISO8601の日付フォーマットかチェック.
@@ -266,29 +264,24 @@ public final class Json {
 			// コーテーション開始.
 			else if (bef != '\\' && (c == '\'' || c == '\"')) {
 				cote = c;
-				if (s != -1 && s != i && bef != ' ' && bef != '　'
-						&& bef != '\t' && bef != '\n' && bef != '\r') {
+				if (s != -1 && s != i && bef != ' ' && bef != '　' && bef != '\t' && bef != '\n' && bef != '\r') {
 					ret.add(json.substring(s, i + 1));
 				}
 				s = i + 1;
 				bef = -1;
 			}
 			// ワード区切り.
-			else if (c == '[' || c == ']' || c == '{' || c == '}' || c == '('
-					|| c == ')' || c == ':' || c == ';' || c == ','
-					|| (c == '.' && (bef < '0' || bef > '9'))) {
-				if (s != -1 && s != i && bef != ' ' && bef != '　'
-						&& bef != '\t' && bef != '\n' && bef != '\r') {
+			else if (c == '[' || c == ']' || c == '{' || c == '}' || c == '(' || c == ')' || c == ':' || c == ';'
+					|| c == ',' || (c == '.' && (bef < '0' || bef > '9'))) {
+				if (s != -1 && s != i && bef != ' ' && bef != '　' && bef != '\t' && bef != '\n' && bef != '\r') {
 					ret.add(json.substring(s, i));
 				}
 				ret.add(new String(new char[] { c }));
 				s = i + 1;
 			}
 			// 連続空間区切り.
-			else if (c == ' ' || c == '　' || c == '\t' || c == '\n'
-					|| c == '\r') {
-				if (s != -1 && s != i && bef != ' ' && bef != '　'
-						&& bef != '\t' && bef != '\n' && bef != '\r') {
+			else if (c == ' ' || c == '　' || c == '\t' || c == '\n' || c == '\r') {
+				if (s != -1 && s != i && bef != ' ' && bef != '　' && bef != '\t' && bef != '\n' && bef != '\r') {
 					ret.add(json.substring(s, i));
 				}
 				s = -1;
@@ -358,7 +351,7 @@ public final class Json {
 		// map.
 		else if (type == TYPE_MAP) {
 			Map<String, Object> ret;
-			//ret = new HashMap<String, Object>();
+			// ret = new HashMap<String, Object>();
 			ret = new ArrayMap();
 			String key = null;
 			for (int i = no + 1; i < len; i++) {
@@ -411,8 +404,7 @@ public final class Json {
 					before = null;
 				} else if (key == null) {
 					key = value;
-					if ((key.startsWith("'") && key.endsWith("'"))
-							|| (key.startsWith("\"") && key.endsWith("\""))) {
+					if ((key.startsWith("'") && key.endsWith("'")) || (key.startsWith("\"") && key.endsWith("\""))) {
 						key = key.substring(1, key.length() - 1).trim();
 					}
 				} else {
@@ -453,12 +445,12 @@ public final class Json {
 		} catch (Exception e) {
 			try {
 				return DateConvert.getTimestamp(s);
-			} catch(Exception ee) {
+			} catch (Exception ee) {
 				try {
 					return DateConvert.getWebTimestamp(s);
-				} catch(ConvertException ce) {
+				} catch (ConvertException ce) {
 					throw ce;
-				} catch(Exception ewe) {
+				} catch (Exception ewe) {
 					throw new RhiginException(500, ewe);
 				}
 			}

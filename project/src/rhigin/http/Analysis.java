@@ -16,6 +16,7 @@ public final class Analysis {
 
 	/**
 	 * Httpヘッダの終端が存在するかチェック.
+	 * 
 	 * @param buffer
 	 */
 	public static final int endPoint(NioReadBuffer buffer) {
@@ -24,51 +25,59 @@ public final class Analysis {
 
 	/**
 	 * HttpHeaderオブジェクトの生成.
+	 * 
 	 * @param buffer
 	 * @param endPoint
 	 * @return HttpHeader
 	 * @exception IOException
 	 */
-	public static final Header getHeader(NioReadBuffer buffer, int endPoint)
-		throws IOException {
+	public static final Header getHeader(NioReadBuffer buffer, int endPoint) throws IOException {
 		return new Header(buffer, endPoint);
 	}
 
 	/**
 	 * HttpRequestオブジェクトの生成.
+	 * 
 	 * @param buffer
 	 * @param endPoint
 	 * @return HttpRequest
 	 * @exception IOException
 	 */
-	public static final Request getRequest(NioReadBuffer buffer, int endPoint)
-		throws IOException {
+	public static final Request getRequest(NioReadBuffer buffer, int endPoint) throws IOException {
 		return new Request(buffer, endPoint);
 	}
 
 	/**
 	 * パラメータ変換処理. POSTのデータおよび、GETのデータを解析します.
-	 * @param body 対象のBody情報を設定します.
-	 * @param cset 対象のキャラクタセットを設定します.
-	 * @param pos 対象のポジションを設定します.
+	 * 
+	 * @param body
+	 *            対象のBody情報を設定します.
+	 * @param cset
+	 *            対象のキャラクタセットを設定します.
+	 * @param pos
+	 *            対象のポジションを設定します.
 	 * @return Params 変換結果を返却します.
-	 * @exception IOException IO例外.
+	 * @exception IOException
+	 *                IO例外.
 	 */
-	public static final Params paramsAnalysis(String body, int pos)
-		throws IOException {
+	public static final Params paramsAnalysis(String body, int pos) throws IOException {
 		return paramsAnalysis(body, "UTF8", pos);
 	}
 
 	/**
 	 * パラメータ変換処理. POSTのデータおよび、GETのデータを解析します.
-	 * @param body 対象のBody情報を設定します.
-	 * @param cset 対象のキャラクタセットを設定します.
-	 * @param pos 対象のポジションを設定します.
+	 * 
+	 * @param body
+	 *            対象のBody情報を設定します.
+	 * @param cset
+	 *            対象のキャラクタセットを設定します.
+	 * @param pos
+	 *            対象のポジションを設定します.
 	 * @return Params 変換結果を返却します.
-	 * @exception IOException IO例外.
+	 * @exception IOException
+	 *                IO例外.
 	 */
-	public static final Params paramsAnalysis(String body, String cset, int pos)
-		throws IOException {
+	public static final Params paramsAnalysis(String body, String cset, int pos) throws IOException {
 		// パラメータバイナリを解析.
 		int p, n;
 		String k;
@@ -81,7 +90,8 @@ public final class Analysis {
 					break;
 				}
 				if (k.indexOf("%") != -1) {
-					ret.put(Converter.urlDecode(k.substring(0, p), cset), Converter.urlDecode(k.substring(p + 1), cset));
+					ret.put(Converter.urlDecode(k.substring(0, p), cset),
+							Converter.urlDecode(k.substring(p + 1), cset));
 				} else {
 					ret.put(k.substring(0, p), k.substring(p + 1));
 				}

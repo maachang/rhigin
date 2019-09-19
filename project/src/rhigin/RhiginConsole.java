@@ -22,21 +22,19 @@ public class RhiginConsole {
 		RhiginConsole o = new RhiginConsole();
 		o.console(conf, new ConsoleInKey());
 	}
-	
-	public void console(RhiginConfig conf, ConsoleInKey console)
-		throws Exception {
+
+	public void console(RhiginConfig conf, ConsoleInKey console) throws Exception {
 		// 開始処理.
 		HttpInfo httpInfo = RhiginStartup.startup(conf);
-		
+
 		// コンパイルキャッシュ生成.
 		// コンパイルキャッシュを require命令に設定.
-		CompileCache cache = new CompileCache(
-			httpInfo.getCompileCacheSize(), httpInfo.getCompileCacheRootDir());
+		CompileCache cache = new CompileCache(httpInfo.getCompileCacheSize(), httpInfo.getCompileCacheRootDir());
 		RequireFunction.init(cache);
-		
+
 		// ランダムオブジェクトをセット.
 		RandomFunction.init();
-		
+
 		System.out.println("" + RhiginConstants.NAME + " console version (" + RhiginConstants.VERSION + ")");
 		System.out.println("");
 		try {
@@ -53,14 +51,14 @@ public class RhiginConsole {
 						return;
 					}
 					Object o = ExecuteScript.execute(context, cmd);
-					if(o instanceof Scriptable) {
+					if (o instanceof Scriptable) {
 						ContextFactory.getGlobal().enterContext();
 						try {
 							System.out.println(Context.toString(o));
 						} finally {
 							Context.exit();
 						}
-					} else if(o instanceof Undefined) {
+					} else if (o instanceof Undefined) {
 						System.out.println("");
 					} else {
 						System.out.println(o);

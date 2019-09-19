@@ -9,28 +9,28 @@ import java.util.Set;
  * KeySet, Iterator実装支援.
  */
 public class AbstractKeyIterator<K> {
-	
+
 	/**
-	 * Map.keySet 実装で必要な基本オブジェクト.
-	 * このオブジェクトを継承してkeySetメソッドを実装し、そこで
-	 *   return KeyIteratorSet<String>(this);
-	 * のように返却します.
+	 * Map.keySet 実装で必要な基本オブジェクト. このオブジェクトを継承してkeySetメソッドを実装し、そこで return
+	 * KeyIteratorSet<String>(this); のように返却します.
 	 */
 	public static interface Base<K> {
 		/**
 		 * キーを取得.
+		 * 
 		 * @param no
 		 * @return
 		 */
 		public K getKey(int no);
-		
+
 		/**
 		 * キー数を取得.
+		 * 
 		 * @return
 		 */
 		public int size();
 	}
-	
+
 	/**
 	 * Iteartor.
 	 */
@@ -103,8 +103,8 @@ public class AbstractKeyIterator<K> {
 				return false;
 			}
 			int len = base.size();
-			for(int i = 0; i < len; i ++) {
-				if(o == base.getKey(i) || o.equals(base.getKey(i))) {
+			for (int i = 0; i < len; i++) {
+				if (o == base.getKey(i) || o.equals(base.getKey(i))) {
 					return true;
 				}
 			}

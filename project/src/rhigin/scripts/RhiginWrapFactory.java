@@ -12,20 +12,22 @@ import org.mozilla.javascript.WrapFactory;
 @SuppressWarnings("rawtypes")
 final class RhiginWrapFactory extends WrapFactory {
 	private static final RhiginWrapFactory theInstance = new RhiginWrapFactory();
+
 	private RhiginWrapFactory() {
 		super.setJavaPrimitiveWrap(false);
 	}
+
 	static final WrapFactory getInstance() {
 		return theInstance;
 	}
-	public Scriptable wrapAsJavaObject(Context cx, Scriptable scope,
-										Object javaObject, Class staticType) {
+
+	public Scriptable wrapAsJavaObject(Context cx, Scriptable scope, Object javaObject, Class staticType) {
 		final SecurityManager sm = System.getSecurityManager();
 		final ClassShutter classShutter = RhiginClassShutter.getInstance();
 		if (javaObject instanceof java.util.Map) {
-			return new JavaScriptable.GetMap((java.util.Map)javaObject);
-		} else if(javaObject instanceof java.util.List) {
-			return new JavaScriptable.GetList((java.util.List)javaObject);
+			return new JavaScriptable.GetMap((java.util.Map) javaObject);
+		} else if (javaObject instanceof java.util.List) {
+			return new JavaScriptable.GetList((java.util.List) javaObject);
 		} else if (javaObject instanceof ClassLoader) {
 			return super.wrapAsJavaObject(cx, scope, javaObject, staticType);
 		} else {
@@ -69,18 +71,22 @@ final class RhiginWrapFactory extends WrapFactory {
 			return super.wrapAsJavaObject(cx, scope, javaObject, staticType);
 		}
 	}
+
 	// RhiginJavaObject.
 	protected static class RhiginJavaObject extends NativeJavaObject {
 		private static final long serialVersionUID = 7074055700134775639L;
+
 		RhiginJavaObject(Scriptable scope, Object obj, Class type) {
 			super(scope, null, type);
 			javaObject = obj;
 		}
 	}
+
 	// toString表示対応のScriptableオブジェクトラッパ.
 	protected static class ToStringScriptableWrapper implements Scriptable {
 		String name;
 		Scriptable parent;
+
 		ToStringScriptableWrapper(String name, Scriptable parent) {
 			this.name = name;
 			this.parent = parent;
@@ -113,8 +119,7 @@ final class RhiginWrapFactory extends WrapFactory {
 
 		@Override
 		public Object getDefaultValue(Class<?> arg0) {
-			return (arg0 == null || String.class.equals(arg0)) ?
-				parent.toString() : parent.getDefaultValue(arg0);
+			return (arg0 == null || String.class.equals(arg0)) ? parent.toString() : parent.getDefaultValue(arg0);
 		}
 
 		@Override
@@ -166,7 +171,7 @@ final class RhiginWrapFactory extends WrapFactory {
 		public void setPrototype(Scriptable arg0) {
 			parent.setPrototype(arg0);
 		}
-		
+
 		@Override
 		public String toString() {
 			return parent.toString();

@@ -12,10 +12,11 @@ import rhigin.scripts.RhiginFunction;
  */
 public class SystemTimeFunction extends RhiginFunction {
 	private static final SystemTimeFunction THIS = new SystemTimeFunction();
+
 	public static final SystemTimeFunction getInstance() {
 		return THIS;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "systemTime";
@@ -25,10 +26,12 @@ public class SystemTimeFunction extends RhiginFunction {
 	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		return System.currentTimeMillis();
 	}
-	
+
 	/**
 	 * スコープにライブラリを登録.
-	 * @param scope 登録先のスコープを設定します.
+	 * 
+	 * @param scope
+	 *            登録先のスコープを設定します.
 	 */
 	public static final void regFunctions(Scriptable scope) {
 		scope.put("systemTime", scope, SystemTimeFunction.getInstance());

@@ -28,8 +28,7 @@ final class CreateSocket {
 	private static SocketFactory sslFactory = null;
 
 	/** SSLSocketFactory作成. **/
-	protected static final SocketFactory getSSLSocketFactory()
-			throws IOException {
+	protected static final SocketFactory getSSLSocketFactory() throws IOException {
 		if (!sslFactoryFlag) {
 			synchronized (sync) {
 				InputStream in = null;
@@ -39,22 +38,20 @@ final class CreateSocket {
 					// JAVA_HOME環境変数が存在する場合.
 					if (javaHome != null && javaHome.length() != 0) {
 						String sp = System.getProperty("file.separator");
-						String changeitFile = new StringBuilder(javaHome)
-								.append(sp).append("jre").append(sp)
-								.append("lib").append(sp).append("security")
-								.append(sp).append("cacerts").toString();
+						String changeitFile = new StringBuilder(javaHome).append(sp).append("jre").append(sp)
+								.append("lib").append(sp).append("security").append(sp).append("cacerts").toString();
 
 						// 内部で用意している「cacerts」を読みこむ.
 						in = CreateSocket.class.getResourceAsStream("cacerts");
-						//in = Thread.currentThread().getContextClassLoader().getResourceAsStream("rhigin/http/client/cacerts");
+						// in =
+						// Thread.currentThread().getContextClassLoader().getResourceAsStream("rhigin/http/client/cacerts");
 
 						// 読み込んだ内容と、JAVA_HOME内の[cacerts]を比較して、サイズが大きい場合は
 						// JAVA_HOMEの方を利用.
 						if (isFile(changeitFile) && getFileLength(changeitFile) > in.available()) {
 							in.close();
 							in = null;
-							in = new BufferedInputStream(new FileInputStream(
-									changeitFile));
+							in = new BufferedInputStream(new FileInputStream(changeitFile));
 						}
 						// JAVA_HOME環境変数が存在しない場合.
 					} else {
@@ -75,7 +72,7 @@ final class CreateSocket {
 					SSLSocketFactory s = context.getSocketFactory();
 					sslFactory = s;
 					sslFactoryFlag = true;
-				} catch(IOException ie) {
+				} catch (IOException ie) {
 					throw ie;
 				} catch (Exception e) {
 					throw new IOException(e);
@@ -100,8 +97,7 @@ final class CreateSocket {
 	private static final boolean KEEP_ALIVE = false;
 
 	/** Httpソケットオプションをセット. **/
-	private static final void setSocketOption(Socket soc, int timeout)
-			throws IOException {
+	private static final void setSocketOption(Socket soc, int timeout) throws IOException {
 		soc.setReuseAddress(true);
 		soc.setSoLinger(true, LINGER);
 		soc.setSendBufferSize(SENDBUF);
@@ -114,14 +110,18 @@ final class CreateSocket {
 	/**
 	 * Socket作成.
 	 *
-	 * @param ssl [true]の場合、SSLで接続します.
-	 * @param addr 接続先アドレス(domain)を設定します.
-	 * @param port 対象のポート番号を設定します.
-	 * @param timeout 通信タイムアウト値を設定します.
-	 * @exception IOException I/O例外.
+	 * @param ssl
+	 *            [true]の場合、SSLで接続します.
+	 * @param addr
+	 *            接続先アドレス(domain)を設定します.
+	 * @param port
+	 *            対象のポート番号を設定します.
+	 * @param timeout
+	 *            通信タイムアウト値を設定します.
+	 * @exception IOException
+	 *                I/O例外.
 	 */
-	public static final Socket create(boolean ssl, String addr, int port,
-			int timeout) throws IOException {
+	public static final Socket create(boolean ssl, String addr, int port, int timeout) throws IOException {
 		if (ssl) {
 			return createSSL(addr, port, timeout);
 		} else {
@@ -130,8 +130,7 @@ final class CreateSocket {
 	}
 
 	/** SSLSocket生成. **/
-	private static final Socket createSSL(String addr, int port, int timeout)
-			throws IOException {
+	private static final Socket createSSL(String addr, int port, int timeout) throws IOException {
 		SSLSocket ret = null;
 		try {
 			SSLSocketFactory factory = (SSLSocketFactory) getSSLSocketFactory();
@@ -152,8 +151,7 @@ final class CreateSocket {
 	}
 
 	/** Socket生成. **/
-	private static final Socket createSocket(String addr, int port, int timeout)
-			throws IOException {
+	private static final Socket createSocket(String addr, int port, int timeout) throws IOException {
 		Socket ret = new Socket();
 		try {
 			setSocketOption(ret, timeout);

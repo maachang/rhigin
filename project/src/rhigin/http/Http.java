@@ -16,18 +16,19 @@ public final class Http {
 
 	/** Nio処理. **/
 	private NioCore nio = null;
-	
+
 	/** Callback. **/
 	private ExitCall call = null;
-	
+
 	/** HttpInfo. **/
 	private static HttpInfo httpInfo = null;
-	
+
 	/** webサーバモード. **/
 	private static boolean webServer = false;
-	
+
 	/**
 	 * HttpInfoを取得.
+	 * 
 	 * @return
 	 */
 	public static final HttpInfo getHttpInfo() {
@@ -36,7 +37,9 @@ public final class Http {
 
 	/**
 	 * WebServerモードを設定.
-	 * @param mode [true]の場合、WebServerモードです.
+	 * 
+	 * @param mode
+	 *            [true]の場合、WebServerモードです.
 	 */
 	public static final void setWebServerMode(boolean mode) {
 		webServer = mode;
@@ -44,6 +47,7 @@ public final class Http {
 
 	/**
 	 * Webサーバモードを取得.
+	 * 
 	 * @return boolean [true]の場合Webサーバです.
 	 */
 	public static final boolean isWebServerMode() {
@@ -52,31 +56,29 @@ public final class Http {
 
 	/**
 	 * コンストラクタ.
+	 * 
 	 * @param info
 	 * @param mime
 	 * @throws Exception
 	 */
 	public Http(HttpInfo info, MimeType mime) throws Exception {
 		// httpInfoをシングルトンとして登録.
-		if(httpInfo == null) {
+		if (httpInfo == null) {
 			httpInfo = info;
 		}
-		
+
 		// bodyファイル格納先のフォルダを作成.
-		if(!FileUtil.isDir(HttpConstants.POST_FILE_OUT_ROOT_DIR)) {
+		if (!FileUtil.isDir(HttpConstants.POST_FILE_OUT_ROOT_DIR)) {
 			FileUtil.mkdirs(HttpConstants.POST_FILE_OUT_ROOT_DIR);
 		}
 
 		// nio:サーバーソケット作成.
-		ServerSocketChannel ch = NioUtil.createServerSocketChannel(
-			info.getSocketReceiveBuffer(), info.getLocalAddress(),
-			info.getLocalPort(), info.getBacklog());
-		
+		ServerSocketChannel ch = NioUtil.createServerSocketChannel(info.getSocketReceiveBuffer(),
+				info.getLocalAddress(), info.getLocalPort(), info.getBacklog());
+
 		// nio処理を生成.
-		this.nio = new NioCore(info.getByteBufferLength(),
-			info.getSocketSendBuffer(), info.getSocketReceiveBuffer(),
-			KEEP_ALIVE, TCP_NO_DELAY, ch, new HttpCall(
-				info, mime, info.getWorkerThread()));
+		this.nio = new NioCore(info.getByteBufferLength(), info.getSocketSendBuffer(), info.getSocketReceiveBuffer(),
+				KEEP_ALIVE, TCP_NO_DELAY, ch, new HttpCall(info, mime, info.getWorkerThread()));
 	}
 
 	public void start() {
@@ -94,11 +96,11 @@ public final class Http {
 	public boolean isExit() {
 		return nio.isExitThread();
 	}
-	
+
 	public void exitCall(ExitCall call) {
 		this.call = call;
 	}
-	
+
 	public ExitCall exitCall() {
 		return this.call;
 	}

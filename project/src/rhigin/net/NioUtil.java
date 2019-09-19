@@ -14,16 +14,18 @@ public final class NioUtil {
 		// guiをoff.
 		System.setProperty("java.awt.headless", "true");
 		// IPV4で処理.
-		System.setProperty("java.net.preferIPv4Stack", ""+NetConstants.NET_IPV4_FLAG);
+		System.setProperty("java.net.preferIPv4Stack", "" + NetConstants.NET_IPV4_FLAG);
 		// DNSキャッシュは300秒.
-		System.setProperty("networkaddress.cache.ttl",""+NetConstants.NET_DNS_CACHE_SECOND);
+		System.setProperty("networkaddress.cache.ttl", "" + NetConstants.NET_DNS_CACHE_SECOND);
 		// DNS解決失敗した場合のキャッシュ保持しない.
-		System.setProperty("networkaddress.cache.negative.ttl", ""+NetConstants.ERROR_DNS_CACHE_TIME);
+		System.setProperty("networkaddress.cache.negative.ttl", "" + NetConstants.ERROR_DNS_CACHE_TIME);
 	}
-	
+
 	/**
 	 * SelectionKeyの破棄.
-	 *	@param key 破棄対象のSelectionKeyを設定します.
+	 * 
+	 * @param key
+	 *            破棄対象のSelectionKeyを設定します.
 	 */
 	public static final void destroyKey(SelectionKey key) {
 		if (key != null) {
@@ -33,20 +35,24 @@ public final class NioUtil {
 					em.clear();
 					return;
 				}
-			} catch (Exception e) {}
+			} catch (Exception e) {
+			}
 			try {
 				key.cancel();
-			} catch (Exception e) {}
+			} catch (Exception e) {
+			}
 			if (key.channel() instanceof SocketChannel) {
 				try {
 					((SocketChannel) key.channel()).socket().close();
-				} catch (Throwable e) {}
+				} catch (Throwable e) {
+				}
 				try {
 					key.channel().close();
-				} catch (Throwable e) {}
+				} catch (Throwable e) {
+				}
 			} else {
 				try {
-						key.channel().close();
+					key.channel().close();
 				} catch (Throwable e) {
 				}
 			}
@@ -55,15 +61,16 @@ public final class NioUtil {
 
 	/**
 	 * サーバーソケット作成.
+	 * 
 	 * @param recvBuffer
 	 * @param addr
 	 * @param port
 	 * @param backlog
-	 * @exception Exception 例外.
+	 * @exception Exception
+	 *                例外.
 	 */
-	public static final ServerSocketChannel createServerSocketChannel(
-		int recvBuffer, String addr, int port, int backlog)
-		throws Exception {
+	public static final ServerSocketChannel createServerSocketChannel(int recvBuffer, String addr, int port,
+			int backlog) throws Exception {
 		// nio:サーバーソケット作成.
 		ServerSocketChannel ch = ServerSocketChannel.open();
 		ch.configureBlocking(false);
@@ -81,16 +88,22 @@ public final class NioUtil {
 
 	/**
 	 * SocketChannelを初期化.
-	 * @param channel SocketChannelを設定します.
-	 * @param s 送信バッファを設定します.
-	 * @param r 受信バッファを設定します.
-	 * @param k keepAliveモードを設定します.
-	 * @param t tcpNoDeleyモードを設定します.
+	 * 
+	 * @param channel
+	 *            SocketChannelを設定します.
+	 * @param s
+	 *            送信バッファを設定します.
+	 * @param r
+	 *            受信バッファを設定します.
+	 * @param k
+	 *            keepAliveモードを設定します.
+	 * @param t
+	 *            tcpNoDeleyモードを設定します.
 	 * @return boolean [true]の場合初期化成功です.
-	 * @exception Exception 例外.
+	 * @exception Exception
+	 *                例外.
 	 */
-	public static final boolean initSocket(SocketChannel channel, int s, int r, boolean k, boolean t)
-		throws Exception {
+	public static final boolean initSocket(SocketChannel channel, int s, int r, boolean k, boolean t) throws Exception {
 		try {
 			channel.configureBlocking(false);
 			channel.setOption(StandardSocketOptions.SO_REUSEADDR, true);

@@ -14,21 +14,22 @@ import rhigin.util.Converter;
 public class EntityFunctions {
 	// entity管理.
 	private static final ThreadLocal<Entity> local = new ThreadLocal<Entity>();
-	
+
 	/**
 	 * スクリプト終了時に呼び出します.
 	 */
 	public static final void exit() {
 		local.set(null);
 	}
-	
+
 	// entity.
 	private static final class ExposeFunction extends RhiginFunction {
 		private static final ExposeFunction THIS = new ExposeFunction();
+
 		public static final ExposeFunction getInstance() {
 			return THIS;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "expose";
@@ -37,7 +38,7 @@ public class EntityFunctions {
 		@Override
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			Entity entity = local.get();
-			if(entity == null) {
+			if (entity == null) {
 				entity = new Entity();
 				local.set(entity);
 			}
@@ -45,14 +46,15 @@ public class EntityFunctions {
 			return Undefined.instance;
 		}
 	}
-	
+
 	// entity.
 	private static final class EntityFunction extends RhiginFunction {
 		private static final EntityFunction THIS = new EntityFunction();
+
 		public static final EntityFunction getInstance() {
 			return THIS;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "entity";
@@ -60,9 +62,9 @@ public class EntityFunctions {
 
 		@Override
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
-			if(args.length >= 2) {
+			if (args.length >= 2) {
 				Entity entity = local.get();
-				if(entity == null) {
+				if (entity == null) {
 					entity = new Entity();
 					local.set(entity);
 				}
@@ -71,10 +73,12 @@ public class EntityFunctions {
 			return argsException();
 		}
 	}
-	
+
 	/**
 	 * スコープにライブラリを登録.
-	 * @param scope 登録先のスコープを設定します.
+	 * 
+	 * @param scope
+	 *            登録先のスコープを設定します.
 	 */
 	public static final void regFunctions(Scriptable scope) {
 		scope.put("expose", scope, ExposeFunction.getInstance());

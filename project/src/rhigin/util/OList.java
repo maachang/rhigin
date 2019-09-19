@@ -94,8 +94,8 @@ public final class OList<T> {
 	 */
 	public void add(T n) {
 		if (length + 1 >= list.length) {
-			Object[] tmp = new Object[(length + (length >> 1)) + 4] ;
-			//Object[] tmp = new Object[length << 1];
+			Object[] tmp = new Object[(length + (length >> 1)) + 4];
+			// Object[] tmp = new Object[length << 1];
 			System.arraycopy(list, 0, tmp, 0, length);
 			list = tmp;
 		}
@@ -115,7 +115,7 @@ public final class OList<T> {
 		if (no < 0 || no >= length) {
 			return null;
 		}
-		T ret = (T)list[no];
+		T ret = (T) list[no];
 		list[no] = o;
 		return ret;
 	}
@@ -148,7 +148,7 @@ public final class OList<T> {
 		T ret = null;
 		if (length == 1) {
 			length = 0;
-			ret = (T)list[0];
+			ret = (T) list[0];
 			list[0] = null;
 		} else {
 			// 厳密な削除.
@@ -159,7 +159,7 @@ public final class OList<T> {
 
 			// 速度重視の削除.
 			length--;
-			ret = (T)list[no];
+			ret = (T) list[no];
 			list[no] = list[length];
 			list[length] = null;
 		}

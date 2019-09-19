@@ -57,8 +57,7 @@ public class Time8SequenceId {
 		}
 		baseTime = base;
 		machineId = (long) id;
-		nowId.set(((System.currentTimeMillis() - baseTime) << 22L)
-				| (machineId << 13L));
+		nowId.set(((System.currentTimeMillis() - baseTime) << 22L) | (machineId << 13L));
 	}
 
 	/**

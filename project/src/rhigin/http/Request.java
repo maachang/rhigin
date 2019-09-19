@@ -28,17 +28,17 @@ public class Request extends Header {
 	public byte[] getBody() {
 		return body;
 	}
-	
+
 	public String getBodyText() {
 		try {
-			return new String(body, charset((String)get("Content-Type")));
-		} catch(RhiginException re) {
+			return new String(body, charset((String) get("Content-Type")));
+		} catch (RhiginException re) {
 			throw re;
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RhiginException(500, e);
 		}
 	}
-	
+
 	private static final String charset(String contentType) {
 		int p = contentType.indexOf(" charset=");
 		if (p == -1) {
@@ -56,28 +56,28 @@ public class Request extends Header {
 		if (contentLength != null) {
 			return contentLength;
 		}
-		String ret = (String)this.get("Content-Length");
+		String ret = (String) this.get("Content-Length");
 		if (ret == null) {
 			return -1;
 		}
 		contentLength = Converter.parseLong(ret);
 		return contentLength;
 	}
-	
+
 	@Override
 	public Object get(Object key) {
-		if("isBodyInputStream".equals(key) || "isBodyFile".equals(key)) {
-			return ((HttpElement)element).isHttpPostBodyFile();
-		} else if("inputStream".equals(key) || "body".equals(key) || "bodyFile".equals(key)) {
-			HttpElement em = (HttpElement)element;
-			if(em.isHttpPostBodyFile()) {
+		if ("isBodyInputStream".equals(key) || "isBodyFile".equals(key)) {
+			return ((HttpElement) element).isHttpPostBodyFile();
+		} else if ("inputStream".equals(key) || "body".equals(key) || "bodyFile".equals(key)) {
+			HttpElement em = (HttpElement) element;
+			if (em.isHttpPostBodyFile()) {
 				return em.getHttpPostBodyFile(null).getInputStream();
 			} else {
 				return null;
 			}
-		} else if("bodyName".equals(key) || "bodyFileName".equals(key)) {
-			HttpElement em = (HttpElement)element;
-			if(em.isHttpPostBodyFile()) {
+		} else if ("bodyName".equals(key) || "bodyFileName".equals(key)) {
+			HttpElement em = (HttpElement) element;
+			if (em.isHttpPostBodyFile()) {
 				return em.getHttpPostBodyFile(null).getFileName();
 			} else {
 				return null;

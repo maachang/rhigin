@@ -28,7 +28,7 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 
 	protected Header() {
 	}
-	
+
 	// http のendpointが検知された場合にコンストラクタ呼び出し.
 	public Header(NioReadBuffer buffer, int endPoint) throws IOException {
 		int firstPoint = buffer.indexOf(Analysis.ONE_LINE);
@@ -59,7 +59,7 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 		this.url = list[1];
 		this.version = list[2];
 	}
-	
+
 	// 取得ヘッダバイナリを文字列のヘッダに変換.
 	protected final void getHeaderString() throws IOException {
 		if (headers != null) {
@@ -67,20 +67,21 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 			headers = null;
 		}
 	}
-	
+
 	// nioElementをセット.
 	protected void setElement(NioElement em) {
 		element = em;
 	}
-	
+
 	public void clear() {
 		element = null;
 		headerList = null;
 		contntType = null;
 	}
-	
+
 	/**
 	 * HTTPメソッドを取得.
+	 * 
 	 * @return
 	 */
 	public String getMethod() {
@@ -89,6 +90,7 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 
 	/**
 	 * HTTPアクセスURLを取得.
+	 * 
 	 * @return
 	 */
 	public String getUrl() {
@@ -97,30 +99,34 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 
 	/**
 	 * HTTPバージョンを取得.
+	 * 
 	 * @return
 	 */
 	public String getVersion() {
 		return version;
 	}
-	
+
 	/**
 	 * リモートアドレスを取得.
+	 * 
 	 * @return
 	 */
 	public String getRemoteAddress() {
 		return element.getRemoteAddress().getHostString();
 	}
-	
+
 	/**
 	 * リモートポートを取得.
+	 * 
 	 * @return
 	 */
 	public int getRemotePort() {
 		return element.getRemoteAddress().getPort();
 	}
-	
+
 	/**
 	 * ヘッダ情報を取得.
+	 * 
 	 * @param key
 	 * @return
 	 * @throws IOException
@@ -139,7 +145,7 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 	}
 
 	public List<String> getHeaders() throws IOException {
-		if(headerList != null) {
+		if (headerList != null) {
 			return headerList;
 		}
 		getHeaderString();
@@ -161,7 +167,9 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 
 	/**
 	 * 取得.
-	 * @param key 対象のキーを設定します.
+	 * 
+	 * @param key
+	 *            対象のキーを設定します.
 	 * @return Object キーに対する要素情報が返却されます.
 	 */
 	@Override
@@ -178,11 +186,11 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 			return getRemoteAddress();
 		} else if ("port".equals(key)) {
 			return getRemotePort();
-		} else if("Content-Type".equals(key)) {
-			if(contntType == null) {
+		} else if ("Content-Type".equals(key)) {
+			if (contntType == null) {
 				try {
 					contntType = getHeader(key.toString());
-				} catch(Exception e) {
+				} catch (Exception e) {
 					contntType = null;
 				}
 			}
@@ -194,7 +202,7 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 			return null;
 		}
 	}
-	
+
 	@Override
 	public String toString() {
 		return super.toString();
@@ -206,11 +214,11 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 			List<String> list = getHeaders();
 			int len = list.size();
 			Object[] ret = new Object[len];
-			for(int i = 0; i < len; i ++) {
+			for (int i = 0; i < len; i++) {
 				ret[i] = list.get(i);
 			}
 			return ret;
-		} catch(Exception e) {
+		} catch (Exception e) {
 			return new Object[] {};
 		}
 	}
@@ -235,7 +243,7 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 		try {
 			List<String> list = getHeaders();
 			return list.get(no);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RhiginException(500, e);
 		}
 	}
@@ -245,7 +253,7 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 		try {
 			List<String> list = getHeaders();
 			return list.size();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RhiginException(500, e);
 		}
 	}

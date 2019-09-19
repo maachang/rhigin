@@ -48,25 +48,24 @@ import rhigin.util.OList;
  * javscriptを実行.
  */
 public class ExecuteScript {
-	
+
 	/** 名無しスクリプト名. **/
 	protected static final String NO_SCRIPT_NAME = "<script>";
-	
+
 	/** Javascriot最適化レベル: コンパイル時は最適化. **/
 	private static final int SCRIPT_COMPILE_OPTIMIZE_LEVEL = 1;
-	
+
 	/** Javascriot最適化レベル: 非コンパイル時は最適化無効. **/
 	private static final int SCRIPT_NOT_COMPILE_OPTIMIZE_LEVEL = -1;
-	
+
 	/** java LanguageVersion. **/
-	//private static final int SCRIPT_LANGUAGE_VERSION = Context.VERSION_1_5;
+	// private static final int SCRIPT_LANGUAGE_VERSION = Context.VERSION_1_5;
 	private static final int SCRIPT_LANGUAGE_VERSION = Context.VERSION_1_8;
-	//private static final int SCRIPT_LANGUAGE_VERSION = Context.VERSION_ES6;
-	
-	
+	// private static final int SCRIPT_LANGUAGE_VERSION = Context.VERSION_ES6;
+
 	/** originalFunctionAndObject. **/
 	private static final ListMap originalFunctionAndObjectList = new ListMap();
-	
+
 	static {
 		// Context初期化.
 		ContextFactory.initGlobal(new ContextFactory() {
@@ -79,8 +78,10 @@ public class ExecuteScript {
 				ctx.setWrapFactory(RhiginWrapFactory.getInstance());
 				return ctx;
 			}
+
 			@Override
-			protected Object doTopCall(final Callable callable, final Context cx, final Scriptable scope, final Scriptable thisObj, final Object[] args) {
+			protected Object doTopCall(final Callable callable, final Context cx, final Scriptable scope,
+					final Scriptable thisObj, final Object[] args) {
 				AccessControlContext accCtxt = null;
 				final Scriptable global = ScriptableObject.getTopLevelScope(scope);
 				final Scriptable globalProto = global.getPrototype();
@@ -97,7 +98,9 @@ public class ExecuteScript {
 					return superDoTopCall(callable, cx, scope, thisObj, args);
 				}
 			}
-			private Object superDoTopCall(Callable callable, Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+
+			private Object superDoTopCall(Callable callable, Context cx, Scriptable scope, Scriptable thisObj,
+					Object[] args) {
 				return super.doTopCall(callable, cx, scope, thisObj, args);
 			}
 		});
@@ -105,9 +108,10 @@ public class ExecuteScript {
 
 	// [ThreadLocal]: topLevelオブジェクトを生成・取得.
 	private static final ThreadLocal<RhiginTopLevel> topLevels = new ThreadLocal<RhiginTopLevel>();
+
 	private static final RhiginTopLevel getTopLevel() {
 		RhiginTopLevel ret = topLevels.get();
-		if(ret == null) {
+		if (ret == null) {
 			try {
 				ret = new RhiginTopLevel(ContextFactory.getGlobal().enterContext());
 			} finally {
@@ -117,85 +121,98 @@ public class ExecuteScript {
 		}
 		return ret;
 	}
-	
+
 	// [ThreadLocal]: RhiginContextオブジェクトのカレントスレッド管理.
 	private static final ThreadLocal<RhiginContext> currentRhiginContext = new ThreadLocal<RhiginContext>();
-	
+
 	/**
 	 * カレントのRhiginContextを取得.
+	 * 
 	 * @return RhiginContext カレントのRhiginContextが返却されます.
 	 */
 	public static final RhiginContext currentRhiginContext() {
 		return currentRhiginContext.get();
 	}
-	
+
 	/**
 	 * 指定javascriptをコンパイル.
-	 * @param script 対象のスクリプトを設定します.
+	 * 
+	 * @param script
+	 *            対象のスクリプトを設定します.
 	 * @return Script コンパイル結果が返却されます.
-	 * @throws Exception 例外.
+	 * @throws Exception
+	 *             例外.
 	 */
-	public static final Script compile(String script)
-		throws Exception {
+	public static final Script compile(String script) throws Exception {
 		return compile(script, null);
 	}
-	
-	
-	
+
 	/**
 	 * 指定javascriptをコンパイル.
-	 * @param script 対象のスクリプトを設定します.
-	 * @param name スクリプトファイル名を設定します.
+	 * 
+	 * @param script
+	 *            対象のスクリプトを設定します.
+	 * @param name
+	 *            スクリプトファイル名を設定します.
 	 * @return Script コンパイル結果が返却されます.
-	 * @throws Exception 例外.
+	 * @throws Exception
+	 *             例外.
 	 */
-	public static final Script compile(String script, String name)
-		throws Exception {
+	public static final Script compile(String script, String name) throws Exception {
 		return compile(new StringReader(script), name);
 	}
-	
+
 	/**
 	 * 指定javascriptをコンパイル.
-	 * @param r readerを設定します.
-	 * @param name スクリプトファイル名を設定します.
+	 * 
+	 * @param r
+	 *            readerを設定します.
+	 * @param name
+	 *            スクリプトファイル名を設定します.
 	 * @return Script コンパイル結果が返却されます.
-	 * @throws Exception 例外.
+	 * @throws Exception
+	 *             例外.
 	 */
-	public static final Script compile(Reader r, String name)
-		throws Exception {
+	public static final Script compile(Reader r, String name) throws Exception {
 		return compile(r, name, "", "", 1);
 	}
-	
+
 	// スクリプト情報を生成.
-	private static final Reader getScript(Reader r, String headerScript, String footerScript)
-		throws Exception {
-		if(headerScript.length() == 0 && footerScript.length() == 0) {
+	private static final Reader getScript(Reader r, String headerScript, String footerScript) throws Exception {
+		if (headerScript.length() == 0 && footerScript.length() == 0) {
 			return r;
 		}
 		int len;
 		char[] c = new char[1024];
 		StringBuilder buf = new StringBuilder(headerScript);
-		while((len = r.read(c)) != -1) {
+		while ((len = r.read(c)) != -1) {
 			buf.append(c, 0, len);
 		}
 		c = null;
 		buf.append(footerScript);
-		
+
 		return new StringReader(buf.toString());
 	}
-	
+
 	/**
 	 * 指定javascriptをコンパイル.
-	 * @param r readerを設定します.
-	 * @param name スクリプトファイル名を設定します.
-	 * @param headerScript ヘッダに追加するスクリプトを設定します.
-	 * @param footerScript フッタに追加するスクリプトを設定します.
-	 * @param lineNo ライン開始番号を設定します.
+	 * 
+	 * @param r
+	 *            readerを設定します.
+	 * @param name
+	 *            スクリプトファイル名を設定します.
+	 * @param headerScript
+	 *            ヘッダに追加するスクリプトを設定します.
+	 * @param footerScript
+	 *            フッタに追加するスクリプトを設定します.
+	 * @param lineNo
+	 *            ライン開始番号を設定します.
 	 * @return Script コンパイル結果が返却されます.
-	 * @throws Exception 例外.
+	 * @throws Exception
+	 *             例外.
 	 */
 	public static final Script compile(Reader r, String name, String headerScript, String footerScript, int lineNo)
-		throws Exception {
+			throws Exception {
 		name = (name == null || name.isEmpty()) ? NO_SCRIPT_NAME : name;
 		Context ctx = ContextFactory.getGlobal().enterContext();
 		try {
@@ -206,16 +223,19 @@ public class ExecuteScript {
 			EntityFunctions.exit();
 		}
 	}
-	
+
 	/**
 	 * コンパイル結果を実行.
-	 * @param context RhiginContextオブジェクトを設定します.
-	 * @param compiled コンパイル済みオブジェクトを設定します.
+	 * 
+	 * @param context
+	 *            RhiginContextオブジェクトを設定します.
+	 * @param compiled
+	 *            コンパイル済みオブジェクトを設定します.
 	 * @return Object スクリプト実行結果を返却します.
-	 * @throws Exception 例外.
+	 * @throws Exception
+	 *             例外.
 	 */
-	public static final Object execute(RhiginContext context, Script compiled)
-		throws Exception {
+	public static final Object execute(RhiginContext context, Script compiled) throws Exception {
 		Context ctx = ContextFactory.getGlobal().enterContext();
 		currentRhiginContext.set(context);
 		try {
@@ -225,8 +245,8 @@ public class ExecuteScript {
 			settingRhiginObject(ctx, scope);
 			final Object ret = compiled.exec(ctx, scope);
 			// 戻り値がWrapperの場合は、アンラップ.
-			if(ret instanceof Wrapper) {
-				return ((Wrapper)ret).unwrap();
+			if (ret instanceof Wrapper) {
+				return ((Wrapper) ret).unwrap();
 			}
 			return ret;
 		} finally {
@@ -235,58 +255,77 @@ public class ExecuteScript {
 			currentRhiginContext.set(null);
 		}
 	}
-	
+
 	/**
 	 * 指定javascriptを実行.
-	 * @param context RhiginContextオブジェクトを設定します.
-	 * @param script スクリプトを設定します.
+	 * 
+	 * @param context
+	 *            RhiginContextオブジェクトを設定します.
+	 * @param script
+	 *            スクリプトを設定します.
 	 * @return Object スクリプト実行結果を返却します.
-	 * @throws Exception 例外.
+	 * @throws Exception
+	 *             例外.
 	 */
-	public static final Object execute(RhiginContext context, String script)
-		throws Exception {
+	public static final Object execute(RhiginContext context, String script) throws Exception {
 		return execute(context, script, null);
 	}
-	
+
 	/**
 	 * 指定javascriptを実行.
-	 * @param context RhiginContextオブジェクトを設定します.
-	 * @param script スクリプトを設定します.
-	 * @param name スクリプトファイル名を設定します.
+	 * 
+	 * @param context
+	 *            RhiginContextオブジェクトを設定します.
+	 * @param script
+	 *            スクリプトを設定します.
+	 * @param name
+	 *            スクリプトファイル名を設定します.
 	 * @return Object スクリプト実行結果を返却します.
-	 * @throws Exception 例外.
+	 * @throws Exception
+	 *             例外.
 	 */
-	public static final Object execute(RhiginContext context, String script, String name)
-		throws Exception {
+	public static final Object execute(RhiginContext context, String script, String name) throws Exception {
 		return execute(context, new StringReader(script), name);
 	}
-	
+
 	/**
 	 * 指定javascriptを実行.
-	 * @param context RhiginContextオブジェクトを設定します.
-	 * @param r readerを設定します.
-	 * @param name スクリプトファイル名を設定します.
+	 * 
+	 * @param context
+	 *            RhiginContextオブジェクトを設定します.
+	 * @param r
+	 *            readerを設定します.
+	 * @param name
+	 *            スクリプトファイル名を設定します.
 	 * @return Object スクリプト実行結果を返却します.
-	 * @throws Exception 例外.
+	 * @throws Exception
+	 *             例外.
 	 */
-	public static final Object execute(RhiginContext context, Reader r, String name)
-		throws Exception {
+	public static final Object execute(RhiginContext context, Reader r, String name) throws Exception {
 		return execute(context, r, name, "", "", 1);
 	}
-	
+
 	/**
 	 * 指定javascriptを実行.
-	 * @param context RhiginContextオブジェクトを設定します.
-	 * @param r readerを設定します.
-	 * @param name スクリプトファイル名を設定します.
-	 * @param headerScript ヘッダに追加するスクリプトを設定します.
-	 * @param footerScript フッタに追加するスクリプトを設定します.
-	 * @param lineNo ライン開始番号を設定します.
+	 * 
+	 * @param context
+	 *            RhiginContextオブジェクトを設定します.
+	 * @param r
+	 *            readerを設定します.
+	 * @param name
+	 *            スクリプトファイル名を設定します.
+	 * @param headerScript
+	 *            ヘッダに追加するスクリプトを設定します.
+	 * @param footerScript
+	 *            フッタに追加するスクリプトを設定します.
+	 * @param lineNo
+	 *            ライン開始番号を設定します.
 	 * @return Object スクリプト実行結果を返却します.
-	 * @throws Exception 例外.
+	 * @throws Exception
+	 *             例外.
 	 */
-	public static final Object execute(RhiginContext context, Reader r, String name, String headerScript, String footerScript, int lineNo)
-		throws Exception {
+	public static final Object execute(RhiginContext context, Reader r, String name, String headerScript,
+			String footerScript, int lineNo) throws Exception {
 		name = (name == null || name.isEmpty()) ? NO_SCRIPT_NAME : name;
 		Context ctx = ContextFactory.getGlobal().enterContext();
 		ctx.setOptimizationLevel(SCRIPT_NOT_COMPILE_OPTIMIZE_LEVEL);
@@ -300,8 +339,8 @@ public class ExecuteScript {
 			// 実行処理.
 			final Object ret = compiled.exec(ctx, scope);
 			// 戻り値がWrapperの場合は、アンラップ.
-			if(ret instanceof Wrapper) {
-				return ((Wrapper)ret).unwrap();
+			if (ret instanceof Wrapper) {
+				return ((Wrapper) ret).unwrap();
 			}
 			return ret;
 		} finally {
@@ -310,11 +349,10 @@ public class ExecuteScript {
 			currentRhiginContext.set(null);
 		}
 	}
-	
+
 	// 基本オブジェクトをセット.
-	private static final void settingRhiginObject(Context ctx, Scriptable scope)
-		throws Exception {
-		
+	private static final void settingRhiginObject(Context ctx, Scriptable scope) throws Exception {
+
 		// オブジェクトの登録.
 		ConsoleObject.regFunctions(scope);
 		Xor128Object.regFunctions(scope);
@@ -326,7 +364,7 @@ public class ExecuteScript {
 		UniqueIdObject.regFunctions(scope);
 		FCipherObject.regFunctions(scope);
 		FCompObject.regFunctions(scope);
-		
+
 		// rhigin用の基本オブジェクトを設定.
 		RequireFunction.regFunctions(scope);
 		GcFunction.regFunctions(scope);
@@ -345,28 +383,31 @@ public class ExecuteScript {
 		ServerIdFunction.regFunctions(scope);
 		ValidateFunction.regFunctions(scope);
 		EntityFunctions.regFunctions(scope);
-		
+
 		// オリジナルオブジェクトを設定.
 		Object[] kv;
 		final OList<Object[]> list = originalFunctionAndObjectList.rawData();
 		final int len = list.size();
-		for(int i = 0; i < len; i ++) {
+		for (int i = 0; i < len; i++) {
 			kv = list.get(i);
-			scope.put((String)kv[0], scope, kv[1]);
+			scope.put((String) kv[0], scope, kv[1]);
 		}
 	}
-	
+
 	/**
 	 * オリジナルなRhigin用のFunction及びオブジェクトを設定.
-	 * @param args [name], [value], [name], [value] .... のように設定します.
+	 * 
+	 * @param args
+	 *            [name], [value], [name], [value] .... のように設定します.
 	 */
 	public static final void addOriginals(Object... args) {
 		originalFunctionAndObjectList.set(args);
 	}
-	
+
 	/**
 	 * オリジナルなRhigin用のFunction及びオブジェクトを格納するオブジェクトを取得.
-	 * @return ListMap 
+	 * 
+	 * @return ListMap
 	 */
 	public static final ListMap getOriginal() {
 		return originalFunctionAndObjectList;

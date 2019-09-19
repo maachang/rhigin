@@ -57,21 +57,22 @@ public class HttpWorkerThread extends Thread {
 		mime = m;
 		// コンパイルキャッシュは、ワーカースレッド単位で生成する.
 		compileCache = new CompileCache(info.getCompileCacheSize(), info.getCompileCacheRootDir());
-		
+
 		// HttpElement受付用.
 		queue = new ConcurrentLinkedQueue<HttpElement>();
 		wait = new Wait();
-		
+
 		// テンポラリバッファを生成.
 		// この情報は、ワーカースレッドで処理される、各HttpElement.sendTempBinaryで利用される.
 		tmpBuffer = new byte[info.getByteBufferLength()];
-		
+
 		// ランダムオブジェクト.
 		xor128 = new Xor128(System.nanoTime());
 	}
 
 	/**
 	 * ワーカースレッド登録.
+	 * 
 	 * @param em
 	 * @throws IOException
 	 */
@@ -84,6 +85,7 @@ public class HttpWorkerThread extends Thread {
 
 	/**
 	 * シグナル呼び出し.
+	 * 
 	 * @param em
 	 * @throws IOException
 	 */
@@ -112,13 +114,13 @@ public class HttpWorkerThread extends Thread {
 
 	public void run() {
 		LOG.info(" * start rhigin workerThread(" + no + ").");
-		
+
 		// ワーカー単位のコンパイルキャッシュを require命令に設定.
 		RequireFunction.init(compileCache);
-		
+
 		// ワーカー単位でランダムオブジェクトをセット.
 		RandomFunction.init(xor128);
-		
+
 		// 実行処理.
 		ThreadDeath td = execute();
 
@@ -145,7 +147,7 @@ public class HttpWorkerThread extends Thread {
 							executeScript(em, compileCache, mime);
 						} finally {
 							// 大容量Body受付情報が存在する場合は、後片付けをする.
-							if(em.isHttpPostBodyFile()) {
+							if (em.isHttpPostBodyFile()) {
 								HttpPostBodyFile f = em.getHttpPostBodyFile(null);
 								f.close();
 							}
@@ -170,8 +172,7 @@ public class HttpWorkerThread extends Thread {
 	}
 
 	/** Request処理. **/
-	private static final boolean executionRequest(HttpElement em, byte[] tmpBuffer, Xor128 xor128)
-		throws IOException {
+	private static final boolean executionRequest(HttpElement em, byte[] tmpBuffer, Xor128 xor128) throws IOException {
 
 		// 既に受信処理が終わっている場合.
 		if (em.isEndReceive()) {
@@ -199,16 +200,16 @@ public class HttpWorkerThread extends Thread {
 		final String method = request.getMethod();
 
 		// OPTIONの場合は、Optionヘッダを返却.
-		//if ("OPTIONS".equals(method)) {
-		if (Alphabet.eq("options",method)) {
+		// if ("OPTIONS".equals(method)) {
+		if (Alphabet.eq("options", method)) {
 
 			// Optionsレスポンス.
 			sendOptions(em);
 			return false;
 		}
 		// POSTの場合は、ContentLength分の情報を取得.
-		//else if ("POST".equals(method)) {
-		else if (Alphabet.eq("post",method)) {
+		// else if ("POST".equals(method)) {
+		else if (Alphabet.eq("post", method)) {
 			// ContentLengthを取得.
 			long contentLength = request.getContentLength();
 			if (contentLength <= -1L) {
@@ -220,19 +221,19 @@ public class HttpWorkerThread extends Thread {
 				}
 				return false;
 			}
-			
+
 			// 大容量ファイル受信が要求されてる場合.
-			if(HttpConstants.POST_FILE_OUT_CONTENT_TYPE.equals(request.getString("Content-Type"))) {
+			if (HttpConstants.POST_FILE_OUT_CONTENT_TYPE.equals(request.getString("Content-Type"))) {
 				// 受信データが存在する場合.
 				HttpPostBodyFile file = em.getHttpPostBodyFile(xor128);
-				if(buffer.size() > 0) {
+				if (buffer.size() > 0) {
 					int len;
 					final byte[] buf = tmpBuffer;
-					while((len = buffer.read(buf)) > 0) {
+					while ((len = buffer.read(buf)) > 0) {
 						file.write(buf, len);
 					}
 					// 受信完了の場合.
-					if(file.getFileLength() >= contentLength) {
+					if (file.getFileLength() >= contentLength) {
 						file.endWrite();
 						request.setBody(null);
 						em.setEndReceive(true);
@@ -255,7 +256,7 @@ public class HttpWorkerThread extends Thread {
 
 			// Body情報が受信完了かチェック.
 			if (buffer.size() >= contentLength) {
-				byte[] body = new byte[(int)contentLength];
+				byte[] body = new byte[(int) contentLength];
 				buffer.read(body);
 				request.setBody(body);
 			} else {
@@ -264,8 +265,8 @@ public class HttpWorkerThread extends Thread {
 			}
 		}
 		// POST, GET以外の場合は処理しない.
-		//else if (!"GET".equals(method)) {
-		else if(!Alphabet.eq("get",method)) {
+		// else if (!"GET".equals(method)) {
+		else if (!Alphabet.eq("get", method)) {
 			// 通信クローズ.
 			if (em != null) {
 				em.clear();
@@ -289,45 +290,50 @@ public class HttpWorkerThread extends Thread {
 		try {
 			Request req = em.getRequest();
 			em.setRequest(null);
-			
+
 			// gzipに対応しているかチェック.
 			boolean gzip = isGzip(req);
-			
+
 			// アクセス対象のパスを取得.
 			String path = HttpConstants.ACCESS_PATH + getPath(req.getUrl());
-			
+
 			// main.jsが存在する場合は、urlに関係なくmain.jsを実行.
-			if(!FileUtil.isFile(path + RhiginConstants.MAIN_JS)) {
+			if (!FileUtil.isFile(path + RhiginConstants.MAIN_JS)) {
 				// 最後が / で終わっている場合.
-				if(path.endsWith("/")) {
+				if (path.endsWith("/")) {
 					path += "index";
 				}
-				
+
 				// 実行ファイルのパスが存在しない場合.
 				// ただ / で設定された場合は優先的に [/index.html or /index.htm] を探して、存在する場合はそちらを優先する.
 				if ((req.getUrl().endsWith("/") && (FileUtil.isFile(path + ".html") || FileUtil.isFile(path + ".htm")))
 						|| !FileUtil.isFile(path + ".js")) {
 					boolean useFlag = false;
-					
+
 					// 普通にファイル名として存在するかチェック.
-					if(gzip) {
+					if (gzip) {
 						// gzip対応.
-						if(path.endsWith("/index")) {
-							if(FileUtil.isFile(path + ".html.gz")) {
-								path += ".html.gz"; useFlag = true;
-							} else if(FileUtil.isFile(path + ".html")) {
-								path += ".html"; useFlag = true;
-								} else if(FileUtil.isFile(path + ".htm.gz")) {
-								path += ".htm.gz"; useFlag = true;
-							} else if(FileUtil.isFile(path + ".htm")) {
-								path += ".htm"; useFlag = true;
+						if (path.endsWith("/index")) {
+							if (FileUtil.isFile(path + ".html.gz")) {
+								path += ".html.gz";
+								useFlag = true;
+							} else if (FileUtil.isFile(path + ".html")) {
+								path += ".html";
+								useFlag = true;
+							} else if (FileUtil.isFile(path + ".htm.gz")) {
+								path += ".htm.gz";
+								useFlag = true;
+							} else if (FileUtil.isFile(path + ".htm")) {
+								path += ".htm";
+								useFlag = true;
 							}
-						} else if(FileUtil.isFile(path + ".gz")) {
-							path += ".gz"; useFlag = true;
-						} else if(FileUtil.isFile(path)) {
+						} else if (FileUtil.isFile(path + ".gz")) {
+							path += ".gz";
+							useFlag = true;
+						} else if (FileUtil.isFile(path)) {
 							// ただし[.js]に対しては、サーバ実行なので、中身が見れないようにする.
 							// 例外として[/@file.js] のように、ファイルの頭にアットマークの場合は表示対象とする.
-							if(path.endsWith(".js") && path.indexOf("/@") == -1) {
+							if (path.endsWith(".js") && path.indexOf("/@") == -1) {
 								useFlag = false;
 							} else {
 								useFlag = true;
@@ -335,23 +341,25 @@ public class HttpWorkerThread extends Thread {
 						}
 					} else {
 						// gzip非対応.
-						if(path.endsWith("/index")) {
-							if(FileUtil.isFile(path + ".html")) {
-								path += ".html"; useFlag = true;
-							} else if(FileUtil.isFile(path + ".htm")) {
-								path += ".htm"; useFlag = true;
+						if (path.endsWith("/index")) {
+							if (FileUtil.isFile(path + ".html")) {
+								path += ".html";
+								useFlag = true;
+							} else if (FileUtil.isFile(path + ".htm")) {
+								path += ".htm";
+								useFlag = true;
 							}
-						} else if(FileUtil.isFile(path)) {
+						} else if (FileUtil.isFile(path)) {
 							// ただし[.js]に対しては、サーバ実行なので、中身が見れないようにする.
 							// 例外として[/@file.js] のように、ファイルの頭にアットマークの場合は表示対象とする.
-							if(path.endsWith(".js") && path.indexOf("/@") == -1) {
+							if (path.endsWith(".js") && path.indexOf("/@") == -1) {
 								useFlag = false;
 							} else {
 								useFlag = true;
 							}
 						}
 					}
-					if(!useFlag) {
+					if (!useFlag) {
 						// 存在しない場合.
 						errorResponse(em, 404);
 					} else {
@@ -367,7 +375,7 @@ public class HttpWorkerThread extends Thread {
 				// main.jsを実行させる.
 				path = path + RhiginConstants.MAIN_JS;
 			}
-			
+
 			String method = req.getMethod();
 			Object params = null;
 			if ("GET".equals(method)) {
@@ -376,16 +384,16 @@ public class HttpWorkerThread extends Thread {
 				params = postParams(req);
 			}
 			// パラメータがnullの場合は、空のパラメータをセット.
-			if(params == null) {
+			if (params == null) {
 				params = new Params();
-			// パラメータがMapの場合.
-			} else if(params instanceof Map) {
-				params = new Params((Map)params);
+				// パラメータがMapの場合.
+			} else if (params instanceof Map) {
+				params = new Params((Map) params);
 			}
-			
+
 			// レスポンス生成.
 			Response res = new Response();
-			
+
 			// コンテキスト生成・設定.
 			RhiginContext context = new RhiginContext();
 			context.setAttribute("params", params);
@@ -393,48 +401,47 @@ public class HttpWorkerThread extends Thread {
 			context.setAttribute("response", res);
 			context.setAttribute(redirect.getName(), redirect);
 			context.setAttribute(error.getName(), error);
-			
+
 			Object ret = "";
 			try {
 				// スクリプトの実行.
-				ret = ExecuteScript.execute(
-						context, cache.get(path, ScriptConstants.HEADER, ScriptConstants.FOOTER).getScript());
+				ret = ExecuteScript.execute(context,
+						cache.get(path, ScriptConstants.HEADER, ScriptConstants.FOOTER).getScript());
 			} catch (Redirect redirect) {
 				redirectResponse(em, redirect);
 				return;
 			} catch (RhiginException rhiginException) {
 				// HTTPステータスが500エラー以上の場合のみ、エラー表示.
-				if(rhiginException.getStatus() >= 500) {
-					//　スクリプトエラーを表示.
+				if (rhiginException.getStatus() >= 500) {
+					// スクリプトエラーを表示.
 					LOG.error("scriptError:" + req.getUrl(), rhiginException);
 				}
-				errorResponse(em, rhiginException.getStatus(),
-					rhiginException.getMessage());
+				errorResponse(em, rhiginException.getStatus(), rhiginException.getMessage());
 				return;
 			}
 			// 戻り値がInputStreamでない場合.
-			if(!(ret instanceof InputStream)) {
-				if (ret == null ||
-					(ret instanceof String && ((String)ret).length() == 0)) {
+			if (!(ret instanceof InputStream)) {
+				if (ret == null || (ret instanceof String && ((String) ret).length() == 0)) {
 					ret = "";
 					gzip = false;
 				}
 				// success形式で返却.
 				successResponse(gzip, em, res.getStatus(), res, ret);
-			// 戻り値がInputStreamの場合.
+				// 戻り値がInputStreamの場合.
 			} else {
 				// バイナリ返却.
-				sendResponse(em, res.getStatus(), res, (InputStream)ret);
+				sendResponse(em, res.getStatus(), res, (InputStream) ret);
 			}
-		} catch(RhiginException re) {
-			if(!em.isEndSend()) {
+		} catch (RhiginException re) {
+			if (!em.isEndSend()) {
 				LOG.error("error", re);
 				try {
 					errorResponse(em, re.getStatus(), re.getMessage());
-				} catch(Exception ee) {}
+				} catch (Exception ee) {
+				}
 			}
 		} catch (Exception e) {
-			if(!em.isEndSend()) {
+			if (!em.isEndSend()) {
 				LOG.error("error", e);
 				try {
 					errorResponse(em, 500, e.getMessage());
@@ -443,7 +450,7 @@ public class HttpWorkerThread extends Thread {
 			}
 		}
 	}
-	
+
 	/** 要求パス取得. **/
 	private static final String getPath(String url) {
 		int p = url.indexOf("?");
@@ -468,14 +475,14 @@ public class HttpWorkerThread extends Thread {
 	/** POSTパラメータを取得. **/
 	private static final Object postParams(Request req) throws IOException {
 		// 大容量ファイルの受け取りの場合は、パラメータ解析を行わない.
-		if(HttpConstants.POST_FILE_OUT_CONTENT_TYPE.equals(req.get("Content-Type"))) {
+		if (HttpConstants.POST_FILE_OUT_CONTENT_TYPE.equals(req.get("Content-Type"))) {
 			return null;
 		}
 		String v = req.getBodyText();
 		req.setBody(null);
 
 		// Body内容がJSON形式の場合.
-		String contentType = (String)req.get("Content-Type");
+		String contentType = (String) req.get("Content-Type");
 		if (contentType.indexOf("application/json") == 0) {
 			return Json.decode(v);
 		} else if ("application/x-www-form-urlencoded".equals(contentType)) {
@@ -484,13 +491,12 @@ public class HttpWorkerThread extends Thread {
 			return Analysis.paramsAnalysis(v, 0);
 		}
 	}
-	
+
 	/** 正常結果をJSON返却. **/
 	private static final void successResponse(boolean gzip, HttpElement em, int status, Response response, Object value)
-		throws IOException {
-		StringBuilder buf = new StringBuilder(
-			"{\"success\":true,\"status\":").append(status).append(",");
-		if(value == null) {
+			throws IOException {
+		StringBuilder buf = new StringBuilder("{\"success\":true,\"status\":").append(status).append(",");
+		if (value == null) {
 			buf.append("\"value\":null");
 		} else {
 			buf.append("\"value\":").append(Json.encode(value));
@@ -502,7 +508,7 @@ public class HttpWorkerThread extends Thread {
 
 	/** GZIP返却許可チェック. **/
 	private static final boolean isGzip(Request req) throws IOException {
-		String n = (String)req.get("Accept-Encoding");
+		String n = (String) req.get("Accept-Encoding");
 		if (n == null || n.indexOf("gzip") == -1) {
 			return false;
 		}
@@ -517,35 +523,35 @@ public class HttpWorkerThread extends Thread {
 		em.setEndSend(true);
 		em.setSendBinary(OPSIONS_RESPONSE);
 	}
-	
+
 	/** ファイル送信. **/
-	private static final void sendFile(boolean gzip, String fileName, 
-			HttpElement em, MimeType mime, int status, Response header) throws IOException {
+	private static final void sendFile(boolean gzip, String fileName, HttpElement em, MimeType mime, int status,
+			Response header) throws IOException {
 		em.setRequest(null);
 		em.destroyBuffer();
 		em.setEndReceive(true);
 		em.setEndSend(true);
-		if(gzip && fileName.endsWith(".gz")) {
+		if (gzip && fileName.endsWith(".gz")) {
 			header.put("Content-Encoding", "gzip");
-			header.put("Content-Type", mime.getUrl(fileName.substring(0, fileName.length()-3)));
+			header.put("Content-Type", mime.getUrl(fileName.substring(0, fileName.length() - 3)));
 		} else {
 			header.put("Content-Type", mime.getUrl(fileName.substring(0, fileName.length())));
 		}
 		try {
-			em.setSendData(new ByteArrayInputStream(stateResponse(
-				status, header, BLANK_BINARY, FileUtil.getFileLength(fileName))));
+			em.setSendData(new ByteArrayInputStream(
+					stateResponse(status, header, BLANK_BINARY, FileUtil.getFileLength(fileName))));
 			em.setSendData(new FileInputStream(fileName));
 			em.startWrite();
-		} catch(IOException io) {
+		} catch (IOException io) {
 			throw io;
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new IOException(e);
 		}
 	}
 
 	/** [byte[]]レスポンス送信. **/
-	private static final void sendResponse(boolean gzip, HttpElement em,
-			int status, Response header, String body) throws IOException {
+	private static final void sendResponse(boolean gzip, HttpElement em, int status, Response header, String body)
+			throws IOException {
 		em.setRequest(null);
 		em.destroyBuffer();
 		em.setEndReceive(true);
@@ -559,36 +565,34 @@ public class HttpWorkerThread extends Thread {
 	}
 
 	/** [inputStream]レスポンス送信. **/
-	private static final void sendResponse(HttpElement em,
-			int status, Response header, InputStream body) throws IOException {
-			em.setRequest(null);
-			em.destroyBuffer();
-			em.setEndReceive(true);
-			em.setEndSend(true);
-			try {
-				Long len;
-				// 直接ファイルの場合は、そのまま転送.
-				if(body instanceof FileInputStream) {
-						len = (long)body.available();
+	private static final void sendResponse(HttpElement em, int status, Response header, InputStream body)
+			throws IOException {
+		em.setRequest(null);
+		em.destroyBuffer();
+		em.setEndReceive(true);
+		em.setEndSend(true);
+		try {
+			Long len;
+			// 直接ファイルの場合は、そのまま転送.
+			if (body instanceof FileInputStream) {
+				len = (long) body.available();
 				// それ以外の場合はchunked転送.
-				} else {
-						len = null;
-						body = new HttpChunkedInputStream(Http.getHttpInfo().getByteBufferLength(), body);
-				}
-				em.setSendData(new ByteArrayInputStream(stateResponse(
-					status, header, BLANK_BINARY, len)));
-				em.setSendData(body);
-				em.startWrite();
-			} catch(IOException io) {
-				throw io;
-			} catch(Exception e) {
-				throw new IOException(e);
+			} else {
+				len = null;
+				body = new HttpChunkedInputStream(Http.getHttpInfo().getByteBufferLength(), body);
 			}
+			em.setSendData(new ByteArrayInputStream(stateResponse(status, header, BLANK_BINARY, len)));
+			em.setSendData(body);
+			em.startWrite();
+		} catch (IOException io) {
+			throw io;
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
 	}
 
 	/** リダイレクト送信. **/
-	private static final void redirectResponse(HttpElement em, Redirect redirect)
-		throws IOException {
+	private static final void redirectResponse(HttpElement em, Redirect redirect) throws IOException {
 		em.setRequest(null);
 		em.destroyBuffer();
 		em.setEndReceive(true);
@@ -610,33 +614,29 @@ public class HttpWorkerThread extends Thread {
 	}
 
 	/** エラーレスポンスを送信. **/
-	private static final void errorResponse(HttpElement em, int status)
-		throws IOException {
+	private static final void errorResponse(HttpElement em, int status) throws IOException {
 		errorResponse(em, status, null);
 	}
 
 	/** エラーレスポンスを送信. **/
-	private static final void errorResponse(HttpElement em, int status,
-		String message) throws IOException {
-		StringBuilder buf = new StringBuilder(
-				"{\"success\":false,\"status\":").append(status);
+	private static final void errorResponse(HttpElement em, int status, String message) throws IOException {
+		StringBuilder buf = new StringBuilder("{\"success\":false,\"status\":").append(status);
 		if (message == null) {
 			message = Status.getMessage(status);
 		}
 		// コーテーション系の情報は大文字に置き換える.
-		message = Converter.changeString(message,"\"","”");
-		message = Converter.changeString(message,"\'","’");
-		
+		message = Converter.changeString(message, "\"", "”");
+		message = Converter.changeString(message, "\'", "’");
+
 		// カッコ系の情報も大文字に置き換える.
-		message = Converter.changeString(message,"[","［");
-		message = Converter.changeString(message,"]","］");
-		message = Converter.changeString(message,"{","｛");
-		message = Converter.changeString(message,"}","｝");
-		
-		String res = buf.append(",\"value\":{\"message\":\"").append(message)
-			.append("\"}}").toString();
+		message = Converter.changeString(message, "[", "［");
+		message = Converter.changeString(message, "]", "］");
+		message = Converter.changeString(message, "{", "｛");
+		message = Converter.changeString(message, "}", "｝");
+
+		String res = buf.append(",\"value\":{\"message\":\"").append(message).append("\"}}").toString();
 		buf = null;
-		
+
 		Response header = new Response();
 		header.put("Content-Type", "application/json; charset=UTF-8");
 
@@ -649,33 +649,30 @@ public class HttpWorkerThread extends Thread {
 	}
 
 	/** ステータス指定Response返却用バイナリの生成. **/
-	private static final byte[] stateResponse(int state, Response header,
-			String b) throws IOException {
+	private static final byte[] stateResponse(int state, Response header, String b) throws IOException {
 		return stateResponse(state, header, b.getBytes("UTF8"), -1L);
 	}
 
 	/** ステータス指定Response返却用バイナリの生成. **/
-	private static final byte[] stateResponse(int state, Response header,
-		byte[] b, Long contentLength) throws IOException {
-		if(contentLength != null && contentLength == -1L) {
-				contentLength = (long)b.length;
+	private static final byte[] stateResponse(int state, Response header, byte[] b, Long contentLength)
+			throws IOException {
+		if (contentLength != null && contentLength == -1L) {
+			contentLength = (long) b.length;
 		}
-		final byte[] stateBinary = new StringBuilder(String.valueOf(state))
-				.append(" ").append(Status.getMessage(state)).toString()
-				.getBytes("UTF8");
-		
-		StringBuilder buf = new StringBuilder(String.valueOf(contentLength))
-				.append("\r\n").append(Response.headers(header));
-		if(contentLength == null) {
-				// content-lengthが存在しない場合はchunked転送.
-				buf.append("Transfer-Encoding: chunked\r\n");
+		final byte[] stateBinary = new StringBuilder(String.valueOf(state)).append(" ").append(Status.getMessage(state))
+				.toString().getBytes("UTF8");
+
+		StringBuilder buf = new StringBuilder(String.valueOf(contentLength)).append("\r\n")
+				.append(Response.headers(header));
+		if (contentLength == null) {
+			// content-lengthが存在しない場合はchunked転送.
+			buf.append("Transfer-Encoding: chunked\r\n");
 		}
 		buf.append("\r\n");
 		final byte[] foot = buf.toString().getBytes("UTF8");
 		buf = null;
-		
-		int all = STATE_RESPONSE_1.length + stateBinary.length
-				+ STATE_RESPONSE_2.length + foot.length + b.length;
+
+		int all = STATE_RESPONSE_1.length + stateBinary.length + STATE_RESPONSE_2.length + foot.length + b.length;
 		byte[] ret = new byte[all];
 
 		int pos = 0;
@@ -688,7 +685,7 @@ public class HttpWorkerThread extends Thread {
 		System.arraycopy(foot, 0, ret, pos, foot.length);
 		pos += foot.length;
 		System.arraycopy(b, 0, ret, pos, b.length);
-		
+
 		return ret;
 	}
 
@@ -705,34 +702,22 @@ public class HttpWorkerThread extends Thread {
 		byte[] s1;
 		byte[] s2;
 		try {
-			op = ("HTTP/1.1 200 OK\r\n" + "Allow: GET, POST, HEAD, OPTIONS\r\n"
-					+ "Cache-Control: no-cache\r\n"
-					+ "Pragma: no-cache\r\n"
-					+ "Expire: -1\r\n"
-					+ "X-Accel-Buffering: no\r\n"
+			op = ("HTTP/1.1 200 OK\r\n" + "Allow: GET, POST, HEAD, OPTIONS\r\n" + "Cache-Control: no-cache\r\n"
+					+ "Pragma: no-cache\r\n" + "Expire: -1\r\n" + "X-Accel-Buffering: no\r\n"
 					+ "Access-Control-Allow-Origin: *\r\n"
 					+ "Access-Control-Allow-Headers: content-type, X-Accel-Buffering, *\r\n"
-					+ "Access-Control-Allow-Methods: GET, POST, HEAD, OPTIONS\r\n"
-					+ "Server: "
-					+ name + "\r\n" + "Connection: close\r\n" + "Content-Length: 0\r\n\r\n")
-					.getBytes("UTF8");
+					+ "Access-Control-Allow-Methods: GET, POST, HEAD, OPTIONS\r\n" + "Server: " + name + "\r\n"
+					+ "Connection: close\r\n" + "Content-Length: 0\r\n\r\n").getBytes("UTF8");
 
 			s1 = ("HTTP/1.1 ").getBytes("UTF8");
-			s2 = ("\r\n"
-					+ "Cache-Control: no-cache\r\n"
-					+ "Pragma: no-cache\r\n"
-					+ "Expire: -1\r\n"
-					+ "X-Accel-Buffering: no\r\n"
-					+ "Access-Control-Allow-Origin: *\r\n"
+			s2 = ("\r\n" + "Cache-Control: no-cache\r\n" + "Pragma: no-cache\r\n" + "Expire: -1\r\n"
+					+ "X-Accel-Buffering: no\r\n" + "Access-Control-Allow-Origin: *\r\n"
 					+ "Access-Control-Allow-Headers: content-type, X-Accel-Buffering, *\r\n"
-					+ "Access-Control-Allow-Methods: GET, POST, HEAD, OPTIONS\r\n"
-					+ "Server: "
-					+ name + "\r\n" + "Connection: close\r\n"
-					+ "Content-Length: ")
-					.getBytes("UTF8");
+					+ "Access-Control-Allow-Methods: GET, POST, HEAD, OPTIONS\r\n" + "Server: " + name + "\r\n"
+					+ "Connection: close\r\n" + "Content-Length: ").getBytes("UTF8");
 
 		} catch (Exception e) {
-			op= null;
+			op = null;
 			s1 = null;
 			s2 = null;
 		}
@@ -740,19 +725,19 @@ public class HttpWorkerThread extends Thread {
 		STATE_RESPONSE_1 = s1;
 		STATE_RESPONSE_2 = s2;
 	}
-	
+
 	// [js]リダイレクト用メソッド.
 	private static final RhiginFunction redirect = new RhiginFunction() {
 		@Override
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			int status = 301;
 			String url = null;
-			if(args.length >= 1) {
-				if(args.length >= 2) {
-					if(Converter.isNumeric(args[0])) {
+			if (args.length >= 1) {
+				if (args.length >= 2) {
+					if (Converter.isNumeric(args[0])) {
 						status = Converter.convertInt(args[0]);
 						url = "" + args[1];
-					} else if(Converter.isNumeric(args[1])) {
+					} else if (Converter.isNumeric(args[1])) {
 						url = "" + args[0];
 						status = Converter.convertInt(args[1]);
 					} else {
@@ -766,23 +751,25 @@ public class HttpWorkerThread extends Thread {
 			}
 			return Undefined.instance;
 		}
-		
+
 		@Override
-		public final String getName() { return "redirect"; }
+		public final String getName() {
+			return "redirect";
+		}
 	};
-	
+
 	// [js]エラー用メソッド.
 	private static final RhiginFunction error = new RhiginFunction() {
 		@Override
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			int status = 500;
 			String message = null;
-			if(args.length >= 1) {
-				if(args.length >= 2) {
-					if(Converter.isNumeric(args[0])) {
+			if (args.length >= 1) {
+				if (args.length >= 2) {
+					if (Converter.isNumeric(args[0])) {
 						status = Converter.convertInt(args[0]);
 						message = "" + args[1];
-					} else if(Converter.isNumeric(args[1])) {
+					} else if (Converter.isNumeric(args[1])) {
 						message = "" + args[0];
 						status = Converter.convertInt(args[1]);
 					} else {
@@ -796,8 +783,10 @@ public class HttpWorkerThread extends Thread {
 			}
 			return Undefined.instance;
 		}
-		
+
 		@Override
-		public final String getName() { return "error"; }
+		public final String getName() {
+			return "error";
+		}
 	};
 }

@@ -4,7 +4,8 @@ package rhigin.net;
  * Nio定義.
  */
 public final class NetConstants {
-	protected NetConstants() {}
+	protected NetConstants() {
+	}
 
 	/**
 	 * NioのSelectorタイムアウト.

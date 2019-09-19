@@ -20,23 +20,23 @@ public class Rhigin {
 	static {
 		NioUtil.initNet();
 	}
-	
+
 	// RhiginHttpオブジェクトをシャットダウン.
 	public static final class ShutdownHttp extends CallbackShutdown {
 		protected Log log;
 		protected Http http;
-		
+
 		public ShutdownHttp(Log log, Http http) {
 			this.log = log;
 			this.http = http;
 		}
-		
+
 		/**
 		 * シャットダウンフック：Http 終了コールを呼び出す.
 		 */
 		public final void execution() {
 			log.info("start shutdown Rhigin.");
-			
+
 			// 各サービス停止.
 			http.stop();
 			while (!http.isExit()) {
@@ -46,16 +46,16 @@ public class Rhigin {
 				}
 			}
 			// シャットダウン時の処理終了コールバック.
-			if(http.exitCall() != null) {
+			if (http.exitCall() != null) {
 				http.exitCall().call();
 			}
 			log.info("end shutdown Rhigin version (" + RhiginConstants.VERSION + ").");
 		}
-	 }
-	
+	}
+
 	// ロガー.
 	private static Log LOG = null;
-	
+
 	/** Main. **/
 	public static final void main(String[] args) {
 		RhiginConfig conf = RhiginStartup.initLogFactory(true, args);
@@ -78,13 +78,13 @@ public class Rhigin {
 	protected final void execute(RhiginConfig conf) throws Exception {
 		// 開始処理.
 		HttpInfo httpInfo = RhiginStartup.startup(conf);
-		
+
 		// 生成されたMimeTypeを取得.
-		MimeType mime = (MimeType)ExecuteScript.getOriginal().get("mime");
+		MimeType mime = (MimeType) ExecuteScript.getOriginal().get("mime");
 
 		// Httpの生成.
 		http = new Http(httpInfo, mime);
-		
+
 		// 終了コールバック処理をセット.
 		http.exitCall(exitCall());
 
@@ -93,7 +93,7 @@ public class Rhigin {
 
 		// シャットダウンまで待つ処理を生成.
 		int shutdownPort = -1;
-		if(Converter.isNumeric(conf.get("http", "shutdownPort"))) {
+		if (Converter.isNumeric(conf.get("http", "shutdownPort"))) {
 			shutdownPort = conf.getInt("http", "shutdownPort");
 		}
 
@@ -110,7 +110,7 @@ public class Rhigin {
 		LOG.error(errMessage);
 		System.exit(-1);
 	}
-	
+
 	/** サーバ終了処理. **/
 	private final ExitCall exitCall() {
 		return new ExitCall() {

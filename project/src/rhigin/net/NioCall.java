@@ -12,12 +12,14 @@ import java.nio.channels.FileChannel;
 public abstract class NioCall {
 	/**
 	 * 新しい通信要素を生成.
+	 * 
 	 * @return BaseNioElement 新しい通信要素が返却されます.
 	 */
 	public abstract NioElement createElement();
 
 	/**
 	 * nio開始処理.
+	 * 
 	 * @return boolean [true]の場合、正常に処理されました.
 	 */
 	public boolean startNio() {
@@ -38,9 +40,12 @@ public abstract class NioCall {
 
 	/**
 	 * Accept処理.
-	 * @param em 対象のBaseNioElementオブジェクトが設定されます.
+	 * 
+	 * @param em
+	 *            対象のBaseNioElementオブジェクトが設定されます.
 	 * @return boolean [true]の場合、正常に処理されました.
-	 * @exception IOException IO例外.
+	 * @exception IOException
+	 *                IO例外.
 	 */
 	public boolean accept(NioElement em) throws IOException {
 		return true;
@@ -48,10 +53,14 @@ public abstract class NioCall {
 
 	/**
 	 * Send処理.
-	 * @param em 対象のBaseNioElementオブジェクトが設定されます.
-	 * @param buf 対象のByteBufferを設定します.
+	 * 
+	 * @param em
+	 *            対象のBaseNioElementオブジェクトが設定されます.
+	 * @param buf
+	 *            対象のByteBufferを設定します.
 	 * @return boolean [true]の場合、正常に処理されました.
-	 * @exception IOException IO例外.
+	 * @exception IOException
+	 *                IO例外.
 	 */
 	public boolean send(NioElement em, ByteBuffer buf) throws IOException {
 		return sendInputStream(em, buf);
@@ -64,24 +73,25 @@ public abstract class NioCall {
 	protected boolean sendInputStream(NioElement em, ByteBuffer buf) throws IOException {
 		InputStream in = em.getSendData();
 		final byte[] sendTempBinary = em.getSendTempBinary();
-		while(true) {
+		while (true) {
 			// FileChannelで処理できる場合.
-			if(in instanceof FileInputStream) {
+			if (in instanceof FileInputStream) {
 				// dataBinaryを使わず、直接FileにDirectByteBufferの読み込みを行う.
-				FileChannel ch = ((FileInputStream)in).getChannel();
+				FileChannel ch = ((FileInputStream) in).getChannel();
 				// データ終端.
-				if(ch.read(buf) == -1) {
+				if (ch.read(buf) == -1) {
 					// 現在の inputStream を破棄.
 					InputStream endInputStream = em.removeSendData();
-					if(endInputStream != null) {
+					if (endInputStream != null) {
 						try {
 							endInputStream.close();
-						} catch(Exception e) {}
+						} catch (Exception e) {
+						}
 					}
 					// バッファのデータ設定先に空きがありデータが設定可能な場合.
-					if(buf.position() != buf.limit()) {
+					if (buf.position() != buf.limit()) {
 						in = em.getSendData();
-						if(in != null) {
+						if (in != null) {
 							continue;
 						}
 					}
@@ -91,23 +101,24 @@ public abstract class NioCall {
 						return false;
 					}
 				}
-			// 通常のInputStreamで処理する場合.
+				// 通常のInputStreamで処理する場合.
 			} else {
 				// 一旦バイナリデータにセット.
 				int len = buf.limit() - buf.position();
 				len = in.read(sendTempBinary, 0, len);
-				if(len == -1) {
+				if (len == -1) {
 					// 現在の inputStream を破棄.
 					InputStream endInputStream = em.removeSendData();
-					if(endInputStream != null) {
+					if (endInputStream != null) {
 						try {
 							endInputStream.close();
-						} catch(Exception e) {}
+						} catch (Exception e) {
+						}
 					}
 					// バッファのデータ設定先に空きがありデータが設定可能な場合.
-					if(buf.position() != buf.limit()) {
+					if (buf.position() != buf.limit()) {
 						in = em.getSendData();
-						if(in != null) {
+						if (in != null) {
 							continue;
 						}
 					}
@@ -127,10 +138,14 @@ public abstract class NioCall {
 
 	/**
 	 * Receive処理.
-	 * @param em 対象のBaseNioElementオブジェクトが設定されます.
-	 * @param buf 対象のByteBufferを設定します.
+	 * 
+	 * @param em
+	 *            対象のBaseNioElementオブジェクトが設定されます.
+	 * @param buf
+	 *            対象のByteBufferを設定します.
 	 * @return boolean [true]の場合、正常に処理されました.
-	 * @exception IOException IO例外.
+	 * @exception IOException
+	 *                IO例外.
 	 */
 	public boolean receive(NioElement em, ByteBuffer buf) throws IOException {
 		return true;

@@ -13,10 +13,11 @@ import rhigin.util.EnvCache;
  */
 public class GetEnvFunction extends RhiginFunction {
 	private static final GetEnvFunction THIS = new GetEnvFunction();
+
 	public static final GetEnvFunction getInstance() {
 		return THIS;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "getEnv";
@@ -24,15 +25,17 @@ public class GetEnvFunction extends RhiginFunction {
 
 	@Override
 	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
-		if(args.length >= 1) {
-			return EnvCache.get(""+args[0]);
+		if (args.length >= 1) {
+			return EnvCache.get("" + args[0]);
 		}
 		return argsException();
 	}
-	
+
 	/**
 	 * スコープにライブラリを登録.
-	 * @param scope 登録先のスコープを設定します.
+	 * 
+	 * @param scope
+	 *            登録先のスコープを設定します.
 	 */
 	public static final void regFunctions(Scriptable scope) {
 		scope.put("getEnv", scope, GetEnvFunction.getInstance());

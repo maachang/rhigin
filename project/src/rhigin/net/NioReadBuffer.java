@@ -13,7 +13,7 @@ public class NioReadBuffer {
 	private final Queue<byte[]> buffer = new ConcurrentLinkedQueue<byte[]>();
 	private final AtomicNumber bufferLength = new AtomicNumber(0);
 	private byte[] topBuffer = null;
-	
+
 	/**
 	 * データクリア.
 	 */
@@ -22,22 +22,24 @@ public class NioReadBuffer {
 		buffer.clear();
 		bufferLength.set(0);
 	}
-	
+
 	/**
 	 * 現在の格納バイナリ長を取得.
+	 * 
 	 * @return
 	 */
 	public int size() {
 		return bufferLength.get();
 	}
-	
+
 	/**
 	 * 書き込み処理.
+	 * 
 	 * @param buf
 	 */
 	public void write(ByteBuffer buf) {
 		final int bufLen = buf.remaining();
-		if(bufLen <= 0) {
+		if (bufLen <= 0) {
 			return;
 		}
 		final byte[] bin = new byte[bufLen];
@@ -45,26 +47,29 @@ public class NioReadBuffer {
 		buffer.offer(bin);
 		bufferLength.add(bin.length);
 	}
-	
+
 	/**
 	 * 書き込み処理.
+	 * 
 	 * @param b
 	 */
 	public void write(byte[] b) {
 		write(b, 0, b.length);
 	}
-	
+
 	/**
 	 * 書き込み処理.
+	 * 
 	 * @param b
 	 * @param len
 	 */
 	public void write(byte[] b, int len) {
 		write(b, 0, len);
 	}
-	
+
 	/**
 	 * 書き込み処理.
+	 * 
 	 * @param b
 	 * @param off
 	 * @param len
@@ -75,18 +80,20 @@ public class NioReadBuffer {
 		buffer.offer(bin);
 		bufferLength.add(bin.length);
 	}
-	
+
 	/**
 	 * 読み込み処理.
+	 * 
 	 * @param b
 	 * @return
 	 */
 	public int read(byte[] b) {
 		return read(b, 0, b.length);
 	}
-	
+
 	/**
 	 * 読み込み処理.
+	 * 
 	 * @param b
 	 * @param len
 	 * @return
@@ -94,9 +101,10 @@ public class NioReadBuffer {
 	public int read(byte[] b, int len) {
 		return read(b, 0, len);
 	}
-	
+
 	/**
 	 * 読み込み処理.
+	 * 
 	 * @param b
 	 * @param off
 	 * @param len
@@ -107,11 +115,12 @@ public class NioReadBuffer {
 		int ret = 0;
 		byte[] etcBuf;
 		byte[] buf = null;
-		
+
 		// 前回読み込み中のTOPデータが存在する場合.
-		buf = topBuffer; topBuffer = null;
-		if(buf != null) {
-			if(len < (bufLen = buf.length)) {
+		buf = topBuffer;
+		topBuffer = null;
+		if (buf != null) {
+			if (len < (bufLen = buf.length)) {
 				etcLen = len;
 				System.arraycopy(buf, 0, b, off, etcLen);
 				etcBuf = new byte[bufLen - etcLen];
@@ -125,13 +134,13 @@ public class NioReadBuffer {
 			off += bufLen;
 			ret = bufLen;
 			bufferLength.remove(bufLen);
-			if(len <= ret) {
+			if (len <= ret) {
 				return ret;
 			}
 		}
 		// 断片化されたバイナリを結合.
-		while((buf = buffer.poll()) != null) {
-			if(len < ret + (bufLen = buf.length)) {
+		while ((buf = buffer.poll()) != null) {
+			if (len < ret + (bufLen = buf.length)) {
 				// １つの塊のデータの読み込みに対して、残りが発生する場合.
 				// 次の処理で読み込む.
 				etcLen = len - ret;
@@ -147,15 +156,16 @@ public class NioReadBuffer {
 			off += bufLen;
 			ret += bufLen;
 			bufferLength.remove(bufLen);
-			if(len <= ret) {
+			if (len <= ret) {
 				return ret;
 			}
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * スキップ.
+	 * 
 	 * @param len
 	 * @return
 	 */
@@ -164,11 +174,12 @@ public class NioReadBuffer {
 		int ret = 0;
 		byte[] etcBuf;
 		byte[] buf = null;
-		
+
 		// 前回読み込み中のTOPデータが存在する場合.
-		buf = topBuffer; topBuffer = null;
-		if(buf != null) {
-			if(len < (bufLen = buf.length)) {
+		buf = topBuffer;
+		topBuffer = null;
+		if (buf != null) {
+			if (len < (bufLen = buf.length)) {
 				etcLen = len;
 				etcBuf = new byte[bufLen - etcLen];
 				System.arraycopy(buf, etcLen, etcBuf, 0, bufLen - etcLen);
@@ -179,13 +190,13 @@ public class NioReadBuffer {
 			}
 			ret = bufLen;
 			bufferLength.remove(bufLen);
-			if(len <= ret) {
+			if (len <= ret) {
 				return ret;
 			}
 		}
 		// 断片化されたバイナリを結合.
-		while((buf = buffer.poll()) != null) {
-			if(len < ret + (bufLen = buf.length)) {
+		while ((buf = buffer.poll()) != null) {
+			if (len < ret + (bufLen = buf.length)) {
 				// １つの塊のデータの読み込みに対して、残りが発生する場合.
 				// 次の処理で読み込む.
 				etcLen = len - ret;
@@ -198,30 +209,32 @@ public class NioReadBuffer {
 			}
 			ret += bufLen;
 			bufferLength.remove(bufLen);
-			if(len <= ret) {
+			if (len <= ret) {
 				return ret;
 			}
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * バイナリ検索.
+	 * 
 	 * @param index
 	 * @return
 	 */
 	public int indexOf(byte[] index) {
 		return indexOf(index, 0);
 	}
-	
+
 	/**
 	 * バイナリ検索.
+	 * 
 	 * @param index
 	 * @param pos
 	 * @return
 	 */
 	public int indexOf(byte[] index, int pos) {
-		int i, j, bufLen, startPos, off ;
+		int i, j, bufLen, startPos, off;
 		int bp, np;
 		int cnt = 0;
 		int eqCnt = 0;
@@ -230,18 +243,19 @@ public class NioReadBuffer {
 		final int len = array.length;
 		final byte top = index[0];
 		final int indexLen = index.length;
-		bp = 0; off = 0;
+		bp = 0;
+		off = 0;
 		// posの位置を算出.
-		if(pos > 0) {
+		if (pos > 0) {
 			// データサイズを超えている場合.
-			if(pos >= size()) {
+			if (pos >= size()) {
 				return -1;
 			}
 			// topBufferが存在する場合.
-			if(topBuffer != null) {
+			if (topBuffer != null) {
 				bp = -1;
 				bufLen = topBuffer.length;
-				if(bufLen > pos) {
+				if (bufLen > pos) {
 					off = pos;
 					cnt = pos;
 				} else {
@@ -250,59 +264,59 @@ public class NioReadBuffer {
 				}
 			}
 			// topBufferが存在しないか、topBuffer内の範囲でoffが確定できなかった場合.
-			if(off == 0) {
+			if (off == 0) {
 				// posの位置まで移動.
-				for(int p = 0; p < len; p ++) {
-					bufLen = ((byte[])array[bp]).length;
-					if(cnt + bufLen > pos) {
+				for (int p = 0; p < len; p++) {
+					bufLen = ((byte[]) array[bp]).length;
+					if (cnt + bufLen > pos) {
 						off = pos - cnt;
 						break;
 					}
 					cnt += bufLen;
-					bp ++;
+					bp++;
 				}
 				cnt = pos;
 			}
-		} else if(topBuffer != null) {
+		} else if (topBuffer != null) {
 			// topBufferが存在する場合開始位置を、-1にする.
 			bp = -1;
 		}
 		// toArrayで配列化された内容を元に、検索.
-		for(; bp < len; bp ++) {
-			buf = (bp == -1) ? topBuffer : (byte[])array[bp];
+		for (; bp < len; bp++) {
+			buf = (bp == -1) ? topBuffer : (byte[]) array[bp];
 			bufLen = buf.length;
-			for(i = off; i < bufLen; i++) {
+			for (i = off; i < bufLen; i++) {
 				// 先頭のindex条件が一致.
-				if(top == buf[i]) {
+				if (top == buf[i]) {
 					// indexデータ数が１つの場合.
-					if(indexLen == 1) {
+					if (indexLen == 1) {
 						return cnt;
 					}
 					eqCnt = 0;
 					startPos = i;
-					
+
 					// 跨ったデータのチェック用.
-					for(np = bp; np < len; np ++) {
-						buf = (np == -1) ? topBuffer : (byte[])array[np];
+					for (np = bp; np < len; np++) {
+						buf = (np == -1) ? topBuffer : (byte[]) array[np];
 						bufLen = buf.length;
 						// 一致するかチェックする.
-						for(j = startPos; j < bufLen; j ++) {
-							if(index[eqCnt++] != buf[j]) {
+						for (j = startPos; j < bufLen; j++) {
+							if (index[eqCnt++] != buf[j]) {
 								eqCnt = -1;
 								break;
-							} else if(eqCnt >= indexLen) {
+							} else if (eqCnt >= indexLen) {
 								break;
 							}
 						}
 						// 不一致.
-						if(eqCnt == -1) {
+						if (eqCnt == -1) {
 							// 元に戻す.
-							buf = (bp == -1) ? topBuffer : (byte[])array[bp];
+							buf = (bp == -1) ? topBuffer : (byte[]) array[bp];
 							bufLen = buf.length;
 							break;
 						}
 						// 一致.
-						else if(eqCnt == indexLen) {
+						else if (eqCnt == indexLen) {
 							// 一致条件を返却.
 							return cnt;
 						}
@@ -310,7 +324,7 @@ public class NioReadBuffer {
 						startPos = 0;
 					}
 				}
-				cnt ++;
+				cnt++;
 			}
 			off = 0;
 		}

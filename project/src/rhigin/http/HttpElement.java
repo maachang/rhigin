@@ -14,13 +14,13 @@ public final class HttpElement extends NioElement {
 	protected int workerNo = -1;
 	protected boolean endReceive = false;
 	protected boolean endSend = false;
-	
+
 	protected HttpPostBodyFile httpPostBodyFile = null;
 
 	public void clear() {
 		super.clear();
 		request = null;
-		if(httpPostBodyFile != null) {
+		if (httpPostBodyFile != null) {
 			httpPostBodyFile.close();
 		}
 		httpPostBodyFile = null;
@@ -64,20 +64,19 @@ public final class HttpElement extends NioElement {
 	public boolean isEndSend() {
 		return endSend;
 	}
-	
-	public void setSendBinary(byte[] binary)
-		throws IOException {
+
+	public void setSendBinary(byte[] binary) throws IOException {
 		super.setSendData(new ByteArrayInputStream(binary));
 		super.startWrite();
 	}
-	
+
 	public HttpPostBodyFile getHttpPostBodyFile(Xor128 rand) {
-		if(httpPostBodyFile == null) {
+		if (httpPostBodyFile == null) {
 			httpPostBodyFile = new HttpPostBodyFile(workerNo, HttpConstants.POST_FILE_OUT_ROOT_DIR, rand);
 		}
 		return httpPostBodyFile;
 	}
-	
+
 	public boolean isHttpPostBodyFile() {
 		return httpPostBodyFile != null;
 	}

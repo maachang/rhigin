@@ -7,6 +7,7 @@ import java.util.AbstractList;
  */
 public class ObjectList<E> extends AbstractList<E> implements ConvertGet<Integer> {
 	private OList<E> list;
+
 	/**
 	 * コンストラクタ.
 	 */
@@ -32,28 +33,28 @@ public class ObjectList<E> extends AbstractList<E> implements ConvertGet<Integer
 	public ObjectList(Object... o) {
 		list = new OList<E>(o);
 	}
-	
+
 	@Override
 	public Object getOriginal(Integer n) {
 		return get(n);
 	}
-	
+
 	@Override
 	public void clear() {
 		list.clear();
 	}
-	
+
 	@Override
 	public boolean add(E n) {
 		list.add(n);
 		return true;
 	}
-	
+
 	@Override
 	public E set(int index, E n) {
 		return list.set(index, n);
 	}
-	
+
 	@Override
 	public E remove(int index) {
 		return list.remove(index);
