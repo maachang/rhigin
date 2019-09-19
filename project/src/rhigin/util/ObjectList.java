@@ -69,4 +69,8 @@ public class ObjectList<E> extends AbstractList<E> implements ConvertGet<Integer
 	public int size() {
 		return list.size();
 	}
+	
+	public OList<E> rawData() {
+		return list;
+	}
 }
