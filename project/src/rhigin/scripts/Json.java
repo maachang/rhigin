@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -20,6 +19,7 @@ import rhigin.util.ArrayMap;
 import rhigin.util.ConvertException;
 import rhigin.util.Converter;
 import rhigin.util.DateConvert;
+import rhigin.util.ObjectList;
 
 /**
  * Json変換処理.
@@ -250,7 +250,7 @@ public final class Json {
 		int cote = -1;
 		int bef = -1;
 		int len = json.length();
-		List<Object> ret = new ArrayList<Object>();
+		List<Object> ret = new ObjectList<Object>();
 		// Token解析.
 		for (int i = 0; i < len; i++) {
 			c = json.charAt(i);
@@ -308,7 +308,7 @@ public final class Json {
 		StringBuilder before = null;
 		// List.
 		if (type == TYPE_ARRAY) {
-			List<Object> ret = new ArrayList<Object>();
+			List<Object> ret = new ObjectList<Object>();
 			int flg = 0;
 			for (int i = no + 1; i < len; i++) {
 				value = (String) token.get(i);
@@ -358,6 +358,7 @@ public final class Json {
 		// map.
 		else if (type == TYPE_MAP) {
 			Map<String, Object> ret;
+			//ret = new HashMap<String, Object>();
 			ret = new ArrayMap();
 			String key = null;
 			for (int i = no + 1; i < len; i++) {

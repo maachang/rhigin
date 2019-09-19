@@ -17,7 +17,7 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>, Map<String, O
 	 * コンストラクタ.
 	 */
 	public ArrayMap() {
-		this(null);
+		list = new ListMap();
 	}
 
 	/**
@@ -28,6 +28,22 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>, Map<String, O
 			list = new ListMap();
 		}
 		this.list = list;
+	}
+	
+	/**
+	 * コンストラクタ.
+	 */
+	public ArrayMap(final Map<String, Object> v) {
+		list = new ListMap();
+		list.set(v);
+	}
+
+	/**
+	 * コンストラクタ.
+	 */
+	public ArrayMap(final Object... args) {
+		list = new ListMap();
+		list.set(args);
 	}
 
 	/**
@@ -155,5 +171,13 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>, Map<String, O
 	@Override
 	public String getKey(int no) {
 		return (String)list.rawData().get(no)[0];
+	}
+	
+	public void set(final Map<String, Object> v) {
+		list.set(v);
+	}
+	
+	public void set(final Object... args) {
+		list.set(args);
 	}
 }
