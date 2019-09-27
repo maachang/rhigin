@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
-import rhigin.RhiginException;
 import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.Json;
 import rhigin.util.AbstractKeyIterator;
@@ -93,7 +92,7 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 		try {
 			convertString();
 		} catch (Exception e) {
-			throw new RhiginException(500, e);
+			throw new HttpClientException(500, e);
 		}
 		if (headersString == null) {
 			return null;
@@ -119,7 +118,7 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 		try {
 			convertString();
 		} catch (Exception e) {
-			throw new RhiginException(500, e);
+			throw new HttpClientException(500, e);
 		}
 		if (headersString == null) {
 			return null;
@@ -256,7 +255,7 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 				return out.toByteArray();
 			}
 		} catch (Exception e) {
-			throw new RhiginException(500, e);
+			throw new HttpClientException(500, e);
 		} finally {
 			if (in != null) {
 				try {
@@ -280,7 +279,7 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 				try {
 					return new GZIPInputStream(bodyFile.getInputStream());
 				} catch (Exception e) {
-					throw new RhiginException(500, e);
+					throw new HttpClientException(500, e);
 				}
 			}
 			return bodyFile.getInputStream();
@@ -311,7 +310,7 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 				String charset = charset(getContentType());
 				return new String(b, charset);
 			} catch (Exception e) {
-				throw new RhiginException(500, e);
+				throw new HttpClientException(500, e);
 			}
 		}
 		return null;
@@ -338,7 +337,7 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 		try {
 			return getHeaders().get(no);
 		} catch (Exception e) {
-			throw new RhiginException(500, e);
+			throw new HttpClientException(500, e);
 		}
 	}
 
@@ -352,7 +351,7 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 		try {
 			return getHeaders().size();
 		} catch (Exception e) {
-			throw new RhiginException(500, e);
+			throw new HttpClientException(500, e);
 		}
 	}
 

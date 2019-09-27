@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
-import rhigin.RhiginException;
 import rhigin.util.FileUtil;
 
 /**
@@ -64,7 +63,7 @@ final class HttpBodyFile {
 			o = null;
 			fileName = name;
 		} catch (Exception e) {
-			throw new RhiginException(500, e);
+			throw new HttpClientException(500, e);
 		} finally {
 			if (o != null) {
 				try {
@@ -144,7 +143,7 @@ final class HttpBodyFile {
 			fileSize += len;
 		} catch (Exception e) {
 			close();
-			throw new RhiginException(500, e);
+			throw new HttpClientException(500, e);
 		}
 	}
 
@@ -159,7 +158,7 @@ final class HttpBodyFile {
 			fileSize = -1L;
 		} catch (Exception e) {
 			close();
-			throw new RhiginException(500, e);
+			throw new HttpClientException(500, e);
 		} finally {
 			if (out != null) {
 				try {
@@ -184,7 +183,7 @@ final class HttpBodyFile {
 			in = new FileInputStream(fileName);
 		} catch (Exception e) {
 			close();
-			throw new RhiginException(500, e);
+			throw new HttpClientException(500, e);
 		}
 		return in;
 	}

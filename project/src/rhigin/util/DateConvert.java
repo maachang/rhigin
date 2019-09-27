@@ -1,5 +1,7 @@
 package rhigin.util;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -359,5 +361,102 @@ public final class DateConvert {
 			return new java.sql.Timestamp(cal.getTime().getTime());
 		}
 		throw new ConvertException("Incorrect webTime format:" + value);
+	}
+	
+	// 日付フォーマットを管理.
+	private static final ThreadLocal<SimpleDateFormat> iso8601 = new ThreadLocal<SimpleDateFormat>();
+	private static final SimpleDateFormat _getISO8601() {
+		SimpleDateFormat ret = iso8601.get();
+		if (ret == null) {
+			ret = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+			iso8601.set(ret);
+		}
+		return ret;
+	}
+	
+	/**
+	 * ISO8601形式で文字列をパース.
+	 * @param value
+	 * @return
+	 * @throws ParseException
+	 */
+	public static final java.util.Date getISO8601(String value) throws ParseException {
+		return _getISO8601().parse(value);
+	}
+	
+	/**
+	 * ISO8601形式でDateオブジェクトを文字列変換.
+	 * @param date
+	 * @return
+	 */
+	public static final String getISO8601(java.util.Date date) {
+		return _getISO8601().format(date);
+	}
+	
+	/**
+	 * 指定文字が日付フォーマットの可能性かチェック.
+	 * @param s
+	 * @return
+	 */
+	public static final boolean isISO8601(String s) {
+		int code = 0;
+		int len = s.length();
+		char c;
+		for (int i = 0; i < len; i++) {
+			c = s.charAt(i);
+			switch (code) {
+			case 0:
+			case 1:
+				if (c == '-') {
+					code++;
+				} else if (!(c >= '0' && c <= '9')) {
+					return false;
+				}
+				break;
+			case 2:
+				if (c == 'T') {
+					code++;
+				} else if (!(c >= '0' && c <= '9')) {
+					return false;
+				}
+				break;
+			case 3:
+			case 4:
+				if (c == ':') {
+					code++;
+				} else if (!(c >= '0' && c <= '9')) {
+					return false;
+				}
+				break;
+			case 5:
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * 文字を日付変換.
+	 * @param s
+	 * @return Date
+	 */
+	public static final Date stringToDate(String s) {
+		try {
+			if(isISO8601(s)) {
+				return DateConvert.getISO8601(s);
+			}
+		} catch (Exception e) {
+		}
+		try {
+			return DateConvert.getTimestamp(s);
+		} catch (Exception e) {
+			try {
+				return DateConvert.getWebTimestamp(s);
+			} catch (ConvertException ce) {
+				throw ce;
+			} catch (Exception ee) {
+				throw new ConvertException(ee);
+			}
+		}
 	}
 }

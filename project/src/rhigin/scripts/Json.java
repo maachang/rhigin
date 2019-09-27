@@ -4,7 +4,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -16,7 +15,6 @@ import org.mozilla.javascript.Wrapper;
 
 import rhigin.RhiginException;
 import rhigin.util.ArrayMap;
-import rhigin.util.ConvertException;
 import rhigin.util.Converter;
 import rhigin.util.DateConvert;
 import rhigin.util.ObjectList;
@@ -213,7 +211,7 @@ public final class Json {
 			json = json.substring(1, len - 1);
 
 			// ISO8601の日付フォーマットかチェック.
-			if (isISO8601(json)) {
+			if (DateConvert.isISO8601(json)) {
 				return stringToDate(json);
 			}
 			return json;
@@ -435,75 +433,11 @@ public final class Json {
 
 	/** 日付を文字変換. **/
 	private static final String dateToString(Date d) {
-		return _getISO8601().format(d);
+		return DateConvert.getISO8601(d);
 	}
 
 	/** 文字を日付変換. **/
 	private static final Date stringToDate(String s) {
-		try {
-			return _getISO8601().parse(s);
-		} catch (Exception e) {
-			try {
-				return DateConvert.getTimestamp(s);
-			} catch (Exception ee) {
-				try {
-					return DateConvert.getWebTimestamp(s);
-				} catch (ConvertException ce) {
-					throw ce;
-				} catch (Exception ewe) {
-					throw new RhiginException(500, ewe);
-				}
-			}
-		}
-	}
-
-	/** 指定文字が日付フォーマットの可能性かチェック. **/
-	private static final boolean isISO8601(String s) {
-		int code = 0;
-		int len = s.length();
-		char c;
-		for (int i = 0; i < len; i++) {
-			c = s.charAt(i);
-			switch (code) {
-			case 0:
-			case 1:
-				if (c == '-') {
-					code++;
-				} else if (!(c >= '0' && c <= '9')) {
-					return false;
-				}
-				break;
-			case 2:
-				if (c == 'T') {
-					code++;
-				} else if (!(c >= '0' && c <= '9')) {
-					return false;
-				}
-				break;
-			case 3:
-			case 4:
-				if (c == ':') {
-					code++;
-				} else if (!(c >= '0' && c <= '9')) {
-					return false;
-				}
-				break;
-			case 5:
-				return true;
-			}
-		}
-		return false;
-	}
-
-	// 日付フォーマットを管理.
-	private static final ThreadLocal<SimpleDateFormat> iso8601 = new ThreadLocal<SimpleDateFormat>();
-
-	private static final SimpleDateFormat _getISO8601() {
-		SimpleDateFormat ret = iso8601.get();
-		if (ret == null) {
-			ret = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
-			iso8601.set(ret);
-		}
-		return ret;
+		return DateConvert.stringToDate(s);
 	}
 }

@@ -42,7 +42,7 @@ public class HttpClient {
 	 *        HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
 	 * @return HttpResult 返却データが返されます.
 	 */
-	public static final HttpResult get(String url, Map option) throws IOException {
+	public static final HttpResult get(String url, Map option) {
 		return connect("GET", url, option);
 	}
 
@@ -56,7 +56,7 @@ public class HttpClient {
 	 *        HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
 	 * @return HttpResult 返却データが返されます.
 	 */
-	public static final HttpResult post(String url, Map option) throws IOException {
+	public static final HttpResult post(String url, Map option) {
 		return connect("POST", url, option);
 	}
 
@@ -70,7 +70,7 @@ public class HttpClient {
 	 *        HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
 	 * @return HttpResult 返却データが返されます.
 	 */
-	public static final HttpResult json(String url, Map option) throws IOException {
+	public static final HttpResult json(String url, Map option) {
 		return connect("JSON", url, option);
 	}
 
@@ -87,14 +87,14 @@ public class HttpClient {
 	 * @return HttpResult 返却データが返されます.
 	 */
 	@SuppressWarnings("unchecked")
-	public static final HttpResult connect(String method, String url, Map option) throws IOException {
+	public static final HttpResult connect(String method, String url, Map option) {
 		Object params = null;
 		Map header = null;
 		boolean bodyFile = false;
 		if (option != null) {
 			params = option.get("params");
 			header = (Map) option.get("header");
-			params = Boolean.TRUE.equals(option.get("bodyFile"));
+			bodyFile = Boolean.TRUE.equals(option.get("bodyFile"));
 		}
 		if (header == null) {
 			header = new ArrayMap();
@@ -125,15 +125,14 @@ public class HttpClient {
 			url = location;
 			cnt++;
 			if (cnt > MAX_RETRY) {
-				throw new IOException("リトライ回数の制限を越えました");
+				throw new HttpClientException(500, "リトライ回数の制限を越えました");
 			}
 		}
 		return ret;
 	}
 
 	// 接続処理.
-	private static final HttpResult _connect(boolean bodyFile, String method, String url, Object params, Map header)
-			throws IOException {
+	private static final HttpResult _connect(boolean bodyFile, String method, String url, Object params, Map header) {
 		Socket socket = null;
 		InputStream in = null;
 		OutputStream out = null;
@@ -164,6 +163,8 @@ public class HttpClient {
 			socket = null;
 
 			return ret;
+		} catch(Exception e) {
+			throw new HttpClientException(500, e);
 		} finally {
 			if (in != null) {
 				try {
