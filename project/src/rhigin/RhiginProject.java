@@ -1,8 +1,5 @@
 package rhigin;
 
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermissions;
@@ -70,10 +67,10 @@ public class RhiginProject {
 		FileUtil.mkdirs("./jar");
 
 		// 必要なファイルを転送.
-		rcpy("res/rhigin/projects/index.js", "./index.js");
-		rcpy("res/rhigin/projects/conf/http.json", "./conf/http.json");
-		rcpy("res/rhigin/projects/conf/log.json", "./conf/log.json");
-		rcpy("res/rhigin/projects/conf/rhigin.json", "./conf/rhigin.json");
+		FileUtil.rcpy("res/rhigin/projects/index.js", "./index.js");
+		FileUtil.rcpy("res/rhigin/projects/conf/http.json", "./conf/http.json");
+		FileUtil.rcpy("res/rhigin/projects/conf/log.json", "./conf/log.json");
+		FileUtil.rcpy("res/rhigin/projects/conf/rhigin.json", "./conf/rhigin.json");
 
 		// rhigin.jsonのファイルを書き換える.
 		change("./conf/rhigin.json", "{{projectName}}", name);
@@ -82,13 +79,13 @@ public class RhiginProject {
 		// OSに対する起動バッチファイルをコピー.
 		if (IsOs.getInstance().getOS() == IsOs.OS_WINNT || IsOs.getInstance().getOS() == IsOs.OS_WIN9X) {
 			// windows用.
-			rcpy("res/rhigin/projects/rhigin.cmd", "./rhigin.cmd");
-			rcpy("res/rhigin/projects/rbatch.cmd", "./rbatch.cmd");
+			FileUtil.rcpy("res/rhigin/projects/rhigin.cmd", "./rhigin.cmd");
+			FileUtil.rcpy("res/rhigin/projects/rbatch.cmd", "./rbatch.cmd");
 
 		} else {
 			// linux用.
-			rcpy("res/rhigin/projects/rhigin", "./rhigin");
-			rcpy("res/rhigin/projects/rbatch", "./rbatch");
+			FileUtil.rcpy("res/rhigin/projects/rhigin", "./rhigin");
+			FileUtil.rcpy("res/rhigin/projects/rbatch", "./rbatch");
 			setExecPermission("./rhigin");
 			setExecPermission("./rbatch");
 		}
@@ -111,36 +108,6 @@ public class RhiginProject {
 		System.out.println("");
 		System.out.println("create a new project for \"rhigin\".");
 		System.out.println("");
-	}
-
-	// リソースファイルを、対象ファイルにコピーする.
-	private final void rcpy(String src, String dest) throws Exception {
-		int len;
-		byte[] bin = new byte[4096];
-		OutputStream out = null;
-		InputStream in = null;
-		try {
-			in = Thread.currentThread().getContextClassLoader().getResourceAsStream(src);
-			out = new FileOutputStream(dest);
-			while ((len = in.read(bin)) != -1) {
-				out.write(bin, 0, len);
-			}
-			in.close();
-			in = null;
-			out.close();
-			out = null;
-		} finally {
-			if (in != null) {
-				try {
-					in.close();
-				} catch (Exception e) {
-				}
-				try {
-					out.close();
-				} catch (Exception e) {
-				}
-			}
-		}
 	}
 
 	// 指定ファイル内の内容を変更.

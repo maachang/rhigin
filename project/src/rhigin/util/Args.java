@@ -1,5 +1,7 @@
 package rhigin.util;
 
+import java.util.List;
+
 /**
  * 実行引数の取得処理. たとえば args = ["-a", "hoge"] のような実行引数が設定されていた場合, Args argsObject =
  * new Args(args); String value = argsObject.get("-a"); value.equals("hoge") ==
@@ -62,6 +64,19 @@ public class Args implements ConvertGet<String> {
 	}
 
 	/**
+	 * コンストラクタ.
+	 * 
+	 * @param list 引数群を設定します.
+	 */
+	public Args(List<String> list) {
+		int len = list.size();
+		args = new String[len];
+		for(int i = 0; i < len; i ++) {
+			args[i] = list.get(i);
+		}
+	}
+
+	/**
 	 * このオブジェクトに設定されたコマンド引数を取得.
 	 * 
 	 * @return String[]
@@ -77,6 +92,13 @@ public class Args implements ConvertGet<String> {
 	 * @return
 	 */
 	public String get(String name) {
+		if(Converter.isNumeric(name)) {
+			int no = Converter.convertInt(name);
+			if(no >= 0 && no < args.length) {
+				return args[no];
+			}
+			return null;
+		}
 		final int len = args.length - 1;
 		for (int i = 0; i < len; i++) {
 			if (name.equals(args[i])) {
@@ -93,6 +115,13 @@ public class Args implements ConvertGet<String> {
 	 * @return boolean
 	 */
 	public boolean isValue(String name) {
+		if(Converter.isNumeric(name)) {
+			int no = Converter.convertInt(name);
+			if(no >= 0 && no < args.length) {
+				return true;
+			}
+			return false;
+		}
 		final int len = args.length;
 		for (int i = 0; i < len; i++) {
 			if (name.equals(args[i])) {

@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.nio.file.Files;
@@ -502,5 +503,40 @@ public final class FileUtil {
 	 */
 	public static final void copy(String src, String dest) throws Exception {
 		_copy(getFullPath(src), getFullPath(dest));
+	}
+
+	/**
+	 * リソースファイルを、対象ファイルにコピーする.
+	 * @param src リソースファイルパスを設定します.
+	 * @param dest コピー先のファイル名を設定します.
+	 * @throws Exception
+	 */
+	public static final void rcpy(String src, String dest) throws Exception {
+		int len;
+		byte[] bin = new byte[4096];
+		OutputStream out = null;
+		InputStream in = null;
+		try {
+			in = Thread.currentThread().getContextClassLoader().getResourceAsStream(src);
+			out = new FileOutputStream(dest);
+			while ((len = in.read(bin)) != -1) {
+				out.write(bin, 0, len);
+			}
+			in.close();
+			in = null;
+			out.close();
+			out = null;
+		} finally {
+			if (in != null) {
+				try {
+					in.close();
+				} catch (Exception e) {
+				}
+				try {
+					out.close();
+				} catch (Exception e) {
+				}
+			}
+		}
 	}
 }

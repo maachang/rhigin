@@ -43,8 +43,6 @@ final class CreateSocket {
 
 						// 内部で用意している「cacerts」を読みこむ.
 						in = CreateSocket.class.getResourceAsStream("cacerts");
-						// in =
-						// Thread.currentThread().getContextClassLoader().getResourceAsStream("rhigin/http/client/cacerts");
 
 						// 読み込んだ内容と、JAVA_HOME内の[cacerts]を比較して、サイズが大きい場合は
 						// JAVA_HOMEの方を利用.

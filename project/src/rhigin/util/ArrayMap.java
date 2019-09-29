@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * ArrayMap.
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings("rawtypes")
 public class ArrayMap implements AbstractKeyIterator.Base<String>, Map<String, Object>, ConvertGet<String> {
 	private ListMap list;
 
@@ -119,7 +119,7 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>, Map<String, O
 		return false;
 	}
 
-	public Set entrySet() {
+	public Set<Entry<String,Object>> entrySet() {
 		return null;
 	}
 
@@ -143,7 +143,7 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>, Map<String, O
 		return buf.append("}").toString();
 	}
 
-	public Collection values() {
+	public Collection<Object> values() {
 		ArrayList<Object> ret = new ArrayList<Object>();
 		OList<Object[]> n = list.rawData();
 		int len = n.size();
@@ -157,7 +157,7 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>, Map<String, O
 		return list;
 	}
 
-	public Set keySet() {
+	public Set<String> keySet() {
 		return new AbstractKeyIterator.KeyIteratorSet<>(this);
 	}
 
