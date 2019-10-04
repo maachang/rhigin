@@ -211,11 +211,11 @@ public class HttpClient {
 			}
 		} else if (pp == -1) {
 			domain = url.substring(b, p);
-			port = url.substring(p);
+			port = url.substring(p + 1);
 			path = "/";
 		} else if (p < pp) {
 			domain = url.substring(b, p);
-			port = url.substring(p, pp);
+			port = url.substring(p + 1, pp);
 			path = url.substring(pp);
 		} else {
 			domain = url.substring(b, p);
