@@ -66,13 +66,10 @@ public class RhiginStartup {
 			if (rhiginEnv != null && rhiginEnv.length() != 0) {
 				confDir += rhiginEnv + "/";
 				// 対象フォルダが存在しない、対象フォルダ以下のコンフィグ情報が０件の場合は
-				// エラーで終了.
+				// confフォルダ配下を読み込む.
 				File confStat = new File(confDir);
 				if (!confStat.isDirectory() || confStat.list() == null || confStat.list().length == 0) {
-					System.out.println(
-							"error: There is no configuration definition for the execution environment:" + confDir);
-					System.exit(1);
-					return null;
+					confDir = RhiginConstants.DIR_CONFIG;
 				}
 				confStat = null;
 			}
