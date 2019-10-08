@@ -76,10 +76,9 @@ final class RhiginScriptable implements Scriptable {
 	public boolean has(String name, Scriptable start) {
 		if (name.length() == 0) {
 			return indexedProps.containsKey(name);
+		} else if("rhigin".equals(name)) {
+			return true;
 		} else {
-			if("rhigin".equals(name)) {
-				return true;
-			}
 			return context.hasAttribute(name);
 		}
 	}
