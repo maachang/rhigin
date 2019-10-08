@@ -14,6 +14,7 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Wrapper;
 
+import rhigin.RhiginConstants;
 import rhigin.scripts.function.ArgsFunction;
 import rhigin.scripts.function.Base64Functions;
 import rhigin.scripts.function.BinaryFunction;
@@ -352,6 +353,8 @@ public class ExecuteScript {
 
 	// 基本オブジェクトをセット.
 	private static final void settingRhiginObject(Context ctx, Scriptable scope) throws Exception {
+		// rhiginバージョンをセット.
+		scope.put("rhigin", scope, RhiginConstants.VERSION);
 
 		// オブジェクトの登録.
 		ConsoleObject.regFunctions(scope);
