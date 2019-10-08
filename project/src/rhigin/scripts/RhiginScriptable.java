@@ -14,6 +14,8 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Wrapper;
 
+import rhigin.RhiginConstants;
+
 final class RhiginScriptable implements Scriptable {
 	private static final String RHINO_JS_PACKAGE_NAME = "org.mozilla.javascript";
 	private RhiginContext context;
@@ -46,6 +48,8 @@ final class RhiginScriptable implements Scriptable {
 			} else {
 				return NOT_FOUND;
 			}
+		} else if("rhigin".equals(name)) {
+			return RhiginConstants.VERSION;
 		} else {
 			Class c;
 			Object value = context.getAttribute(name);
@@ -73,6 +77,9 @@ final class RhiginScriptable implements Scriptable {
 		if (name.length() == 0) {
 			return indexedProps.containsKey(name);
 		} else {
+			if("rhigin".equals(name)) {
+				return true;
+			}
 			return context.hasAttribute(name);
 		}
 	}

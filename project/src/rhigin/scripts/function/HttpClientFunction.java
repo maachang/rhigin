@@ -12,10 +12,13 @@ import rhigin.scripts.RhiginFunction;
 /**
  * [js]HttpClient.
  * 
- * httpClient(method, url, option) method: Httpメソッド [GET, POST, DELETE, PUT,
- * PATCH, OPTION] url: 接続先URL (http://yahoo.co.jp). option: Mapで設定. params:
- * パラメータを設定する場合は、この名前で設定します. header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
- * bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
+ * httpClient(method, url, option)
+ *   method: Httpメソッド [GET, POST, DELETE, PUT, PATCH, OPTION]
+ *   url: 接続先URL (http://yahoo.co.jp).
+ *   option: Mapで設定.
+ *     params: パラメータを設定する場合は、この名前で設定します.
+ *     header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
+ *     bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
  */
 public class HttpClientFunction extends RhiginFunction {
 	private static final HttpClientFunction THIS = new HttpClientFunction();
@@ -36,11 +39,12 @@ public class HttpClientFunction extends RhiginFunction {
 	 * @param scope
 	 * @param thisObj
 	 * @param args
-	 *            args[0]: [String] method 対象のMethodを設定します. args[1]: [String] url
-	 *            対象のURLを設定します. args[2]: [Map] option 対象のオプションを設定します. params:
-	 *            パラメータを設定する場合は、この名前で設定します. header:
-	 *            追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します. bodyFile:
-	 *            HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
+	 *            args[0]: [String] method 対象のMethodを設定します.
+	 *            args[1]: [String] url 対象のURLを設定します.
+	 *            args[2]: [Map] option 対象のオプションを設定します.
+	 *              params: パラメータを設定する場合は、この名前で設定します.
+	 *              header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
+	 *              bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
 	 * @return HttpResult 返却データが返されます.
 	 */
 	@Override

@@ -51,7 +51,7 @@ public final class HttpCall extends NioCall {
 	 * @return boolean [true]の場合、正常に処理されました.
 	 */
 	public boolean startNio() {
-		LOG.info(" start Http nio");
+		LOG.info(" start Http nio: " + workerLength + " threads.");
 
 		// ワーカースレッドを生成.
 		HttpWorkerThread[] w = new HttpWorkerThread[workerLength];
