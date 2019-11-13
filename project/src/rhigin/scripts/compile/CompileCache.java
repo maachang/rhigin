@@ -30,9 +30,9 @@ public class CompileCache {
 	private static final String CHARSET = "UTF8";
 
 	// キャッシュサイズ定義.
-	private static final int NOT_CACHE_SIZE = -1;
-	private static final int MIN_CACHE_SIZE = 32;
-	private static final int DEF_CACHE_SIZE = 128;
+	private static final int NOT_CACHE_SIZE = 8192;
+	private static final int MIN_CACHE_SIZE = 64;
+	private static final int DEF_CACHE_SIZE = 256;
 	private static final int MAX_CACHE_SIZE = 4096;
 	private int maxCacheSize;
 
@@ -76,7 +76,7 @@ public class CompileCache {
 	 *            ベースパスを設定します.
 	 */
 	public CompileCache(int s, String b) {
-		if (s == NOT_CACHE_SIZE) {
+		if (s <= 0) {
 			s = NOT_CACHE_SIZE;
 		} else if (s <= MIN_CACHE_SIZE) {
 			s = MIN_CACHE_SIZE;
