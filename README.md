@@ -85,6 +85,29 @@ _
 
 _
 
+# rhigin の欠点
+
+rhiginの最大の欠点はjsのエンジンである「rhino」がES5やES6に対応していないので、対応していない。  
+ただ、現状の「rhino」のバージョンは「1.7.11」で「一部のES5」たとえば「let」などは利用可能である（constは利用できない）。  
+(そのうち対応予定)
+
+純粋なjsの速度ではv8エンジンであるnode-jsよりも、rhinoの方が遅い。  
+ただ、HTTPのI/Oではnode-jsよりもrhiginの方が「倍ぐらい」早いので、その辺それほど速度差で困ることはない（と思う）。
+
+node-jsのような豊富なライブラリやnpmのようなものが存在しない。  
+ただ、引き換えとして「過去にあるjavaの資産」が利用できる利点はある。
+
+rhiginには、javaでよく利用する「Gradle や maven」などのプロジェクト管理ツールに対応していません。  
+(そのうち対応予定)
+
+テストコード、カバレッジなどに現状対応していません。  
+(そのうち対応予定)
+
+_
+
+_
+
+
 # rhigin のセットアップと、実行について
 
 rhiginのセットアップは、非常に簡単です。
@@ -123,9 +146,15 @@ $ cd project
 $ mkdir testServer
 $ cd testServer
 
-$ rproj -n testServer -v 0.01
+$ rproj -n testServer -v 0.0.1
 $ ls
 application  conf  index.js  jar  log  rbatch  rhigin
+
+$ cat conf/rhigin.json
+{
+  "projectName": "testServer"
+  ,"version": "0.0.1"
+}
 ```
 
 作成したプロジェクトを実際に動かしてみます。
@@ -137,7 +166,7 @@ $ cd /opt/project/testServer
 
 $ echo "return {'hello': 'world'};" > application/index.js
 
-$ rhigin
+$ ./rhigin
 start rhigin.
 [2019/12/04 00:39:34.422] [DEBUG] start rhigin version (0.0.1). 
 [2019/12/04 00:39:34.735] [DEBUG]  start Http nio: 16 threads. 
