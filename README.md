@@ -1,6 +1,6 @@
-# rhigin は javaVM上で動作する javascript(rhino)で実装するrestFULなマイクロサーバです。
+# rhigin は javaVM上で動作する javascript(rhino)で実装するRESTfulなマイクロサーバです。
 
-以前node-jsでマイクロサービスを行っていましたが、restFULな処理を記載するにあたり、サーバ実装にもかかわらずnode-jsではブラウザでのクライアントJSのような実装が面倒になると感じました。
+以前node-jsでマイクロサービスを行っていましたが、RESTfulな処理を記載するにあたり、サーバ実装にもかかわらずnode-jsではブラウザでのクライアントJSのような実装が面倒になると感じました。
 
 ブラウザでのクライアントJSのような実装と言うのは、node-jsの特性である「ノンブロッキングI/O」による「シングルスレッド」により、asyncやpromiseなど「余計な非同期」で実装しなければならなくなります。
 
@@ -65,7 +65,7 @@ console.log(res);
 ```
 こんな感じで、スレッド単位でリクエストが動くjava系のサーバーサイト実装では、node-jsのような「非同期」実装を行う必要はなく、単純にSQLを書いて処理結果を取得するだけで済みます。
 
-javaのサーバーサイトのように実装できる「javascript」のrestFULなマイクロサーバがほしいと思い、作ったのが、この「rhigin」です。
+javaのサーバーサイトのように実装できる「javascript」のRESTfulなマイクロサーバがほしいと思い、作ったのが、この「rhigin」です。
 
 _
 
@@ -130,7 +130,7 @@ application  conf  index.js  jar  log  rbatch  rhigin
 
 作成したプロジェクトを実際に動かしてみます。
 
-JSONで {"hello": "world"} と言う内容を返却する restFULなjsファイルを./application/index.jsファイルとして作成して rhiginサーバを起動します。
+JSONで {"hello": "world"} と言う内容を返却する RESTfulなjsファイルを./application/index.jsファイルとして作成して rhiginサーバを起動します。
 
 ```shell
 $ cd /opt/project/testServer
