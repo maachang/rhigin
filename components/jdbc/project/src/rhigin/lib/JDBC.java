@@ -37,6 +37,9 @@ import rhigin.util.FixedArray;
  */
 public class JDBC implements JavaRequire {
 	
+	/** コンポーネントバージョン. **/
+	public static final String VERSION = "0.0.1";
+	
 	/**
 	 * コンストラクタ.
 	 */
@@ -161,7 +164,7 @@ public class JDBC implements JavaRequire {
 	// JDBCオブジェクトインスタンス.
 	private static final RhiginObject JDBC_INSTANCE = new RhiginObject("JDBC", new RhiginFunction[] {
 		new JDBCFunctions(0), new JDBCFunctions(1), new JDBCFunctions(2), new JDBCFunctions(3),
-		new JDBCFunctions(4), new JDBCFunctions(5)
+		new JDBCFunctions(4), new JDBCFunctions(5), new JDBCFunctions(6)
 	});
 	
 	// jdbcオブジェクトのメソッド群. 
@@ -176,7 +179,11 @@ public class JDBC implements JavaRequire {
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			try {
 				switch (type) {
-				case 0: // startup.
+				case 0: // version.
+					{
+						return VERSION;
+					}
+				case 1: // startup.
 					{
 						// スタートアップ登録されていない場合のみ実行.
 						if(!CORE.isStartup) {
@@ -197,7 +204,7 @@ public class JDBC implements JavaRequire {
 						}
 						return false;
 					}
-				case 1: // connect.
+				case 2: // connect.
 					{
 						if(args.length > 0) {
 							if(args.length == 1) {
@@ -210,25 +217,25 @@ public class JDBC implements JavaRequire {
 						}
 						argsException("JDBC");
 					}
-				case 2: // kind.
+				case 3: // kind.
 					{
 						if(args.length > 0) {
 							return CORE.getKind("" + args[0]).getMap();
 						}
 						argsException("JDBC");
 					}
-				case 3: // isRegister.
+				case 4: // isRegister.
 					{
 						if(args.length > 0) {
 							return CORE.isRegister("" + args[0]);
 						}
 						argsException("JDBC");
 					}
-				case 4: // size.
+				case 5: // size.
 					{
 						return CORE.size();
 					}
-				case 5: // names.
+				case 6: // names.
 					{
 						return CORE.names();
 					}
@@ -245,12 +252,13 @@ public class JDBC implements JavaRequire {
 		@Override
 		public final String getName() {
 			switch (type) {
-			case 0: return "startup";
-			case 1: return "connect";
-			case 2: return "kind";
-			case 3: return "isRegister";
-			case 4: return "length";
-			case 5: return "names";
+			case 0: return "version";
+			case 1: return "startup";
+			case 2: return "connect";
+			case 3: return "kind";
+			case 4: return "isRegister";
+			case 5: return "length";
+			case 6: return "names";
 			}
 			return "unknown";
 		}

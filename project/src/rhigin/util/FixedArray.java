@@ -1,7 +1,9 @@
 package rhigin.util;
 
+import java.lang.reflect.Array;
 import java.util.AbstractList;
 import java.util.List;
+
 
 /**
  * 固定配列のList実装.
@@ -13,18 +15,25 @@ public class FixedArray<E> extends AbstractList<E> implements ConvertGet<Integer
 		array = new Object[0];
 	}
 	
-	@SafeVarargs
-	public FixedArray(Object... n) {
-		array = n;
-	}
-	
-	public FixedArray(List<E> n) {
-		int len = n == null ? 0 : n.size();
-		Object[] o = new Object[len];
-		for(int i = 0; i < len; i ++) {
-			o[i] = n.get(i);
+	@SuppressWarnings("rawtypes")
+	public FixedArray(Object n) {
+		if(n == null) {
+			array = new Object[0];
+		} else if(n.getClass().isArray()) {
+			int len = Array.getLength(n);
+			array = new Object[len];
+			System.arraycopy(n, 0, array, 0, len);
+		} else if(n instanceof List) {
+			List lst = (List)n;
+			int len = n == null ? 0 : lst.size();
+			Object[] o = new Object[len];
+			for(int i = 0; i < len; i ++) {
+				o[i] = lst.get(i);
+			}
+			array = o;
+		} else {
+			array = new Object[] {n};
 		}
-		array = o;
 	}
 	
 	public FixedArray(int size) {
