@@ -5,12 +5,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.mozilla.javascript.Context;
+import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
@@ -18,14 +17,19 @@ import rhigin.http.Http;
 import rhigin.http.HttpInfo;
 import rhigin.http.MimeType;
 import rhigin.logs.LogFactory;
+import rhigin.scripts.ExecuteJsByEndScriptCall;
 import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.RhiginContext;
+import rhigin.scripts.RhiginEndScriptCall;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.ScriptConstants;
 import rhigin.scripts.objects.LockObjects;
 import rhigin.util.Args;
+import rhigin.util.ArrayMap;
 import rhigin.util.EnvCache;
 import rhigin.util.FileUtil;
+import rhigin.util.OList;
+import rhigin.util.ObjectList;
 
 /**
  * Rhigin初期処理.
@@ -38,7 +42,10 @@ public class RhiginStartup {
 	public static final String STARTUP_JS = "./index.js";
 
 	/** スタートアップオブジェクト一時格納先. **/
-	private static final String STARTUP_OBJECT = "_originals";
+	private static final String STARTUP_OBJECT = "_$originals";
+	
+	/** スクリプト実行後の終了処理を一時格納先. **/
+	private static final String STARTUP_END_CALL_SCRIPT = "_$endCallScripts";
 
 	/**
 	 * ログファクトリの初期化.
@@ -119,31 +126,44 @@ public class RhiginStartup {
 			RhiginContext context = new RhiginContext();
 
 			// スタートアップで、ExecuteScript実行時に利用可能にしたいオブジェクトを設定.
-			Map<String, Object> originals = new HashMap<String, Object>();
+			ArrayMap originals = new ArrayMap();
 			context.setAttribute(STARTUP_OBJECT, originals);
+			List<RhiginEndScriptCall> endScriptCallList = new ObjectList<RhiginEndScriptCall>();
+			context.setAttribute(STARTUP_END_CALL_SCRIPT, endScriptCallList);
 			context.setAttribute(addOrigin.getName(), addOrigin);
-			context.setAttribute(removeOrigin.getName(), removeOrigin);
-
+			context.setAttribute(addEndCall.getName(), addEndCall);
+			
 			Reader r = null;
 			try {
 				r = new BufferedReader(new InputStreamReader(new FileInputStream(STARTUP_JS), "UTF8"));
 				ExecuteScript.execute(context, r, STARTUP_JS, ScriptConstants.HEADER, ScriptConstants.FOOTER, 0);
 				r.close();
 				r = null;
-
-				// ExecuteScript実行時に利用可能にしたいオブジェクトをExecuteScript.addOriginalsで追加.
-				Entry<String, Object> et;
-				Iterator<Entry<String, Object>> it = originals.entrySet().iterator();
-				while (it.hasNext()) {
-					et = it.next();
-					ExecuteScript.addOriginals(et.getKey(), et.getValue());
-				}
 			} finally {
 				if (r != null) {
 					try {
 						r.close();
 					} catch (Exception e) {
 					}
+				}
+			}
+			
+			// ExecuteScript実行時に利用可能にしたいオブジェクトをExecuteScript.addOriginalsで追加.
+			{
+				OList<Object[]> list = originals.getListMap().rawData();
+				int len = list.size();
+				Object[] n;
+				for(int i = 0; i < len; i ++) {
+					n = list.get(i);
+					ExecuteScript.addOriginals((String)n[0], n[1]);
+				}
+			}
+			// ExecuteScriptの終了時にスタートアップで登録した終了処理スクリプトを追加.
+			{
+				List<RhiginEndScriptCall> list = endScriptCallList;
+				int len = list.size();
+				for(int i = 0; i < len; i ++) {
+					ExecuteScript.addEndScripts(list.get(i));
 				}
 			}
 		}
@@ -164,6 +184,12 @@ public class RhiginStartup {
 	private static final Map<String, Object> getOriginal(Scriptable scope) {
 		return (Map) scope.get(STARTUP_OBJECT, null);
 	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static final List<RhiginEndScriptCall> getEndScriptCall(Scriptable scope) {
+		return (List) scope.get(STARTUP_END_CALL_SCRIPT, null);
+	}
+	
 
 	// スタートアップオブジェクト追加.
 	private static final RhiginFunction addOrigin = new RhiginFunction() {
@@ -181,17 +207,25 @@ public class RhiginStartup {
 
 		@Override
 		public final String getName() {
-			return "addOriginals";
+			return "originals";
 		}
 	};
-
-	// スタートアップオブジェクト削除.
-	private static final RhiginFunction removeOrigin = new RhiginFunction() {
+	
+	// スクリプト実行後の終了処理を追加.
+	private static final RhiginFunction addEndCall = new RhiginFunction() {
 		@Override
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
-			if (args.length >= 2) {
+			if (args.length >= 1) {
 				try {
-					getOriginal(scope).remove("" + args[0], args[1]);
+					Object o = args[0];
+					if(o instanceof NativeJavaObject) {
+						o = ((NativeJavaObject)o).unwrap();
+					}
+					if(o instanceof RhiginEndScriptCall) {
+						getEndScriptCall(scope).add((RhiginEndScriptCall)o);
+					} else {
+						getEndScriptCall(scope).add(new ExecuteJsByEndScriptCall("" + o));
+					}
 				} catch (Exception e) {
 					throw new RhiginException(500, e);
 				}
@@ -201,7 +235,7 @@ public class RhiginStartup {
 
 		@Override
 		public final String getName() {
-			return "removeOriginals";
+			return "endCall";
 		}
 	};
 

@@ -7,9 +7,11 @@ import rhigin.RhiginException;
 import rhigin.http.Http;
 import rhigin.http.HttpInfo;
 import rhigin.scripts.ExecuteScript;
+import rhigin.scripts.JavaRequire;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.compile.CompileCache;
 import rhigin.scripts.compile.ScriptElement;
+import rhigin.util.Converter;
 
 /**
  * [Function]: require.
@@ -55,12 +57,25 @@ public final class RequireFunction extends RhiginFunction {
 		if (args == null || args.length < 1) {
 			throw new RhiginException(404, "The require argument has not been set.");
 		}
+		String path = "" + args[0];
+		// パスの先頭に[@]が存在する場合は、javaのクラス[JavaRequire]でロード.
+		if(path.startsWith("@")) {
+			try {
+				// パス名は/は[.]に変換.
+				path = Converter.changeString(path.substring(1), "/", ".");
+				// コンストラクタは引数が空のものでインスタンスで作成して、JavaRequire.loadで
+				// js用のオブジェクトを生成.
+				return ((JavaRequire)Class.forName(path).getConstructor().newInstance()).load();
+			} catch (Exception e) {
+				throw new RhiginException(500, e);
+			}
+		}
 		try {
 			CompileCache c = getCache();
 			if (c == null) {
 				throw new RhiginException(500, "compileCache has not been set.");
 			}
-			ScriptElement se = c.get("" + args[0], HEADER_SCRIPT, FOOTER_SCRIPT);
+			ScriptElement se = c.get(path, HEADER_SCRIPT, FOOTER_SCRIPT);
 			return ExecuteScript.execute(null, se.getScript());
 		} catch (RhiginException re) {
 			throw re;

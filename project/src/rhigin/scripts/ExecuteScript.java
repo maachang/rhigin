@@ -14,7 +14,10 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Wrapper;
 
+import rhigin.RhiginConfig;
 import rhigin.RhiginConstants;
+import rhigin.RhiginException;
+import rhigin.scripts.compile.CompileCache;
 import rhigin.scripts.function.ArgsFunction;
 import rhigin.scripts.function.Base64Functions;
 import rhigin.scripts.function.BinaryFunction;
@@ -66,6 +69,9 @@ public class ExecuteScript {
 
 	/** originalFunctionAndObject. **/
 	private static final ListMap originalFunctionAndObjectList = new ListMap();
+	
+	/** スクリプト終了処理管理. **/
+	private static final OList<RhiginEndScriptCall> endScriptCallList = new OList<RhiginEndScriptCall>();
 
 	static {
 		// Context初期化.
@@ -414,5 +420,60 @@ public class ExecuteScript {
 	 */
 	public static final ListMap getOriginal() {
 		return originalFunctionAndObjectList;
+	}
+	
+	/**
+	 * コンフィグオブジェクトを取得.
+	 * 
+	 * @return RhiginConfig
+	 */
+	public static final RhiginConfig getConfig() {
+		RhiginConfig ret = (RhiginConfig)originalFunctionAndObjectList.get("config");
+		if(ret == null) {
+			// 存在しない場合は、空を返却.
+			try {
+				ret = new RhiginConfig();
+			} catch(Exception e) {
+				throw new RhiginException(500, e);
+			}
+		}
+		return ret;
+	}
+	
+	/**
+	 * スクリプト終了時に実行する処理を追加.
+	 * @param endScript
+	 */
+	public static final void addEndScripts(RhiginEndScriptCall... endScripts) {
+		final int len = endScripts.length;
+		for(int i = 0; i < len; i ++) {
+			endScriptCallList.add(endScripts[i]);
+		}
+	}
+	
+	/**
+	 * スクリプト終了時に実行する処理群を取得.
+	 * @return
+	 */
+	public static final OList<RhiginEndScriptCall> getEndScriptList() {
+		return endScriptCallList;
+	}
+	
+	/**
+	 * スクリプト終了時に実行する処理群を実行.
+	 * @param cache
+	 */
+	public static final void callEndScripts(final CompileCache cache) {
+		final int len = endScriptCallList.size();
+		if(len > 0) {
+			RhiginEndScriptCall n;
+			final RhiginContext context = new RhiginContext();
+			for(int i = 0; i < len; i ++) {
+				n = endScriptCallList.get(i);
+				if(n != null) {
+					n.call(context, cache);
+				}
+			}
+		}
 	}
 }

@@ -45,6 +45,13 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>, Map<String, O
 		list = new ListMap();
 		list.set(args);
 	}
+	
+	/**
+	 * ListMapをセット.
+	 */
+	public void setRaw(ListMap list) {
+		this.list = list;
+	}
 
 	/**
 	 * クリア.

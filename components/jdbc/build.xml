@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *******************************************************************************
+   rhigin.
+   
+   Copyright (c) 2019 masahito suzuki, Inc. All Rights Reserved.
+ *******************************************************************************
+-->
+<project name="rhigin" default="all" basedir=".">
+    
+  <!-- ===================================================================== -->
+  <!-- set env.                                                              -->
+  <!-- ===================================================================== -->
+  <property name="project.name" value="rhigin"/>
+  <property name="version" value="0.0.1"/>
+  <property name="bin.dir" value="bin/"/>
+  <property name="lib.dir" value="project/lib/"/>
+  <property name="src.dir" value="project/src/"/>
+  <property name="dest.dir" value="project/classes"/>
+  <property name="jar.dir" value="jar" />
+  <property name="jar.name" value="${project.name}-${version}.jar"/>
+  <property environment="env"/>
+  <property name="rhigin.home" value="${env.RHIGIN_HOME}"/>
+  <property name="doc.dir" value="doc/"/>
+  <property name="debug" value="on"/>
+  <property name="deprecation" value="on"/>
+  <property name="optimize" value="on"/>
+  <property name="nowarn" value="on"/>
+  <property name="unchecked" value="on"/>
+  
+  <!-- ===================================================================== -->
+  <!-- include Jar path.                                                     -->
+  <!-- ===================================================================== -->
+  <path id="path.lib">
+    <fileset dir="./project">
+      <include name="lib/**/*.jar"/>
+      <include name="jar/**/*.jar"/>
+    </fileset>
+  </path>
+  
+  <!-- ===================================================================== -->
+  <!-- all.                                                                  -->
+  <!-- ===================================================================== -->
+  <target name="all" depends="compile, jar"/>
+  
+  <!-- ===================================================================== -->
+  <!-- compile.                                                              -->
+  <!-- ===================================================================== -->
+  <target name="compile">
+    <delete dir="${dest.dir}" />
+    <delete file="${jar.name}" />
+    <mkdir dir="${dest.dir}" />
+    <javac includeantruntime="false"
+           srcdir="${src.dir}"
+           destdir="${dest.dir}"
+           encoding="UTF8"
+           debug="${debug}"
+           deprecation="${deprecation}"
+           optimize="${optimize}"
+           nowarn="${nowarn}"   
+    >
+      <classpath refid="path.lib" />
+    </javac>
+    <copy overwrite="yes"
+      todir="${dest.dir}/res">
+      <fileset dir="${src.dir}/res" />
+    </copy>
+    <copy overwrite="yes"
+      file="${src.dir}/rhigin/http/client/cacerts"
+      tofile="${dest.dir}/rhigin/http/client/cacerts"/>
+  </target>
+  
+  <!-- ===================================================================== -->
+  <!-- create JarFile.                                                       -->
+  <!-- ===================================================================== -->
+  <target name="jar">
+    <jar jarfile="${jar.name}" basedir="${dest.dir}">
+    </jar>
+    <delete dir="${rhigin.home}/lib" />
+    <copy file="${jar.name}"
+      tofile="${rhigin.home}/lib/${jar.name}"/>
+    <copy todir="${rhigin.home}/lib">
+      <fileset dir="${lib.dir}" />
+    </copy>
+  </target>
+
+  <!-- ===================================================================== -->
+  <!-- create archive zip                                                       -->
+  <!-- ===================================================================== -->
+	<target name="archive">
+		<zip destfile="${project.name}-${version}.zip" 
+			 basedir="${bin.dir}"
+			 update="true"
+		/>
+    <zip destfile="${project.name}-${version}_src.zip" 
+			 basedir="${src.dir}"
+			 update="true"
+		/>
+	</target>
+  
+  <!-- ===================================================================== -->
+  <!-- make javadoc.                                                         -->
+  <!-- ===================================================================== -->
+  <target name="javadoc">
+    <delete dir="${doc.dir}${project.name}" />
+    <mkdir dir="${doc.dir}" />
+    <mkdir dir="${doc.dir}${project.name}" />
+    <javadoc sourcepath="${src.dir}"
+        packagenames="*"
+        destdir="${doc.dir}${project.name}"
+        defaultexcludes="yes"
+        author="true"
+        version="true"
+        use="true"
+        Public="true"
+        nohelp="true"
+        encoding="UTF8"
+        docencoding="UTF8"
+        charset="UTF8"
+        doctitle="${project.name} - version . ${version}"
+        windowtitle="${project.name} - version . ${version}">
+    </javadoc>
+  </target>
+  
+  <!-- ===================================================================== -->
+  <!-- clean work file.                                                      -->
+  <!-- ===================================================================== -->
+  <target name="clean">
+    <delete dir="${dest.dir}" />
+    <delete file="${jar.name}" />
+    <delete file="${project.name}-${version}.zip" />
+    <delete file="${project.name}-${version}_src.zip" />
+    <delete dir="${doc.dir}" />
+    <delete dir="${rhigin.home}/lib" />
+    <delete file=".ant-targets-build.xml" />
+  </target>
+
+</project>

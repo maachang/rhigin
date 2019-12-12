@@ -72,7 +72,7 @@ public class HttpWorkerThread extends Thread {
 
 	/**
 	 * ワーカースレッド登録.
-	 * 
+	 *  
 	 * @param em
 	 * @throws IOException
 	 */
@@ -391,63 +391,73 @@ public class HttpWorkerThread extends Thread {
 				params = new Params((Map) params);
 			}
 
-			// レスポンス生成.
-			Response res = new Response();
-
-			// コンテキスト生成・設定.
-			RhiginContext context = new RhiginContext();
-			context.setAttribute("params", params);
-			context.setAttribute("request", req);
-			context.setAttribute("response", res);
-			context.setAttribute(redirect.getName(), redirect);
-			context.setAttribute(error.getName(), error);
-
-			Object ret = "";
 			try {
-				// スクリプトの実行.
-				ret = ExecuteScript.execute(context,
-						cache.get(path, ScriptConstants.HEADER, ScriptConstants.FOOTER).getScript());
-			} catch (Redirect redirect) {
-				redirectResponse(em, redirect);
-				return;
-			} catch (RhiginException rhiginException) {
-				// HTTPステータスが500エラー以上の場合のみ、エラー表示.
-				if (rhiginException.getStatus() >= 500) {
-					// スクリプトエラーを表示.
-					LOG.error("scriptError:" + req.getUrl(), rhiginException);
+				
+				// レスポンス生成.
+				Response res = new Response();
+
+				// コンテキスト生成・設定.
+				RhiginContext context = new RhiginContext();
+				context.setAttribute("params", params);
+				context.setAttribute("request", req);
+				context.setAttribute("response", res);
+				context.setAttribute(redirect.getName(), redirect);
+				context.setAttribute(error.getName(), error);
+				
+				Object ret = "";
+				try {
+					// スクリプトの実行.
+					ret = ExecuteScript.execute(context,
+							cache.get(path, ScriptConstants.HEADER, ScriptConstants.FOOTER).getScript());
+				} catch (Redirect redirect) {
+					redirectResponse(em, redirect);
+					return;
+				} catch (RhiginException rhiginException) {
+					// HTTPステータスが500エラー以上の場合のみ、エラー表示.
+					if (rhiginException.getStatus() >= 500) {
+						// スクリプトエラーを表示.
+						LOG.error("scriptError:" + req.getUrl(), rhiginException);
+					}
+					errorResponse(em, rhiginException.getStatus(), rhiginException.getMessage());
+					return;
 				}
-				errorResponse(em, rhiginException.getStatus(), rhiginException.getMessage());
-				return;
-			}
-			// 戻り値がInputStreamでない場合.
-			if (!(ret instanceof InputStream)) {
-				if (ret == null || (ret instanceof String && ((String) ret).length() == 0)) {
-					ret = "";
-					gzip = false;
+				
+				// 戻り値がInputStreamでない場合.
+				if (!(ret instanceof InputStream)) {
+					if (ret == null || (ret instanceof String && ((String) ret).length() == 0)) {
+						ret = "";
+						gzip = false;
+					}
+					// success形式で返却.
+					successResponse(gzip, em, res.getStatus(), res, ret);
+					// 戻り値がInputStreamの場合.
+				} else {
+					// バイナリ返却.
+					sendResponse(em, res.getStatus(), res, (InputStream) ret);
 				}
-				// success形式で返却.
-				successResponse(gzip, em, res.getStatus(), res, ret);
-				// 戻り値がInputStreamの場合.
-			} else {
-				// バイナリ返却.
-				sendResponse(em, res.getStatus(), res, (InputStream) ret);
+				
+			} finally {
+				
+				// スクリプト終了処理.
+				ExecuteScript.callEndScripts(cache);
 			}
+			
 		} catch (RhiginException re) {
 			if (!em.isEndSend()) {
-				LOG.error("error", re);
 				try {
 					errorResponse(em, re.getStatus(), re.getMessage());
 				} catch (Exception ee) {
 				}
 			}
+			LOG.error("error", re);
 		} catch (Exception e) {
 			if (!em.isEndSend()) {
-				LOG.error("error", e);
 				try {
 					errorResponse(em, 500, e.getMessage());
 				} catch (Exception ee) {
 				}
 			}
+			LOG.error("error", e);
 		}
 	}
 
