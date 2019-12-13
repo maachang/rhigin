@@ -5,13 +5,16 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.Json;
+import rhigin.scripts.JsonOut;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginObject;
 
 /**
  * [js]Jsonオブジェクト.
  * 
- * var a = JSON.stringify({hoge: "moge"}); var b = JSON.parse(a);
+ * var a = JSON.stringify({hoge: "moge"});
+ * var b = JSON.parse(a);
+ * console.log(JSON.toString(b));
  */
 public final class JSONObject {
 	private static final class Execute extends RhiginFunction {
@@ -29,6 +32,8 @@ public final class JSONObject {
 					return Json.encode(args[0]);
 				case 1:
 					return Json.decode("" + args[0]);
+				case 2:
+					return JsonOut.toString(args[0]);
 				}
 			}
 			return argsError(args);
@@ -41,6 +46,8 @@ public final class JSONObject {
 				return "stringify";
 			case 1:
 				return "parse";
+			case 2:
+				return "toString";
 			}
 			return "unknown";
 		}
@@ -58,7 +65,7 @@ public final class JSONObject {
 	};
 
 	// オブジェクトリスト.
-	private static final RhiginFunction[] list = { new Execute(0), new Execute(1) };
+	private static final RhiginFunction[] list = { new Execute(0), new Execute(1), new Execute(2) };
 
 	// シングルトン.
 	private static final RhiginObject THIS = new RhiginObject("JSON", list);

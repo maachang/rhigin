@@ -2,9 +2,6 @@ package rhigin.scripts;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -94,11 +91,9 @@ public final class Json {
 			encodeJsonMap(buf, base, (Map) target);
 		} else if (target instanceof List) {
 			encodeJsonList(buf, base, (List) target);
-		} else if (target instanceof Long || target instanceof Short || target instanceof Integer
-				|| target instanceof Float || target instanceof Double || target instanceof BigInteger
-				|| target instanceof BigDecimal) {
+		} else if (target instanceof Number || target instanceof Boolean) {
 			buf.append(target);
-		} else if (target instanceof Character || target instanceof String) {
+		} else if (target instanceof Character || target instanceof CharSequence) {
 			buf.append("\"").append(target).append("\"");
 		} else if (target instanceof byte[]) {
 			buf.append("null");
@@ -106,8 +101,6 @@ public final class Json {
 			buf.append("\"").append(new String((char[]) target)).append("\"");
 		} else if (target instanceof java.util.Date) {
 			buf.append("\"").append(dateToString((java.util.Date) target)).append("\"");
-		} else if (target instanceof Boolean) {
-			buf.append(target);
 		} else if (target.getClass().isArray()) {
 			if (Array.getLength(target) == 0) {
 				buf.append("[]");
@@ -115,24 +108,11 @@ public final class Json {
 				encodeJsonArray(buf, base, target);
 			}
 		} else if (target instanceof IdScriptableObject) {
-			// IdScriptableObject = rhino側の型オブジェクトの基底オブジェクト.
-			IdScriptableObject io = (IdScriptableObject) target;
-			if ("Date".equals(io.getClassName())) {
-				// NativeDate.
-				try {
-					// 現状リフレクションで直接取得するようにする.
-					// 本来は ScriptRuntime.toNumber(NativeDate) で取得できるのだけど、
-					// これは rhinoのContextの範囲内でないとエラーになるので.
-					final Method m = io.getClass().getDeclaredMethod("getJSTimeValue");
-					m.setAccessible(true);
-					buf.append("\"").append(dateToString(new Date(Converter.convertLong(m.invoke(io))))).append("\"");
-				} catch (Exception e) {
-					// エラーの場合は処理しない.
-					buf.append("null");
-				}
-			} else {
-				// それ以外はnullをセット.
+			final java.util.Date d = getJSDate((IdScriptableObject) target);
+			if(d == null) {
 				buf.append("null");
+			} else {
+				buf.append("\"").append(dateToString(d)).append("\"");
 			}
 		} else {
 			buf.append("\"").append(target.toString()).append("\"");
@@ -415,26 +395,39 @@ public final class Json {
 			return ret;
 		}
 		// その他.
-		throw new RhiginException(500, "Failed to parse JSON");
+		throw new RhiginException(500, "Failed to parse JSON.");
 	}
 
-	/** 日付情報チェック. **/
-	private static final boolean isNumeric(String o) {
-		try {
-			Double.parseDouble(o);
-		} catch (Exception e) {
-			return false;
-		}
-		return true;
+	/** 数値チェック. **/
+	protected static final boolean isNumeric(String o) {
+		return Converter.isNumeric(o);
 	}
 
 	/** 日付を文字変換. **/
-	private static final String dateToString(Date d) {
+	protected static final String dateToString(java.util.Date d) {
 		return DateConvert.getISO8601(d);
 	}
 
 	/** 文字を日付変換. **/
-	private static final Date stringToDate(String s) {
+	protected static final java.util.Date stringToDate(String s) {
 		return DateConvert.stringToDate(s);
+	}
+	
+	/** JSDateオブジェクトの場合は、java.util.Dateに変換. **/
+	protected static final java.util.Date getJSDate(IdScriptableObject io) {
+		if ("Date".equals(io.getClassName())) {
+			// NativeDate.
+			try {
+				// 現状リフレクションで直接取得するようにする.
+				// 本来は ScriptRuntime.toNumber(NativeDate) で取得できるのだけど、
+				// これは rhinoのContextの範囲内でないとエラーになるので.
+				final Method md = io.getClass().getDeclaredMethod("getJSTimeValue");
+				md.setAccessible(true);
+				return new java.util.Date(Converter.convertLong(md.invoke(io)));
+			} catch (Exception e) {
+				// エラーの場合は処理しない.
+			}
+		}
+		return null;
 	}
 }

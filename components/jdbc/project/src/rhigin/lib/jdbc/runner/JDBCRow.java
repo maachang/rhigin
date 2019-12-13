@@ -74,7 +74,7 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 	
 	// チェック処理.
 	private void check() {
-		if(conn == null || conn.closeFlag || rs == null) {
+		if(isClose()) {
 			throw new JDBCException("Connection is already closed.");
 		}
 	}

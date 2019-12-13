@@ -57,11 +57,11 @@ _
 //
 // rhigin での実装サンプル例.
 //
-var jdbc = require("jdbc-pooling");
+var jdbc = require("@/rhigin/lib/JDBC");
 
-var conn = jdbc("test-mysql").connect("testjs");
-var res = conn.query("SELECT * FROM test_table").execute();
-console.log(res);
+var conn = jdbc.connect("testjs");
+var res = conn.query("SELECT * FROM test_table;");
+console.log(JSON.toString(res.rows()));
 ```
 こんな感じで、スレッド単位でリクエストが動くjava系のサーバーサイト実装では、node-jsのような「非同期」実装を行う必要はなく、単純にSQLを書いて処理結果を取得するだけで済みます。
 
@@ -107,26 +107,43 @@ _
 
 _
 
+# 興味をお持ちの方は、rhiginをインストールして、実行してみてください
 
-# rhigin のセットアップと、実行について
+当プロジェクトのrhiginに、もしご興味をお持ちの方はrhiginをインストールして、実行してみてください。
 
-rhiginのセットアップは、非常に簡単です。
+以下の流れによって、rhiginをインストールして実行します。
 
-以下のように行います。
+```
+1) gitからrhiginをクローンする。
 
-※ java8以上はインストールされていることが前提です。  
+2) RHIGIN_HOMEの環境パスを通す。
+
+3) rhiginプロジェクトを作成する。
+
+4) rhiginプロジェクトを実行する。
+```
+
+５分ほどのお時間で実行できると思いますので、お試しいただければ幸いです。
+
+_
+
+_
+
+## gitからrhiginをクローンして、環境パスを通します
+
+※ java8以上がインストールされていることが前提です。  
 ※ antはインストールされていることが前提です。  
 ※ linux系をベースに設定の説明をしています。  
-※ opt/bin/フォルダ配下にrhiginフォルダを作成して、インストールすることを説明しています。  
+※ ~/project/rhigin フォルダ配下にrhiginフォルダを作成して、インストールすることを説明しています。  
 
 ```shell
-$ cd /opt
-$ mkdir bin
-$ cd bin
+$ cd ~/
+$ mkdir project
+$ cd project
 
 $ git clone https://github.com/maachang/rhigin.git
 
-$ echo "export RHIGIN_HOME=/opt/bin/rhigin/bin" >> ~/.profile
+$ echo "export RHIGIN_HOME=~/project/rhigin/bin" >> ~/.profile
 $ echo "export PATH=${PATH}:${RHIGIN_HOME}" >> ~/.profile
 $ source ~/.profile
 
@@ -134,14 +151,16 @@ $ cd rhigin
 $ ant
 ```
 
-次に rhigin 用のプロジェクトを作成します。
+_
 
-※ opt/project/フォルダ配下にtestServerフォルダを作成して、rhiginプロジェクトを作成しています。  
+_
+
+## rhigin 用のプロジェクトを作成します
+
+※ ~/project/フォルダ配下にtestServerフォルダを作成して、rhiginプロジェクトを作成しています。  
 
 ```shell
-$ cd /opt
-$ mkdir project
-$ cd project
+$ cd ~/project
 
 $ mkdir testServer
 $ cd testServer
@@ -157,12 +176,16 @@ $ cat conf/rhigin.json
 }
 ```
 
-作成したプロジェクトを実際に動かしてみます。
+_
+
+_
+
+## 作成したプロジェクトを実際に動かしてみます
 
 JSONで {"hello": "world"} と言う内容を返却する RESTfulなjsファイルを./application/index.jsファイルとして作成して rhiginサーバを起動します。
 
 ```shell
-$ cd /opt/project/testServer
+$ cd ~/project/testServer
 
 $ echo "return {'hello': 'world'};" > application/index.js
 
@@ -188,7 +211,11 @@ start rhigin.
 [2019/12/04 00:39:34.784] [DEBUG]  * start rhigin workerThread(15). 
 ```
 
-ブラウザを開いて、以下のURLを入力します。
+_
+
+_
+
+## ブラウザを開いて、以下のURLを入力します。
 
 <http://127.0.0.1:3120/>
 
