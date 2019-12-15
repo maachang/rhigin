@@ -444,7 +444,7 @@ public class JDBC implements JavaRequire {
 	private static final RhiginObject createRow(JDBCRow r) {
 		return new RhiginObject("JDBCRow", new RhiginFunction[] {
 			new RowFunctions(0, r), new RowFunctions(1, r), new RowFunctions(2, r), new RowFunctions(3, r),
-			new RowFunctions(4, r)
+			new RowFunctions(4, r), new RowFunctions(5, r)
 		});
 	}
 	
@@ -487,6 +487,10 @@ public class JDBC implements JavaRequire {
 							return row.getRows(Converter.convertInt(args[0]));
 						}
 					}
+				case 5: // toString.
+					{
+						return row.toString();
+					}
 				}
 			} catch (RhiginException re) {
 				throw re;
@@ -504,6 +508,7 @@ public class JDBC implements JavaRequire {
 			case 2: return "hasNext";
 			case 3: return "next";
 			case 4: return "rows";
+			case 5: return "toString";
 			}
 			return "unknown";
 		}

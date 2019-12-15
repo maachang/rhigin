@@ -1,5 +1,9 @@
 package rhigin;
 
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Scriptable;
@@ -7,6 +11,7 @@ import org.mozilla.javascript.Undefined;
 
 import rhigin.http.HttpInfo;
 import rhigin.scripts.ExecuteScript;
+import rhigin.scripts.JsonOut;
 import rhigin.scripts.RhiginContext;
 import rhigin.scripts.compile.CompileCache;
 import rhigin.scripts.function.RandomFunction;
@@ -51,15 +56,24 @@ public class RhiginConsole {
 						return;
 					}
 					Object o = ExecuteScript.execute(context, cmd);
-					if (o instanceof Scriptable) {
-						ContextFactory.getGlobal().enterContext();
-						try {
-							System.out.println(Context.toString(o));
-						} finally {
-							Context.exit();
-						}
+					if(o == null) {
+						System.out.println("null");
 					} else if (o instanceof Undefined) {
 						System.out.println("");
+					} else if (o instanceof Scriptable) {
+						if(o instanceof Map || o instanceof List) {
+							System.out.println(JsonOut.toString(o));
+						} else {
+							ContextFactory.getGlobal().enterContext();
+							try {
+								System.out.println(Context.toString(o));
+							} finally {
+								Context.exit();
+							}
+						}
+					} else if(o instanceof Map || o instanceof List ||
+						o instanceof Iterator || o.getClass().isArray()) {
+						System.out.println(JsonOut.toString(o));
 					} else {
 						System.out.println(o);
 					}

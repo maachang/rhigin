@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import rhigin.scripts.JsonOut;
 import rhigin.util.ArrayMap;
 import rhigin.util.ListMap;
 import rhigin.util.OList;
@@ -133,6 +134,14 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 			row = null;
 		}
 		return ret;
+	}
+	
+	/**
+	 * 文字列変換.
+	 * @return String
+	 */
+	public String toString() {
+		return JsonOut.toString(this);
 	}
 	
 	// １行の保持情報.

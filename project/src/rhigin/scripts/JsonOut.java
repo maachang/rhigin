@@ -17,13 +17,38 @@ import org.mozilla.javascript.Wrapper;
 public class JsonOut {
 	protected JsonOut() {}
 	
+	// デフォルトスペース.
+	private static final int DEF_SPACE = 2;
+	
 	/**
 	 * 文字列変換.
 	 * @param m 出力対象のオブジェクトを設定します.
 	 * @return 文字列が返却されます.
 	 */
 	public static final String toString(Object m) {
-		return toString(2, m);
+		StringBuilder buf = new StringBuilder();
+		toString(DEF_SPACE, 0, buf, m);
+		return buf.toString();
+	}
+	
+	/**
+	 * iteratorを文字列変換.
+	 * @param it
+	 * @return
+	 */
+	public static final String toString(Iterator it) {
+		String enter = "";
+		StringBuilder buf = new StringBuilder();
+		buf.append("[");
+		while(it.hasNext()) {
+			if(enter.length() == 0) {
+				buf.append("\n");
+				enter = "\n";
+			}
+			toString(DEF_SPACE, DEF_SPACE, buf, it.next());
+		}
+		buf.append(enter).append("]");
+		return buf.toString();
 	}
 	
 	/**
@@ -33,31 +58,28 @@ public class JsonOut {
 	 * @return 文字列が返却されます.
 	 */
 	public static final String toString(int indent, Object m) {
+		StringBuilder buf = new StringBuilder();
+		toString(indent, 0, buf, m);
+		return buf.toString();
+	}
+	
+	/** 文字列変換. */
+	private static final void toString(int indent, int initSpace, StringBuilder buf, Object m) {
 		if(m == null || m instanceof Undefined) {
 			m = null;
 		} else if (m instanceof Wrapper) {
 			m = ((Wrapper) m).unwrap();
 		}
 		if(m == null) {
-			StringBuilder buf = new StringBuilder();
-			toValue(indent, 0, buf, m);
-			return buf.toString();
+			toValue(indent, initSpace, buf, m);
 		} else if(m instanceof Map) {
-			StringBuilder buf = new StringBuilder();
-			toMap(indent, 0, buf, (Map)m);
-			return buf.toString();
+			toMap(indent, initSpace, buf, (Map)m);
 		} else if(m instanceof List) {
-			StringBuilder buf = new StringBuilder();
-			toList(indent, 0, buf, (List)m);
-			return buf.toString();
+			toList(indent, initSpace, buf, (List)m);
 		} else if(m.getClass().isArray()) {
-			StringBuilder buf = new StringBuilder();
-			toArray(indent, 0, buf, m);
-			return buf.toString();
+			toArray(indent, initSpace, buf, m);
 		} else {
-			StringBuilder buf = new StringBuilder();
-			toValue(indent, 0, buf, m);
-			return buf.toString();
+			toValue(indent, initSpace, buf, m);
 		}
 	}
 	
