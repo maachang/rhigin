@@ -67,12 +67,28 @@ public class JDBCConnect {
 	 * @return boolean
 	 */
 	public boolean isClose() {
-		return closeFlag;
+		// クローズ処理を直接呼び出している場合.
+		if(closeFlag) {
+			return true;
+		}
+		// コネクションにクローズ済みか問い合わせる.
+		try {
+			if(conn.isClosed()) {
+				// クローズの場合は、このオブジェクトのクローズを呼び出す.
+				close();
+				return true;
+			}
+		} catch(Exception e) {
+			// 例外が出てもクローズを呼び出す.
+			close();
+			return true;
+		}
+		return false;
 	}
 	
 	// チェック処理.
 	protected void check() {
-		if(closeFlag) {
+		if(isClose()) {
 			throw new JDBCException("Connection is already closed.");
 		}
 	}
@@ -305,6 +321,7 @@ public class JDBCConnect {
 	 * @return
 	 */
 	public int getFetchSize() {
+		check();
 		return fetchSize;
 	}
 	

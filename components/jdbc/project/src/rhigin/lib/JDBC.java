@@ -60,7 +60,7 @@ public class JDBC implements JavaRequire {
 	
 	// jdbcコアオブジェクト.
 	protected static final class JdbcCoreObject {
-		private boolean isStartup = false;
+		private volatile boolean isStartup = false;
 		private final AtomicPoolingManager man = new AtomicPoolingManager();
 		private final AtomicPoolingMonitor mon = new AtomicPoolingMonitor();
 		private final JDBCCloseable closeable = new JDBCCloseable();
@@ -164,7 +164,8 @@ public class JDBC implements JavaRequire {
 	// JDBCオブジェクトインスタンス.
 	private static final RhiginObject JDBC_INSTANCE = new RhiginObject("JDBC", new RhiginFunction[] {
 		new JDBCFunctions(0), new JDBCFunctions(1), new JDBCFunctions(2), new JDBCFunctions(3),
-		new JDBCFunctions(4), new JDBCFunctions(5), new JDBCFunctions(6)
+		new JDBCFunctions(4), new JDBCFunctions(5), new JDBCFunctions(6), new JDBCFunctions(7),
+		new JDBCFunctions(8)
 	});
 	
 	// jdbcオブジェクトのメソッド群. 
@@ -204,41 +205,68 @@ public class JDBC implements JavaRequire {
 						}
 						return false;
 					}
-				case 2: // connect.
+				case 2: // isStartup.
 					{
-						if(args.length > 0) {
-							if(args.length == 1) {
-								// プーリングコネクションから取得.
-								return JDBC.createConnect(CORE.connect("" + args[0]));
-							} else {
-								// プーリングコネクションを利用せずにコネクションを取得.
-								return JDBC.createConnect(CORE.connect(args));
+						return CORE.isStartup;
+					}
+				case 3: // abort.
+					{
+						if(CORE.isStartup) {
+							// closeableを呼び出す.
+							CORE.closeable.call(null, null);
+						}
+					}
+					break;
+				case 4: // connect.
+					{
+						if(CORE.isStartup) {
+							if(args.length > 0) {
+								if(args.length == 1) {
+									// プーリングコネクションから取得.
+									return JDBC.createConnect(CORE.connect("" + args[0]));
+								} else {
+									// プーリングコネクションを利用せずにコネクションを取得.
+									return JDBC.createConnect(CORE.connect(args));
+								}
 							}
+							argsException("JDBC");
 						}
-						argsException("JDBC");
 					}
-				case 3: // kind.
+					break;
+				case 5: // kind.
 					{
-						if(args.length > 0) {
-							return CORE.getKind("" + args[0]).getMap();
+						if(CORE.isStartup) {
+							if(args.length > 0) {
+								return CORE.getKind("" + args[0]).getMap();
+							}
+							argsException("JDBC");
 						}
-						argsException("JDBC");
 					}
-				case 4: // isRegister.
+					break;
+				case 6: // isRegister.
 					{
-						if(args.length > 0) {
-							return CORE.isRegister("" + args[0]);
+						if(CORE.isStartup) {
+							if(args.length > 0) {
+								return CORE.isRegister("" + args[0]);
+							}
+							argsException("JDBC");
 						}
-						argsException("JDBC");
 					}
-				case 5: // size.
+					break;
+				case 7: // length.
 					{
-						return CORE.size();
+						if(CORE.isStartup) {
+							return CORE.size();
+						}
 					}
-				case 6: // names.
+					break;
+				case 8: // names.
 					{
-						return CORE.names();
+						if(CORE.isStartup) {
+							return CORE.names();
+						}
 					}
+					break;
 				}
 				
 			} catch (RhiginException re) {
@@ -254,11 +282,13 @@ public class JDBC implements JavaRequire {
 			switch (type) {
 			case 0: return "version";
 			case 1: return "startup";
-			case 2: return "connect";
-			case 3: return "kind";
-			case 4: return "isRegister";
-			case 5: return "length";
-			case 6: return "names";
+			case 2: return "isStartup";
+			case 3: return "abort";
+			case 4: return "connect";
+			case 5: return "kind";
+			case 6: return "isRegister";
+			case 7: return "length";
+			case 8: return "names";
 			}
 			return "unknown";
 		}

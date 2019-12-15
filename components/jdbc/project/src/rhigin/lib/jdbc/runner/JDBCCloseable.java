@@ -92,7 +92,7 @@ public class JDBCCloseable implements RhiginEndScriptCall {
 	public final JDBCCloseable clearBatch() {
 		int len;
 		final OList<JDBCBatch> list = jdbcBatchs.get();
-		if((len = list.size()) > 0) {
+		if(list != null && (len = list.size()) > 0) {
 			for(int i = 0; i < len; i ++) {
 				try {
 					list.get(i).clear();
@@ -110,7 +110,7 @@ public class JDBCCloseable implements RhiginEndScriptCall {
 	public final JDBCCloseable clearResultSet() {
 		int len;
 		final OList<ResultSet> list = resultSets.get();
-		if((len = list.size()) > 0) {
+		if(list != null && (len = list.size()) > 0) {
 			for(int i = 0; i < len; i ++) {
 				try {
 					list.get(i).close();
@@ -128,7 +128,7 @@ public class JDBCCloseable implements RhiginEndScriptCall {
 	public final JDBCCloseable clearStatement() {
 		int len;
 		final OList<Statement> list = statements.get();
-		if((len = list.size()) > 0) {
+		if(list != null && (len = list.size()) > 0) {
 			for(int i = 0; i < len; i ++) {
 				try {
 					list.get(i).close();
@@ -146,7 +146,7 @@ public class JDBCCloseable implements RhiginEndScriptCall {
 	public final JDBCCloseable clearConnection() {
 		int len;
 		final OList<Connection> list = connections.get();
-		if((len = list.size()) > 0) {
+		if(list != null && (len = list.size()) > 0) {
 			Connection c;
 			boolean cf;
 			for(int i = 0; i < len; i ++) {

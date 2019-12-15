@@ -1,8 +1,11 @@
 package rhigin.util;
 
 import java.util.AbstractList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 読み込み専用オブジェクト.
@@ -70,7 +73,7 @@ public class Read {
 	 * 読み込み専用のMap.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static final class Maps implements BlankMap, ConvertGet<String> {
+	public static final class Maps implements Map<String, Object>, ConvertGet<String> {
 		Map<String, Object> srcMap = null;
 
 		public Maps(Map<String, Object> srcMap) {
@@ -115,13 +118,46 @@ public class Read {
 		}
 
 		@Override
-		public Object put(Object name, Object value) {
+		public Object put(String name, Object value) {
 			return null;
 		}
 
 		@Override
 		public Object remove(Object name) {
 			return null;
+		}
+
+		@Override
+		public void clear() {
+		}
+
+		@Override
+		public boolean containsValue(Object arg0) {
+			return srcMap.containsValue(arg0);
+		}
+
+		@Override
+		public Set<Entry<String, Object>> entrySet() {
+			return srcMap.entrySet();
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return srcMap.isEmpty();
+		}
+
+		@Override
+		public Set<String> keySet() {
+			return srcMap.keySet();
+		}
+
+		@Override
+		public void putAll(Map<? extends String, ? extends Object> arg0) {
+		}
+
+		@Override
+		public Collection<Object> values() {
+			return srcMap.values();
 		}
 	}
 }

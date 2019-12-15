@@ -1,22 +1,23 @@
 {
     // JDBC接続設定を個別に設定します.
     // ここでの名前は「ユニーク名」を設定してください.
-    "name": {
+    "h2db": {
         // JDBC管理名を設定します.
-        "name" :            "name"
+        "name" :            "h2db"
         ,"driver":           "org.h2.Driver"    // JDBCドライバーパッケージ＋クラス名を設定します.
         // 接続先URL、データベース名など.
-        ,"url":              "jdbc:h2:xxxx"
+        ,"url":              "jdbc:h2:./h2db"
         ,"user":             ""                 // 接続先ユーザ名.
         ,"password":         ""                 // 接続先パスワード.
         ,"readOnly":         false              // リードオンリのみの接続ならtrue.
         ,"busyTimeout":      -1                 // 問い合わせタイムアウト(0以下で無効).
-        ,"transactionLevel": -1                 // トランザクションレベル.
+        // トランザクションレベル.
+        ,"transactionLevel": "TRANSACTION_READ_UNCOMMITTED"
         ,"fetchSize":        -1                 // フェッチサイズ(0以下で無効).
         ,"poolSize":         -1                 // プーリングサイズ(0以下で最大プーリング数).
         ,"poolTimeout":      -1                 // プーリングタイムアウト.
-        // JDBCパラメータ.
         ,"params":
+        // JDBCパラメータ.
         {
         }
         ,"urlType":          false              // URLドライバパラメータ区切りタイプ.
@@ -25,6 +26,19 @@
         // URLの後にドライバに追加するパラメータ.
         ,"urlParams":
         {
+            //"MVCC": "TRUE"                      // MVCCモード(多版型同時実行制御)
+            "LOCK_MODE": 0                      // 低レベルロック(READ_UNCOMMITTED).
+            ,"LOCK_TIMEOUT": 120000             // ビジータイムアウト(120秒).
+            ,"DB_CLOSE_ON_EXIT": "TRUE"         // VM終了時にDBクローズ.
+            ,"CACHE_SIZE": 131072               // キャッシュは12k.
+            ,"PAGE_SIZE": 32768                 // ページサイズは32768.
+            ,"IFEXISTS": "FALSE"                // ファイルが存在しない場合はファイル作成.
+            ,"AUTOCOMMIT": "FALSE"              // 通常コミットモード.
+            ,"CACHE_TYPE": "TQ"                 // scan-resistantキャッシュタイプ"TQ"(two queue).
+            ,"LOG": 0                           // ログは必要なし
+            ,"UNDO_LOG": 0
         }
     }
 }
+
+

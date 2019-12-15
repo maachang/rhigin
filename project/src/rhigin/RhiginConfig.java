@@ -13,6 +13,7 @@ import rhigin.scripts.Json;
 import rhigin.scripts.function.ToStringFunction;
 import rhigin.util.BlankScriptable;
 import rhigin.util.ConvertGet;
+import rhigin.util.Converter;
 import rhigin.util.FileUtil;
 import rhigin.util.OList;
 import rhigin.util.Read;
@@ -55,7 +56,8 @@ public class RhiginConfig implements BlankScriptable {
 				for (int i = 0; i < len; i++) {
 					name = dir + list[i];
 					if (FileUtil.isFile(name)) {
-						v = (Map) Json.decode(FileUtil.getFileString(name, CONF_CHARSET));
+						v = (Map) Json.decode(Converter.cutComment(
+							FileUtil.getFileString(name, CONF_CHARSET)));
 						ret.put(cutExtention(list[i]), new Read.Maps(v));
 						v = null;
 					}

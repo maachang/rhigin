@@ -30,8 +30,7 @@ public final class Json {
 	/**
 	 * JSON変換.
 	 * 
-	 * @param target
-	 *            対象のターゲットオブジェクトを設定します.
+	 * @param target 対象のターゲットオブジェクトを設定します.
 	 * @return String 変換されたJSON情報が返されます.
 	 */
 	public static final String encode(Object target) {
@@ -43,8 +42,7 @@ public final class Json {
 	/**
 	 * JSON形式から、オブジェクト変換2.
 	 * 
-	 * @param json
-	 *            対象のJSON情報を設定します.
+	 * @param json 対象のJSON情報を設定します.
 	 * @return Object 変換されたJSON情報が返されます.
 	 */
 	public static final Object decode(String json) {
@@ -109,7 +107,7 @@ public final class Json {
 			}
 		} else if (target instanceof IdScriptableObject) {
 			final java.util.Date d = getJSDate((IdScriptableObject) target);
-			if(d == null) {
+			if (d == null) {
 				buf.append("null");
 			} else {
 				buf.append("\"").append(dateToString(d)).append("\"");
@@ -412,7 +410,7 @@ public final class Json {
 	protected static final java.util.Date stringToDate(String s) {
 		return DateConvert.stringToDate(s);
 	}
-	
+
 	/** JSDateオブジェクトの場合は、java.util.Dateに変換. **/
 	protected static final java.util.Date getJSDate(IdScriptableObject io) {
 		if ("Date".equals(io.getClassName())) {

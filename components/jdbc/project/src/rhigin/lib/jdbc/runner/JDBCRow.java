@@ -53,12 +53,14 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 	 * クローズ.
 	 */
 	public void close() {
-		try {
-			rs.close();
-		} catch(Exception e) {}
-		try {
-			stmt.close();
-		} catch(Exception e) {}
+		if(rs != null) {
+			try {
+				rs.close();
+			} catch(Exception e) {}
+			try {
+				stmt.close();
+			} catch(Exception e) {}
+		}
 		conn = null;
 		rs = null;
 		stmt = null;
@@ -70,7 +72,13 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 	 * @return boolean
 	 */
 	public boolean isClose() {
-		return conn == null || conn.closeFlag || rs == null;
+		if(rs == null) {
+			return true;
+		} else if(conn.isClose()) {
+			close();
+			return true;
+		}
+		return false;
 	}
 	
 	// チェック処理.
@@ -85,11 +93,9 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 		check();
 		if(rs == null) {
 			return false;
-		} else if(row == null) {
-			if(!getRow()) {
-				close();
-				return false;
-			}
+		} else if(row == null && !_row()) {
+			close();
+			return false;
 		}
 		return true;
 	}
@@ -97,13 +103,11 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 	@Override
 	public Map<String, Object> next() {
 		check();
-		if(rs == null || (row == null && !getRow())) {
-			if(!isClose()) {
-				close();
-			}
+		if(rs == null || (row == null && !_row())) {
+			close();
 			throw new NoSuchElementException();
 		}
-		Map<String, Object> ret = row;
+		final Map<String, Object> ret = row;
 		row = null;
 		return ret;
 	}
@@ -125,7 +129,7 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 	public List<Map<String, Object>> getRows(int max) {
 		check();
 		max = max <= 0 ? 0 : max;
-		List<Map<String, Object>> ret = new ObjectList<Map<String, Object>>();
+		final List<Map<String, Object>> ret = new ObjectList<Map<String, Object>>();
 		while(hasNext()) {
 			if(max != 0 && ret.size() >= max) {
 				break;
@@ -140,6 +144,7 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 	 * 文字列変換.
 	 * @return String
 	 */
+	@Override
 	public String toString() {
 		return JsonOut.toString(this);
 	}
@@ -148,7 +153,7 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 	private ArrayMap row = null;
 	
 	// 1行の情報を取得.
-	private boolean getRow() {
+	private boolean _row() {
 		try {
 			if(rs.next()) {
 				Object[] n;

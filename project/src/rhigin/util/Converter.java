@@ -1683,4 +1683,88 @@ public final class Converter {
 			tmp = null;
 		}
 	}
+	
+	/**
+	 * コメント除去.
+	 * @param sql
+	 * @return
+	 */
+	public static final String cutComment(String sql) {
+		if (sql == null || sql.length() <= 0) {
+			return "";
+		}
+		StringBuilder buf = new StringBuilder();
+		int len = sql.length();
+		int cote = -1;
+		int commentType = -1;
+		int bef = -1;
+		char c, c2;
+		for (int i = 0; i < len; i++) {
+			if (i != 0) {
+				bef = sql.charAt(i - 1);
+			}
+			c = sql.charAt(i);
+			// コメント内の処理.
+			if (commentType != -1) {
+				switch (commentType) {
+				case 1: // １行コメント.
+					if (c == '\n') {
+						buf.append(c);
+						commentType = -1;
+					}
+					break;
+				case 2: // 複数行コメント.
+					if (c == '\n') {
+						buf.append(c);
+					} else if (len > i + 1 && c == '*' && sql.charAt(i + 1) == '/') {
+						i++;
+						commentType = -1;
+					}
+					break;
+				}
+				continue;
+			}
+			// シングル／ダブルコーテーション内の処理.
+			if (cote != -1) {
+				if (c == cote && (char) bef != '\\') {
+					cote = -1;
+				}
+				buf.append(c);
+				continue;
+			}
+			// コメント(// or /* ... */).
+			if (c == '/') {
+				if (len <= i + 1) {
+					buf.append(c);
+					continue;
+				}
+				c2 = sql.charAt(i + 1);
+				if (c2 == '*') {
+					commentType = 2;
+					continue;
+				} else if (c2 == '/') {
+					commentType = 1;
+					continue;
+				}
+			}
+			// コメント(--)
+			else if (c == '-') {
+				if (len <= i + 1) {
+					buf.append(c);
+					continue;
+				}
+				c2 = sql.charAt(i + 1);
+				if (c2 == '-') {
+					commentType = 1;
+					continue;
+				}
+			}
+			// コーテーション開始.
+			else if ((c == '\'' || c == '\"') && (char) bef != '\\') {
+				cote = (int) (c & 0x0000ffff);
+			}
+			buf.append(c);
+		}
+		return buf.toString();
+	}
 }

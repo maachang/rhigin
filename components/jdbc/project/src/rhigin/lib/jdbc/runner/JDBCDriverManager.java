@@ -48,6 +48,7 @@ public final class JDBCDriverManager {
 			Connection ret;
 			Properties p = new java.util.Properties();
 			kind.setProperty(p);
+			p.put("block size", BLOCK_SIZE);
 
 			if (user == null || user.length() <= 0) {
 				p.put("user", "");
