@@ -18,4 +18,8 @@
  *
  * Since this js is executed only once at startup, it is also used for 
  * initialization processing.
+ *
+ * <Example>
+ * var jdbc = require("@rhigin/lib/JDBC");
+ * jdbc.startup();
  */

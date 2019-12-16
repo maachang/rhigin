@@ -16,5 +16,10 @@
  * ＜例＞
  * endCall("endScript/endCall.js");
  * 
- * このjsは起動時に１度だけ実行されるので、初期化処理を行う場合にも利用されます.
+ * このjsは起動時に１度だけ実行されるので、初期化処理を行う場合にも利用します.
+ * 
+ * ＜例＞
+ * var jdbc = require("@rhigin/lib/JDBC");
+ * jdbc.startup();
+ *
  */

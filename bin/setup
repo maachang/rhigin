@@ -5,8 +5,6 @@ chmod 755 rdown
 chmod 755 rhigin
 chmod 755 rid
 chmod 755 rproj
+chmod 755 rlib
 chmod 755 sub/
 chmod 755 sub/classpath.sh
-
-rm -Rf ./set_mod
-

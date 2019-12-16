@@ -32,7 +32,7 @@ public class ExecuteJsByEndScriptCall implements RhiginEndScriptCall {
 	public void call(RhiginContext context, CompileCache cache) {
 		try {
 			ExecuteScript.execute(context,
-					cache.get(name, ScriptConstants.HEADER, ScriptConstants.FOOTER).getScript());
+				cache.get(name, ScriptConstants.HEADER, ScriptConstants.FOOTER).getScript());
 		} catch(RhiginException re) {
 			throw re;
 		} catch(Exception e) {

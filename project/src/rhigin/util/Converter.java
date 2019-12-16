@@ -1759,6 +1759,15 @@ public final class Converter {
 					continue;
 				}
 			}
+			// コメント(#)
+			else if (c == '#') {
+				if (len <= i + 1) {
+					buf.append(c);
+					continue;
+				}
+				commentType = 1;
+				continue;
+			}
 			// コーテーション開始.
 			else if ((c == '\'' || c == '\"') && (char) bef != '\\') {
 				cote = (int) (c & 0x0000ffff);

@@ -4,12 +4,14 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
 import rhigin.util.BlankScriptable;
+import rhigin.util.FixedSearchArray;
 
 /**
  * RhiginObject. Object.method処理を実装する時に利用します.
  */
 public class RhiginObject implements BlankScriptable {
-	protected Object[] list;
+	protected FixedSearchArray<String> searchList;
+	protected RhiginFunction[] list;
 	protected String name;
 
 	/**
@@ -18,49 +20,40 @@ public class RhiginObject implements BlankScriptable {
 	 * @param name
 	 *            オブジェクト名を設定します.
 	 * @param list
-	 *            オブジェクトで有効になるFunctionをAbstractFunction配列で設定します.
+	 *            オブジェクトで有効になるRhiginFunction群で設定します.
 	 */
-	public RhiginObject(String name, RhiginFunction[] list) {
+	public RhiginObject(String name, RhiginFunction... list) {
 		int cnt = 0;
 		final int len = list.length;
-		final int listLen = len << 1;
-		final Object[] values = new Object[listLen];
+		final FixedSearchArray<String> searchList = new FixedSearchArray<String>(len);
 		for (int i = 0; i < len; i++) {
-			values[cnt++] = list[i].getName();
-			values[cnt++] = list[i];
+			searchList.add(list[i].getName(), i);
 		}
-		this.list = values;
+		this.list = list;
+		this.searchList = searchList;
 		this.name = name;
 	}
 
 	@Override
 	public Object get(String k, Scriptable s) {
-		final int len = list.length;
-		for (int i = 0; i < len; i += 2) {
-			if (list[i].equals(k)) {
-				return list[i + 1];
-			}
+		int no = searchList.search(k);
+		if(no != -1) {
+			return list[no];
 		}
 		return Undefined.instance;
 	}
 
 	@Override
 	public boolean has(String k, Scriptable s) {
-		final int len = list.length;
-		for (int i = 0; i < len; i += 2) {
-			if (list[i].equals(k)) {
-				return true;
-			}
-		}
-		return false;
+		return  searchList.search(k) != -1;
 	}
 
 	@Override
 	public Object[] getIds() {
 		final int len = list.length;
-		Object[] ret = new Object[len >> 1];
-		for (int i = 0, j = 0; i < len; i += 2, j++) {
-			ret[j] = list[i];
+		Object[] ret = new Object[len];
+		for (int i = 0; i < len; i ++) {
+			ret[i] = list[i].getName();
 		}
 		return ret;
 	}
@@ -79,4 +72,4 @@ public class RhiginObject implements BlankScriptable {
 	public String toString() {
 		return "[" + name + "]";
 	}
-}
+ }

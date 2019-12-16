@@ -6,7 +6,7 @@
         "name" :            "h2db"
         ,"driver":           "org.h2.Driver"    // JDBCドライバーパッケージ＋クラス名を設定します.
         // 接続先URL、データベース名など.
-        ,"url":              "jdbc:h2:./h2db"
+        ,"url":              "jdbc:h2:./h2db/h2db"
         ,"user":             ""                 // 接続先ユーザ名.
         ,"password":         ""                 // 接続先パスワード.
         ,"readOnly":         false              // リードオンリのみの接続ならtrue.
@@ -21,13 +21,13 @@
         {
         }
         ,"urlType":          false              // URLドライバパラメータ区切りタイプ.
-                                                // [true] url + "?" + parmas + "&" ...
-                                                // [false] url + ";" + params + ";" ...
+                                                // [true] url + "?" + urlParams + "&" ...
+                                                // [false] url + ";" + urlParams + ";" ...
         // URLの後にドライバに追加するパラメータ.
         ,"urlParams":
         {
-            //"MVCC": "TRUE"                      // MVCCモード(多版型同時実行制御)
-            "LOCK_MODE": 0                      // 低レベルロック(READ_UNCOMMITTED).
+            "MVCC": "TRUE"                      // MVCCモード(多版型同時実行制御)
+            ,"LOCK_MODE": 0                     // 低レベルロック(READ_UNCOMMITTED).
             ,"LOCK_TIMEOUT": 120000             // ビジータイムアウト(120秒).
             ,"DB_CLOSE_ON_EXIT": "TRUE"         // VM終了時にDBクローズ.
             ,"CACHE_SIZE": 131072               // キャッシュは12k.
@@ -37,6 +37,8 @@
             ,"CACHE_TYPE": "TQ"                 // scan-resistantキャッシュタイプ"TQ"(two queue).
             ,"LOG": 0                           // ログは必要なし
             ,"UNDO_LOG": 0
+            ,"AUTO_SERVER": "TRUE"
+            ,"TRACE_LEVEL_FILE": 0
         }
     }
 }

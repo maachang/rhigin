@@ -1,5 +1,5 @@
 .DS_Store
 
-mongo-*.jar
+jdbc-*.jar
 
 project/classes

@@ -27,9 +27,10 @@ import rhigin.scripts.RhiginObject;
 import rhigin.util.ArrayMap;
 import rhigin.util.Converter;
 import rhigin.util.FixedArray;
+import rhigin.util.Flag;
 
 /**
- * [js]JDBCオブジェクト.
+ * [js]JDBCコンポーネント.
  * 
  * js 上で、以下のようにして呼び出します.
  * 
@@ -37,8 +38,14 @@ import rhigin.util.FixedArray;
  */
 public class JDBC implements JavaRequire {
 	
+	/** コンポーネント名. **/
+	public static final String NAME = "JDBC";
+	
 	/** コンポーネントバージョン. **/
 	public static final String VERSION = "0.0.1";
+	
+	/** デフォルトのJDBCコンフィグ名. **/
+	private static final String DEF_JDBC_JSON_CONFIG_NAME = "jdbc";
 	
 	/**
 	 * コンストラクタ.
@@ -60,7 +67,7 @@ public class JDBC implements JavaRequire {
 	
 	// jdbcコアオブジェクト.
 	protected static final class JdbcCoreObject {
-		private volatile boolean isStartup = false;
+		private final Flag isStartup = new Flag(false);
 		private final AtomicPoolingManager man = new AtomicPoolingManager();
 		private final AtomicPoolingMonitor mon = new AtomicPoolingMonitor();
 		private final JDBCCloseable closeable = new JDBCCloseable();
@@ -80,7 +87,7 @@ public class JDBC implements JavaRequire {
 					conf = new ArrayMap();
 				}
 			}
-			if(!isStartup) {
+			if(!isStartup.get()) {
 				Iterator<String> itr = conf.keySet().iterator();
 				AtomicPooling p;
 				while(itr.hasNext()) {
@@ -88,7 +95,7 @@ public class JDBC implements JavaRequire {
 					man.register(p); p = null;
 				}
 				mon.startThread();
-				isStartup = true;
+				isStartup.set(true);
 			}
 			return closeable;
 		}
@@ -165,7 +172,7 @@ public class JDBC implements JavaRequire {
 	private static final RhiginObject JDBC_INSTANCE = new RhiginObject("JDBC", new RhiginFunction[] {
 		new JDBCFunctions(0), new JDBCFunctions(1), new JDBCFunctions(2), new JDBCFunctions(3),
 		new JDBCFunctions(4), new JDBCFunctions(5), new JDBCFunctions(6), new JDBCFunctions(7),
-		new JDBCFunctions(8)
+		new JDBCFunctions(8), new JDBCFunctions(9)
 	});
 	
 	// jdbcオブジェクトのメソッド群. 
@@ -184,42 +191,48 @@ public class JDBC implements JavaRequire {
 					{
 						return VERSION;
 					}
-				case 1: // startup.
+				case 1: // name.
+					{
+						return NAME;
+					}
+				case 2: // startup.
 					{
 						// スタートアップ登録されていない場合のみ実行.
-						if(!CORE.isStartup) {
+						if(!CORE.isStartup.get()) {
 							final RhiginConfig conf = ExecuteScript.getConfig();
-							String name = "jdbc";
+							String jdbcJsonConfigName = DEF_JDBC_JSON_CONFIG_NAME;
 							if(args.length > 0) {
 								// JDBC読み込み対象のコンフィグ情報名が設定されている場合.
-								name = "" + args[0];
-								Object o = conf.get(name);
+								jdbcJsonConfigName = "" + args[0];
+								Object o = conf.get(jdbcJsonConfigName);
 								if(o == null || !(o instanceof Map)) {
 									argsException("JDBC");
 								}
 							}
 							// スタートアップ実行をして、スクリプト実行後の終了処理時にJDBC関連のクローズ処理実行を登録.
-							final RhiginEndScriptCall e = CORE.startup(conf.get(name));
+							final RhiginEndScriptCall e = CORE.startup(conf.get(jdbcJsonConfigName));
 							ExecuteScript.addEndScripts(e);
 							return true;
 						}
 						return false;
 					}
-				case 2: // isStartup.
+				case 3: // isStartup.
 					{
-						return CORE.isStartup;
+						return CORE.isStartup.get();
 					}
-				case 3: // abort.
+				case 4: // abort.
 					{
-						if(CORE.isStartup) {
+						if(CORE.isStartup.get()) {
 							// closeableを呼び出す.
 							CORE.closeable.call(null, null);
+						} else {
+							throw noStartupException();
 						}
 					}
 					break;
-				case 4: // connect.
+				case 5: // connect.
 					{
-						if(CORE.isStartup) {
+						if(CORE.isStartup.get()) {
 							if(args.length > 0) {
 								if(args.length == 1) {
 									// プーリングコネクションから取得.
@@ -230,43 +243,48 @@ public class JDBC implements JavaRequire {
 								}
 							}
 							argsException("JDBC");
+						} else {
+							throw noStartupException();
 						}
 					}
-					break;
-				case 5: // kind.
+				case 6: // kind.
 					{
-						if(CORE.isStartup) {
+						if(CORE.isStartup.get()) {
 							if(args.length > 0) {
 								return CORE.getKind("" + args[0]).getMap();
 							}
 							argsException("JDBC");
+						} else {
+							throw noStartupException();
 						}
 					}
-					break;
-				case 6: // isRegister.
+				case 7: // isRegister.
 					{
-						if(CORE.isStartup) {
+						if(CORE.isStartup.get()) {
 							if(args.length > 0) {
 								return CORE.isRegister("" + args[0]);
 							}
 							argsException("JDBC");
+						} else {
+							throw noStartupException();
 						}
 					}
-					break;
-				case 7: // length.
+				case 8: // length.
 					{
-						if(CORE.isStartup) {
+						if(CORE.isStartup.get()) {
 							return CORE.size();
+						} else {
+							throw noStartupException();
 						}
 					}
-					break;
-				case 8: // names.
+				case 9: // names.
 					{
-						if(CORE.isStartup) {
+						if(CORE.isStartup.get()) {
 							return CORE.names();
+						} else {
+							throw noStartupException();
 						}
 					}
-					break;
 				}
 				
 			} catch (RhiginException re) {
@@ -281,18 +299,22 @@ public class JDBC implements JavaRequire {
 		public final String getName() {
 			switch (type) {
 			case 0: return "version";
-			case 1: return "startup";
-			case 2: return "isStartup";
-			case 3: return "abort";
-			case 4: return "connect";
-			case 5: return "kind";
-			case 6: return "isRegister";
-			case 7: return "length";
-			case 8: return "names";
+			case 1: return "name";
+			case 2: return "startup";
+			case 3: return "isStartup";
+			case 4: return "abort";
+			case 5: return "connect";
+			case 6: return "kind";
+			case 7: return "isRegister";
+			case 8: return "length";
+			case 9: return "names";
 			}
 			return "unknown";
 		}
 		
+		private static final JDBCException noStartupException() {
+			throw new JDBCException("Initialization processing ([JDBC].startup();) has not been performed.");
+		}
 	};
 	
 	// JDBCコネクションオブジェクトを生成.
@@ -449,7 +471,7 @@ public class JDBC implements JavaRequire {
 			case 8: return "isClose";
 			case 9: return "kind";
 			case 10: return "isAutoCommit";
-			case 11: return "getAutoCommit";
+			case 11: return "setAutoCommit";
 			case 12: return "getFetchSize";
 			case 13: return "setFetchSize";
 			case 14: return "clearBatch";

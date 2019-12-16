@@ -1,0 +1,52 @@
+#!/bin/sh
+################################################################################
+# rhiginコンポーネントをプロジェクトに取り込むための処理.
+################################################################################
+COMPONENT_NAME=${1}
+
+# コンポーネント名が存在しない場合.
+if [ "${COMPONENT_NAME}" = "" ]; then
+    echo "The component name must be set."
+    echo ""
+    echo "$ rlib [component]"
+    exit
+fi
+
+# 現在のパスを保持.
+NOW_PATH=`pwd`
+
+# コンポーネントのパスに移動.
+cd ${RHIGIN_HOME}/../components/${COMPONENT_NAME}
+if [ $? != 0 ]; then
+    cd ${NOW_PATH}
+    echo "The specified component does not exist: ${COMPONENT_NAME}"
+    exit
+fi
+
+# antでコンポーネントをコンパイル.
+ant
+if [ $? != 0 ]; then
+    cd ${NOW_PATH}
+    echo "The specified component does not exist: ${COMPONENT_NAME}"
+    exit
+fi
+
+# コンポーネントを入れたプロジェクト側のフォルダを再作成.
+cd ${NOW_PATH}/jar
+rm -Rf ${COMPONENT_NAME}
+mkdir ${COMPONENT_NAME}
+
+# コンポーネントのフォルダに戻る.
+cd ${RHIGIN_HOME}/../components/${COMPONENT_NAME}
+
+# 作られたコンパイルをコピー.
+cp ${COMPONENT_NAME}-*.jar "${NOW_PATH}/jar/${COMPONENT_NAME}"
+
+# コンポーネントで必要なライブラリをコピー.
+LIB_FILES=project/lib/*.jar
+if [ -e $LIB_FILES ]; then
+    cp ${LIB_FILES} "${NOW_PATH}/jar/${COMPONENT_NAME}"
+fi
+
+# 元のパスに移動.
+cd ${NOW_PATH}
