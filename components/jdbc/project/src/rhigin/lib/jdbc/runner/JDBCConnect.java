@@ -17,6 +17,7 @@ public class JDBCConnect {
 	protected boolean closeFlag = false;
 	protected JDBCCloseable closeable = null;
 	protected Connection conn = null;
+	protected JDBCKind kind = null;
 	private JDBCBatch batch = null;
 	
 	// 今回のコネクション専用のフェッチサイズ.
@@ -35,6 +36,7 @@ public class JDBCConnect {
 	 */
 	public static final JDBCConnect create(JDBCCloseable c, Connection ac) {
 		JDBCConnect ret = new JDBCConnect();
+		ret.kind = (c instanceof AtomicPoolConnection) ? ((AtomicPoolConnection)c).getKind() : null;
 		ret.batch = new JDBCBatch(ret);
 		ret.closeable = c;
 		ret.conn = ac;
@@ -168,7 +170,7 @@ public class JDBCConnect {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			stmt = conn.prepareStatement(sql,
+			stmt = conn.prepareStatement(JDBCUtils.sql(kind, sql),
 				ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 			stmt.setMaxRows(limit > 0 ? limit : 0);
 			int fsize = fetchSize > 0 ? fetchSize : stmt.getFetchSize();
@@ -208,7 +210,7 @@ public class JDBCConnect {
 		check();
 		PreparedStatement stmt = null;
 		try {
-			stmt = conn.prepareStatement(sql, Statement.NO_GENERATED_KEYS);
+			stmt = conn.prepareStatement(JDBCUtils.sql(kind, sql), Statement.NO_GENERATED_KEYS);
 			JDBCUtils.preParams(stmt, stmt.getParameterMetaData(), args);
 			int ret = stmt.executeUpdate();
 			stmt.close(); stmt = null;
@@ -235,7 +237,7 @@ public class JDBCConnect {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			stmt = conn.prepareStatement(JDBCUtils.sql(kind, sql), Statement.RETURN_GENERATED_KEYS);
 			stmt.setMaxRows(1);
 			JDBCUtils.preParams(stmt, stmt.getParameterMetaData(), args);
 			stmt.executeUpdate();
@@ -379,6 +381,5 @@ public class JDBCConnect {
 		check();
 		return batch;
 	}
-
 }
 

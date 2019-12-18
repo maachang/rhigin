@@ -119,4 +119,30 @@ public class FixedSearchArray<K> {
 		}
 		return -1;
 	}
+	
+	/**
+	 * データ数を取得.
+	 * @return
+	 */
+	public int size() {
+		return keys.length;
+	}
+	
+	/**
+	 * 指定キーを取得.
+	 * @param no
+	 * @return
+	 */
+	public K get(int no) {
+		return keys[no].key;
+	}
+	
+	/**
+	 * 指定項番を取得.
+	 * @param no
+	 * @return
+	 */
+	public int getNo(int no) {
+		return keys[no].no;
+	}
 }

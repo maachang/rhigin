@@ -342,4 +342,30 @@ public final class JDBCUtils {
 		}
 		return buf.toString();
 	}
+	
+	/**
+	 * SQLを整形.
+	 * @param kind
+	 * @param sql
+	 * @return
+	 */
+	public static final String sql(final JDBCKind kind, String sql) {
+		if(kind == null) {
+			return sql;
+		} else if(kind.isNotSemicolon()) {
+			// 終端のセミコロンがあるとエラーになる場合.
+			char c;
+			for(int i = sql.length()-1 ; i >= 0 ; i --) {
+				c = sql.charAt(i);
+				if(c == ';') {
+					sql = sql.substring(0, i);
+					break;
+				} else if(c == ' ' || c == '\t' || c == '\r' || c == '\n') {
+					continue;
+				}
+				break;
+			}
+		}
+		return sql;
+	}
 }

@@ -57,7 +57,7 @@
            debug="${debug}"
            deprecation="${deprecation}"
            optimize="${optimize}"
-           nowarn="${nowarn}"   
+           nowarn="${nowarn}"
     >
       <classpath refid="path.lib" />
     </javac>
@@ -85,7 +85,7 @@
   </target>
 
   <!-- ===================================================================== -->
-  <!-- create archive zip                                                       -->
+  <!-- create archive zip                                                    -->
   <!-- ===================================================================== -->
 	<target name="archive">
 		<zip destfile="${project.name}-${version}.zip" 

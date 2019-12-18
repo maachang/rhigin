@@ -3,9 +3,12 @@ package rhigin.util;
 import java.util.List;
 
 /**
- * 実行引数の取得処理. たとえば args = ["-a", "hoge"] のような実行引数が設定されていた場合, Args argsObject =
- * new Args(args); String value = argsObject.get("-a"); value.equals("hoge") ==
- * true
+ * 実行引数の取得処理. たとえば args = ["-a", "hoge"] のような実行引数が設定されていた場合,
+ * 
+ * String[] args = ...;
+ * Args argsObject = new Args(args);
+ * String value = argsObject.get("-a");
+ * value.equals("hoge") == true;
  * 
  * のような形で取得が出来ます.
  */

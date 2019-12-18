@@ -31,6 +31,10 @@ public class JDBCKind {
 	private Integer poolingSize = null;
 	private Integer poolingTimeout = null;
 	
+	// oracle の jdbc接続など、末尾に；を付けるとエラーになるものは[true].
+	// 現在oracle専門.
+	private boolean notSemicolon = false;
+	
 	/**
 	 * コンストラクタ.
 	 */
@@ -92,6 +96,7 @@ public class JDBCKind {
 				}
 			}
 		}
+		ret.notSemicolon = checkNotSemicolon(ret.url);
 		ret.check();
 		return ret;
 	}
@@ -145,6 +150,7 @@ public class JDBCKind {
 				}
 			}
 		}
+		ret.notSemicolon = checkNotSemicolon(ret.url);
 		ret.check();
 		return ret;
 	}
@@ -161,7 +167,8 @@ public class JDBCKind {
 		ret.driver = driver;
 		ret.url = url;
 		ret.params = new ArrayMap();
-		
+		ret.notSemicolon = checkNotSemicolon(ret.url);
+
 		ret.check();
 		return ret;
 	}
@@ -224,6 +231,16 @@ public class JDBCKind {
 			}
 		}
 		return null;
+	}
+	
+	// SQLの末端に「；」セミコロンを付けるとNGかチェック.
+	private static final boolean checkNotSemicolon(String url) {
+		final String u = url.toLowerCase();
+		if(u.startsWith("jdbc:oracle") ||
+			u.startsWith("jdbc:derby")) {
+			return true;
+		}
+		return false;
 	}
 	
 	// 設定チェック.
@@ -387,6 +404,14 @@ public class JDBCKind {
 	}
 	
 	/**
+	 * SQLの末端にセミコロンを付与させない場合は「true」が返却されます.
+	 * @return
+	 */
+	public boolean isNotSemicolon() {
+		return notSemicolon;
+	}
+	
+	/**
 	 * Kind設定内容をMapで取得.
 	 * @return
 	 */
@@ -395,6 +420,7 @@ public class JDBCKind {
 			"name", name, "driver", driver, "url", url, "user", user,
 			"password", password, "readOnly", readOnly, "urlParams", urlParams,
 			"busyTimeout", busyTimeout, "transactionLevel", transactionLevel, "fetchSize", fetchSize,
-			"params", new ArrayMap(params), "poolingSize", poolingSize, "poolingTimeout", poolingTimeout);
+			"params", new ArrayMap(params), "poolingSize", poolingSize, "poolingTimeout", poolingTimeout,
+			"notSemicolon", notSemicolon);
 	}
 }

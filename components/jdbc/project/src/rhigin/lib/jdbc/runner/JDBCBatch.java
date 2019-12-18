@@ -96,6 +96,7 @@ public class JDBCBatch {
 		jcon.check();
 		PreparedStatement stmt = null;
 		try {
+			sql = JDBCUtils.sql(jcon.kind, sql);
 			if(psCache == null || (stmt = psCache.get(sql)) == null) {
 				stmt = jcon.conn.prepareStatement(sql, Statement.NO_GENERATED_KEYS);
 				JDBCUtils.preParams(stmt, stmt.getParameterMetaData(), args);

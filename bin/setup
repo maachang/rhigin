@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 chmod 755 rbatch
 chmod 755 rcons
 chmod 755 rdown

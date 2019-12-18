@@ -1,0 +1,40 @@
+#!/bin/bash
+################################################################################
+# rlibでコマンドでの対象コンポーネントの独自操作を行います.
+################################################################################
+COMPONENT_PATH=${1}
+TARGET_PROJECT_PATH=${2}
+ATHER_ARGS=${3}
+
+# ターゲットプロジェクトのパスが設定されていない場合は処理しない.
+if [ "${TARGET_PROJECT_PATH}" = "" ]; then
+    exit 1
+fi
+
+# ather なパラメータが設定されている場合は、exsample配下の環境をセット.
+if [ "${ATHER_ARGS}" != "" ]; then
+    cd exsample/${ATHER_ARGS}
+    if [ $? != 0 ]; then
+        cd ${TARGET_PROJECT_PATH}
+        echo "JDBC driver sample name does not exist: ${ATHER_ARGS}"
+        exit 1
+    fi
+    # jdbcドライバの格納先フォルダを生成.
+    cd ${TARGET_PROJECT_PATH}/jar
+    rm -Rf jdbc_driver
+    mkdir jdbc_driver
+
+    # コピー処理.
+    cd ${COMPONENT_PATH}/exsample/${ATHER_ARGS}
+    cp jar/*.jar ${TARGET_PROJECT_PATH}/jar/jdbc_driver
+    cp conf/*.json ${TARGET_PROJECT_PATH}/conf
+    
+# ather なパラメータが設定されていない場合は、project/confのjsonファイルをセット.
+else
+    cp project/conf/*.json ${TARGET_PROJECT_PATH}/conf
+fi
+
+# binフォルダ配下の内容をコピー.
+cp -a bin/* ${TARGET_PROJECT_PATH}
+
+exit 0

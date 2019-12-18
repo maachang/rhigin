@@ -60,7 +60,11 @@ public class RhiginBatch {
 			final Script script = ExecuteScript.compile(r, args[0], ScriptConstants.HEADER, ScriptConstants.FOOTER, 0);
 			r.close();
 			r = null;
-			ExecuteScript.execute(new RhiginContext(), script);
+			try {
+				ExecuteScript.execute(new RhiginContext(), script);
+			} finally {
+				ExecuteScript.callEndScripts(cache);
+			}
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -43,19 +43,36 @@ public class RhiginConsole {
 		System.out.println("" + RhiginConstants.NAME + " console version (" + RhiginConstants.VERSION + ")");
 		System.out.println("");
 		try {
+			Object o;
 			String cmd;
 			RhiginContext context = new RhiginContext();
 			while (true) {
 				try {
 					if ((cmd = console.readLine("rhigin> ")) == null) {
+						// null返却の場合は、ctrl+cの可能性があるので、
+						// 終了処理をおこなってコンソール処理終了.
+						ExecuteScript.callEndScripts(cache);
+						System.out.println("");
 						return;
 					} else if ((cmd = cmd.trim()).length() == 0) {
 						continue;
+					} else if ("?".equals(cmd) || "help".equals(cmd)) {
+						System.out.println("exit [quit]   Exit the console.");
+						System.out.println("end  [close]  Terminate javascript processing.");
+						System.out.println("");
+						continue;
 					} else if ("exit".equals(cmd) || "quit".equals(cmd)) {
+						ExecuteScript.callEndScripts(cache);
 						System.out.println("");
 						return;
+					} else if ("end".equals(cmd) || "close".equals(cmd)) {
+						ExecuteScript.callEndScripts(cache);
+						context = new RhiginContext();
+						System.out.println("");
+						continue;
 					}
-					Object o = ExecuteScript.execute(context, cmd);
+					o = ExecuteScript.execute(context, cmd);
+					cmd = null;
 					if(o == null) {
 						System.out.println("null");
 					} else if (o instanceof Undefined) {
@@ -79,6 +96,9 @@ public class RhiginConsole {
 					}
 				} catch (Throwable e) {
 					e.printStackTrace();
+				} finally {
+					o = null;
+					cmd = null;
 				}
 			}
 		} finally {
