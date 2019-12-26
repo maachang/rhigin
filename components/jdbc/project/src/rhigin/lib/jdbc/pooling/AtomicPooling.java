@@ -116,11 +116,6 @@ public class AtomicPooling implements DataSource {
 		monitor.setPooling(this);
 	}
 
-	/** デストラクタ. **/
-	protected void finalize() throws Exception {
-		destroy();
-	}
-
 	/**
 	 * オブジェクト破棄.
 	 */
@@ -206,7 +201,7 @@ public class AtomicPooling implements DataSource {
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			try {
 				String name = method.getName();
-				if ("finalize".equals(name) || "destroy".equals(name)) {
+				if ("destroy".equals(name)) {
 					poolCloseFlag.set(true); // 論理close.
 					try {
 						src.close();

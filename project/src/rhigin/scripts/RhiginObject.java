@@ -23,7 +23,6 @@ public class RhiginObject implements BlankScriptable {
 	 *            オブジェクトで有効になるRhiginFunction群で設定します.
 	 */
 	public RhiginObject(String name, RhiginFunction... list) {
-		int cnt = 0;
 		final int len = list.length;
 		final FixedSearchArray<String> searchList = new FixedSearchArray<String>(len);
 		for (int i = 0; i < len; i++) {

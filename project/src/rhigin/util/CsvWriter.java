@@ -60,10 +60,6 @@ public class CsvWriter implements Closeable, AutoCloseable {
 		this.cutCode = c;
 	}
 
-	protected void finalize() throws Exception {
-		close();
-	}
-
 	/**
 	 * オブジェクトクローズ.
 	 * 

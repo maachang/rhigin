@@ -55,6 +55,18 @@ public class RhiginStartup {
 	 * @return RhiginConfig
 	 */
 	public static final RhiginConfig initLogFactory(boolean server, String[] args) {
+		return initLogFactory(server, false, args);
+	}
+	
+	/**
+	 * ログファクトリの初期化.
+	 * 
+	 * @param server
+	 * @param noScript
+	 * @param args
+	 * @return RhiginConfig
+	 */
+	public static final RhiginConfig initLogFactory(boolean server, boolean noScript, String[] args) {
 		// Args管理オブジェクトにセット.
 		Args.set(args);
 		RhiginConfig config = null;
@@ -63,7 +75,9 @@ public class RhiginStartup {
 			Http.setWebServerMode(server);
 
 			// function, objectの初期化.
-			initRhiginScriptFunctionObject();
+			if(!noScript) {
+				initRhiginScriptFunctionObject();
+			}
 
 			// 環境変数から、rhigin起動環境を取得.
 			String rhiginEnv = EnvCache.get(RhiginConstants.ENV_ENV);

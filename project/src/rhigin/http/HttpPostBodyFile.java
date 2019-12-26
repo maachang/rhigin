@@ -85,11 +85,6 @@ public class HttpPostBodyFile {
 		return buf.append(".body").toString();
 	}
 
-	@Override
-	protected void finalize() throws Exception {
-		close();
-	}
-
 	/**
 	 * 情報クリア.
 	 */

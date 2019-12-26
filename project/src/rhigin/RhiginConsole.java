@@ -25,7 +25,7 @@ public class RhiginConsole {
 	public static final void main(String[] args) throws Exception {
 		RhiginConfig conf = RhiginStartup.initLogFactory(false, args);
 		RhiginConsole o = new RhiginConsole();
-		o.console(conf, new ConsoleInKey());
+		o.console(conf, new ConsoleInKey(".rcons"));
 	}
 
 	public void console(RhiginConfig conf, ConsoleInKey console) throws Exception {
@@ -48,10 +48,9 @@ public class RhiginConsole {
 			RhiginContext context = new RhiginContext();
 			while (true) {
 				try {
-					if ((cmd = console.readLine("rhigin> ")) == null) {
+					if ((cmd = console.readLine(RhiginConstants.NAME + "> ")) == null) {
 						// null返却の場合は、ctrl+cの可能性があるので、
 						// 終了処理をおこなってコンソール処理終了.
-						ExecuteScript.callEndScripts(cache);
 						System.out.println("");
 						return;
 					} else if ((cmd = cmd.trim()).length() == 0) {
@@ -62,7 +61,6 @@ public class RhiginConsole {
 						System.out.println("");
 						continue;
 					} else if ("exit".equals(cmd) || "quit".equals(cmd)) {
-						ExecuteScript.callEndScripts(cache);
 						System.out.println("");
 						return;
 					} else if ("end".equals(cmd) || "close".equals(cmd)) {
@@ -102,6 +100,7 @@ public class RhiginConsole {
 				}
 			}
 		} finally {
+			ExecuteScript.callEndScripts(cache);
 			console.close();
 		}
 	}

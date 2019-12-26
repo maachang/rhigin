@@ -44,8 +44,7 @@ public final class Converter {
 	/**
 	 * 文字列内容が数値かチェック.
 	 * 
-	 * @param num
-	 *            対象のオブジェクトを設定します.
+	 * @param num 対象のオブジェクトを設定します.
 	 * @return boolean [true]の場合、文字列内は数値が格納されています.
 	 */
 	public static final boolean isNumeric(Object num) {
@@ -102,8 +101,7 @@ public final class Converter {
 	/**
 	 * 対象文字列内容が小数点かチェック.
 	 * 
-	 * @param n
-	 *            対象のオブジェクトを設定します.
+	 * @param n 対象のオブジェクトを設定します.
 	 * @return boolean [true]の場合は、数値内容です.
 	 */
 	public static final boolean isFloat(Object n) {
@@ -121,8 +119,7 @@ public final class Converter {
 	/**
 	 * Boolean変換.
 	 * 
-	 * @param n
-	 *            変換対象の条件を設定します.
+	 * @param n 変換対象の条件を設定します.
 	 * @return 変換された内容が返却されます.
 	 */
 	public static final Boolean convertBool(Object o) {
@@ -144,8 +141,7 @@ public final class Converter {
 	/**
 	 * Integer変換.
 	 * 
-	 * @param n
-	 *            変換対象の条件を設定します.
+	 * @param n 変換対象の条件を設定します.
 	 * @return 変換された内容が返却されます.
 	 */
 	public static final Integer convertInt(Object o) {
@@ -167,8 +163,7 @@ public final class Converter {
 	/**
 	 * Long変換.
 	 * 
-	 * @param n
-	 *            変換対象の条件を設定します.
+	 * @param n 変換対象の条件を設定します.
 	 * @return 変換された内容が返却されます.
 	 */
 	public static final Long convertLong(Object o) {
@@ -190,8 +185,7 @@ public final class Converter {
 	/**
 	 * Float変換.
 	 * 
-	 * @param n
-	 *            変換対象の条件を設定します.
+	 * @param n 変換対象の条件を設定します.
 	 * @return 変換された内容が返却されます.
 	 */
 	public static final Float convertFloat(final Object o) {
@@ -212,8 +206,7 @@ public final class Converter {
 	/**
 	 * Double変換.
 	 * 
-	 * @param n
-	 *            変換対象の条件を設定します.
+	 * @param n 変換対象の条件を設定します.
 	 * @return 変換された内容が返却されます.
 	 */
 	public static final Double convertDouble(Object o) {
@@ -235,8 +228,7 @@ public final class Converter {
 	/**
 	 * 文字列変換.
 	 * 
-	 * @param n
-	 *            変換対象の条件を設定します.
+	 * @param n 変換対象の条件を設定します.
 	 * @return 変換された内容が返却されます.
 	 */
 	public static final String convertString(Object o) {
@@ -262,8 +254,7 @@ public final class Converter {
 	/**
 	 * 日付変換.
 	 * 
-	 * @param n
-	 *            変換対象の条件を設定します.
+	 * @param n 変換対象の条件を設定します.
 	 * @return 変換された内容が返却されます.
 	 */
 	public static final java.sql.Date convertSqlDate(Object o) {
@@ -298,8 +289,7 @@ public final class Converter {
 	/**
 	 * 時間変換.
 	 * 
-	 * @param n
-	 *            変換対象の条件を設定します.
+	 * @param n 変換対象の条件を設定します.
 	 * @return 変換された内容が返却されます.
 	 */
 	public static final java.sql.Time convertSqlTime(Object o) {
@@ -324,8 +314,7 @@ public final class Converter {
 	/**
 	 * 日付時間変換.
 	 * 
-	 * @param n
-	 *            変換対象の条件を設定します.
+	 * @param n 変換対象の条件を設定します.
 	 * @return 変換された内容が返却されます.
 	 */
 	public static final java.sql.Timestamp convertSqlTimestamp(Object o) {
@@ -353,11 +342,9 @@ public final class Converter {
 	/**
 	 * 通常日付変換.
 	 * 
-	 * @param n
-	 *            変換対象の条件を設定します.
+	 * @param n 変換対象の条件を設定します.
 	 * @return 変換された内容が返却されます.
-	 * @exception Exception
-	 *                例外.
+	 * @exception Exception 例外.
 	 */
 	public static final java.util.Date convertDate(Object o) {
 		if (o == null) {
@@ -381,8 +368,7 @@ public final class Converter {
 	/**
 	 * 文字列から、Boolean型に変換.
 	 * 
-	 * @param s
-	 *            対象の文字列を設定します.
+	 * @param s 対象の文字列を設定します.
 	 * @return boolean Boolean型が返されます.
 	 */
 	public static final boolean parseBoolean(String s) {
@@ -419,8 +405,7 @@ public final class Converter {
 	/**
 	 * 文字列から、int型数値に変換.
 	 * 
-	 * @param num
-	 *            対象の文字列を設定します.
+	 * @param num 対象の文字列を設定します.
 	 * @return int int型で変換された数値が返されます.
 	 */
 	public static final int parseInt(final String num) {
@@ -466,8 +451,7 @@ public final class Converter {
 	/**
 	 * 文字列から、long型数値に変換.
 	 * 
-	 * @param num
-	 *            対象の文字列を設定します.
+	 * @param num 対象の文字列を設定します.
 	 * @return long long型で変換された数値が返されます.
 	 */
 	public static final long parseLong(final String num) {
@@ -514,8 +498,7 @@ public final class Converter {
 	/**
 	 * 文字列から、float型数値に変換.
 	 * 
-	 * @param num
-	 *            対象の文字列を設定します.
+	 * @param num 対象の文字列を設定します.
 	 * @return float float型で変換された数値が返されます.
 	 */
 	public static final float parseFloat(final String num) {
@@ -594,8 +577,7 @@ public final class Converter {
 	/**
 	 * 文字列から、double型数値に変換.
 	 * 
-	 * @param num
-	 *            対象の文字列を設定します.
+	 * @param num 対象の文字列を設定します.
 	 * @return double double型で変換された数値が返されます.
 	 */
 	public static final double parseDouble(final String num) {
@@ -674,12 +656,9 @@ public final class Converter {
 	/**
 	 * 文字情報の置き換え.
 	 * 
-	 * @param src
-	 *            置き換え元の文字列を設定します.
-	 * @param s
-	 *            置き換え文字条件を設定します.
-	 * @param d
-	 *            置き換え先の文字条件を設定します.
+	 * @param src 置き換え元の文字列を設定します.
+	 * @param s   置き換え文字条件を設定します.
+	 * @param d   置き換え先の文字条件を設定します.
 	 * @return String 文字列が返却されます.
 	 */
 	public static final String changeString(String src, String s, String d) {
@@ -689,16 +668,11 @@ public final class Converter {
 	/**
 	 * 文字情報の置き換え.
 	 * 
-	 * @param src
-	 *            置き換え元の文字列を設定します.
-	 * @param off
-	 *            置き換え元文字のオフセット値を設定します.
-	 * @param len
-	 *            置き換え元文字の長さを設定します.
-	 * @param s
-	 *            置き換え文字条件を設定します.
-	 * @param d
-	 *            置き換え先の文字条件を設定します.
+	 * @param src 置き換え元の文字列を設定します.
+	 * @param off 置き換え元文字のオフセット値を設定します.
+	 * @param len 置き換え元文字の長さを設定します.
+	 * @param s   置き換え文字条件を設定します.
+	 * @param d   置き換え先の文字条件を設定します.
 	 * @return String 文字列が返却されます.
 	 */
 	public static final String changeString(String src, int off, int len, String s, String d) {
@@ -728,8 +702,7 @@ public final class Converter {
 	/**
 	 * 対象文字列が存在するかチェック.
 	 * 
-	 * @param v
-	 *            対象の情報を設定します.
+	 * @param v 対象の情報を設定します.
 	 * @return boolean [true]の場合、文字列が存在します.
 	 */
 	@SuppressWarnings("rawtypes")
@@ -758,8 +731,7 @@ public final class Converter {
 	/**
 	 * 前後のスペース等を取り除く.
 	 * 
-	 * @param string
-	 *            対象の文字列を設定します.
+	 * @param string 対象の文字列を設定します.
 	 * @return String 文字列が返されます.
 	 */
 	public static final String trim(String string) {
@@ -800,13 +772,10 @@ public final class Converter {
 	/**
 	 * URLデコード.
 	 * 
-	 * @param info
-	 *            変換対象の条件を設定します.
-	 * @param charset
-	 *            対象のキャラクタセットを設定します.
+	 * @param info    変換対象の条件を設定します.
+	 * @param charset 対象のキャラクタセットを設定します.
 	 * @return 変換された情報が返されます.
-	 * @exception IOException
-	 *                例外.
+	 * @exception IOException 例外.
 	 */
 	public static final String urlDecode(String info, String charset) throws IOException {
 		int len;
@@ -839,13 +808,10 @@ public final class Converter {
 	/**
 	 * URLエンコード.
 	 * 
-	 * @param info
-	 *            変換対象の条件を設定します.
-	 * @param charset
-	 *            対象のキャラクタセットを設定します.
+	 * @param info    変換対象の条件を設定します.
+	 * @param charset 対象のキャラクタセットを設定します.
 	 * @return 変換された情報が返されます.
-	 * @exception IOException
-	 *                例外.
+	 * @exception IOException 例外.
 	 */
 	public static final String urlEncode(String info, String charset) throws IOException {
 		int len;
@@ -1010,8 +976,7 @@ public final class Converter {
 	/**
 	 * 文字列１６進数を数値変換.
 	 * 
-	 * @param s
-	 *            対象の文字列を設定します.
+	 * @param s 対象の文字列を設定します.
 	 * @return int 変換された数値が返されます.
 	 */
 	public static final int parseHexInt(String s) throws IOException {
@@ -1110,10 +1075,8 @@ public final class Converter {
 	/**
 	 * HTTPタイムスタンプを取得.
 	 * 
-	 * @param mode
-	 *            [true]の場合、ハイフン区切りの条件で出力します.
-	 * @param date
-	 *            出力対象の日付オブジェクトを設定します.
+	 * @param mode [true]の場合、ハイフン区切りの条件で出力します.
+	 * @param date 出力対象の日付オブジェクトを設定します.
 	 * @return String タイムスタンプ値が返却されます.
 	 */
 	public static final String createTimestamp(boolean mode, java.util.Date date) {
@@ -1151,12 +1114,9 @@ public final class Converter {
 	/**
 	 * HTTPタイムスタンプを取得.
 	 * 
-	 * @param buf
-	 *            出力先のStringBuilderを設定します.
-	 * @param mode
-	 *            [true]の場合、ハイフン区切りの条件で出力します.
-	 * @param date
-	 *            出力対象の日付オブジェクトを設定します.
+	 * @param buf  出力先のStringBuilderを設定します.
+	 * @param mode [true]の場合、ハイフン区切りの条件で出力します.
+	 * @param date 出力対象の日付オブジェクトを設定します.
 	 */
 	public static final void createTimestamp(StringBuilder buf, boolean mode, java.util.Date date) {
 		try {
@@ -1191,11 +1151,9 @@ public final class Converter {
 	/**
 	 * HTMLタイムスタンプを時間変換.
 	 * 
-	 * @param timestamp
-	 *            変換対象のHTMLタイムスタンプを設定します.
+	 * @param timestamp 変換対象のHTMLタイムスタンプを設定します.
 	 * @return Date 変換された時間が返されます.
-	 * @exception Exception
-	 *                例外.
+	 * @exception Exception 例外.
 	 */
 	public static final Date convertTimestamp(String timestamp) throws Exception {
 		return DateConvert.getWebTimestamp(timestamp);
@@ -1204,10 +1162,8 @@ public final class Converter {
 	/**
 	 * 英字の大文字小文字を区別せずにチェック.
 	 * 
-	 * @param src
-	 *            比較元文字を設定します.
-	 * @param dest
-	 *            比較先文字を設定します.
+	 * @param src  比較元文字を設定します.
+	 * @param dest 比較先文字を設定します.
 	 * @return boolean [true]の場合、一致します.
 	 */
 	public static final boolean eqEng(String src, String dest) {
@@ -1217,14 +1173,10 @@ public final class Converter {
 	/**
 	 * 英字の大文字小文字を区別せずにチェック.
 	 * 
-	 * @param src
-	 *            比較元文字を設定します.
-	 * @param off
-	 *            srcのオフセット値を設定します.
-	 * @param len
-	 *            srcのlength値を設定します.
-	 * @param dest
-	 *            比較先文字を設定します.
+	 * @param src  比較元文字を設定します.
+	 * @param off  srcのオフセット値を設定します.
+	 * @param len  srcのlength値を設定します.
+	 * @param dest 比較先文字を設定します.
 	 * @return boolean [true]の場合、一致します.
 	 */
 	public static final boolean eqEng(String src, int off, int len, String dest) {
@@ -1234,10 +1186,8 @@ public final class Converter {
 	/**
 	 * 英字の大文字小文字を区別しない、バイトチェック.
 	 * 
-	 * @param s
-	 *            比較の文字を設定します.
-	 * @param d
-	 *            比較の文字を設定します.
+	 * @param s 比較の文字を設定します.
+	 * @param d 比較の文字を設定します.
 	 * @return boolean [true]の場合、一致します.
 	 */
 	public static final boolean oneEng(char s, char d) {
@@ -1247,12 +1197,9 @@ public final class Converter {
 	/**
 	 * 英字の大文字小文字を区別しない、文字indexOf.
 	 * 
-	 * @param buf
-	 *            設定対象の文字情報を設定します.
-	 * @param chk
-	 *            チェック対象の文字情報を設定します.
-	 * @param off
-	 *            設定対象のオフセット値を設定します.
+	 * @param buf 設定対象の文字情報を設定します.
+	 * @param chk チェック対象の文字情報を設定します.
+	 * @param off 設定対象のオフセット値を設定します.
 	 * @return int マッチする位置が返却されます. [-1]の場合は情報は存在しません.
 	 */
 	public static final int indexOfEng(final String buf, final String chk) {
@@ -1262,12 +1209,9 @@ public final class Converter {
 	/**
 	 * 英字の大文字小文字を区別しない、文字indexOf.
 	 * 
-	 * @param buf
-	 *            設定対象の文字情報を設定します.
-	 * @param chk
-	 *            チェック対象の文字情報を設定します.
-	 * @param off
-	 *            設定対象のオフセット値を設定します.
+	 * @param buf 設定対象の文字情報を設定します.
+	 * @param chk チェック対象の文字情報を設定します.
+	 * @param off 設定対象のオフセット値を設定します.
 	 * @return int マッチする位置が返却されます. [-1]の場合は情報は存在しません.
 	 */
 	public static final int indexOfEng(final String buf, final String chk, final int off) {
@@ -1277,10 +1221,8 @@ public final class Converter {
 	/**
 	 * 比較処理.
 	 * 
-	 * @param s
-	 *            比較の文字を設定します.
-	 * @param d
-	 *            比較の文字を設定します.
+	 * @param s 比較の文字を設定します.
+	 * @param d 比較の文字を設定します.
 	 * @return int 数字が返却されます. [マイナス]の場合、sのほうが小さい. [プラス]の場合は、sのほうが大きい.
 	 *         [0]の場合は、sとdは同一.
 	 */
@@ -1291,8 +1233,7 @@ public final class Converter {
 	/**
 	 * 小文字変換.
 	 * 
-	 * @param s
-	 *            対象の文字列を設定します.
+	 * @param s 対象の文字列を設定します.
 	 * @return String 小文字変換された情報が返却されます.
 	 */
 	public static final String toLowerCase(String s) {
@@ -1302,8 +1243,7 @@ public final class Converter {
 	/**
 	 * 指定条件をList変換.
 	 * 
-	 * @param list
-	 *            対象の要素群を設定します.
+	 * @param list 対象の要素群を設定します.
 	 * @return List<Object> List要素が返却されます.
 	 */
 	public static final List<Object> toList(Object... list) {
@@ -1320,8 +1260,7 @@ public final class Converter {
 	 * 
 	 * @parma list 対象の要素群を設定します.
 	 * @return Map<String,Object> Map要素が返却されます.
-	 * @exception Exception
-	 *                例外.
+	 * @exception Exception 例外.
 	 */
 	public static final Map<String, Object> toMap(Object... list) throws Exception {
 		Map<String, Object> ret = new HashMap<String, Object>();
@@ -1335,8 +1274,7 @@ public final class Converter {
 	/**
 	 * 文字列をASCII型に変換. 単純にStringのchar[]をbyte[]に変換.
 	 * 
-	 * @param string
-	 *            対象の文字列を設定します.
+	 * @param string 対象の文字列を設定します.
 	 * @return byte[] ASCII型で変換された文字列が返却されます.
 	 */
 	public static final byte[] toAsciiBytes(final String string) {
@@ -1346,12 +1284,9 @@ public final class Converter {
 	/**
 	 * 文字列をASCII型に変換. 単純にStringのchar[]をbyte[]に変換.
 	 * 
-	 * @param string
-	 *            対象の文字列を設定します.
-	 * @param off
-	 *            対象のオフセット値を設定します.
-	 * @param len
-	 *            対象の長さを設定します.
+	 * @param string 対象の文字列を設定します.
+	 * @param off    対象のオフセット値を設定します.
+	 * @param len    対象の長さを設定します.
 	 * @return byte[] ASCII型で変換された文字列が返却されます.
 	 */
 	public static final byte[] toAsciiBytes(final String string, final int off, final int len) {
@@ -1370,8 +1305,7 @@ public final class Converter {
 	/**
 	 * 16バイトデータ(4バイト配列４つ)をUUIDに変換.
 	 * 
-	 * @param n
-	 *            int[4] のデータを設定します.
+	 * @param n int[4] のデータを設定します.
 	 * @return
 	 */
 	public static final String byte16ToUUID(int[] n) {
@@ -1381,14 +1315,10 @@ public final class Converter {
 	/**
 	 * 16バイトデータ(4バイト配列４つ)をUUIDに変換.
 	 * 
-	 * @param a
-	 *            4バイトデータを設定します.
-	 * @param b
-	 *            4バイトデータを設定します.
-	 * @param c
-	 *            4バイトデータを設定します.
-	 * @param d
-	 *            4バイトデータを設定します.
+	 * @param a 4バイトデータを設定します.
+	 * @param b 4バイトデータを設定します.
+	 * @param c 4バイトデータを設定します.
+	 * @param d 4バイトデータを設定します.
 	 * @return String uuidが返却されます.
 	 */
 	public static final String byte16ToUUID(int a, int b, int c, int d) {
@@ -1419,8 +1349,7 @@ public final class Converter {
 	/**
 	 * UUIDを16バイトデータ(4バイト配列４つ)に変換.
 	 * 
-	 * @param n
-	 *            uuidを設定します.
+	 * @param n uuidを設定します.
 	 * @return int[] int[4]が返却されます.
 	 */
 	public static final int[] uuidToByte16(String n) {
@@ -1433,15 +1362,11 @@ public final class Converter {
 	/**
 	 * チェック情報単位で情報を区切ります.
 	 * 
-	 * @param out
-	 *            区切られた情報が格納されます.
-	 * @param mode
-	 *            区切られた時の文字列が無い場合に、無視するかチェックします. [true]の場合は、無視しません.
-	 *            [false]の場合は、無視します.
-	 * @param str
-	 *            区切り対象の情報を設置します.
-	 * @param check
-	 *            区切り対象の文字情報をセットします. 区切り対象文字を複数設定する事により、それらに対応した区切りとなります.
+	 * @param out   区切られた情報が格納されます.
+	 * @param mode  区切られた時の文字列が無い場合に、無視するかチェックします. [true]の場合は、無視しません.
+	 *              [false]の場合は、無視します.
+	 * @param str   区切り対象の情報を設置します.
+	 * @param check 区切り対象の文字情報をセットします. 区切り対象文字を複数設定する事により、それらに対応した区切りとなります.
 	 */
 	public static final void cutString(List<String> out, boolean mode, String str, String check) {
 		int i, j;
@@ -1510,18 +1435,14 @@ public final class Converter {
 	/**
 	 * チェック情報単位で情報を区切ります。
 	 * 
-	 * @param out
-	 *            区切られた情報が格納されます.
-	 * @param cote
-	 *            コーテーション対応であるか設定します. [true]を設定した場合、各コーテーション ( ",' ) で囲った情報内は
-	 *            区切り文字と判別しません. [false]を設定した場合、コーテーション対応を行いません.
-	 * @param coteFlg
-	 *            コーテーションが入っている場合に、コーテーションを範囲に含むか否かを 設定します.
-	 *            [true]を設定した場合、コーテーション情報も範囲に含みます. [false]を設定した場合、コーテーション情報を範囲としません.
-	 * @param str
-	 *            区切り対象の情報を設置します.
-	 * @param check
-	 *            区切り対象の文字情報をセットします. 区切り対象文字を複数設定する事により、それらに対応した区切りとなります.
+	 * @param out     区切られた情報が格納されます.
+	 * @param cote    コーテーション対応であるか設定します. [true]を設定した場合、各コーテーション ( ",' ) で囲った情報内は
+	 *                区切り文字と判別しません. [false]を設定した場合、コーテーション対応を行いません.
+	 * @param coteFlg コーテーションが入っている場合に、コーテーションを範囲に含むか否かを 設定します.
+	 *                [true]を設定した場合、コーテーション情報も範囲に含みます.
+	 *                [false]を設定した場合、コーテーション情報を範囲としません.
+	 * @param str     区切り対象の情報を設置します.
+	 * @param check   区切り対象の文字情報をセットします. 区切り対象文字を複数設定する事により、それらに対応した区切りとなります.
 	 */
 	public static final void cutString(List<String> out, boolean cote, boolean coteFlg, String str, String check) {
 		int i, j;
@@ -1686,10 +1607,22 @@ public final class Converter {
 	
 	/**
 	 * コメント除去.
+	 * 
 	 * @param sql
 	 * @return
 	 */
 	public static final String cutComment(String sql) {
+		return cutComment(true, sql);
+	}
+
+	/**
+	 * コメント除去.
+	 * 
+	 * @param comment2
+	 * @param sql
+	 * @return
+	 */
+	public static final String cutComment(boolean comment2, String sql) {
 		if (sql == null || sql.length() <= 0) {
 			return "";
 		}
@@ -1739,7 +1672,7 @@ public final class Converter {
 					continue;
 				}
 				c2 = sql.charAt(i + 1);
-				if (c2 == '*') {
+				if (comment2 && c2 == '*') {
 					commentType = 2;
 					continue;
 				} else if (c2 == '/') {
@@ -1775,5 +1708,92 @@ public final class Converter {
 			buf.append(c);
 		}
 		return buf.toString();
+	}
+
+	/**
+	 * コーテーション内を検知しないIndexOf.
+	 * 
+	 * @param base
+	 *            検索元の情報を設定します.
+	 * @param cc
+	 *            チェック対象の内容を設定します.
+	 * @return int 検索結果の内容が返されます.
+	 */
+	public static final int indexOfNoCote(final String base, final String cc) {
+		return indexOfNoCote(base, cc, 0);
+	}
+	
+	/**
+	 * コーテーション内を検知しないIndexOf.
+	 * 
+	 * @param base
+	 *            検索元の情報を設定します.
+	 * @param cc
+	 *            チェック対象の内容を設定します.
+	 * @param off
+	 *            対象のオフセット値を設定します.
+	 * @return int 検索結果の内容が返されます.
+	 */
+	public static final int indexOfNoCote(final String base, final String cc, final int off) {
+		final int len = base.length();
+		final char[] ck = cc.toCharArray();
+		final int cLen = ck.length;
+		char bef = 0;
+		int cote = -1;
+		boolean yenFlag = false;
+		for (int i = off; i < len; i++) {
+			char c = base.charAt(i);
+			if (cote != -1) {
+				if (bef != '\\' && c == cote) {
+					yenFlag = false;
+					cote = -1;
+				} else if (c == '\\' && bef == '\\') {
+					yenFlag = true;
+				} else {
+					yenFlag = false;
+				}
+			} else if (bef != '\\' && (c == '\'' || c == '\"')) {
+				cote = c;
+			} else if (c == ck[0]) {
+				boolean res = true;
+				for (int j = 1; j < cLen; j++) {
+					if (i + j >= len || ck[j] != base.charAt(i + j)) {
+						res = false;
+						break;
+					}
+				}
+				if (res == true) {
+					return i;
+				}
+			}
+			if (yenFlag) {
+				yenFlag = false;
+				bef = 0;
+			} else {
+				bef = c;
+			}
+		}
+		return -1;
+	}
+	
+	/**
+	 * 文字列の前後コーテーションを削除.
+	 * 
+	 * @param str
+	 *            変換対象の文字列を設定します.
+	 * @return String 変換された結果が返されます.
+	 */
+	public static final String cutCote(String str) {
+		if (str == null || str.length() <= 0) {
+			if (str == null) {
+				return null;
+			} else {
+				return "";
+			}
+		}
+		str = str.trim();
+		return ((str.startsWith("\'") == true && str.endsWith("\'") == true)
+				|| (str.startsWith("\"") == true && str.endsWith("\"") == true)) ? str.substring(1, str.length() - 1)
+						: str;
 	}
 }

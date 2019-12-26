@@ -8,9 +8,11 @@ import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Types;
+import java.util.List;
 
 import rhigin.util.ByteArrayIO;
 import rhigin.util.Converter;
+import rhigin.util.ObjectList;
 
 /**
  * JDBCユーティリティ.
@@ -367,5 +369,112 @@ public final class JDBCUtils {
 			}
 		}
 		return sql;
+	}
+	
+	/**
+	 * SQLの終端が存在する場合.
+	 * @param sql
+	 * @return
+	 */
+	public static final boolean endSqlExists(String sql) {
+		return Converter.indexOfNoCote(sql, ";", 0) != -1;
+	}
+	
+	/**
+	 * 複数命令のSQL文を１つのSQLに変換してリスト化.
+	 * @param sql
+	 * @return
+	 */
+	public static final List<String> sqlList(String sql) {
+		
+		// たとえば
+		// select * from hoge; select * frim moge;
+		// ような場合は、
+		// (1) select * from hoge;
+		// (2) select * from moge;
+		// と言う感じで分ける.
+		
+		int p;
+		int b = 0;
+		String s;
+		List<String> ret = new ObjectList<String>();
+		while((p = Converter.indexOfNoCote(sql, ";", b)) != -1) {
+			if(p != b) {
+				s = sql.substring(b, p+1).trim();
+				if(!s.isEmpty()) {
+					ret.add(s);
+				}
+			}
+			b = p + 1;
+		}
+		if(b != sql.length() && !(s = sql.substring(b).trim()).isEmpty()) {
+			ret.add(s);
+		}
+		return ret;
+	}
+	
+	/** 不明なSQL、多分実行出来ないSQL文. **/
+	public static final int SQL_UNKNOWN = 0;
+	
+	/** SELECT文. **/
+	public static final int SQL_SELECT = 1;
+	
+	/** INSERT文. **/
+	public static final int SQL_INSERT = 2;
+	
+	/** 他SQL文. **/
+	public static final int SQL_SQL = 3;
+	
+	// SELECT コマンド.
+	private static final String[] SELECT_CMD = new String[] {"select", "SELECT"};
+	private static final int SELECT_CMD_LENGTH = 6;
+	
+	// INSERT コマンド.
+	private static final String[] INSERT_CMD = new String[] {"insert", "INSERT"};
+	private static final int INSERT_CMD_LENGTH = 6;
+	
+	/**
+	 * SQLタイプを取得.
+	 * @param sql
+	 * @return int [0] 不明, [1] SELECT文 [2] INSERT文 [3] その他SQL文.
+	 */
+	public static final int sqlType(String sql) {
+		char c;
+		int cnt = 0;
+		int type = SQL_UNKNOWN;
+		final int len = sql.length();
+		for(int i = 0; i < len; i ++) {
+			c = sql.charAt(i);
+			if(type == SQL_UNKNOWN) {
+				if(c == ' ' || c == '\t' || c == '\r' || c == '\n' || c == ';') {
+					continue;
+				} else if(c == 's' || c == 'S') {
+					type = SQL_SELECT; // selectの可能性.
+				} else if(c == 'i' || c == 'I') {
+					type = SQL_INSERT; // insertの可能性.
+				} else {
+					// その他SQLの可能性.
+					return SQL_SQL;
+				}
+				cnt = 1;
+			// SELECTの可能性.
+			} else if(type == SQL_SELECT) {
+				if(SELECT_CMD[0].charAt(cnt) != c && SELECT_CMD[1].charAt(cnt) != c) {
+					return SQL_SQL;
+				} else if(SELECT_CMD_LENGTH == cnt + 1) {
+					return SQL_SELECT;
+				}
+				cnt ++;
+			// INSERTの可能性.
+			} else if(type == SQL_INSERT) {
+				if(INSERT_CMD[0].charAt(cnt) != c && INSERT_CMD[1].charAt(cnt) != c) {
+					return SQL_SQL;
+				} else if(INSERT_CMD_LENGTH == cnt + 1) {
+					return SQL_INSERT;
+				}
+				cnt ++;
+			}
+		}
+		return type != SQL_UNKNOWN ? SQL_SQL : SQL_UNKNOWN;
 	}
 }

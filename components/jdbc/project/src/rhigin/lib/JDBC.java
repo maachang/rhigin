@@ -1,33 +1,22 @@
 package rhigin.lib;
 
-import java.sql.Connection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
 import rhigin.RhiginConfig;
 import rhigin.RhiginException;
-import rhigin.lib.jdbc.pooling.AtomicPooling;
-import rhigin.lib.jdbc.pooling.AtomicPoolingManager;
-import rhigin.lib.jdbc.pooling.AtomicPoolingMonitor;
-import rhigin.lib.jdbc.runner.JDBCCloseable;
+import rhigin.lib.jdbc.JDBCCore;
 import rhigin.lib.jdbc.runner.JDBCConnect;
 import rhigin.lib.jdbc.runner.JDBCException;
-import rhigin.lib.jdbc.runner.JDBCKind;
 import rhigin.lib.jdbc.runner.JDBCRow;
 import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.JavaRequire;
 import rhigin.scripts.RhiginEndScriptCall;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginObject;
-import rhigin.util.ArrayMap;
 import rhigin.util.Converter;
 import rhigin.util.FixedArray;
-import rhigin.util.Flag;
 
 /**
  * [js]JDBCコンポーネント.
@@ -43,9 +32,6 @@ public class JDBC implements JavaRequire {
 	
 	/** コンポーネントバージョン. **/
 	public static final String VERSION = "0.0.1";
-	
-	/** デフォルトのJDBCコンフィグ名. **/
-	private static final String DEF_JDBC_JSON_CONFIG_NAME = "jdbc";
 	
 	/**
 	 * コンストラクタ.
@@ -63,110 +49,7 @@ public class JDBC implements JavaRequire {
 	}
 	
 	// コアオブジェクト.
-	protected static final JdbcCoreObject CORE = new JdbcCoreObject();
-	
-	// jdbcコアオブジェクト.
-	protected static final class JdbcCoreObject {
-		private final Flag isStartup = new Flag(false);
-		private final AtomicPoolingManager man = new AtomicPoolingManager();
-		private final AtomicPoolingMonitor mon = new AtomicPoolingMonitor();
-		private final JDBCCloseable closeable = new JDBCCloseable();
-		
-		/**
-		 * jdbc初期化処理.
-		 * この処理は[RhiginStartup]で読み込まれる[index.js]内で呼び出します.
-		 * 
-		 * @param conf DB接続情報を設定している、jdbc.jsonの定義条件を設定します.
-		 * @return RhiginEndScriptCall スクリプト実行後のクローズ処理が返却されます.
-		 */
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public RhiginEndScriptCall startup(Map<String, Object> conf) {
-			if(conf == null || conf.size() == 0) {
-				if(conf == null) {
-					// jdbcの定義が無い場合は、空のJSONを設定.
-					conf = new ArrayMap();
-				}
-			}
-			if(!isStartup.get()) {
-				Iterator<String> itr = conf.keySet().iterator();
-				AtomicPooling p;
-				while(itr.hasNext()) {
- 					p = new AtomicPooling(JDBCKind.create((Map)conf.get(itr.next())), mon);
-					man.register(p); p = null;
-				}
-				mon.startThread();
-				isStartup.set(true);
-			}
-			return closeable;
-		}
-		
-		/**
-		 * プーリングのJDBCコネクションを取得.
-		 * @param name 登録されているプーリング名を設定します.
-		 * @return
-		 */
-		public JDBCConnect connect(String name) {
-			final AtomicPooling p = man.get(name);
-			if(p == null) {
-				throw new JDBCException(
-					"Connection information with the specified name does not exist:" + name);
-			}
-			return JDBCConnect.create(closeable, p.getConnection());
-		}
-		
-		/**
-		 * 非プーリングのJDBCコネクションを取得.
-		 * @param args [0] drivre, [1] url, [2] user, [3] password を入れます.
-		 */
-		public JDBCConnect connect(Object[] args) {
-			try {
-				final String driver = args.length > 0 ? "" + args[0] : null;
-				final String url = args.length > 1 ? "" + args[1] : null;
-				final String user = args.length > 2 ? "" + args[2] : null;
-				final String password = args.length > 3 ? "" + args[3] : null;
-				final Connection c = AtomicPooling.getConnetion(driver, url, user, password);
-				return JDBCConnect.create(closeable, c);
-			} catch(JDBCException je) {
-				throw je;
-			} catch(Exception e) {
-				throw new JDBCException(e);
-			}
-		}
-		
-		public JDBCKind getKind(String name) {
-			final JDBCKind k = man.getKind(name);
-			if(k == null) {
-				throw new JDBCException(
-					"Connection information with the specified name does not exist:" + name);
-			}
-			return k;
-		}
-		
-		/**
-		 * 指定名が登録されているかチェック.
-		 * @param name
-		 * @return
-		 */
-		public boolean isRegister(String name) {
-			return man.contains(name);
-		}
-		
-		/**
-		 * 登録接続条件を取得.
-		 * @return
-		 */
-		public int size() {
-			return man.size();
-		}
-		
-		/**
-		 * 登録名一覧を取得.
-		 * @return List<String>
-		 */
-		public List<String> names() {
-			return new FixedArray<String>(man.getNames());
-		}
-	};
+	protected static final JDBCCore CORE = new JDBCCore();
 	
 	// JDBCオブジェクトインスタンス.
 	private static final RhiginObject JDBC_INSTANCE = new RhiginObject("JDBC", new RhiginFunction[] {
@@ -198,92 +81,62 @@ public class JDBC implements JavaRequire {
 				case 2: // startup.
 					{
 						// スタートアップ登録されていない場合のみ実行.
-						if(!CORE.isStartup.get()) {
+						if(!CORE.isStartup()) {
+							RhiginEndScriptCall es = null;
 							final RhiginConfig conf = ExecuteScript.getConfig();
-							String jdbcJsonConfigName = DEF_JDBC_JSON_CONFIG_NAME;
 							if(args.length > 0) {
-								// JDBC読み込み対象のコンフィグ情報名が設定されている場合.
-								jdbcJsonConfigName = "" + args[0];
-								Object o = conf.get(jdbcJsonConfigName);
-								if(o == null || !(o instanceof Map)) {
-									argsException("JDBC");
-								}
+								es = CORE.startup(conf, "" + args[0]);
+							} else {
+								es = CORE.startup(conf, null);
 							}
-							// スタートアップ実行をして、スクリプト実行後の終了処理時にJDBC関連のクローズ処理実行を登録.
-							final RhiginEndScriptCall e = CORE.startup(conf.get(jdbcJsonConfigName));
-							ExecuteScript.addEndScripts(e);
+							ExecuteScript.addEndScripts(es);
 							return true;
 						}
 						return false;
 					}
 				case 3: // isStartup.
 					{
-						return CORE.isStartup.get();
+						return CORE.isStartup();
 					}
 				case 4: // abort.
 					{
-						if(CORE.isStartup.get()) {
-							// closeableを呼び出す.
-							CORE.closeable.call(null, null);
-						} else {
-							throw noStartupException();
-						}
+						CORE.close();
 					}
 					break;
 				case 5: // connect.
 					{
-						if(CORE.isStartup.get()) {
-							if(args.length > 0) {
-								if(args.length == 1) {
-									// プーリングコネクションから取得.
-									return JDBC.createConnect(CORE.connect("" + args[0]));
-								} else {
-									// プーリングコネクションを利用せずにコネクションを取得.
-									return JDBC.createConnect(CORE.connect(args));
-								}
+						if(args.length > 0) {
+							if(args.length == 1) {
+								// プーリングコネクションから取得.
+								return JDBC.createConnect(CORE.getNewConnect("" + args[0]));
+							} else {
+								// プーリングコネクションを利用せずにコネクションを取得.
+								return JDBC.createConnect(CORE.getNoPoolingConnect(args));
 							}
-							argsException("JDBC");
-						} else {
-							throw noStartupException();
 						}
+						argsException("JDBC");
 					}
 				case 6: // kind.
 					{
-						if(CORE.isStartup.get()) {
-							if(args.length > 0) {
-								return CORE.getKind("" + args[0]).getMap();
-							}
-							argsException("JDBC");
-						} else {
-							throw noStartupException();
+						if(args.length > 0) {
+							return CORE.getKind("" + args[0]).getMap();
 						}
+						argsException("JDBC");
 					}
 				case 7: // isRegister.
 					{
-						if(CORE.isStartup.get()) {
-							if(args.length > 0) {
-								return CORE.isRegister("" + args[0]);
-							}
-							argsException("JDBC");
-						} else {
-							throw noStartupException();
+						if(args.length > 0) {
+							return CORE.isRegister("" + args[0]);
 						}
+						argsException("JDBC");
 					}
 				case 8: // length.
 					{
-						if(CORE.isStartup.get()) {
-							return CORE.size();
-						} else {
-							throw noStartupException();
-						}
+						return CORE.size();
 					}
 				case 9: // names.
 					{
-						if(CORE.isStartup.get()) {
-							return CORE.names();
-						} else {
-							throw noStartupException();
-						}
+						return CORE.names();
 					}
 				}
 				

@@ -94,18 +94,21 @@ public class Args implements ConvertGet<String> {
 	 * @param name
 	 * @return
 	 */
-	public String get(String name) {
-		if(Converter.isNumeric(name)) {
-			int no = Converter.convertInt(name);
-			if(no >= 0 && no < args.length) {
-				return args[no];
+	public String get(String... names) {
+		final int len = names.length;
+		final int lenJ = args.length - 1;
+		for(int i = 0; i < len; i ++) {
+			if(Converter.isNumeric(names[i])) {
+				final int no = Converter.convertInt(names[i]);
+				if(no >= 0 && no < args.length) {
+					return args[no];
+				}
+				continue;
 			}
-			return null;
-		}
-		final int len = args.length - 1;
-		for (int i = 0; i < len; i++) {
-			if (name.equals(args[i])) {
-				return args[i + 1];
+			for (int j = 0; j < lenJ; j++) {
+				if (names[j].equals(args[j])) {
+					return args[j + 1];
+				}
 			}
 		}
 		return null;
@@ -114,21 +117,24 @@ public class Args implements ConvertGet<String> {
 	/**
 	 * 指定ヘッダ名を指定して、そのヘッダ名が存在するかチェックします.
 	 * 
-	 * @param name
+	 * @param names
 	 * @return boolean
 	 */
-	public boolean isValue(String name) {
-		if(Converter.isNumeric(name)) {
-			int no = Converter.convertInt(name);
-			if(no >= 0 && no < args.length) {
-				return true;
+	public boolean isValue(String... names) {
+		final int len = names.length;
+		final int lenJ = args.length;
+		for(int i = 0; i < len; i ++) {
+			if(Converter.isNumeric(names[i])) {
+				final int no = Converter.convertInt(names[i]);
+				if(no >= 0 && no < args.length) {
+					return true;
+				}
+				continue;
 			}
-			return false;
-		}
-		final int len = args.length;
-		for (int i = 0; i < len; i++) {
-			if (name.equals(args[i])) {
-				return true;
+			for (int j = 0; j < lenJ; j++) {
+				if (names[j].equals(args[j])) {
+					return true;
+				}
 			}
 		}
 		return false;

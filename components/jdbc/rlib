@@ -35,6 +35,8 @@ else
 fi
 
 # binフォルダ配下の内容をコピー.
-cp -a bin/* ${TARGET_PROJECT_PATH}
+cd ../../bin
+chmod 755 *
+cp -a * ${TARGET_PROJECT_PATH}
 
 exit 0

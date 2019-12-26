@@ -75,10 +75,6 @@ public class CsvReader implements Iterator<Map<String, Object>>, Closeable, Auto
 		init();
 	}
 
-	protected void finalize() throws Exception {
-		close();
-	}
-
 	/**
 	 * クローズ処理.
 	 * 

@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import rhigin.lib.jdbc.runner.JDBCException;
 import rhigin.lib.jdbc.runner.JDBCKind;
+import rhigin.scripts.JsonOut;
 import rhigin.util.Flag;
 
 /**
@@ -28,11 +29,6 @@ public class AtomicPoolingManager {
 		destroyFlag.set(false);
 	}
 
-	/** デストラクタ. **/
-	protected void finalize() throws Exception {
-		destroy();
-	}
-
 	/**
 	 * 情報破棄.
 	 */
@@ -40,14 +36,12 @@ public class AtomicPoolingManager {
 		if (destroyFlag.setToGetBefore(true)) {
 			return;
 		}
-
 		String name;
 		AtomicPooling pool;
 		Iterator<String> it = manager.keySet().iterator();
 		while (it.hasNext()) {
 			name = it.next();
-			pool = manager.get(name);
-			if (pool != null) {
+			if ((pool = manager.get(name)) != null) {
 				pool.destroy();
 			}
 		}
@@ -219,14 +213,20 @@ public class AtomicPoolingManager {
 	 * @return String 登録されている情報を文字情報に変換します.
 	 */
 	public String toString() {
-		StringBuilder buf = new StringBuilder();
+		int cnt = 0;
 		String name;
+		StringBuilder buf = new StringBuilder();
 		Iterator<String> it = manager.keySet().iterator();
-		buf.append("登録数:").append(manager.size()).append("\n");
+		buf.append("[\n");
 		while (it.hasNext()) {
 			name = it.next();
-			buf.append("  name:").append(name).append("\n").append("    ").append(manager.get(name)).append("\n");
+			if(cnt != 0) {
+				buf.append(",\n");
+			}
+			buf.append(JsonOut.toString(2, manager.get(name).getKind().getMap()));
+			cnt ++;
 		}
+		buf.append("\n]");
 		return buf.toString();
 	}
 }

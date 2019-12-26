@@ -41,11 +41,6 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 		this.headers = header;
 	}
 
-	@Override
-	protected void finalize() throws Exception {
-		clear();
-	}
-
 	/**
 	 * クリア.
 	 */
