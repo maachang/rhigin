@@ -33,7 +33,7 @@ public class JDBCKind {
 	private Integer poolingTimeout = null;
 	
 	// oracle の jdbc接続など、末尾に；を付けるとエラーになるものは[true].
-	// 現在oracle専門.
+	// oracleやderbyなど.
 	private boolean notSemicolon = false;
 	
 	/**
@@ -49,9 +49,13 @@ public class JDBCKind {
 	 * @return
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static final JDBCKind create(Map<String,Object> conf) {
+	public static final JDBCKind create(String name, Map<String,Object> conf) {
 		JDBCKind ret = new JDBCKind();
+		// name定義がされている場合は、こちらを優先する.
 		ret.name = Converter.convertString(conf.get("name"));
+		if(ret.name == null || ret.name.isEmpty()) {
+			ret.name = name;
+		}
 		ret.driver = Converter.convertString(conf.get("driver"));
 		ret.url = Converter.convertString(conf.get("url"));
 		ret.user = Converter.convertString(conf.get("user"));

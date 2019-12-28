@@ -129,10 +129,12 @@ public class JDBCCore {
 			throw new JDBCException("jdbc connection definition config object is not set");
 		}
 		if(!startup.get()) {
+			String name;
 			Iterator<String> itr = conf.keySet().iterator();
 			AtomicPooling p;
 			while(itr.hasNext()) {
-				p = new AtomicPooling(JDBCKind.create((Map)conf.get(itr.next())), mon);
+				name = itr.next();
+				p = new AtomicPooling(JDBCKind.create(name, (Map)conf.get(name)), mon);
 				man.register(p); p = null;
 			}
 			mon.startThread();
