@@ -287,17 +287,46 @@ public class JDBCCore {
 	/**
 	 * コネクションオブジェクトを取得.
 	 * 一度利用したコネクションオブジェクトは、再利用します.
-	 * @param name
+	 * @param args args[0] だけをセットし jdbc接続名を設定することで、プーリング情報でアクセスします.
+	 *             プーリング接続を利用しない場合は [0] drivre, [1] url, [2] user, [3] password を入れます.
 	 * @return
 	 */
-	public JDBCConnect getConnect(String name) {
+	public JDBCConnect getConnect(Object... args) {
 		check();
+		if(args.length == 1) {
+			String name = "" + args[0];
+			final Map<String, JDBCConnect> c = closeable.useConnect();
+			JDBCConnect ret = c.get(name);
+			if(ret == null || ret.isClose()) {
+				ret = getNewConnect(name);
+				c.put(name, ret);
+			}
+			return ret;
+		}
+		StringBuilder buf = new StringBuilder();
+		int len = args.length;
+		for(int i = 0; i < len; i ++) {
+			if(i != 0) {
+				buf.append(",");
+			}
+			buf.append("\'").append(args[i]).append("\'");
+		}
+		String name = buf.toString(); buf = null;
 		final Map<String, JDBCConnect> c = closeable.useConnect();
 		JDBCConnect ret = c.get(name);
 		if(ret == null || ret.isClose()) {
-			ret = getNewConnect(name);
+			ret = getNoPoolingConnect(args);
 			c.put(name, ret);
 		}
 		return ret;
+	}
+	
+	/**
+	 * 登録順で接続名を取得.
+	 * @param no
+	 * @return
+	 */
+	public String getName(int no) {
+		return man.getName(no);
 	}
 }

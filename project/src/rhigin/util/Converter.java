@@ -1796,4 +1796,21 @@ public final class Converter {
 				|| (str.startsWith("\"") == true && str.endsWith("\"") == true)) ? str.substring(1, str.length() - 1)
 						: str;
 	}
+	
+	/**
+	 * 文字列内に、指定文字が何個存在するかチェック.
+	 * @param src
+	 * @param c
+	 * @return
+	 */
+	public static final int numberOfCharToString(String src, String c) {
+		int p, b;
+		b = 0;
+		int ret = 0;
+		while((p = src.indexOf(c, b)) != -1) {
+			b = p + 1;
+			ret ++;
+		}
+		return ret;
+	}
 }

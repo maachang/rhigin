@@ -38,13 +38,16 @@ public class JsonOut {
 	 */
 	public static final String toString(Iterator it) {
 		String enter = "";
-		StringBuilder buf = new StringBuilder();
+		final StringBuilder buf = new StringBuilder();
 		buf.append("[");
 		while(it.hasNext()) {
 			if(enter.length() == 0) {
 				buf.append("\n");
 				enter = "\n";
+			} else {
+				buf.append(",\n");
 			}
+			countSpace(DEF_SPACE, buf);
 			toString(DEF_SPACE, DEF_SPACE, buf, it.next());
 		}
 		buf.append(enter).append("]");
@@ -182,7 +185,7 @@ public class JsonOut {
 		count += indent;
 		if(Array.getLength(m) == 0) {
 			buf.append("[]");
-			return count -indent;
+			return count - indent;
 		}
 		buf.append("[\n");
 		

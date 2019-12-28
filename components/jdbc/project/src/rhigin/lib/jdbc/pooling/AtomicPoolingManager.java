@@ -1,6 +1,7 @@
 package rhigin.lib.jdbc.pooling;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ public class AtomicPoolingManager {
 
 	/** プーリングデータベース管理オブジェクト群. **/
 	private final Map<String, AtomicPooling> manager = new ConcurrentHashMap<String, AtomicPooling>();
+	private final List<String> managerList = new ArrayList<String>();
 
 	/** オブジェクト破棄チェック. **/
 	private final Flag destroyFlag = new Flag();
@@ -91,6 +93,9 @@ public class AtomicPoolingManager {
 			throw new JDBCException("対象のプーリングオブジェクト名[" + name + "]は既に存在します");
 		}
 		manager.put(name, pool);
+		synchronized(managerList) {
+			managerList.add(name);
+		}
 	}
 
 	/**
@@ -107,7 +112,16 @@ public class AtomicPoolingManager {
 		if (!manager.containsKey(name)) {
 			return null;
 		}
-		return manager.remove(name);
+		AtomicPooling ret = manager.remove(name);
+		synchronized(managerList) {
+			int len = managerList.size();
+			for(int i = len - 1; i >= 0; i --) {
+				if(name.equals(managerList.get(i))) {
+					managerList.remove(i);
+				}
+			}
+		}
+		return ret;
 	}
 
 	/**
@@ -228,5 +242,16 @@ public class AtomicPoolingManager {
 		}
 		buf.append("\n]");
 		return buf.toString();
+	}
+	
+	/**
+	 * 登録順の名前を取得.
+	 * @param no
+	 * @return
+	 */
+	public String getName(int no) {
+		synchronized(managerList) {
+			return managerList.get(no);
+		}
 	}
 }

@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
+import rhigin.scripts.JsonOut;
 import rhigin.util.ArrayMap;
 import rhigin.util.Converter;
 import rhigin.util.OList;
@@ -422,5 +423,14 @@ public class JDBCKind {
 			"busyTimeout", busyTimeout, "transactionLevel", transactionLevel, "fetchSize", fetchSize,
 			"params", new ArrayMap(params), "poolingSize", poolingSize, "poolingTimeout", poolingTimeout,
 			"notSemicolon", notSemicolon);
+	}
+	
+	/**
+	 * 文字列変換.
+	 * @return
+	 */
+	@Override
+	public String toString() {
+		return JsonOut.toString(getMap());
 	}
 }

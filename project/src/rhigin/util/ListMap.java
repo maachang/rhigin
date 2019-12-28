@@ -7,16 +7,26 @@ import java.util.Map;
  * ListMapオブジェクト. java.util.Mapを利用したい場合は ArrayMapを利用.
  */
 public class ListMap implements ConvertGet<String> {
-	private final OList<Object[]> list = new OList<Object[]>();
+	private final OList<Object[]> list;
 
 	public ListMap() {
+		list = new OList<Object[]>();
 	}
-
-	public ListMap(final Map<String, Object> v) {
-		set(v);
-	}
-
+	
+	@SuppressWarnings("rawtypes")
 	public ListMap(final Object... args) {
+		if(args.length == 1) {
+			if(args[0] instanceof Map) {
+				list = new OList<Object[]>(((Map)args[0]).size());
+				set(args[0]);
+				return;
+			} else if(Converter.isNumeric(args[0])) {
+				list = new OList<Object[]>(Converter.convertInt(args[0]));
+				return;
+			}
+			throw new IllegalArgumentException("Key and Value need to be set.");
+		}
+		list = new OList<Object[]>(args.length >> 1);
 		set(args);
 	}
 
@@ -35,25 +45,30 @@ public class ListMap implements ConvertGet<String> {
 		list.clear();
 	}
 
+	@SuppressWarnings("rawtypes")
 	public final void set(final Object... args) {
 		if (args == null) {
 			return;
 		}
+		if(args.length == 1) {
+			if(args[0] instanceof Map) {
+				Map v = (Map)args[0];
+				if (v == null) {
+					return;
+				}
+				String k;
+				final Iterator it = v.keySet().iterator();
+				while (it.hasNext()) {
+					k = (String)it.next();
+					put(k, v.get(k));
+				}
+				return;
+			}
+			throw new IllegalArgumentException("Key and Value need to be set.");
+		}
 		final int len = args.length;
 		for (int i = 0; i < len; i += 2) {
-			put((String) args[i], args[i + 1]);
-		}
-	}
-
-	public final void set(final Map<String, Object> v) {
-		if (v == null) {
-			return;
-		}
-		String k;
-		final Iterator<String> it = v.keySet().iterator();
-		while (it.hasNext()) {
-			k = it.next();
-			put(k, v.get(k));
+			put((String)args[i], args[i + 1]);
 		}
 	}
 

@@ -17,6 +17,7 @@ import java.util.NoSuchElementException;
  */
 public class CsvReader implements Iterator<Map<String, Object>>, Closeable, AutoCloseable {
 	private FixedSearchArray<String> header;
+	private String[] headerList;
 	private List<String> now;
 	private CsvReaderRow rowMap;
 
@@ -29,7 +30,6 @@ public class CsvReader implements Iterator<Map<String, Object>>, Closeable, Auto
 	 * コンストラクタ.
 	 * 
 	 * @param n    対象のファイル名を設定します.
-	 * @param cset 文字charsetを設定します.
 	 * @param c    Csvのカットコードを設定します.
 	 * @throws IOException
 	 */
@@ -83,6 +83,7 @@ public class CsvReader implements Iterator<Map<String, Object>>, Closeable, Auto
 	public void close() throws IOException {
 		eof = true;
 		header = null;
+		headerList = null;
 		now = null;
 		rowMap = null;
 
@@ -171,10 +172,12 @@ public class CsvReader implements Iterator<Map<String, Object>>, Closeable, Auto
 	// １行の情報.
 	private static final class CsvReaderRow implements ConvertMap {
 		private FixedSearchArray<String> header;
+		private String[] headerList;
 		private List<String> rowData;
 
-		public CsvReaderRow(FixedSearchArray<String> h) {
+		public CsvReaderRow(FixedSearchArray<String> h, String[] lst) {
 			header = h;
+			headerList = lst;
 		}
 
 		public CsvReaderRow set(List<String> r) {
@@ -182,9 +185,9 @@ public class CsvReader implements Iterator<Map<String, Object>>, Closeable, Auto
 			return this;
 		}
 
-		private Integer _getParamNo(Object key) {
+		private int _getParamNo(Object key) {
 			if (key == null) {
-				return null;
+				return -1;
 			}
 			// 数値だった場合は、番号で処理.
 			if (Converter.isNumeric(key)) {
@@ -192,19 +195,19 @@ public class CsvReader implements Iterator<Map<String, Object>>, Closeable, Auto
 				if (n >= 0 && n < rowData.size()) {
 					return n;
 				}
-				return null;
+				return -1;
 			}
 			int ret = header.search(key.toString());
 			if(ret == -1) {
-				return null;
+				return -1;
 			}
 			return ret;
 		}
 
 		@Override
 		public Object get(Object key) {
-			Integer n = (Integer) _getParamNo(key);
-			if (n == null) {
+			int n = _getParamNo(key);
+			if (n == -1) {
 				return null;
 			}
 			return rowData.get(n);
@@ -212,7 +215,7 @@ public class CsvReader implements Iterator<Map<String, Object>>, Closeable, Auto
 
 		@Override
 		public boolean containsKey(Object key) {
-			return (_getParamNo(key) == null) ? false : true;
+			return (_getParamNo(key) == -1) ? false : true;
 		}
 
 		@Override
@@ -222,19 +225,14 @@ public class CsvReader implements Iterator<Map<String, Object>>, Closeable, Auto
 
 		@Override
 		public String toString() {
-			int len = header.size();
-			String[] key = new String[len];
-			for(int i = 0; i < len; i ++) {
-				key[header.getNo(i)] = header.get(i);
-			}
-
+			final int len = headerList.length;
 			StringBuilder buf = new StringBuilder("{");
 			for (int i = 0; i < len; i++) {
 				if (i != 0) {
 					buf.append(",");
 				}
 				String v = rowData.get(i);
-				buf.append("\"").append(key[i]).append("\":");
+				buf.append("\"").append(headerList[i]).append("\":");
 				if (Converter.isNumeric(v)) {
 					buf.append(v);
 				} else if ("TRUE".equals(v)) {
@@ -265,13 +263,16 @@ public class CsvReader implements Iterator<Map<String, Object>>, Closeable, Auto
 			throw new IOException("CSV情報の読み込みに失敗しました");
 		}
 		final int len = list.size();
+		final String[] lst = new String[len];
 		final FixedSearchArray<String> m = new FixedSearchArray<String>(len);
 		for (int i = 0; i < len; i++) {
+			lst[i] = list.get(i);
 			m.add(list.get(i), i);
 		}
 		header = m;
+		headerList = lst;
 		now = list;
-		rowMap = new CsvReaderRow(header);
+		rowMap = new CsvReaderRow(header, headerList);
 	}
 
 	/**
@@ -323,6 +324,23 @@ public class CsvReader implements Iterator<Map<String, Object>>, Closeable, Auto
 	 */
 	public int getRowCount() {
 		return count;
+	}
+	
+	/**
+	 * ヘッダ数を取得.
+	 * @return
+	 */
+	public int getHeaderSize() {
+		return headerList.length;
+	}
+	
+	/**
+	 * ヘッダ情報を取得.
+	 * @param no
+	 * @return
+	 */
+	public String getHeader(int no) {
+		return headerList[no];
 	}
 
 	public String toString() {

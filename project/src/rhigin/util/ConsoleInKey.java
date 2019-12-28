@@ -12,7 +12,11 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+
+import rhigin.RhiginException;
 
 /**
  * コンソール入力支援.
@@ -139,6 +143,16 @@ public class ConsoleInKey implements Closeable, AutoCloseable {
 			in = null;
 		}
 	}
+	
+	/**
+	 * タブ補完を追加します.
+	 * 
+	 * @param tb 
+	 * @throws Exception
+	 */
+	public void addTabCompleter(final TabCompleter tb) throws Exception {
+		addJCompleter(tb);
+	}
 
 	/**
 	 * 1行入力情報を取得.
@@ -263,13 +277,13 @@ public class ConsoleInKey implements Closeable, AutoCloseable {
 		}
 	}
 	
-	// jlineの例外がctrl+c 押下での返却の場合.
+	// [jline2専用]例外がctrl+c 押下での返却の場合.
 	private static final boolean isJlineByCtrl_C(Throwable e) {
 		return ("jline.console.UserInterruptException".equals(e.getClass().getName()));
 	}
 	
 	//
-	// jline向けの履歴管理.
+	// [jline2専用]履歴管理.
 	//
 	
 	// デフォルトのjist履歴のバックアップファイル先.
@@ -278,11 +292,11 @@ public class ConsoleInKey implements Closeable, AutoCloseable {
 	// デフォルトのjlist履歴のバックアップ最大データ数.
 	private static final int DEF_JHIST_SIZE = 100;
 	
-	// jlistの履歴管理条件.
+	// [jline2専用]履歴管理条件.
 	private String jlineHistoryFileName = DEF_JHIST_FILE;
 	private int jlineHistorySize = DEF_JHIST_SIZE;
 	
-	// jhistの履歴をファイルからロード.
+	// [jline2専用]履歴をファイルからロード.
 	private final void loadJhist() throws Exception {
 		if(!FileUtil.isFile(jlineHistoryFileName)) {
 			return;
@@ -313,7 +327,7 @@ public class ConsoleInKey implements Closeable, AutoCloseable {
 		}
 	}
 	
-	// jlineの履歴をファイルに保存.
+	// [jline2専用]履歴をファイルに保存.
 	private final void saveJhist() {
 		BufferedWriter bw = null;
 		try {
@@ -352,5 +366,110 @@ public class ConsoleInKey implements Closeable, AutoCloseable {
 		}
 	}
 	
+	// [jline2専用]補完処理を追加.
+	private final void addJCompleter(final TabCompleter tb) throws Exception {
+		if(consoleReader == null) {
+			return;
+		}
+		Method m = consoleReaderClass.getMethod("addCompleter", jline.console.completer.Completer.class);
+		m.invoke(consoleReader, new jline.console.completer.Completer() {
+			final TabCompleter tab = tb;
+			public int complete(String buffer, int cursor, List<CharSequence> candidates) {
+				return tab.complete(buffer, cursor, candidates) ? 0 : -1;
+			}
+		});
+	}
 	
+	/**
+	 * [jline2専用]タブ補完定義.
+	 */
+	public static abstract class TabCompleter {
+		
+		/**
+		 * 補完呼び出し.
+		 * @param buffer 入力中の文字列が設定されます.
+		 * @param cursor 入力位置のカーソルが設定されます.
+		 * @param candidates 補完対象の文字列が返却されます.
+		 * @return boolean false の場合は、情報は存在しない.
+		 *                 true の場合は情報が存在する.
+		 */
+		public abstract boolean complete(String buffer, int cursor, List<CharSequence> candidates);
+	}
+	
+	/**
+	 * [jline2専用]文字列（大文字、小文字無視）補完用.
+	 */
+	public static class StringIgnoreCaseCompleter extends TabCompleter {
+		protected final String[] list;
+		
+		public StringIgnoreCaseCompleter(String... cs) {
+			Set<String> s = new HashSet<String>();
+			int len = cs.length;
+			for(int i = 0; i < len; i ++) {
+				s.add(cs[i]);
+			}
+			int cnt = 0;
+			len = s.size();
+			final String[] list = new String[len];
+			final Iterator<String> it = s.iterator();
+			while(it.hasNext()) {
+				list[cnt++] = it.next();
+			}
+			this.list = list;
+		}
+		
+		@Override
+		public boolean complete(String buffer, int cursor, List<CharSequence> candidates) {
+			final String target = (cursor > 0) ? buffer.substring(0, cursor) : "";
+			if(target.length() == 0) {
+				return false;
+			}
+			final boolean upper = target.charAt(0) >= 'A' && target.charAt(0) <= 'Z';
+			final int len = list.length;
+			for(int i = 0; i < len; i ++) {
+				if(Alphabet.indexOf(list[i], target) == 0) {
+					candidates.add(upper ? list[i].toUpperCase() : list[i]);
+				}
+			}
+			return candidates.size() > 0;
+		}
+	}
+	
+	/**
+	 * [jline2専用]文字列（大文字、小文字無視）補完用.
+	 */
+	public static class StringCompleter extends TabCompleter {
+		protected final String[] list;
+		
+		public StringCompleter(String... cs) {
+			Set<String> s = new HashSet<String>();
+			int len = cs.length;
+			for(int i = 0; i < len; i ++) {
+				s.add(cs[i]);
+			}
+			int cnt = 0;
+			len = s.size();
+			String[] list = new String[len];
+			Iterator<String> it = s.iterator();
+			while(it.hasNext()) {
+				list[cnt++] = it.next();
+			}
+			this.list = list;
+		}
+		
+		@Override
+		public boolean complete(String buffer, int cursor, List<CharSequence> candidates) {
+			final String target = (cursor > 0) ? buffer.substring(0, cursor) : "";
+			if(target.length() == 0) {
+				return false;
+			}
+			final int len = list.length;
+			for(int i = 0; i < len; i ++) {
+				if(list[i].startsWith(target)) {
+					candidates.add(list[i]);
+				}
+			}
+			return candidates.size() > 0;
+		}
+	}
 }

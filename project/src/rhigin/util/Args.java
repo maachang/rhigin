@@ -103,11 +103,11 @@ public class Args implements ConvertGet<String> {
 				if(no >= 0 && no < args.length) {
 					return args[no];
 				}
-				continue;
-			}
-			for (int j = 0; j < lenJ; j++) {
-				if (names[j].equals(args[j])) {
-					return args[j + 1];
+			} else {
+				for (int j = 0; j < lenJ; j++) {
+					if (names[j].equals(args[j])) {
+						return args[j + 1];
+					}
 				}
 			}
 		}
@@ -129,15 +129,45 @@ public class Args implements ConvertGet<String> {
 				if(no >= 0 && no < args.length) {
 					return true;
 				}
-				continue;
-			}
-			for (int j = 0; j < lenJ; j++) {
-				if (names[j].equals(args[j])) {
-					return true;
+			} else {
+				for (int j = 0; j < lenJ; j++) {
+					if (names[j].equals(args[j])) {
+						return true;
+					}
 				}
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * 最初のパラメータを取得.
+	 * @return
+	 */
+	public String getFirst() {
+		if(args.length == 0) {
+			return "";
+		}
+		return args[0];
+	}
+	
+	/**
+	 * 一番うしろのパラメータを取得.
+	 * @return
+	 */
+	public String getLast() {
+		if(args.length == 0) {
+			return "";
+		}
+		return args[args.length - 1];
+	}
+	
+	/**
+	 * パラメータ数を取得.
+	 * @return
+	 */
+	public int size() {
+		return args.length;
 	}
 
 	@Override
