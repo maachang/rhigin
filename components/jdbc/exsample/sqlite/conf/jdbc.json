@@ -1,0 +1,47 @@
+{
+    // JDBC接続設定を個別に設定します.
+    // ここでの名前は「ユニーク名」で、JDBC管理名を設定します.
+    "name": {
+        "driver":            "org.sqlite.JDBC"  // JDBCドライバーパッケージ＋クラス名を設定します.
+        // 接続先URL、データベース名など.
+        ,"url":              "jdbc:sqlite:sqlite.db"
+        ,"user":             ""                 // 接続先ユーザ名.
+        ,"password":         ""                 // 接続先パスワード.
+        ,"readOnly":         false              // リードオンリのみの接続ならtrue.
+        ,"busyTimeout":      15                 // 問い合わせタイムアウト(0以下で無効).
+        // トランザクションレベル.
+        ,"transactionLevel": "TRANSACTION_READ_COMMITTED"
+        ,"fetchSize":        -1                 // フェッチサイズ(0以下で無効).
+        ,"poolSize":         -1                 // プーリングサイズ(0以下で最大プーリング数).
+        ,"poolTimeout":      -1                 // プーリングタイムアウト.
+        // JDBCパラメータ.
+        ,"params":
+        {
+            "shared_cache":         "true"      // 共有キャッシュを許可.
+            ,"busy_timeout":        "120000"    // デフォルトビジータイムアウト(120sec).
+            // pragma定義.
+            ,"encoding":            "UTF8"      // UTF8エンコード.
+            ,"journal_mode":        "WAL"       // ジャーナルモード(WAL).
+            ,"locking_mode":        "NORMAL"    // ノーマルロック.
+            ,"transaction_mode":    "DEFFERED"  // トランザクションは[DEFFERED].
+            ,"read_uncommited":     "true"      // READ UNCOMMITTED.
+            ,"case_sensitive_like": "true"      // Like検索の大文字小文字区別する.
+            ,"legacy_file_format":  "false"     // 古いフォーマットは対応しない.
+            ,"cache_size":          "16384"     // キャッシュサイズ(16k).
+            ,"page_size":           "2048"      // ページサイズ(2k).
+            //"synchronous":          "NORMAL"  // 通常書き込み.
+            ,"synchronous":         "OFF"       // 遅延書き込み.
+
+            // default定義を行った場合、書き込み処理が存在すると
+            // ロックが利いてしまう.
+            // sqliteでは、pragma default_xxxx定義してはいけない.
+        }
+        ,"urlType":          false              // URLドライバパラメータ区切りタイプ.
+                                                // [true] url + "?" + parmas + "&" ...
+                                                // [false] url + ";" + params + ";" ...
+        // URLの後にドライバに追加するパラメータ.
+        ,"urlParams":
+        {
+        }
+    }
+}

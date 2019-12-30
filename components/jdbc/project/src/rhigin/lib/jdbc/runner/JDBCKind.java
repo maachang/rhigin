@@ -335,6 +335,7 @@ public class JDBCKind {
 	public void setBusyTimeout(Statement stmt) {
 		if (busyTimeout != null && busyTimeout > 0) {
 			try {
+				// 秒単位で設定.
 				stmt.setQueryTimeout(busyTimeout);
 			} catch (Exception e) {
 				throw new JDBCException(e);
