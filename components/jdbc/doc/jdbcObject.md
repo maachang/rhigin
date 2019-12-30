@@ -4,11 +4,11 @@
 
 JDBC接続コンポーネントでは、以下の操作がサポートされています。
 
-- [JDBCオブジェクト](#5-1）JDBCオブジェクト)
+- [JDBCオブジェクト](#5-1jdbcオブジェクト)
 
-- [JDBCConnectオブジェクト](#5-2）JDBCConnectオブジェクト)
+- [JDBCConnectオブジェクト](#5-2jdbcconnectオブジェクト)
 
-- [JDBCRowオブジェクト](#5-3）JDBCRowオブジェクト)
+- [JDBCRowオブジェクト](#5-3jdbcrowオブジェクト)
 
 _
 

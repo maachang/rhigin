@@ -6,19 +6,19 @@ jdbcドライバを使ったデータベースI/Oに対して、薄いwapper実�
 
 当コンポーネントは、以下の導入方法と、機能を有します。
 
-- [jdbc接続コンポーネント導入方法](#１）jdbc接続コンポーネント導入方法)
+- [jdbc接続コンポーネント導入方法](#１jdbc接続コンポーネント導入方法)
 
-- [jdbc接続コンポーネントをjavascriptから呼び出せる機能](#２）jdbc接続コンポーネントをjavascriptから呼び出せる機能)
+- [jdbc接続コンポーネントをjavascriptから呼び出せる機能](#２jdbc接続コンポーネントをjavascriptから呼び出せる機能)
 
-- [jdbc接続定義](#３）jdbc接続定義)
+- [jdbc接続定義](#３jdbc接続定義)
 
-- [jdbcコネクションプーリング機能](#４）jdbcコネクションプーリング機能)
+- [jdbcコネクションプーリング機能](#４jdbcコネクションプーリング機能)
 
-- [jdbcコネクションオブジェクト機能](#５）jdbcコネクションオブジェクト機能)
+- [jdbcコネクションオブジェクト機能](#５jdbcコネクションオブジェクト機能)
 
-- [jdbc接続してSQL実行用コンソール、ファイル実行機能](#６）jdbc接続してSQL実行用コンソール、ファイル実行機能)
+- [jdbc接続してSQL実行用コンソール、ファイル実行機能](#６jdbc接続してSQL実行用コンソール、ファイル実行機能)
 
-- [csvファイルを読み込んで、その内容をテーブルにinsertする機能](#７）csvファイルを読み込んで、その内容をテーブルにinsertする機能)
+- [csvファイルを読み込んで、その内容をテーブルにinsertする機能](#７csvファイルを読み込んで、その内容をテーブルにinsertする機能)
 
 _
 
@@ -246,11 +246,11 @@ _
 
 JDBC接続コンポーネントでは、以下の操作がサポートされています。
 
-- [JDBCオブジェクト](https://github.com/maachang/rhigin/blob/master/components/jdbc/doc/jdbcObject.md#5-1）JDBCオブジェクト)
+- [JDBCオブジェクト](https://github.com/maachang/rhigin/blob/master/components/jdbc/doc/jdbcObject.md#5-1jdbcオブジェクト)
 
-- [JDBCConnectオブジェクト](https://github.com/maachang/rhigin/blob/master/components/jdbc/doc/jdbcObject.md#5-2）JDBCConnectオブジェクト)
+- [JDBCConnectオブジェクト](https://github.com/maachang/rhigin/blob/master/components/jdbc/doc/jdbcObject.md#5-2jdbcconnectオブジェクト)
 
-- [JDBCRowオブジェクト](https://github.com/maachang/rhigin/blob/master/components/jdbc/doc/jdbcObject.md#5-3）JDBCRowオブジェクト)
+- [JDBCRowオブジェクト](https://github.com/maachang/rhigin/blob/master/components/jdbc/doc/jdbcObject.md#5-3jdbcrowオブジェクト)
 
 _
 
