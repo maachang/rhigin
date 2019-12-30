@@ -63,7 +63,7 @@ jdbc [-c --conf --config] [-f --file]
 JDBCコンソール機能では、JDBC経由でのSQL文の実行を行うことが出来ますが、それ以外に、本コンポーネント専用のコマンドも利用することが出来ます。
 
 - [help](#6-1help)
-- [exit,quit](#6-2exit,quit)
+- [exit,quit](#6-2exitquit)
 - [close](#6-3close)
 - [commit](#6-4commit)
 - [rollback](#6-5rollback)
