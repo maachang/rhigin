@@ -113,6 +113,9 @@ public class JDBC implements JavaRequire {
 								// プーリングコネクションを利用せずにコネクションを取得.
 								return JDBC.createConnect(CORE.getNoPoolingConnect(args));
 							}
+						} else if(CORE.size() > 0) {
+							// 一番最初に定義されている定義情報のコネクションを取得.
+							return JDBC.createConnect(CORE.getNewConnect(CORE.getName(0)));
 						}
 						argsException("JDBC");
 					}
@@ -120,6 +123,9 @@ public class JDBC implements JavaRequire {
 					{
 						if(args.length > 0) {
 							return CORE.getKind("" + args[0]).getMap();
+						} else if(CORE.size() > 0) {
+							// 一番最初に定義されている定義情報を取得.
+							return CORE.getKind(CORE.getName(0)).getMap();
 						}
 						argsException("JDBC");
 					}

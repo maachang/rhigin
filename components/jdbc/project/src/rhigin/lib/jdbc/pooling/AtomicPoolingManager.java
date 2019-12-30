@@ -2,10 +2,10 @@ package rhigin.lib.jdbc.pooling;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import rhigin.lib.jdbc.runner.JDBCException;
 import rhigin.lib.jdbc.runner.JDBCKind;
@@ -18,7 +18,7 @@ import rhigin.util.Flag;
 public class AtomicPoolingManager {
 
 	/** プーリングデータベース管理オブジェクト群. **/
-	private final Map<String, AtomicPooling> manager = new ConcurrentHashMap<String, AtomicPooling>();
+	private final Map<String, AtomicPooling> manager = new HashMap<String, AtomicPooling>();
 	private final List<String> managerList = new ArrayList<String>();
 
 	/** オブジェクト破棄チェック. **/
@@ -48,6 +48,7 @@ public class AtomicPoolingManager {
 			}
 		}
 		manager.clear();
+		managerList.clear();
 	}
 
 	/**
@@ -85,17 +86,13 @@ public class AtomicPoolingManager {
 		check();
 		if (name == null || name.length() <= 0) {
 			throw new JDBCException("登録対象のプーリングオブジェクト名が定義されていません");
-		}
-		if (pool == null || pool.isDestroy()) {
+		} else if (pool == null || pool.isDestroy()) {
 			throw new JDBCException("登録対象のプーリングオブジェクトは有効ではありません");
-		}
-		if (manager.containsKey(name)) {
+		} else if (manager.containsKey(name)) {
 			throw new JDBCException("対象のプーリングオブジェクト名[" + name + "]は既に存在します");
 		}
 		manager.put(name, pool);
-		synchronized(managerList) {
-			managerList.add(name);
-		}
+		managerList.add(name);
 	}
 
 	/**
@@ -113,12 +110,10 @@ public class AtomicPoolingManager {
 			return null;
 		}
 		AtomicPooling ret = manager.remove(name);
-		synchronized(managerList) {
-			int len = managerList.size();
-			for(int i = len - 1; i >= 0; i --) {
-				if(name.equals(managerList.get(i))) {
-					managerList.remove(i);
-				}
+		int len = managerList.size();
+		for(int i = len - 1; i >= 0; i --) {
+			if(name.equals(managerList.get(i))) {
+				managerList.remove(i);
 			}
 		}
 		return ret;
@@ -180,13 +175,11 @@ public class AtomicPoolingManager {
 	 */
 	public String[] getNames() {
 		check();
-		Object[] names = manager.keySet().toArray();
-		if (names == null) {
-			return null;
-		}
-		int len = names.length;
+		int len = managerList.size();
 		String[] ret = new String[len];
-		System.arraycopy(names, 0, ret, 0, len);
+		for(int i = 0; i < len; i ++) {
+			ret[i] = managerList.get(i);
+		}
 		return ret;
 	}
 
@@ -197,13 +190,9 @@ public class AtomicPoolingManager {
 	 */
 	public void getNames(List<String> list) {
 		check();
-		Object[] names = manager.keySet().toArray();
-		if (names == null) {
-			return;
-		}
-		int len = names.length;
-		for (int i = 0; i < len; i++) {
-			list.add((String) names[i]);
+		int len = managerList.size();
+		for(int i = 0; i < len; i ++) {
+			list.add(managerList.get(i));
 		}
 	}
 
@@ -227,18 +216,15 @@ public class AtomicPoolingManager {
 	 * @return String 登録されている情報を文字情報に変換します.
 	 */
 	public String toString() {
-		int cnt = 0;
 		String name;
-		StringBuilder buf = new StringBuilder();
-		Iterator<String> it = manager.keySet().iterator();
-		buf.append("[\n");
-		while (it.hasNext()) {
-			name = it.next();
-			if(cnt != 0) {
+		final int len = managerList.size();
+		final StringBuilder buf = new StringBuilder("[\n");
+		for(int i = 0; i < len; i ++) {
+			name = managerList.get(i);
+			if(i != 0) {
 				buf.append(",\n");
 			}
 			buf.append(JsonOut.toString(2, manager.get(name).getKind().getMap()));
-			cnt ++;
 		}
 		buf.append("\n]");
 		return buf.toString();
@@ -250,8 +236,6 @@ public class AtomicPoolingManager {
 	 * @return
 	 */
 	public String getName(int no) {
-		synchronized(managerList) {
-			return managerList.get(no);
-		}
+		return managerList.get(no);
 	}
 }
