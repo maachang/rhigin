@@ -26,7 +26,8 @@ public class JDBCCsv {
 	 * 
 	 */
 	
-	private static final String DEF_CHARSET = "Windows-31J";
+	//private static final String DEF_CHARSET = "Windows-31J";
+	private static final String DEF_CHARSET = "UTF8";
 	
 	public static final void main(String[] args) throws Exception {
 		// コマンド引数を解析.

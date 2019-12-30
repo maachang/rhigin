@@ -241,8 +241,8 @@ public class JDBCKind {
 	// SQLの末端に「；」セミコロンを付けるとNGかチェック.
 	private static final boolean checkNotSemicolon(String url) {
 		final String u = url.toLowerCase();
-		if(u.startsWith("jdbc:oracle") ||
-			u.startsWith("jdbc:derby")) {
+		if(u.startsWith("jdbc:oracle:") ||
+			u.startsWith("jdbc:derby:")) {
 			return true;
 		}
 		return false;

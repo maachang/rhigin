@@ -1,14 +1,14 @@
-[前の頁に戻る](https://github.com/maachang/rhigin/blob/master/components/jdbc/README.md)
+<span style="font-size: 25px;"> [前の頁に戻る](https://github.com/maachang/rhigin/blob/master/components/jdbc/README.md) </span>
 
 # ５）jdbcコネクションオブジェクト機能
 
-JDBC接続コンポーネントでは、以下の操作がサポートされています。
+JDBC接続コンポーネントでは、以下の機能が提供されます。
 
-- [JDBCオブジェクト](#5-1jdbcオブジェクト)
+- [5-1）JDBCオブジェクト](#5-1jdbcオブジェクト)
 
-- [JDBCConnectオブジェクト](#5-2jdbcconnectオブジェクト)
+- [5-2）JDBCConnectオブジェクト](#5-2jdbcconnectオブジェクト)
 
-- [JDBCRowオブジェクト](#5-3jdbcrowオブジェクト)
+- [5-3）JDBCRowオブジェクト](#5-3jdbcrowオブジェクト)
 
 _
 
@@ -536,4 +536,4 @@ _
 
 _
 
-[前の頁に戻る](https://github.com/maachang/rhigin/blob/master/components/jdbc/README.md)
+<span style="font-size: 25px;"> [前の頁に戻る](https://github.com/maachang/rhigin/blob/master/components/jdbc/README.md) </span>
