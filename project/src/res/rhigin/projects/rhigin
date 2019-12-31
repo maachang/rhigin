@@ -68,7 +68,6 @@ OPT="${OPT} -Djava.net.preferIPv4Stack=true"
 # execution java.
 cd ${PROJ_DIR}
 
-echo "start rhigin."
 if [ ${CHANGE_MALLOC:--1} = "-1" ];
 then
     ${JAVA_HOME}/bin/java -server -Xms${STM}m -Xmx${EXM}m ${OPT} -classpath ${MY_JAR} ${EXEC_PACKAGE} ${ARGS}

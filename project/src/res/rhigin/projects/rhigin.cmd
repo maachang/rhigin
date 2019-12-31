@@ -87,7 +87,6 @@
 @set OPT=%OPT% -Djava.net.preferIPv4Stack=true
 @set BASE_OPT=-Xms%STM%m -Xmx%EXM%m
 
-@echo "start rhigin."
 @%JAVA_HOME%\bin\java -server %BASE_OPT% %OPT% %EXEC_PACKAGE% %ARGS%
 goto end
 

@@ -62,6 +62,17 @@ public class RhiginStartup {
 	 * ログファクトリの初期化.
 	 * 
 	 * @param server
+	 * @return RhiginConfig
+	 */
+	public static final RhiginConfig initLogFactory(boolean server) {
+		return initLogFactory(server, false);
+	}
+
+	
+	/**
+	 * ログファクトリの初期化.
+	 * 
+	 * @param server
 	 * @param noScript
 	 * @param args
 	 * @return RhiginConfig
@@ -69,6 +80,18 @@ public class RhiginStartup {
 	public static final RhiginConfig initLogFactory(boolean server, boolean noScript, String[] args) {
 		// Args管理オブジェクトにセット.
 		Args.set(args);
+		return initLogFactory(server, noScript);
+	}
+	
+	/**
+	 * ログファクトリの初期化.
+	 * 
+	 * @param server
+	 * @param noScript
+	 * @return RhiginConfig
+	 */
+	public static final RhiginConfig initLogFactory(boolean server, boolean noScript) {
+		Args params = Args.getInstance();
 		RhiginConfig config = null;
 		try {
 			// webServerモードをセット.
@@ -78,9 +101,15 @@ public class RhiginStartup {
 			if(!noScript) {
 				initRhiginScriptFunctionObject();
 			}
-
+			
 			// 環境変数から、rhigin起動環境を取得.
 			String rhiginEnv = EnvCache.get(RhiginConstants.ENV_ENV);
+			
+			// プログラム引数からrhigin起動環境が設定されている場合.
+			// こちらの情報を優先的に利用する.
+			if(params.isValue("-c", "--conf", "--config")) {
+				rhiginEnv = params.get("-c", "--conf", "--config");
+			}
 
 			// コンフィグ読み込みディレクトリ先を、rhigin起動環境に合わせる.
 			String confDir = RhiginConstants.DIR_CONFIG;

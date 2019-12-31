@@ -16,6 +16,7 @@ import rhigin.scripts.RhiginContext;
 import rhigin.scripts.compile.CompileCache;
 import rhigin.scripts.function.RandomFunction;
 import rhigin.scripts.function.RequireFunction;
+import rhigin.util.Args;
 import rhigin.util.ConsoleInKey;
 
 /**
@@ -23,11 +24,45 @@ import rhigin.util.ConsoleInKey;
  */
 public class RhiginConsole {
 	public static final void main(String[] args) throws Exception {
-		RhiginConfig conf = RhiginStartup.initLogFactory(false, args);
-		RhiginConsole o = new RhiginConsole();
-		o.console(conf, new ConsoleInKey(".rcons"));
+		Args.set(args);
+		if(viewArgs()) {
+			System.exit(0);
+			return;
+		}
+		int ret = 0;
+		try {
+			RhiginConfig conf = RhiginStartup.initLogFactory(false);
+			RhiginConsole o = new RhiginConsole();
+			o.console(conf, new ConsoleInKey(".rcons"));
+		} catch(Throwable t) {
+			t.printStackTrace();
+			ret = 1;
+		}
+		System.exit(ret);
 	}
-
+	
+	// プログラム引数による命令.
+	private static final boolean viewArgs() {
+		Args params = Args.getInstance();
+		if(params.isValue("-v", "--version")) {
+			System.out.println(RhiginConstants.VERSION);
+			return true;
+		} else if(params.isValue("-h", "--help")) {
+			System.out.println("rcons [-h] [-v] [-c]");
+			System.out.println(" Run the rhigin console.");
+			System.out.println("  [-h][--help]");
+			System.out.println("    Displays command help.");
+			System.out.println("  [-v][--version]");
+			System.out.println("    Get rhigin version.");
+			System.out.println("  [-c][--conf][--config]");
+			System.out.println("    Set the environment name for reading the configuration.");
+			System.out.println("    For example, when `-c hoge` is specified, the configuration ");
+			System.out.println("    information under `./conf/hoge/` is read.");
+			return true;
+		}
+		return false;
+	}
+	
 	public void console(RhiginConfig conf, ConsoleInKey console) throws Exception {
 		// 開始処理.
 		HttpInfo httpInfo = RhiginStartup.startup(conf);

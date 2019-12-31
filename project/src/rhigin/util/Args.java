@@ -20,12 +20,14 @@ public class Args implements ConvertGet<String> {
 	 * Mainメソッドに設定されたコマンド引数を設定します.
 	 * 
 	 * @param args
+	 * @return
 	 */
-	public static final void set(String[] args) {
+	public static final Args set(String[] args) {
 		if (MAIN_ARGS == null) {
 			MAIN_ARGS = args;
 			THIS = new Args();
 		}
+		return THIS;
 	}
 
 	/**

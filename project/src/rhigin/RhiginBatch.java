@@ -14,6 +14,7 @@ import rhigin.scripts.ScriptConstants;
 import rhigin.scripts.compile.CompileCache;
 import rhigin.scripts.function.RandomFunction;
 import rhigin.scripts.function.RequireFunction;
+import rhigin.util.Args;
 import rhigin.util.FileUtil;
 
 /**
@@ -21,28 +22,63 @@ import rhigin.util.FileUtil;
  */
 public class RhiginBatch {
 	public static final void main(String[] args) throws Exception {
-		// 引数が存在しない場合.
-		if (args == null || args.length == 0 || args[0].length() == 0) {
-			System.out.println("The file to be executed has not been set.");
-			System.exit(1);
-			return;
-		} else if (!FileUtil.isFile(args[0])) {
-			System.out.println("Target file does not exist:" + args[0]);
-			System.exit(1);
-			return;
-		}
-		RhiginConfig conf = RhiginStartup.initLogFactory(false, args);
-		RhiginBatch o = new RhiginBatch();
-
-		// バッチ実行.
-		if (o.batch(conf, args)) {
+		Args params = Args.set(args);
+		if(viewArgs()) {
 			System.exit(0);
-		} else {
-			System.exit(2);
+			return;
 		}
+		int ret = 0;
+		try {
+			String fileName = params.get("-f", "--file");
+			// 引数が存在しない場合.
+			if (fileName == null || fileName.isEmpty()) {
+				System.err.println("The file to be executed has not been set.");
+				System.exit(1);
+				return;
+			} else if (!FileUtil.isFile(fileName)) {
+				System.err.println("Target file does not exist: " + fileName);
+				System.exit(1);
+				return;
+			}
+			RhiginConfig conf = RhiginStartup.initLogFactory(false);
+			RhiginBatch o = new RhiginBatch();
+			// バッチ実行.
+			if (!o.batch(conf, fileName)) {
+				ret = 1;
+			}
+		} catch(Throwable t) {
+			t.printStackTrace();
+			ret = 1;
+		}
+		System.exit(ret);
+	}
+	
+	// プログラム引数による命令.
+	private static final boolean viewArgs() {
+		Args params = Args.getInstance();
+		if(params.isValue("-v", "--version")) {
+			System.out.println(RhiginConstants.VERSION);
+			return true;
+		} else if(params.isValue("-h", "--help")) {
+			System.out.println("rbatch [-h] [-v] [-c] [-f]");
+			System.out.println(" Perform rhigin batch execution.");
+			System.out.println("  [-h][--help]");
+			System.out.println("    Displays command help.");
+			System.out.println("  [-v][--version]");
+			System.out.println("    Get rhigin version.");
+			System.out.println("  [-c][--conf][--config]");
+			System.out.println("    Set the environment name for reading the configuration.");
+			System.out.println("    For example, when `-c hoge` is specified, the configuration ");
+			System.out.println("    information under `./conf/hoge/` is read.");
+			System.out.println("  [-f][--file] {fileName}");
+			System.out.println("    Set the Javascript file to be executed.");
+			System.out.println("    This setting is required.");
+			return true;
+		}
+		return false;
 	}
 
-	public boolean batch(RhiginConfig conf, String[] args) throws Exception {
+	public boolean batch(RhiginConfig conf, String fileName) throws Exception {
 		// 開始処理.
 		HttpInfo httpInfo = RhiginStartup.startup(conf);
 
@@ -56,8 +92,8 @@ public class RhiginBatch {
 
 		Reader r = null;
 		try {
-			r = new BufferedReader(new InputStreamReader(new FileInputStream(args[0]), "UTF8"));
-			final Script script = ExecuteScript.compile(r, args[0], ScriptConstants.HEADER, ScriptConstants.FOOTER, 0);
+			r = new BufferedReader(new InputStreamReader(new FileInputStream(fileName), "UTF8"));
+			final Script script = ExecuteScript.compile(r, fileName, ScriptConstants.HEADER, ScriptConstants.FOOTER, 0);
 			r.close();
 			r = null;
 			try {

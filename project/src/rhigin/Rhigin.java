@@ -11,6 +11,7 @@ import rhigin.logs.Log;
 import rhigin.logs.LogFactory;
 import rhigin.net.NioUtil;
 import rhigin.scripts.ExecuteScript;
+import rhigin.util.Args;
 import rhigin.util.Converter;
 
 /**
@@ -18,7 +19,35 @@ import rhigin.util.Converter;
  */
 public class Rhigin {
 	static {
+		// ネットワーク関連の初期設定.
 		NioUtil.initNet();
+	}
+	
+	// ロガー.
+	private static Log LOG = null;
+
+	/** Main. **/
+	public static final void main(String[] args) {
+		// プログラム引数による命令が完了した場合.
+		Args.set(args);
+		if(viewArgs()) {
+			System.exit(0);
+			return;
+		}
+		int ret = 0;
+		RhiginConfig conf = RhiginStartup.initLogFactory(true);
+		LOG = LogFactory.create();
+		try {
+			LOG.info("start rhigin version (" + RhiginConstants.VERSION + ").");
+			Rhigin rhigin = new Rhigin();
+			rhigin.execute(conf);
+		} catch (Throwable e) {
+			LOG.error("rhiginError", e);
+			ret = 1;
+		} finally {
+			LOG.info("exit rhigin.");
+		}
+		System.exit(ret);
 	}
 
 	// RhiginHttpオブジェクトをシャットダウン.
@@ -52,23 +81,27 @@ public class Rhigin {
 			log.info("end shutdown Rhigin version (" + RhiginConstants.VERSION + ").");
 		}
 	}
-
-	// ロガー.
-	private static Log LOG = null;
-
-	/** Main. **/
-	public static final void main(String[] args) {
-		RhiginConfig conf = RhiginStartup.initLogFactory(true, args);
-		LOG = LogFactory.create();
-		try {
-			LOG.info("start rhigin version (" + RhiginConstants.VERSION + ").");
-			Rhigin rhigin = new Rhigin();
-			rhigin.execute(conf);
-		} catch (Throwable e) {
-			LOG.error("rhiginError", e);
-		} finally {
-			LOG.info("exit rhigin.");
+	
+	// プログラム引数による命令.
+	private static final boolean viewArgs() {
+		Args params = Args.getInstance();
+		if(params.isValue("-v", "--version")) {
+			System.out.println(RhiginConstants.VERSION);
+			return true;
+		} else if(params.isValue("-h", "--help")) {
+			System.out.println("rhigin [-h] [-v] [-c]");
+			System.out.println(" Start the rhigin server.");
+			System.out.println("  [-h][--help]");
+			System.out.println("    Displays command help.");
+			System.out.println("  [-v][--version]");
+			System.out.println("    Get rhigin version.");
+			System.out.println("  [-c][--conf][--config]");
+			System.out.println("    Set the environment name for reading the configuration.");
+			System.out.println("    For example, when `-c hoge` is specified, the configuration ");
+			System.out.println("    information under `./conf/hoge/` is read.");
+			return true;
 		}
+		return false;
 	}
 
 	/** http. **/
