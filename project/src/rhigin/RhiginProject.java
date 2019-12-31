@@ -8,7 +8,6 @@ import rhigin.http.HttpConstants;
 import rhigin.util.Args;
 import rhigin.util.Converter;
 import rhigin.util.FileUtil;
-import rhigin.util.IsOs;
 
 /**
  * rhigin新規プロジェクト環境生成.
@@ -34,14 +33,12 @@ public class RhiginProject {
 
 	// プロジェクト実行.
 	private final boolean execute(String[] args) throws Exception {
+		Args params = Args.getInstance();
 		// プロジェクト名を取得.
-		String name = Args.getInstance().get("-n");
-		if (name == null) {
-			name = Args.getInstance().get("--name");
-		}
+		String name = params.get("-n", "--name");
 
 		// プロジェクト名が存在しないじゃ、ヘルプを表示.
-		if (name == null || Args.getInstance().isValue("-h") || Args.getInstance().isValue("--help")) {
+		if (name == null || params.isValue("-h", "--help")) {
 			if (name == null) {
 				System.out.println("> Project name is required.");
 				System.out.println("");
@@ -51,13 +48,10 @@ public class RhiginProject {
 		}
 
 		// バージョン情報を取得.
-		String version = Args.getInstance().get("-v");
-		if (version == null) {
-			version = Args.getInstance().get("--version");
-		}
+		String version = params.get("-v", "--version");
 		// バージョン情報が存在しない場合.
 		if (version == null) {
-			version = "1.0.0";
+			version = "NONE";
 		}
 
 		// 必要なフォルダを生成.
@@ -77,18 +71,18 @@ public class RhiginProject {
 		change("./conf/rhigin.json", "{{version}}", version);
 
 		// OSに対する起動バッチファイルをコピー.
-		if (IsOs.getInstance().getOS() == IsOs.OS_WINNT || IsOs.getInstance().getOS() == IsOs.OS_WIN9X) {
+		//if (IsOs.getInstance().getOS() == IsOs.OS_WINNT || IsOs.getInstance().getOS() == IsOs.OS_WIN9X) {
 			// windows用.
-			FileUtil.rcpy("res/rhigin/projects/rhigin.cmd", "./rhigin.cmd");
-			FileUtil.rcpy("res/rhigin/projects/rbatch.cmd", "./rbatch.cmd");
+		//	FileUtil.rcpy("res/rhigin/projects/rhigin.cmd", "./rhigin.cmd");
+		//	FileUtil.rcpy("res/rhigin/projects/rbatch.cmd", "./rbatch.cmd");
 
-		} else {
+		//} else {
 			// linux用.
 			FileUtil.rcpy("res/rhigin/projects/rhigin", "./rhigin");
 			FileUtil.rcpy("res/rhigin/projects/rbatch", "./rbatch");
 			setExecPermission("./rhigin");
 			setExecPermission("./rbatch");
-		}
+		//}
 
 		// プロジェクト作成完了.
 		return true;

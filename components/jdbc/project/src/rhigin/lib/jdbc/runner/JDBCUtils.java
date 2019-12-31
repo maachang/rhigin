@@ -96,6 +96,8 @@ public final class JDBCUtils {
 		case Types.BOOLEAN:
 			if (v instanceof Boolean) {
 				pre.setBoolean(no, (Boolean) v);
+			} else if(Converter.isNumeric(v)) {
+				pre.setBoolean(no, Converter.convertInt(v) == 1);
 			} else {
 				pre.setBoolean(no, Converter.convertBool(v));
 			}
@@ -121,14 +123,18 @@ public final class JDBCUtils {
 			break;
 		case Types.FLOAT:
 		case Types.REAL:
-			if (v instanceof Float) {
+			if (v instanceof Boolean) {
+				pre.setFloat(no, (((Boolean) v).booleanValue()) ? 1.0f : 0.0f);
+			} else if (v instanceof Float) {
 				pre.setFloat(no, (Float) v);
 			} else {
 				pre.setFloat(no, Converter.convertFloat(v));
 			}
 			break;
 		case Types.DOUBLE:
-			if (v instanceof Double) {
+			if (v instanceof Boolean) {
+				pre.setDouble(no, (((Boolean) v).booleanValue()) ? 1.0d : 0.0d);
+			} else if (v instanceof Double) {
 				pre.setDouble(no, (Double) v);
 			} else {
 				pre.setDouble(no, Converter.convertDouble(v));
@@ -136,7 +142,9 @@ public final class JDBCUtils {
 			break;
 		case Types.NUMERIC:
 		case Types.DECIMAL:
-			if (v instanceof BigDecimal) {
+			if (v instanceof Boolean) {
+				pre.setBigDecimal(no, new BigDecimal((((Boolean) v).booleanValue()) ? "1.0" : "0.0"));
+			} if (v instanceof BigDecimal) {
 				pre.setBigDecimal(no, (BigDecimal) v);
 			} else {
 				pre.setBigDecimal(no, new BigDecimal(Converter.convertDouble(v).toString()));
@@ -148,6 +156,14 @@ public final class JDBCUtils {
 		case Types.DATALINK:
 			if (v instanceof String) {
 				pre.setString(no, (String) v);
+			} else if(Converter.isNumeric(v)) {
+				Long n = Converter.convertLong(v);
+				// javascriptの場合、1 と設定しても 1.0 となるので、その場合は整数でセット.
+				if(Converter.convertDouble(n).equals(Converter.convertDouble(v))) {
+					pre.setString(no, Converter.convertString(n));
+				} else {
+					pre.setString(no, Converter.convertString(v));
+				}
 			} else {
 				pre.setString(no, Converter.convertString(v));
 			}
@@ -179,10 +195,10 @@ public final class JDBCUtils {
 		case Types.BLOB:
 			if (v instanceof byte[]) {
 				pre.setBytes(no, (byte[]) v);
-				break;
 			} else if (v instanceof String) {
 				pre.setBytes(no, ((String) v).getBytes("UTF8"));
-				break;
+			} else {
+				pre.setBytes(no, ("" + v).getBytes("UTF8"));
 			}
 			break;
 		case Types.JAVA_OBJECT:
@@ -192,7 +208,6 @@ public final class JDBCUtils {
 			pre.setObject(no, v);
 			break;
 		}
-
 	}
 
 	/**

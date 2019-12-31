@@ -31,6 +31,7 @@ import rhigin.scripts.function.LogFactoryFunction;
 import rhigin.scripts.function.NanoTimeFunction;
 import rhigin.scripts.function.RandomFunction;
 import rhigin.scripts.function.RequireFunction;
+import rhigin.scripts.function.RhiginEnvFunction;
 import rhigin.scripts.function.ServerIdFunction;
 import rhigin.scripts.function.SleepFunction;
 import rhigin.scripts.function.SystemTimeFunction;
@@ -392,6 +393,7 @@ public class ExecuteScript {
 		ServerIdFunction.regFunctions(scope);
 		ValidateFunction.regFunctions(scope);
 		EntityFunctions.regFunctions(scope);
+		RhiginEnvFunction.regFunctions(scope);
 
 		// オリジナルオブジェクトを設定.
 		Object[] kv;

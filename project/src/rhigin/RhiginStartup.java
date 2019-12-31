@@ -102,18 +102,12 @@ public class RhiginStartup {
 				initRhiginScriptFunctionObject();
 			}
 			
-			// 環境変数から、rhigin起動環境を取得.
-			String rhiginEnv = EnvCache.get(RhiginConstants.ENV_ENV);
-			
-			// プログラム引数からrhigin起動環境が設定されている場合.
-			// こちらの情報を優先的に利用する.
-			if(params.isValue("-e", "--env")) {
-				rhiginEnv = params.get("-e", "--env");
-			}
+			// rhiginEnvを取得.
+			String rhiginEnv = getRhiginEnv();
 
 			// コンフィグ読み込みディレクトリ先を、rhigin起動環境に合わせる.
 			String confDir = RhiginConstants.DIR_CONFIG;
-			if (rhiginEnv != null && rhiginEnv.length() != 0) {
+			if (rhiginEnv != null) {
 				confDir += rhiginEnv + "/";
 				// 対象フォルダが存在しない、対象フォルダ以下のコンフィグ情報が０件の場合は
 				// confフォルダ配下を読み込む.
@@ -137,6 +131,27 @@ public class RhiginStartup {
 			System.exit(1);
 		}
 		return config;
+	}
+
+	/**
+	 * RhiginEnvを取得.
+	 * 
+	 * @return String RhiginEnvが返却されます.
+	 */
+	public static final String getRhiginEnv() {
+		// 環境変数から、rhigin起動環境を取得.
+		String ret = EnvCache.get(RhiginConstants.ENV_ENV);
+		
+		// プログラム引数からrhigin起動環境が設定されている場合.
+		// こちらの情報を優先的に利用する.
+		Args params = Args.getInstance();
+		if(params.isValue("-e", "--env")) {
+			String n = params.get("-e", "--env");
+			if(n != null && !n.isEmpty()) {
+				ret = n;
+			}
+		}
+		return ret == null || ret.isEmpty() ? null : ret;
 	}
 
 	/**
