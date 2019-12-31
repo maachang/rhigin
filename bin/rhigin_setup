@@ -3,6 +3,15 @@
 # 現在のパスを保持.
 NOW_PATH=` pwd`
 
+# RHIGIN_HOMEが設定されていない場合. 
+if [ "${RHIGIN_HOME}" = "" ]; then
+    # 現在ユーザの.profileにRHIGIN_HOMEを設定.
+    TARGET_DIR=$(cd $(dirname $0); pwd)
+    echo "export RHIGIN_HOME=${TARGET_DIR}" >> ~/.profile
+    echo 'export PATH=${PATH}:${RHIGIN_HOME}' >> ~/.profile
+    source ~/.profile
+fi
+
 # RHIGIN_HOMEに移動.
 cd ${RHIGIN_HOME}
 
@@ -20,3 +29,4 @@ chmod 755 ../components/jdbc/bin/*
 
 # 元のパスに戻る.
 cd ${NOW_PATH}
+exit 0

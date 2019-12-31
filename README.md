@@ -39,11 +39,10 @@ _
 _
 
 だけど上記実装では、本来単純に「DBからデータを取得して、コンソールに出力」と単純な処理でしかなく。
-```
-1. DB接続
-2. SQL実行
-3. 処理結果をログ出力.
-```
+
+- DB接続
+- SQL実行
+- 処理結果をログ出力.
 
 _
 
@@ -108,19 +107,17 @@ _
 
 # 興味をお持ちの方は、rhiginをインストールして、実行してみてください
 
-当プロジェクトのrhiginに、もしご興味をお持ちの方はrhiginをインストールして、実行してみてください。
+当プロジェクトのrhiginに、もしご興味をお持ちの方はrhiginをインストールして、実行していただければ幸いです。
 
 以下の流れによって、rhiginをインストールして実行します。
 
-```
-1) gitからrhiginをクローンする。
+- [gitからrhiginをクローンする](#gitからrhiginをクローンして環境パスを通します)
 
-2) RHIGIN_HOMEの環境パスを通す。
+- [RHIGIN_HOMEの環境パスを通す](#gitからrhiginをクローンして環境パスを通します)
 
-3) rhiginプロジェクトを作成する。
+- [rhiginプロジェクトを作成する](#rhigin用のプロジェクトを作成します)
 
-4) rhiginプロジェクトを実行する。
-```
+- [rhiginプロジェクトを実行する](#作成したプロジェクトを実際に動かしてみます)
 
 ５分ほどのお時間で実行できると思いますので、お試しいただければ幸いです。
 
@@ -142,21 +139,28 @@ $ cd project
 
 $ git clone https://github.com/maachang/rhigin.git
 
-$ echo "export RHIGIN_HOME=~/project/rhigin/bin" >> ~/.profile
-$ echo "export PATH=${PATH}:${RHIGIN_HOME}" >> ~/.profile
-$ source ~/.profile
-
 $ cd rhigin
+$ chmod 755 ./bin/rhigin_setup
 $ ./bin/rhigin_setup
 
 $ ant
 ```
 
-_
+別途、RHIGIN_HOMEを定義する場合は `./bin/rhigin_setup` を実行する前に以下な感じで設定します。
+
+```sh
+$ echo "export RHIGIN_HOME=~/project/rhigin/bin" >> ~/.profile
+$ echo 'export PATH=${PATH}:${RHIGIN_HOME}' >> ~/.profile
+$ source ~/.profile
+```
+
+この設定は `./bin/rhigin_setup` を実行したときに設定されますが、既に設定されてる場合は勝手に設定されません。
 
 _
 
-## rhigin 用のプロジェクトを作成します
+_
+
+## rhigin用のプロジェクトを作成します
 
 ※ ~/project/フォルダ配下にtestServerフォルダを作成して、rhiginプロジェクトを作成しています。  
 
@@ -227,6 +231,15 @@ _
 表示結果：
 {"success":true,"status":200,"value":{"hello":"world"}}
 ```
+
+_
+
+_
+
+簡単ですが、rhiginを導入から動作までを記載しました。
+
+もしrhiginに興味を持ち、もう少し知りたいて思いましたら、以下を参照していただければ幸いです。
+
 
 
 

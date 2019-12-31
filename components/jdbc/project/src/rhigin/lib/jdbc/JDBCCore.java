@@ -15,11 +15,8 @@ import rhigin.lib.jdbc.runner.JDBCCloseable;
 import rhigin.lib.jdbc.runner.JDBCConnect;
 import rhigin.lib.jdbc.runner.JDBCException;
 import rhigin.lib.jdbc.runner.JDBCKind;
-import rhigin.scripts.JsonOut;
-import rhigin.util.Converter;
 import rhigin.util.FixedArray;
 import rhigin.util.Flag;
-import rhigin.util.ObjectList;
 
 /**
  * JDBCコアオブジェクト.

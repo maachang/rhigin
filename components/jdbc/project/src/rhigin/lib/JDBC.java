@@ -171,9 +171,6 @@ public class JDBC implements JavaRequire {
 			return "unknown";
 		}
 		
-		private static final JDBCException noStartupException() {
-			throw new JDBCException("Initialization processing ([JDBC].startup();) has not been performed.");
-		}
 	};
 	
 	// JDBCコネクションオブジェクトを生成.

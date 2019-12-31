@@ -25,7 +25,7 @@ public final class BinaryFunction extends RhiginFunction {
 	@Override
 	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		if (args.length >= 1) {
-			if (Converter.isFloat(args[0])) {
+			if (Converter.isNumeric(args[0])) {
 				return new byte[Converter.convertInt(args[0])];
 			} else if (args[0] instanceof String) {
 				try {
@@ -40,7 +40,7 @@ public final class BinaryFunction extends RhiginFunction {
 		}
 		return argsException();
 	}
-
+	
 	/**
 	 * スコープにライブラリを登録.
 	 * 

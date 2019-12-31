@@ -1,15 +1,16 @@
-#!/bin/sh
+#!/bin/bash
 ################################################################################
 # rhiginコンポーネントをプロジェクトに取り込むための処理.
 ################################################################################
 COMPONENT_NAME=${1}
 ATHER_ARGS=${2}
+ARGS=${*}
 
 # コンポーネント名が存在しない場合.
 if [ "${COMPONENT_NAME}" = "" ]; then
     echo "The component name must be set."
     echo ""
-    echo "$ rlib [component] [ather] ..."
+    echo "$ rlib {component name} {ather params} ..."
     exit 1
 fi
 
@@ -55,7 +56,7 @@ fi
 # コンポーネント内のrlibシェルがある場合は、それを実行.
 RLIB_FILE=rlib
 if [ -e $RLIB_FILE ]; then
-    sh rlib "${COMPONENT_PATH}" "${NOW_PATH}" "${ATHER_ARGS}"
+    sh rlib "${COMPONENT_PATH}" "${NOW_PATH}" "${ATHER_ARGS}" ${ARGS}
     if [ $? != 0 ]; then
         cd ${NOW_PATH}
         exit 1

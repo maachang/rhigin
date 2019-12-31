@@ -22,7 +22,7 @@ public class EntityFunctions {
 		local.set(null);
 	}
 
-	// entity.
+	// expose.
 	private static final class ExposeFunction extends RhiginFunction {
 		private static final ExposeFunction THIS = new ExposeFunction();
 
