@@ -31,10 +31,10 @@ public class JDBCCsv {
 	
 	public static final void main(String[] args) throws Exception {
 		// コマンド引数を解析.
-		final Args params = new Args(args);
+		final Args params = Args.set(args);
 		// help表示.
 		if(params.isValue("-h", "--help")) {
-			System.out.println("jcsv [-c --conf --config] [-j --jdbc] [-t --table] [-s --charset] [-d --delete] {file}");
+			System.out.println("jcsv [-c] [-j] [-t] [-s] [-d] [-e] {file}");
 			System.out.println(" Read CSV and insert into database table.");
 			System.out.println("  [-c] [--conf] [--config] {args}");
 			System.out.println("    Set the configuration definition file name.");
@@ -56,11 +56,20 @@ public class JDBCCsv {
 			System.out.println("    Set to delete all database contents.");
 			System.out.println("    If not set, all data will not be deleted.");
 			//System.out.println();
+			System.out.println("  [-e] [--env]");
+			System.out.println("    Set the environment name for reading the configuration.");
+			System.out.println("    For example, when `-e hoge` is specified, the configuration ");
+			System.out.println("    information under `./conf/hoge/` is read.");
+			//System.out.println();
 			System.out.println("  {file}");
 			System.out.println("    If [-j or -t] is omitted, each is interpreted by the file name.");
 			System.out.println("      {file} = [jdbc name].[table name].csv");
 			System.out.println("    If [-j or -t] is not omitted, set an arbitrary file name.");
 			System.out.println();
+			System.exit(0);
+			return;
+		} else if(params.isValue("-v", "--version")) {
+			System.out.println(JDBC.VERSION);
 			System.exit(0);
 			return;
 		}

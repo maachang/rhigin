@@ -107,8 +107,8 @@ public class RhiginStartup {
 			
 			// プログラム引数からrhigin起動環境が設定されている場合.
 			// こちらの情報を優先的に利用する.
-			if(params.isValue("-c", "--conf", "--config")) {
-				rhiginEnv = params.get("-c", "--conf", "--config");
+			if(params.isValue("-e", "--env")) {
+				rhiginEnv = params.get("-e", "--env");
 			}
 
 			// コンフィグ読み込みディレクトリ先を、rhigin起動環境に合わせる.

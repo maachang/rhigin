@@ -89,15 +89,11 @@ public class Rhigin {
 			System.out.println(RhiginConstants.VERSION);
 			return true;
 		} else if(params.isValue("-h", "--help")) {
-			System.out.println("rhigin [-h] [-v] [-c]");
+			System.out.println("rhigin [-e]");
 			System.out.println(" Start the rhigin server.");
-			System.out.println("  [-h][--help]");
-			System.out.println("    Displays command help.");
-			System.out.println("  [-v][--version]");
-			System.out.println("    Get rhigin version.");
-			System.out.println("  [-c][--conf][--config]");
+			System.out.println("  [-e] [--env]");
 			System.out.println("    Set the environment name for reading the configuration.");
-			System.out.println("    For example, when `-c hoge` is specified, the configuration ");
+			System.out.println("    For example, when `-e hoge` is specified, the configuration ");
 			System.out.println("    information under `./conf/hoge/` is read.");
 			return true;
 		}

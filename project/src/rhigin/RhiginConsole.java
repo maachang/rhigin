@@ -48,15 +48,11 @@ public class RhiginConsole {
 			System.out.println(RhiginConstants.VERSION);
 			return true;
 		} else if(params.isValue("-h", "--help")) {
-			System.out.println("rcons [-h] [-v] [-c]");
+			System.out.println("rcons [-e]");
 			System.out.println(" Run the rhigin console.");
-			System.out.println("  [-h][--help]");
-			System.out.println("    Displays command help.");
-			System.out.println("  [-v][--version]");
-			System.out.println("    Get rhigin version.");
-			System.out.println("  [-c][--conf][--config]");
+			System.out.println("  [-e] [--env]");
 			System.out.println("    Set the environment name for reading the configuration.");
-			System.out.println("    For example, when `-c hoge` is specified, the configuration ");
+			System.out.println("    For example, when `-e hoge` is specified, the configuration ");
 			System.out.println("    information under `./conf/hoge/` is read.");
 			return true;
 		}

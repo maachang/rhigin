@@ -35,17 +35,26 @@ public class JDBCConsole {
 	
 	public static final void main(String[] args) throws Exception {
 		// コマンド引数を解析.
-		final Args params = new Args(args);
+		final Args params = Args.set(args);
 		// help表示.
 		if(params.isValue("-h", "--help")) {
-			System.out.println("jdbc [-c --conf --config] [-f --file]");
+			System.out.println("jdbc [-c] [-e] [-f]");
 			System.out.println(" Executes SQL statement console and file execution.");
 			System.out.println("  [-c] [--conf] [--config] {args}");
 			System.out.println("    Set the configuration definition file name.");
 			//System.out.println();
+			System.out.println("  [-e] [--env]");
+			System.out.println("    Set the environment name for reading the configuration.");
+			System.out.println("    For example, when `-e hoge` is specified, the configuration ");
+			System.out.println("    information under `./conf/hoge/` is read.");
+			//System.out.println();
 			System.out.println("  [-f] [--file] {args}");
 			System.out.println("    Set the SQL execution file name.");
 			System.out.println();
+			System.exit(0);
+			return;
+		} else if(params.isValue("-v", "--version")) {
+			System.out.println(JDBC.VERSION);
 			System.exit(0);
 			return;
 		}

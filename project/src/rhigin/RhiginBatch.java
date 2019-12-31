@@ -60,17 +60,13 @@ public class RhiginBatch {
 			System.out.println(RhiginConstants.VERSION);
 			return true;
 		} else if(params.isValue("-h", "--help")) {
-			System.out.println("rbatch [-h] [-v] [-c] [-f]");
+			System.out.println("rbatch [-e] [-f]");
 			System.out.println(" Perform rhigin batch execution.");
-			System.out.println("  [-h][--help]");
-			System.out.println("    Displays command help.");
-			System.out.println("  [-v][--version]");
-			System.out.println("    Get rhigin version.");
-			System.out.println("  [-c][--conf][--config]");
+			System.out.println("  [-e] [--env]");
 			System.out.println("    Set the environment name for reading the configuration.");
-			System.out.println("    For example, when `-c hoge` is specified, the configuration ");
+			System.out.println("    For example, when `-e hoge` is specified, the configuration ");
 			System.out.println("    information under `./conf/hoge/` is read.");
-			System.out.println("  [-f][--file] {fileName}");
+			System.out.println("  [-f] [--file] {fileName}");
 			System.out.println("    Set the Javascript file to be executed.");
 			System.out.println("    This setting is required.");
 			return true;
