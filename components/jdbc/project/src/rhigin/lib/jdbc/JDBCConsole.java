@@ -238,8 +238,8 @@ public class JDBCConsole {
 			return true;
 		} else if(Alphabet.eq("sequence", cmd)) {
 			if(!noConsole) {
-				if(connectParams == null && connectParams.length > 1) {
-					System.out.println();
+				if(connectParams == null || connectParams.length > 1) {
+					System.out.println(JDBCConnect.NON_SEQUENCE);
 				} else {
 					final byte[] b = core.getTime12SequenceId(""+connectParams[0]).next();
 					System.out.println(Time12SequenceId.toString(b));

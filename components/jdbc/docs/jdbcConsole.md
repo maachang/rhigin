@@ -38,6 +38,7 @@ kind {name}     Displays the specified connection definition details.
                 {name} Set the connection name.
 connect {name}  Set and display current connection name.
                 {name} Set the connection name.
+sequence        Get the 16 character sequence ID.
 ```
 
 逆に言えば、複数行に渡って入力ができるようになっています。
@@ -70,6 +71,7 @@ JDBCコンソール機能では、JDBC経由でのSQL文の実行を行うこと
 - [list](#6-6list)
 - [kind](#6-7kind)
 - [connect](#6-8connect)
+- [sequence](#6-9sequence)
 
 以下より、それらのコマンドに対する説明を行います。
 
@@ -92,6 +94,7 @@ kind {name}     Displays the specified connection definition details.
                 {name} Set the connection name.
 connect {name}  Set and display current connection name.
                 {name} Set the connection name.
+sequence        Get the 16 character sequence ID.
 ```
 
 _
@@ -200,6 +203,47 @@ JDBC> connect;
 ```sql
 JDBC> connect h2db;
 ```
+
+また、JDBC接続定義名で接続せず、直接接続する場合は、以下のように設定します。
+
+```sql
+JDBC> connect "org.h2.Driver" "jdbc:h2:./h2db/h2db";
+```
+
+connect {JDBCドライバ名} {JDBC-URL} {userName} {password};
+
+と設定することで、直接接続が行なえます。
+
+_
+
+## 6-9）sequence
+
+１６文字のシーケンスIDを取得します。
+
+また、この値は現在カレント接続がJDBC接続名の場合のみ、取得することが出来ます。
+
+```sql
+JDBC> connect h2db;
+
+> connect h2db;
+
+JDBC> sequence;
+
+> sequence;
+AAABb2SsonsAAAAA
+
+JDBC> connect "org.h2.Driver" "jdbc:h2:./h2db/h2db";
+
+> connect "org.h2.Driver" "jdbc:h2:./h2db/h2db";
+
+JDBC> sequence;
+
+> sequence;
+f///////////////
+
+```
+
+取得に失敗した場合は `f///////////////` が返却されます。
 
 _
 
