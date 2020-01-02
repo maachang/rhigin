@@ -51,7 +51,7 @@ public class JDBCCsv {
 			//System.out.println();
 			System.out.println("  [-s] [--charset] {args}");
 			System.out.println("    Set the character code of the CSV file.");
-			System.out.println("    If not specified, \"Windows-31J\" will be set.");
+			System.out.println("    If not specified, \""+ DEF_CHARSET + "\" will be set.");
 			//System.out.println();
 			System.out.println("  [-d] [--delete]");
 			System.out.println("    Set to delete all database contents.");

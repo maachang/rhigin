@@ -252,7 +252,7 @@ jcsv [-c --conf --config] [-j --jdbc] [-t --table] [-s --charset] [-d --delete] 
     If omitted, it must be set with the name of {file}.
   [-s] [--charset] {args}
     Set the character code of the CSV file.
-    If not specified, "Windows-31J" will be set.
+    If not specified, "UTF8" will be set.
   [-d] [--delete]
     Set to delete all database contents.
     If not set, all data will not be deleted.
