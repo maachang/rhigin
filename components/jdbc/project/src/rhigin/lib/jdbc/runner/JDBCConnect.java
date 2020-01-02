@@ -9,6 +9,7 @@ import java.util.Map;
 
 import rhigin.lib.jdbc.pooling.AtomicPoolConnection;
 import rhigin.util.ArrayMap;
+import rhigin.util.Time12SequenceId;
 
 /**
  * JDBC-Connect.
@@ -18,10 +19,15 @@ public class JDBCConnect {
 	protected JDBCCloseable closeable = null;
 	protected Connection conn = null;
 	protected JDBCKind kind = null;
-	private JDBCBatch batch = null;
+	protected JDBCBatch batch = null;
+	protected Time12SequenceId sequence = null;
 	
 	// 今回のコネクション専用のフェッチサイズ.
-	private int fetchSize = -1;
+	protected int fetchSize = -1;
+	
+	/** 無効なシーケンスID. **/
+	public static final String NON_SEQUENCE = "f///////////////";
+	
 	
 	/**
 	 * コンストラクタ.
@@ -32,14 +38,16 @@ public class JDBCConnect {
 	 * 生成処理.
 	 * @param c
 	 * @param ac
+	 * @param seq
 	 * @return
 	 */
-	public static final JDBCConnect create(JDBCCloseable c, Connection ac) {
+	public static final JDBCConnect create(JDBCCloseable c, Time12SequenceId seq, Connection ac) {
 		JDBCConnect ret = new JDBCConnect();
 		ret.kind = (c instanceof AtomicPoolConnection) ? ((AtomicPoolConnection)c).getKind() : null;
 		ret.batch = new JDBCBatch(ret);
 		ret.closeable = c;
 		ret.conn = ac;
+		ret.sequence = seq;
 		c.reg(ac);
 		c.reg(ret.batch);
 		return ret;
@@ -380,6 +388,25 @@ public class JDBCConnect {
 	public JDBCBatch getBatch() {
 		check();
 		return batch;
+	}
+	
+	/**
+	 * シーケンスIDが利用可能かチェック.
+	 * @return
+	 */
+	public boolean isSequenceId() {
+		return sequence != null;
+	}
+	
+	/**
+	 * シーケンスIDを取得.
+	 * @return
+	 */
+	public String getSequenceId() {
+		check();
+		// シーケンスIDが利用出来ない場合は、最大値を返却.
+		return sequence == null ? NON_SEQUENCE :
+			Time12SequenceId.toString(sequence.next());
 	}
 }
 

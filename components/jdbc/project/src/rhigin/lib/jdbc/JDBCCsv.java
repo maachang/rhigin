@@ -5,6 +5,7 @@ import java.util.Map;
 import rhigin.lib.JDBC;
 import rhigin.lib.jdbc.runner.JDBCConnect;
 import rhigin.lib.jdbc.runner.JDBCException;
+import rhigin.util.Alphabet;
 import rhigin.util.Args;
 import rhigin.util.Converter;
 import rhigin.util.CsvReader;
@@ -98,13 +99,16 @@ public class JDBCCsv {
 				throw new JDBCException("The specified csv file does not exist: " + fileName);
 			}
 			
+			// ファイル名のみを取得.
+			String fileOnlyName = FileUtil.getFileName(fileName);
+			
 			// JDBC接続名が設定されていない場合は、ファイル名から取得.
-			jdbc = csvFileNameByJdbcDefine(jdbc, fileName);
+			jdbc = csvFileNameByJdbcDefine(jdbc, fileOnlyName);
 			if(jdbc == null || jdbc.isEmpty()) {
 				throw new JDBCException("jdbc connection name is not set.");
 			}
 			// テーブル名が設定されていない場合は、ファイル名から取得.
-			table = csvFileNameByTableDefine(table, fileName);
+			table = csvFileNameByTableDefine(table, fileOnlyName);
 			if(table == null || table.isEmpty()) {
 				throw new JDBCException("Table name is not set.");
 			}
@@ -185,11 +189,17 @@ public class JDBCCsv {
 	}
 	
 	// オブジェクトの内容をリスト変換.
-	private static final Object[] getSqlParams(Map<String, Object> row) {
+	private static final Object[] getSqlParams(JDBCConnect conns, Map<String, Object> row) {
+		String c;
 		final int len = row.size();
 		Object[] ret = new Object[len];
 		for(int i = 0; i < len; i ++) {
-			ret[i] = row.get(""+i);
+			c = (String)row.get(""+i);
+			// １６文字のシーケンスIDを付与する場合。
+			if(Alphabet.eq("{seq}", c) || Alphabet.eq("{sequence}", c)) {
+				c = conns.getSequenceId();
+			}
+			ret[i] = c;
 		}
 		return ret;
 	}
@@ -218,7 +228,7 @@ public class JDBCCsv {
 			
 			// insert処理.
 			while(csv.hasNext()) {
-				conns.addBatch(sql, getSqlParams(csv.next()));
+				conns.addBatch(sql, getSqlParams(conns, csv.next()));
 				cnt ++;
 				// 一定数のバッチ実行が終わったら、データベースに一斉送信.
 				if(cnt > SEND_BATCH_COUNT) {

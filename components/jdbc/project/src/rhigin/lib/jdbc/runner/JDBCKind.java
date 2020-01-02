@@ -36,6 +36,9 @@ public class JDBCKind {
 	// oracleやderbyなど.
 	private boolean notSemicolon = false;
 	
+	// マシンID.
+	private int machineId = 0;
+	
 	/**
 	 * コンストラクタ.
 	 */
@@ -102,6 +105,14 @@ public class JDBCKind {
 			}
 		}
 		ret.notSemicolon = checkNotSemicolon(ret.url);
+		if(conf.containsKey("machineId") && Converter.isNumeric(conf.get("machineId"))) {
+			ret.machineId = Converter.convertInt(conf.get("machineId"));
+			if(ret.machineId >= 511) {
+				ret.machineId = 511;
+			} else if(ret.machineId <= 0) {
+				ret.machineId = 0;
+			}
+		}
 		ret.check();
 		return ret;
 	}
@@ -119,7 +130,9 @@ public class JDBCKind {
 	 * @param fetchSize
 	 * @param poolingSize
 	 * @param poolingTimeout
-	 * @param driverParams
+	 * @param machineId
+	 * @param urlType
+	 * @param urlParams
 	 * @param params
 	 * @return
 	 */
@@ -127,7 +140,7 @@ public class JDBCKind {
 	public static final JDBCKind create(String name, String driver, String url,
 		String user, String password, boolean readOnly, Integer busyTimeout,
 		Object transactionLevel, Integer fetchSize, Integer poolingSize, Integer poolingTimeout,
-		boolean urlType, Object urlParams, Map<String, Object> params) {
+		int machineId, boolean urlType, Object urlParams, Map<String, Object> params) {
 		JDBCKind ret = new JDBCKind();
 		ret.name = name;
 		ret.driver = driver;
@@ -156,6 +169,12 @@ public class JDBCKind {
 			}
 		}
 		ret.notSemicolon = checkNotSemicolon(ret.url);
+		ret.machineId = machineId;
+		if(ret.machineId >= 511) {
+			ret.machineId = 511;
+		} else if(ret.machineId <= 0) {
+			ret.machineId = 0;
+		}
 		ret.check();
 		return ret;
 	}
@@ -418,6 +437,14 @@ public class JDBCKind {
 	}
 	
 	/**
+	 * マシンIDを取得.
+	 * @return
+	 */
+	public int getMachineId() {
+		return machineId;
+	}
+	
+	/**
 	 * Kind設定内容をMapで取得.
 	 * @return
 	 */
@@ -427,7 +454,7 @@ public class JDBCKind {
 			"password", password, "readOnly", readOnly, "urlParams", urlParams,
 			"busyTimeout", busyTimeout, "transactionLevel", transactionLevel, "fetchSize", fetchSize,
 			"params", new ArrayMap(params), "poolingSize", poolingSize, "poolingTimeout", poolingTimeout,
-			"notSemicolon", notSemicolon);
+			"notSemicolon", notSemicolon, "machineId", machineId);
 	}
 	
 	/**

@@ -19,6 +19,7 @@ import rhigin.util.ConsoleInKey.StringIgnoreCaseCompleter;
 import rhigin.util.Converter;
 import rhigin.util.FileUtil;
 import rhigin.util.ObjectList;
+import rhigin.util.Time12SequenceId;
 
 /**
  * JDBCコンソール.
@@ -192,6 +193,7 @@ public class JDBCConsole {
 				System.out.println("                {name} Set the connection name.");
 				System.out.println("connect {name}  Set and display current connection name.");
 				System.out.println("                {name} Set the connection name.");
+				System.out.println("sequence        Get the 16 character sequence ID.");
 				System.out.println("");
 			}
 			return true;
@@ -233,6 +235,16 @@ public class JDBCConsole {
 			return true;
 		} else if(Alphabet.indexOf(cmd, "connect") == 0) {
 			currentConnect(noConsole, core, cmd);
+			return true;
+		} else if(Alphabet.eq("sequence", cmd)) {
+			if(!noConsole) {
+				if(connectParams == null && connectParams.length > 1) {
+					System.out.println();
+				} else {
+					final byte[] b = core.getTime12SequenceId(""+connectParams[0]).next();
+					System.out.println(Time12SequenceId.toString(b));
+				}
+			}
 			return true;
 		}
 		return false;
@@ -304,7 +316,7 @@ public class JDBCConsole {
 		"cast", "convert", "index", "user", "grant", "revoke", "trigger", "begin",
 		"transaction", "tran", "work", "start", "save",
 		// 以下は、今回のコンソール専用.
-		"help", "exit", "quit", "close", "list", "kind", "connect"
+		"help", "exit", "quit", "close", "list", "kind", "connect", "sequence"
 	};
 	
 	// コンソール実行.

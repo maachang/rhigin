@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import rhigin.RhiginConfig;
 import rhigin.RhiginStartup;
@@ -17,6 +18,7 @@ import rhigin.lib.jdbc.runner.JDBCException;
 import rhigin.lib.jdbc.runner.JDBCKind;
 import rhigin.util.FixedArray;
 import rhigin.util.Flag;
+import rhigin.util.Time12SequenceId;
 
 /**
  * JDBCコアオブジェクト.
@@ -31,6 +33,7 @@ public class JDBCCore {
 	protected final AtomicPoolingManager man = new AtomicPoolingManager();
 	protected final AtomicPoolingMonitor mon = new AtomicPoolingMonitor();
 	protected final JDBCCloseable closeable = new JDBCCloseable();
+	protected final Map<String, Time12SequenceId> sequenceKind = new ConcurrentHashMap<String, Time12SequenceId>();
 	
 	/**
 	 * コンストラクタ.
@@ -161,7 +164,7 @@ public class JDBCCore {
 			throw new JDBCException(
 				"Connection information with the specified name does not exist:" + name);
 		}
-		return JDBCConnect.create(closeable, p.getConnection());
+		return JDBCConnect.create(closeable, _getTime12SequenceId(name), p.getConnection());
 	}
 	
 	/**
@@ -189,7 +192,7 @@ public class JDBCCore {
 		check();
 		try {
 			final Connection c = AtomicPooling.getConnetion(driver, url, user, password);
-			return JDBCConnect.create(closeable, c);
+			return JDBCConnect.create(closeable, null, c);
 		} catch(JDBCException je) {
 			throw je;
 		} catch(Exception e) {
@@ -326,6 +329,28 @@ public class JDBCCore {
 	 * @return
 	 */
 	public String getName(int no) {
+		check();
 		return man.getName(no);
 	}
+	
+	/**
+	 * シーケンスID発行オブジェクトを取得.
+	 * @param name
+	 * @return
+	 */
+	public Time12SequenceId getTime12SequenceId(String name) {
+		check();
+		return _getTime12SequenceId(name);
+	}
+	
+	private Time12SequenceId _getTime12SequenceId(String name) {
+		Time12SequenceId ret = sequenceKind.get(name);
+		if(ret == null) {
+			JDBCKind kind = getKind(name);
+			ret = new Time12SequenceId(kind.getMachineId());
+			sequenceKind.put(name, ret);
+		}
+		return ret;
+	}
+
 }

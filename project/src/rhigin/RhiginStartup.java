@@ -91,7 +91,6 @@ public class RhiginStartup {
 	 * @return RhiginConfig
 	 */
 	public static final RhiginConfig initLogFactory(boolean server, boolean noScript) {
-		Args params = Args.getInstance();
 		RhiginConfig config = null;
 		try {
 			// webServerモードをセット.

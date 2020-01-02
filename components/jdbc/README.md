@@ -204,6 +204,7 @@ conf/jdbc.json
         ,"fetchSize":        -1                 // フェッチサイズ(0以下で無効).
         ,"poolSize":         -1                 // プーリングサイズ(0以下で最大プーリング数).
         ,"poolTimeout":      -1                 // プーリングタイムアウト.
+        ,"machineId":        0                  // マシンID(0 - 511).
         ,"params":
         // JDBCパラメータ.
         {
@@ -360,100 +361,14 @@ JDBC接続コンポーネントでは、CSVファイルをテーブルにイン�
 使い方は以下の通りです。
 
 ```sh
-$ jcsv {CSVファイル名}
+$ ./jcsv {CSVファイル名}
 ```
 
 テーブルにインポートされるCSVファイルには、いくつかルールがあります。
 
 _
 
-**Ａ）JDBC接続名、テーブル名は、ファイル名で定義できる。**
-
-たとえば、JDBC接続名が「h2db」で、テーブル名が「NAME_AGE_LIST」に対してインポートする場合。
-
-```
-h2db.NAME_AGE_LIST.csv
-```
-
-と言うファイル名にすることで、対応出来ます。
-
-また、ファイル名で定義しない場合は、以下の方法で行います。
-
-```sh
-$ jcsv -j h2db -t NAME_AGE_LIST {CSVファイル名}
-```
-
-_
-
-**Ｂ）CSVファイル内容は、１行目に対象カラム名、２行目以降をインポート対象のカラムデータを設定します。**
-
-h2db.NAME_AGE_LIST.csv
-```csv
-name,age
-hoge,24
-moge,18
-suzuki,23
-```
-
-この場合、以下のSQL文を実行するのと同じになります。
-```sql
-INSERT INTO NAME_AGE_LIST(name, age) VALUES ('hoge', 24);
-INSERT INTO NAME_AGE_LIST(name, age) VALUES ('moge', 18);
-INSERT INTO NAME_AGE_LIST(name, age) VALUES ('suzuki', 23);
-```
-
-_
-
-**Ｃ）CSVファイルのデフォルトの文字コードは「UTF8」で保存します。**
-
-文字コードを指定する場合は、以下の様に行います。
-
-```sh
-$ jcsv -s Windows-31J {CSVファイル名}
-```
-上記の場合は、文字コード「Windows-31J」でCSVファイルをオープンします。
-
-_
-
-**Ｄ）一旦テーブルを全削除して、インサートすることができます。**
-
-以下のオプションで行うことが出来ます。
-
-```sh
-./jcsv -d {csvファイル名}
-```
-データを追加する前に `DELETE FROM TABLE_NAME;` が実行されます。
-
-対象のテーブル内のカラムに、AUTO_INCREMENTが存在する場合、その内容はリセットされないので注意が必要です。
-
-_
-
-詳しくは、コマンドの使い方はヘルプを指定すると閲覧出来ます。
-
-```sh
-$ ./jcsv -h
-jcsv [-c --conf --config] [-j --jdbc] [-t --table] [-s --charset] [-d --delete] {file}
- Read CSV and insert into database table.
-  [-c] [--conf] [--config] {args}
-    Set the configuration definition file name.
-    If omitted, "jdbc" character is specified.
-  [-j] [--jdbc] {args}
-    Set the connection definition name of jdbc.
-    If omitted, it must be set with the name of {file}.
-  [-t] [--table] {args}
-    Set the write destination table name.
-    If omitted, it must be set with the name of {file}.
-  [-s] [--charset] {args}
-    Set the character code of the CSV file.
-    If not specified, "Windows-31J" will be set.
-  [-d] [--delete]
-    Set to delete all database contents.
-    If not set, all data will not be deleted.
-  {file}
-    If [-j or -t] is omitted, each is interpreted by the file name.
-      {file} = [jdbc name].[table name].csv
-    If [-j or -t] is not omitted, set an arbitrary file name.
-```
+jcsvコマンドの詳しいルールは、[詳細リンク](https://github.com/maachang/rhigin/blob/master/components/jdbc/docs/jdbcCsv.md)より参照できます。
 
 _
 

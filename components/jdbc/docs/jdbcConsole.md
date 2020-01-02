@@ -173,7 +173,8 @@ JDBC> kind h2db;
   "params": {},
   "poolingSize": -1,
   "poolingTimeout": -1,
-  "notSemicolon": false
+  "notSemicolon": false,
+  "machineId": 0
 }
 ```
 

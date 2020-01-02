@@ -28,7 +28,7 @@ public final class JDBCUtils {
 	 * @param meta   パラメータメタデータを設定します.
 	 * @param params 対象のパラメータを設定します.
 	 */
-	public static final void preParams(final PreparedStatement pre, ParameterMetaData meta, Object[] params)
+	public static final void preParams(final PreparedStatement pre, final ParameterMetaData meta, final Object[] params)
 			throws Exception {
 		int len = params.length;
 		for (int i = 0; i < len; i++) {
@@ -39,7 +39,7 @@ public final class JDBCUtils {
 	/**
 	 * 1つのパラメータセット.
 	 */
-	public static final void putParam(final int no, final PreparedStatement pre, ParameterMetaData meta, Object v)
+	public static final void putParam(final int no, final PreparedStatement pre, final ParameterMetaData meta, final Object v)
 			throws Exception {
 
 		// ParameterMetaDataがサポートしていない場合.
@@ -157,8 +157,8 @@ public final class JDBCUtils {
 			if (v instanceof String) {
 				pre.setString(no, (String) v);
 			} else if(Converter.isNumeric(v)) {
-				Long n = Converter.convertLong(v);
 				// javascriptの場合、1 と設定しても 1.0 となるので、その場合は整数でセット.
+				final Long n = Converter.convertLong(v);
 				if(Converter.convertDouble(n).equals(Converter.convertDouble(v))) {
 					pre.setString(no, Converter.convertString(n));
 				} else {
@@ -217,7 +217,7 @@ public final class JDBCUtils {
 	 * @param type   対象のSQLタイプを設定します.
 	 * @param no     対象の項番を設定します. この番号は１から開始されます.
 	 */
-	public static final Object getResultColumn(ResultSet result, int type, int no) throws Exception {
+	public static final Object getResultColumn(final ResultSet result, final int type, final int no) throws Exception {
 		if (result.getObject(no) == null) {
 			return null;
 		}
@@ -307,7 +307,7 @@ public final class JDBCUtils {
 	/** 小文字大文字差分. **/
 	private static final int _Aa = (int) 'a' - (int) 'A';
 
-	public static final String convertJavaNameByDBName(String name) {
+	public static final String convertJavaNameByDBName(final String name) {
 		int cnt = 0;
 		int len = name.length();
 		char c = name.charAt(0);
@@ -391,7 +391,7 @@ public final class JDBCUtils {
 	 * @param sql
 	 * @return
 	 */
-	public static final boolean endSqlExists(String sql) {
+	public static final boolean endSqlExists(final String sql) {
 		return Converter.indexOfNoCote(sql, ";", 0) != -1;
 	}
 	
@@ -400,7 +400,7 @@ public final class JDBCUtils {
 	 * @param sql
 	 * @return
 	 */
-	public static final List<String> sqlList(String sql) {
+	public static final List<String> sqlList(final String sql) {
 		
 		// たとえば
 		// select * from hoge; select * frim moge;
@@ -453,7 +453,7 @@ public final class JDBCUtils {
 	 * @param sql
 	 * @return int [0] 不明, [1] SELECT文 [2] INSERT文 [3] その他SQL文.
 	 */
-	public static final int sqlType(String sql) {
+	public static final int sqlType(final String sql) {
 		char c;
 		int cnt = 0;
 		int type = SQL_UNKNOWN;

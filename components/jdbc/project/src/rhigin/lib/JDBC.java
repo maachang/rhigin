@@ -8,7 +8,6 @@ import rhigin.RhiginConfig;
 import rhigin.RhiginException;
 import rhigin.lib.jdbc.JDBCCore;
 import rhigin.lib.jdbc.runner.JDBCConnect;
-import rhigin.lib.jdbc.runner.JDBCException;
 import rhigin.lib.jdbc.runner.JDBCRow;
 import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.JavaRequire;
@@ -182,6 +181,7 @@ public class JDBC implements JavaRequire {
 			new ConnectFunctions(9, c), new ConnectFunctions(10, c), new ConnectFunctions(11, c),
 			new ConnectFunctions(12, c), new ConnectFunctions(13, c), new ConnectFunctions(14, c),
 			new ConnectFunctions(15, c), new ConnectFunctions(16, c), new ConnectFunctions(17, c),
+			new ConnectFunctions(18, c)
 		});
 	}
 	
@@ -304,6 +304,10 @@ public class JDBC implements JavaRequire {
 					{
 						return conn.batchSize();
 					}
+				case 18: // sequenceId.
+					{
+						return conn.getSequenceId();
+					}
 				}
 			} catch (RhiginException re) {
 				throw re;
@@ -334,6 +338,7 @@ public class JDBC implements JavaRequire {
 			case 15: return "executeBatch";
 			case 16: return "addBatch";
 			case 17: return "batchSize";
+			case 18: return "sequenceId";
 			}
 			return "unknown";
 		}

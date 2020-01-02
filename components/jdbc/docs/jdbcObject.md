@@ -100,7 +100,7 @@ jdbc.kind("h2db"): {"name": "h2db","driver": "org.h2.Driver","url": "jdbc:h2:./h
 "PAGE_SIZE=32768;IFEXISTS=FALSE;AUTOCOMMIT=FALSE;CACHE_TYPE=TQ;LOG=0;UNDO_LOG=0;AUTO_SERVER=TRUE;" +
 "TRACE_LEVEL_FILE=0;",
 "busyTimeout": "-1","transactionLevel": "1","fetchSize": "-1","params": "{}","poolingSize": "-1",
-"poolingTimeout": "-1","notSemicolon": "false"}
+"poolingTimeout": "-1","notSemicolon": "false", "machineId": "0"}
 ```
 
 _
@@ -315,7 +315,7 @@ console.log(conn.kind());
 "PAGE_SIZE=32768;IFEXISTS=FALSE;AUTOCOMMIT=FALSE;CACHE_TYPE=TQ;LOG=0;UNDO_LOG=0;AUTO_SERVER=TRUE;" +
 "TRACE_LEVEL_FILE=0;",
 "busyTimeout": "-1","transactionLevel": "1","fetchSize": "-1","params": "{}","poolingSize": "-1",
-"poolingTimeout": "-1","notSemicolon": "false"}
+"poolingTimeout": "-1","notSemicolon": "false", "machineId": "0"}
 ```
 
 _
@@ -440,9 +440,38 @@ console.log(conn.batchSize());
 ```
 
 実行結果：
-```js
+```sh
 3
 ```
+
+_
+
+### 5-2-10）sequenceId
+
+１６文字のシーケンスIDを取得します。
+
+```js
+var jdbc = require("@rhigin/lib/JDBC");
+
+// JDBC接続定義から取得.
+var conn = jdbc.connect("h2db");
+
+// シーケンスIDを出力.
+console.log("JDBC接続定義 h2db: " + conn.sequenceId());
+
+// 直接接続.
+conn = jdbc.connect("org.h2.Driver", "jdbc:h2:./h2db/h2db");
+
+// 直接接続の場合は、シーケンスIDは取得出来ない。
+console.log("直接接続: " + conn.sequenceId());
+```
+
+実行結果：
+```sh
+JDBC接続定義 h2db: AAABb2SKdjAAAAAA
+直接接続: f///////////////
+```
+直接接続では、シーケンスIDの発行は行なえないので `f///////////////` が返却されます。
 
 _
 
@@ -482,7 +511,7 @@ while(result.hasNext()) {
     console.log(result.next());
 }
 ```
-`hasNext()` で、次の行情報が取得できる(true)か確認して、取得可能(true)な場合は `next()` で１行の情報を取得します。
+`hasNext()` で、次の行情報が取得できる `true` か確認して、取得可能な場合は `next()` で１行の情報を取得します。
 
 _
 
