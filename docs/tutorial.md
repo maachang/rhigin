@@ -147,14 +147,14 @@ _
 
 ~/rhigin/productMan/h2db.product_master.csv
 ```csv
-name,section
-1,メロン,果物
-2,カニ,甲殻類
-3,みかん,果物
-4,魚,魚介類
-5,牛肉,牛肉
-6,豚肉,豚肉
-7,鶏肉,鶏肉
+id,name,section
+{num},メロン,果物
+{num},カニ,甲殻類
+{num},みかん,果物
+{num},魚,魚介類
+{num},牛肉,牛肉
+{num},豚肉,豚肉
+{num},鶏肉,鶏肉
 ```
 
 ~/rhigin/productMan/h2db.product_inventory.csv

@@ -112,9 +112,9 @@ COMMIT;
 ./h2db.TEST_SEQ_TABLE.csv
 ```csv
 id,name
-{num}, "test"
-{num}, "hoge"
-{num}, "moge"
+{num},"test"
+{num},"hoge"
+{num},"moge"
 ```
 
 実行:
@@ -196,9 +196,9 @@ COMMIT;
 ./h2db.TEST_SEQ16_TABLE.csv
 ```csv
 id,name
-{seq}, "test"
-{seq}, "hoge"
-{seq}, "moge"
+{seq},"test"
+{seq},"hoge"
+{seq},"moge"
 ```
 
 実行:

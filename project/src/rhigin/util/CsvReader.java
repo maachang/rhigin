@@ -127,7 +127,7 @@ public class CsvReader implements Iterator<Map<String, Object>>, Closeable, Auto
 				} else {
 					x = line.substring(s, i).trim();
 					if (x.indexOf("\"") == 0 || x.indexOf("\'") == 0) {
-						x = x.substring(1, x.length() - 1).trim();
+						x = x.substring(1, x.length() - 1);
 					}
 					if (setMode) {
 						out.set(cnt++, x);
