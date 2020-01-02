@@ -12,7 +12,7 @@ import java.util.List;
  * 
  * のような形で取得が出来ます.
  */
-public class Args implements ConvertGet<String> {
+public class Args {
 	private static String[] MAIN_ARGS = null;
 	private static Args THIS = null;
 
@@ -172,8 +172,93 @@ public class Args implements ConvertGet<String> {
 		return args.length;
 	}
 
-	@Override
-	public Object getOriginal(String n) {
-		return get(n);
+	/**
+	 * boolean情報を取得.
+	 * 
+	 * @parma n 対象の条件を設定します.
+	 * @return Boolean 情報が返却されます.
+	 */
+	public Boolean getBoolean(String... n) {
+		return Converter.convertBool(get(n));
+	}
+
+	/**
+	 * int情報を取得.
+	 * 
+	 * @parma n 対象の条件を設定します.
+	 * @return Integer 情報が返却されます.
+	 */
+	public Integer getInt(String... n) {
+		return Converter.convertInt(get(n));
+	}
+
+	/**
+	 * long情報を取得.
+	 * 
+	 * @parma n 対象の条件を設定します.
+	 * @return Long 情報が返却されます.
+	 */
+	public Long getLong(String... n) {
+		return Converter.convertLong(get(n));
+	}
+
+	/**
+	 * float情報を取得.
+	 * 
+	 * @parma n 対象の条件を設定します.
+	 * @return Float 情報が返却されます.
+	 */
+	public Float getFloat(String... n) {
+		return Converter.convertFloat(get(n));
+	}
+
+	/**
+	 * double情報を取得.
+	 * 
+	 * @parma n 対象の条件を設定します.
+	 * @return Double 情報が返却されます.
+	 */
+	public Double getDouble(String... n) {
+		return Converter.convertDouble(get(n));
+	}
+
+	/**
+	 * String情報を取得.
+	 * 
+	 * @parma n 対象の条件を設定します.
+	 * @return String 情報が返却されます.
+	 */
+	public String getString(String... n) {
+		return Converter.convertString(get(n));
+	}
+
+	/**
+	 * Date情報を取得.
+	 * 
+	 * @parma n 対象の条件を設定します.
+	 * @return Date 情報が返却されます.
+	 */
+	public java.sql.Date getDate(String... n) {
+		return Converter.convertSqlDate(get(n));
+	}
+
+	/**
+	 * Time情報を取得.
+	 * 
+	 * @parma n 対象の条件を設定します.
+	 * @return Time 情報が返却されます.
+	 */
+	public java.sql.Time getTime(String... n) {
+		return Converter.convertSqlTime(get(n));
+	}
+
+	/**
+	 * Timestamp情報を取得.
+	 * 
+	 * @parma n 対象の条件を設定します.
+	 * @return Timestamp 情報が返却されます.
+	 */
+	public java.sql.Timestamp getTimestamp(String... n) {
+		return Converter.convertSqlTimestamp(get(n));
 	}
 }

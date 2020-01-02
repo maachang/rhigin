@@ -76,7 +76,7 @@ _
 |6|豚肉|豚肉|
 |7|鶏肉|鶏肉|
 
-商品IDは自動採番で、商品名、商品区分は必須で設定するものとします。
+商品IDは手動採番で、商品名、商品区分は必須で設定するものとします。
 
 ＜商品在庫テーブル＞ product_inventory
 
@@ -113,10 +113,10 @@ DROP TABLE IF EXISTS product_inventory;
 
 -- 商品マスタ
 CREATE TABLE product_master(
-    id INT(11) AUTO_INCREMENT NOT NULL,     -- 商品ID
+    id INT(11) PRIMARY KEY NOT NULL,        -- 商品ID
     name VARCHAR(32) NOT NULL ,             -- 商品名
     section VARCHAR(32) NOT NULL,           -- 商品区分
-    PRIMARY KEY (id));
+);
 
 -- 商品在庫
 CREATE TABLE product_inventory(
@@ -148,13 +148,13 @@ _
 ~/rhigin/productMan/h2db.product_master.csv
 ```csv
 name,section
-メロン,果物
-カニ,甲殻類
-みかん,果物
-魚,魚介類
-牛肉,牛肉
-豚肉,豚肉
-鶏肉,鶏肉
+1,メロン,果物
+2,カニ,甲殻類
+3,みかん,果物
+4,魚,魚介類
+5,牛肉,牛肉
+6,豚肉,豚肉
+7,鶏肉,鶏肉
 ```
 
 ~/rhigin/productMan/h2db.product_inventory.csv

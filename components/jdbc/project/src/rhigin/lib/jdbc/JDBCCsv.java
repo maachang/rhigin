@@ -35,7 +35,7 @@ public class JDBCCsv {
 		final Args params = Args.set(args);
 		// help表示.
 		if(params.isValue("-h", "--help")) {
-			System.out.println("jcsv [-c] [-j] [-t] [-s] [-d] [-e] {file}");
+			System.out.println("jcsv [-c] [-j] [-t] [-s] [-d] [-e] [-n] {file}");
 			System.out.println(" Read CSV and insert into database table.");
 			System.out.println("  [-c] [--conf] [--config] {args}");
 			System.out.println("    Set the configuration definition file name.");
@@ -61,6 +61,10 @@ public class JDBCCsv {
 			System.out.println("    Set the environment name for reading the configuration.");
 			System.out.println("    For example, when `-e hoge` is specified, the configuration ");
 			System.out.println("    information under `./conf/hoge/` is read.");
+			//System.out.println();
+			System.out.println("  [-n] [--num] {number}");
+			System.out.println("    Set the start number of the numeric sequence ID.");
+			System.out.println("    If not set, start from 1.");
 			//System.out.println();
 			System.out.println("  {file}");
 			System.out.println("    If [-j or -t] is omitted, each is interpreted by the file name.");
@@ -88,6 +92,10 @@ public class JDBCCsv {
 			String charset = params.get("-s", "--charset");
 			if(charset == null || charset.isEmpty()) {
 				charset = DEF_CHARSET;
+			}
+			Long startNumber = params.getLong("-n", "--num");
+			if(startNumber == null) {
+				startNumber = 1L;
 			}
 			
 			// ファイル名を取得.
@@ -125,7 +133,7 @@ public class JDBCCsv {
 			core.startup(confName, args);
 			
 			// CSV実行.
-			int resCount = o.execute(core, jdbc, table, deleteFlag, charset, fileName);
+			int resCount = o.execute(core, jdbc, table, deleteFlag, charset, startNumber, fileName);
 			System.out.println("success    : " + resCount);
 		} catch(Throwable e) {
 			System.out.println("error      : " + e);
@@ -189,7 +197,7 @@ public class JDBCCsv {
 	}
 	
 	// オブジェクトの内容をリスト変換.
-	private static final Object[] getSqlParams(JDBCConnect conns, Map<String, Object> row) {
+	private static final Object[] getSqlParams(JDBCConnect conns, long[] counter, Map<String, Object> row) {
 		String c;
 		final int len = row.size();
 		Object[] ret = new Object[len];
@@ -198,6 +206,9 @@ public class JDBCCsv {
 			// １６文字のシーケンスIDを付与する場合。
 			if(Alphabet.eq("{seq}", c) || Alphabet.eq("{sequence}", c)) {
 				c = conns.getSequenceId();
+			// 数値のシーケンスIDを付与する場合。
+			} else if(Alphabet.eq("{num}", c) || Alphabet.eq("{number}", c)) {
+				c = "" + (counter[0] ++);
 			}
 			ret[i] = c;
 		}
@@ -209,7 +220,7 @@ public class JDBCCsv {
 	
 	// CSV実行.
 	private int execute(JDBCCore core, String jdbc, String table, boolean deleteFlag,
-		String charset, String fileName)
+		String charset, long startNumber, String fileName)
 		throws Exception {
 		int ret = 0;
 		CsvReader csv = null;
@@ -226,9 +237,12 @@ public class JDBCCsv {
 				cnt ++;
 			}
 			
+			// カウンター.
+			long[] counter = new long[] { startNumber };
+			
 			// insert処理.
 			while(csv.hasNext()) {
-				conns.addBatch(sql, getSqlParams(conns, csv.next()));
+				conns.addBatch(sql, getSqlParams(conns, counter, csv.next()));
 				cnt ++;
 				// 一定数のバッチ実行が終わったら、データベースに一斉送信.
 				if(cnt > SEND_BATCH_COUNT) {

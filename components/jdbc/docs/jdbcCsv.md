@@ -75,19 +75,19 @@ _
 
 _
 
-## 7-5）１６文字のシーケンスIDを埋め込む
+## 7-5）数値のシーケンスIDを埋め込む
 
-CSVファイルの１つの項目に対して以下のように設定することで、１６文字のシーケンスIDが利用出来ます。
+CSVファイルの１つの項目に対して以下のように設定することで、番号１から始まるシーケンスIDが利用出来ます。
 
 ```csv
-{seq}
+{num}}
 
 or
 
-{sequence}
+{number}
 ```
 
-上記ワードをカラム項目の代わりに追加することで、１６文字のシーケンスIDをInsertすることが出来ます。
+上記ワードをカラム項目の代わりに追加することで、番号１から始まるシーケンスIDをInsertすることが出来ます。
 
 ＜例＞
 
@@ -101,7 +101,7 @@ DROP TABLE IF EXISTS test_seq_table;
 
 -- テストシーケンステーブル
 CREATE TABLE test_seq_table(
-    id CHAR(16) PRIMARY KEY NOT NULL, -- ID
+    id INT(11) PRIMARY KEY NOT NULL,  -- ID
     name VARCHAR(32) NOT NULL         -- 商品名
 );
 
@@ -112,9 +112,9 @@ COMMIT;
 ./h2db.TEST_SEQ_TABLE.csv
 ```csv
 id,name
-{seq}, "test"
-{seq}, "hoge"
-{seq}, "moge"
+{num}, "test"
+{num}, "hoge"
+{num}, "moge"
 ```
 
 実行:
@@ -135,6 +135,90 @@ JDBC> select * from test_seq_table;
 > select * from test_seq_table;
 [
   {
+    "ID": 1,
+    "NAME": "test"
+  },
+  {
+    "ID": 2,
+    "NAME": "hoge"
+  },
+  {
+    "ID": 3,
+    "NAME": "moge"
+  }
+]
+```
+
+また、jcsvの起動パラメータ[-n or --number] で数値をセットすると、その番号を開始番号として、シーケンスIDを設定します。
+
+```sh
+$ ./jcsv -n 100 TEST_SEQ_TABLE.sql
+```
+
+_
+
+## 7-6）１６文字のシーケンスIDを埋め込む
+
+CSVファイルの１つの項目に対して以下のように設定することで、１６文字のシーケンスIDが利用出来ます。
+
+```csv
+{seq}
+
+or
+
+{sequence}
+```
+
+上記ワードをカラム項目の代わりに追加することで、１６文字のシーケンスIDをInsertすることが出来ます。
+
+この１６文字のシーケンスIDはUnixTimeと、マシンIDによる、ユニークIDを作成します。
+
+＜例＞
+
+./TEST_SEQ16_TABLE.sql
+```sql
+-- カレントのJDBC接続定義を設定.
+CONNECT 'h2db';
+
+-- テーブル削除.
+DROP TABLE IF EXISTS test_seq16_table;
+
+-- テストシーケンステーブル
+CREATE TABLE test_seq_table(
+    id CHAR(16) PRIMARY KEY NOT NULL, -- ID
+    name VARCHAR(32) NOT NULL         -- 商品名
+);
+
+-- コミット
+COMMIT;
+```
+
+./h2db.TEST_SEQ16_TABLE.csv
+```csv
+id,name
+{seq}, "test"
+{seq}, "hoge"
+{seq}, "moge"
+```
+
+実行:
+```sh
+$ ./jdbc -f TEST_SEQ16_TABLE.sql
+$ ./jcsv h2.TEST_SEQ16_TABLE.csv
+JDBC csv import version (0.0.1)
+target csv : h2db.TEST_SEQ16_TABLE.csv
+jdbc define: h2db
+table name : TEST_SEQ16_TABLE
+delete flag: false
+
+success    : 3
+
+$ ./jdbc
+JDBC> select * from test_seq16_table;
+
+> select * from test_seq16_table;
+[
+  {
     "ID": "AAABb2SsongAAAAA",
     "NAME": "test"
   },
@@ -151,7 +235,7 @@ JDBC> select * from test_seq_table;
 
 _
 
-## 7-6）コマンドの使い方はヘルプを指定すると閲覧出来ます
+## 7-7）コマンドの使い方はヘルプを指定すると閲覧出来ます
 
 ```sh
 $ ./jcsv -h
@@ -172,6 +256,9 @@ jcsv [-c --conf --config] [-j --jdbc] [-t --table] [-s --charset] [-d --delete] 
   [-d] [--delete]
     Set to delete all database contents.
     If not set, all data will not be deleted.
+  [-n] [--num] {number}
+    Set the start number of the numeric sequence ID.
+    If not set, start from 1.
   {file}
     If [-j or -t] is omitted, each is interpreted by the file name.
       {file} = [jdbc name].[table name].csv
