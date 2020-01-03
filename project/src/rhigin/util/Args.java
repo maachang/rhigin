@@ -22,7 +22,7 @@ public class Args {
 	 * @param args
 	 * @return
 	 */
-	public static final Args set(String[] args) {
+	public static final Args set(String... args) {
 		if (MAIN_ARGS == null) {
 			MAIN_ARGS = args;
 			THIS = new Args();
@@ -64,7 +64,7 @@ public class Args {
 	 * @param args
 	 *            mainの引数を設定します.
 	 */
-	public Args(String[] args) {
+	public Args(String... args) {
 		this.args = args;
 	}
 
@@ -107,7 +107,7 @@ public class Args {
 				}
 			} else {
 				for (int j = 0; j < lenJ; j++) {
-					if (names[j].equals(args[j])) {
+					if (names[i].equals(args[j])) {
 						return args[j + 1];
 					}
 				}
@@ -133,7 +133,7 @@ public class Args {
 				}
 			} else {
 				for (int j = 0; j < lenJ; j++) {
-					if (names[j].equals(args[j])) {
+					if (names[i].equals(args[j])) {
 						return true;
 					}
 				}

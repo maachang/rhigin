@@ -26,7 +26,7 @@ public final class JSONObject {
 
 		@Override
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
-			if (args.length >= 1) {
+			if (args != null && args.length >= 1) {
 				switch (type) {
 				case 0:
 					return Json.encode(args[0]);
@@ -35,6 +35,8 @@ public final class JSONObject {
 				case 2:
 					return JsonOut.toString(args[0]);
 				}
+			} else if(type == 2) {
+				return "[JSON]";
 			}
 			return argsError(args);
 		}

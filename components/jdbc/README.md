@@ -364,7 +364,35 @@ JDBC接続コンポーネントでは、CSVファイルをテーブルにイン�
 $ ./jcsv {CSVファイル名}
 ```
 
-テーブルにインポートされるCSVファイルには、いくつかルールがあります。
+詳しくは、コマンドの使い方はヘルプを指定すると閲覧出来ます。
+
+```sh
+$ ./jcsv -h
+jcsv [-c --conf --config] [-j --jdbc] [-t --table] [-s --charset] [-d --delete] {file}
+ Read CSV and insert into database table.
+  [-c] [--conf] [--config] {args}
+    Set the configuration definition file name.
+    If omitted, "jdbc" character is specified.
+  [-j] [--jdbc] {args}
+    Set the connection definition name of jdbc.
+    If omitted, it must be set with the name of {file}.
+  [-t] [--table] {args}
+    Set the write destination table name.
+    If omitted, it must be set with the name of {file}.
+  [-s] [--charset] {args}
+    Set the character code of the CSV file.
+    If not specified, "UTF8" will be set.
+  [-d] [--delete]
+    Set to delete all database contents.
+    If not set, all data will not be deleted.
+  [-n] [--num] {number}
+    Set the start number of the numeric sequence ID.
+    If not set, start from 1.
+  {file}
+    If [-j or -t] is omitted, each is interpreted by the file name.
+      {file} = [jdbc name].[table name].csv
+    If [-j or -t] is not omitted, set an arbitrary file name.
+```
 
 _
 

@@ -13,10 +13,22 @@ import rhigin.http.Validate.TypeConvert;
 import rhigin.util.Converter;
 
 /**
- * Entityコンポーネント. Entityコンポーネントで整形データを生成し、そのデータにしたがって、情報を整形します. <例>
- * Entity.expose("User", "name", "string", "not null", "age", "number", "",
- * "comments", "{", "", "offset", "number", "", "limit", "number", "", "list",
- * "$Comment", "", "comments", "}", "" );
+ * Entityコンポーネント. Entityコンポーネントで整形データを生成し、そのデータにしたがって、情報を整形します.
+ * <例>
+ * Entity.expose("Comment",
+ *   "name", "string", "default "no name",
+ *   "comment", "string", ""
+ * );
+ *   
+ * Entity.expose("User",
+ *   "name", "string", "not null",
+ *   "age", "number", "",
+ *   "comments", "{", "",
+ *     "offset", "number", "",
+ *     "limit", "number", "",
+ *     "list", "$Comment", "",
+ *   "comments", "}", ""
+ * );
  * 
  * var res = Entity.entity("User", value);
  */

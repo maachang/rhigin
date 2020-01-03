@@ -7,10 +7,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -334,9 +331,12 @@ public final class Converter {
 			if (isNumeric(o)) {
 				return new java.sql.Timestamp(parseLong((String) o));
 			}
-			return DateConvert.getTimestamp((String) o);
+			java.util.Date d = DateConvert.stringToDate((String) o);
+			if(d != null) {
+				return new java.sql.Timestamp(d.getTime());
+			}
 		}
-		throw new ConvertException("java.sql.Timestamp型変換に失敗しました[" + o + "]");
+		throw new ConvertException("java.sql.Timestamp型変換に失敗しました: " + o);
 	}
 
 	/**
@@ -358,11 +358,11 @@ public final class Converter {
 			return new java.util.Date(((Number) o).longValue());
 		} else if (o instanceof String) {
 			if (isNumeric(o)) {
-				return new java.sql.Timestamp(parseLong((String) o));
+				return new java.util.Date(parseLong((String) o));
 			}
-			return DateConvert.getTimestamp((String) o);
+			return DateConvert.stringToDate((String) o);
 		}
-		throw new ConvertException("java.util.Date型変換に失敗しました[" + o + "]");
+		throw new ConvertException("java.util.Date型変換に失敗しました: " + o);
 	}
 
 	/**
@@ -389,7 +389,7 @@ public final class Converter {
 			}
 		}
 		if (flg == 0) {
-			throw new ConvertException("Boolean変換に失敗しました:" + s);
+			throw new ConvertException("Boolean変換に失敗しました: " + s);
 		}
 
 		if (isNumeric(s)) {
@@ -399,7 +399,7 @@ public final class Converter {
 		} else if (eqEng(s, start, len, "false") || eqEng(s, start, len, "f") || eqEng(s, start, len, "off")) {
 			return false;
 		}
-		throw new ConvertException("Boolean変換に失敗しました:" + s);
+		throw new ConvertException("Boolean変換に失敗しました: " + s);
 	}
 
 	/**
@@ -432,7 +432,7 @@ public final class Converter {
 			}
 		}
 		if (v == 0) {
-			throw new ConvertException("Int数値変換に失敗しました:" + num);
+			throw new ConvertException("Int数値変換に失敗しました: " + num);
 		}
 
 		v = 1;
@@ -442,7 +442,7 @@ public final class Converter {
 				ret += (v * (c - '0'));
 				v *= 10;
 			} else {
-				throw new ConvertException("Int数値変換に失敗しました:" + num);
+				throw new ConvertException("Int数値変換に失敗しました: " + num);
 			}
 		}
 		return mFlg ? ret * -1 : ret;
@@ -479,7 +479,7 @@ public final class Converter {
 			}
 		}
 		if (flg == 0) {
-			throw new ConvertException("Long数値変換に失敗しました:" + num);
+			throw new ConvertException("Long数値変換に失敗しました: " + num);
 		}
 
 		long v = 1L;
@@ -489,7 +489,7 @@ public final class Converter {
 				ret += (v * (long) (c - '0'));
 				v *= 10L;
 			} else {
-				throw new ConvertException("Long数値変換に失敗しました:" + num);
+				throw new ConvertException("Long数値変換に失敗しました: " + num);
 			}
 		}
 		return mFlg ? ret * -1L : ret;
@@ -524,7 +524,7 @@ public final class Converter {
 			} else if (flg == 1 && CHECK_CHAR[c] != 0) {
 				if (c == '.') {
 					if (dot != -1) {
-						throw new ConvertException("Float数値変換に失敗しました:" + num);
+						throw new ConvertException("Float数値変換に失敗しました: " + num);
 					}
 					dot = i;
 				} else {
@@ -534,7 +534,7 @@ public final class Converter {
 			}
 		}
 		if (flg == 0) {
-			throw new ConvertException("Float数値変換に失敗しました:" + num);
+			throw new ConvertException("Float数値変換に失敗しました: " + num);
 		}
 
 		float v = 1f;
@@ -545,7 +545,7 @@ public final class Converter {
 					ret += (v * (float) (c - '0'));
 					v *= 10f;
 				} else {
-					throw new ConvertException("Float数値変換に失敗しました:" + num);
+					throw new ConvertException("Float数値変換に失敗しました: " + num);
 				}
 			}
 			return mFlg ? ret * -1f : ret;
@@ -556,7 +556,7 @@ public final class Converter {
 					ret += (v * (float) (c - '0'));
 					v *= 10f;
 				} else {
-					throw new ConvertException("Float数値変換に失敗しました:" + num);
+					throw new ConvertException("Float数値変換に失敗しました: " + num);
 				}
 			}
 			float dret = 0f;
@@ -567,7 +567,7 @@ public final class Converter {
 					dret += (v * (float) (c - '0'));
 					v *= 10f;
 				} else {
-					throw new ConvertException("Float数値変換に失敗しました:" + num);
+					throw new ConvertException("Float数値変換に失敗しました: " + num);
 				}
 			}
 			return mFlg ? (ret + (dret / v)) * -1f : ret + (dret / v);
@@ -603,7 +603,7 @@ public final class Converter {
 			} else if (flg == 1 && CHECK_CHAR[c] != 0) {
 				if (c == '.') {
 					if (dot != -1) {
-						throw new ConvertException("Double数値変換に失敗しました:" + num);
+						throw new ConvertException("Double数値変換に失敗しました: " + num);
 					}
 					dot = i;
 				} else {
@@ -613,7 +613,7 @@ public final class Converter {
 			}
 		}
 		if (flg == 0) {
-			throw new ConvertException("Double数値変換に失敗しました:" + num);
+			throw new ConvertException("Double数値変換に失敗しました: " + num);
 		}
 
 		double v = 1d;
@@ -624,7 +624,7 @@ public final class Converter {
 					ret += (v * (double) (c - '0'));
 					v *= 10d;
 				} else {
-					throw new ConvertException("Double数値変換に失敗しました:" + num);
+					throw new ConvertException("Double数値変換に失敗しました: " + num);
 				}
 			}
 			return mFlg ? ret * -1d : ret;
@@ -635,7 +635,7 @@ public final class Converter {
 					ret += (v * (double) (c - '0'));
 					v *= 10d;
 				} else {
-					throw new ConvertException("Double数値変換に失敗しました:" + num);
+					throw new ConvertException("Double数値変換に失敗しました: " + num);
 				}
 			}
 			double dret = 0d;
@@ -646,7 +646,7 @@ public final class Converter {
 					dret += (v * (double) (c - '0'));
 					v *= 10d;
 				} else {
-					throw new ConvertException("Double数値変換に失敗しました:" + num);
+					throw new ConvertException("Double数値変換に失敗しました: " + num);
 				}
 			}
 			return mFlg ? (ret + (dret / v)) * -1d : ret + (dret / v);
@@ -1034,131 +1034,13 @@ public final class Converter {
 				ret |= 15 << n;
 				break;
 			default:
-				throw new IOException("16進文字列に不正な文字列を検知:" + s);
+				throw new IOException("16進文字列に不正な文字列を検知: " + s);
 			}
 			n += 4;
 		}
 		return ret;
 	}
-
-	/** HTTPタイムスタンプ条件を生成. **/
-	private static final String[] _TIMESTAMP_TO_WEEK;
-	private static final String[] _TIMESTAMP_TO_MONTH;
-	static {
-		String[] n = new String[9];
-		n[1] = "Sun, ";
-		n[2] = "Mon, ";
-		n[3] = "Tue, ";
-		n[4] = "Wed, ";
-		n[5] = "Thu, ";
-		n[6] = "Fri, ";
-		n[7] = "Sat, ";
-
-		String[] nn = new String[12];
-		nn[0] = "Jan";
-		nn[1] = "Feb";
-		nn[2] = "Mar";
-		nn[3] = "Apr";
-		nn[4] = "May";
-		nn[5] = "Jun";
-		nn[6] = "Jul";
-		nn[7] = "Aug";
-		nn[8] = "Sep";
-		nn[9] = "Oct";
-		nn[10] = "Nov";
-		nn[11] = "Dec";
-
-		_TIMESTAMP_TO_WEEK = n;
-		_TIMESTAMP_TO_MONTH = nn;
-	}
-
-	/**
-	 * HTTPタイムスタンプを取得.
-	 * 
-	 * @param mode [true]の場合、ハイフン区切りの条件で出力します.
-	 * @param date 出力対象の日付オブジェクトを設定します.
-	 * @return String タイムスタンプ値が返却されます.
-	 */
-	public static final String createTimestamp(boolean mode, java.util.Date date) {
-		StringBuilder buf = new StringBuilder();
-		try {
-			String tmp;
-			Calendar cal = new GregorianCalendar(DateConvert.GMT_TIMEZONE);
-			cal.setTime(date);
-			buf.append(_TIMESTAMP_TO_WEEK[cal.get(Calendar.DAY_OF_WEEK)]);
-			tmp = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
-			if (mode) {
-				buf.append("00".substring(tmp.length())).append(tmp).append("-");
-				buf.append(_TIMESTAMP_TO_MONTH[cal.get(Calendar.MONTH)]).append("-");
-			} else {
-				buf.append("00".substring(tmp.length())).append(tmp).append(" ");
-				buf.append(_TIMESTAMP_TO_MONTH[cal.get(Calendar.MONTH)]).append(" ");
-			}
-			tmp = String.valueOf(cal.get(Calendar.YEAR));
-			buf.append("0000".substring(tmp.length())).append(tmp).append(" ");
-			tmp = String.valueOf(cal.get(Calendar.HOUR_OF_DAY));
-			buf.append("00".substring(tmp.length())).append(tmp).append(":");
-
-			tmp = String.valueOf(cal.get(Calendar.MINUTE));
-			buf.append("00".substring(tmp.length())).append(tmp).append(":");
-
-			tmp = String.valueOf(cal.get(Calendar.SECOND));
-			buf.append("00".substring(tmp.length())).append(tmp).append(" ");
-			buf.append("GMT");
-		} catch (Exception e) {
-			throw new ConvertException("タイムスタンプ生成に失敗", e);
-		}
-		return buf.toString();
-	}
-
-	/**
-	 * HTTPタイムスタンプを取得.
-	 * 
-	 * @param buf  出力先のStringBuilderを設定します.
-	 * @param mode [true]の場合、ハイフン区切りの条件で出力します.
-	 * @param date 出力対象の日付オブジェクトを設定します.
-	 */
-	public static final void createTimestamp(StringBuilder buf, boolean mode, java.util.Date date) {
-		try {
-			String tmp;
-			Calendar cal = new GregorianCalendar(DateConvert.GMT_TIMEZONE);
-			cal.setTime(date);
-			buf.append(_TIMESTAMP_TO_WEEK[cal.get(Calendar.DAY_OF_WEEK)]);
-			tmp = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
-			if (mode) {
-				buf.append("00".substring(tmp.length())).append(tmp).append("-");
-				buf.append(_TIMESTAMP_TO_MONTH[cal.get(Calendar.MONTH)]).append("-");
-			} else {
-				buf.append("00".substring(tmp.length())).append(tmp).append(" ");
-				buf.append(_TIMESTAMP_TO_MONTH[cal.get(Calendar.MONTH)]).append(" ");
-			}
-			tmp = String.valueOf(cal.get(Calendar.YEAR));
-			buf.append("0000".substring(tmp.length())).append(tmp).append(" ");
-			tmp = String.valueOf(cal.get(Calendar.HOUR_OF_DAY));
-			buf.append("00".substring(tmp.length())).append(tmp).append(":");
-
-			tmp = String.valueOf(cal.get(Calendar.MINUTE));
-			buf.append("00".substring(tmp.length())).append(tmp).append(":");
-
-			tmp = String.valueOf(cal.get(Calendar.SECOND));
-			buf.append("00".substring(tmp.length())).append(tmp).append(" ");
-			buf.append("GMT");
-		} catch (Exception e) {
-			throw new ConvertException("タイムスタンプ生成に失敗", e);
-		}
-	}
-
-	/**
-	 * HTMLタイムスタンプを時間変換.
-	 * 
-	 * @param timestamp 変換対象のHTMLタイムスタンプを設定します.
-	 * @return Date 変換された時間が返されます.
-	 * @exception Exception 例外.
-	 */
-	public static final Date convertTimestamp(String timestamp) throws Exception {
-		return DateConvert.getWebTimestamp(timestamp);
-	}
-
+	
 	/**
 	 * 英字の大文字小文字を区別せずにチェック.
 	 * 

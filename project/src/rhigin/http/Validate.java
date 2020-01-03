@@ -11,10 +11,14 @@ import rhigin.util.Alphabet;
 import rhigin.util.Converter;
 
 /**
- * Validate処理. validation( "name", "String", "not null", // name文字パラメータで、必須情報.
- * "age", "Number", "", // age数値パラメータ. "comment", "String", "max 128", //
- * comment文字パラメータで、最大文字が128文字. "X-Test-Code", "String", "not null" //
- * X-Test-CodeHttpヘッダパラメータで、必須. );
+ * Validate処理.
+ * 
+ * validation(
+ * 	"name", "String", "not null", // name文字パラメータで、必須情報.
+ * 	"age", "Number", "", // age数値パラメータ.
+ * 	"comment", "String", "max 128", // comment文字パラメータで、最大文字が128文字.
+ * 	"X-Test-Code", "String", "not null" // X-Test-CodeHttpヘッダパラメータで、必須.
+ * );
  * 
  * また、先頭に[method]を設定した場合、許可する条件として設定します. ※何も定義していない場合は、全てのmethodが有効です.
  *
@@ -43,7 +47,7 @@ public class Validate {
 	}
 
 	// validate判断条件のチェック.
-	public static final class ConditionsChecker {
+	protected static final class ConditionsChecker {
 		protected ConditionsChecker() {
 		}
 
@@ -188,11 +192,21 @@ public class Validate {
 
 		// date.
 		private static final boolean date(boolean notFlag, String a, String column, String conditions, Object value) {
+			try {
+				if(Converter.convertDate(value) != null) {
+					return true;
+				}
+			} catch(Exception e) {}
 			return exp(DATE_EXP, "date", notFlag, a, column, conditions, value, " is not a date format.");
 		}
 
 		// time.
 		private static final boolean time(boolean notFlag, String a, String column, String conditions, Object value) {
+			try {
+				if(Converter.convertSqlTime(value) != null) {
+					return true;
+				}
+			} catch(Exception e) {}
 			return exp(TIME_EXP, "time", notFlag, a, column, conditions, value, " is not a time format.");
 		}
 
@@ -488,10 +502,12 @@ public class Validate {
 					}
 					break;
 				case DATE:
-					try {
-						value = Converter.convertDate(value);
-					} catch (Exception e) {
-						value = null;
+					if(!(value instanceof java.util.Date)) {
+						try {
+							value = Converter.convertDate(value);
+						} catch (Exception e) {
+							value = null;
+						}
 					}
 					break;
 				case BOOL:

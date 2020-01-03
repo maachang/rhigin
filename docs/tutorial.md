@@ -242,10 +242,32 @@ html{height:100%}body{margin-left:1;padding:1;-webkit-tap-highlight-color:transp
 </head>
 <body style="background:#000;color:#fff;">
 
+<!-- ここにクライアントからのテスト実装を追加する -->
 
 
 </body>
 </html>
+```
+
+これより、rhiginサーバ側に実装をおこないながら、クライアントに処理を追加して、実行・確認しながら説明していきます。
+
+### 3-1）在庫一覧を表示
+
+まずはrhiginサーバ側の実装.
+
+~/rhigin/productMan/application/inventory/inventorys.js
+```js
+// validate.
+validation("GET",
+  "limit", "long", "default " + java.lang.Long.MAX_VALUE,   // リミットが存在しない場合はLong.MAX_VALUE.
+  "offset", "long", "default 0",                            // オフセットが存在しない場合は0.
+  "id", "long", "default -1"                                // 検索IDが設定されていない場合は-1.
+);
+
+
+
+
+
 ```
 
 

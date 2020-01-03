@@ -290,6 +290,113 @@ public final class DateConvert {
 		}
 		return ret;
 	}
+	
+	/** HTTPタイムスタンプ条件を生成. **/
+	private static final String[] _TIMESTAMP_TO_WEEK;
+	private static final String[] _TIMESTAMP_TO_MONTH;
+	static {
+		String[] n = new String[9];
+		n[1] = "Sun, ";
+		n[2] = "Mon, ";
+		n[3] = "Tue, ";
+		n[4] = "Wed, ";
+		n[5] = "Thu, ";
+		n[6] = "Fri, ";
+		n[7] = "Sat, ";
+
+		String[] nn = new String[12];
+		nn[0] = "Jan";
+		nn[1] = "Feb";
+		nn[2] = "Mar";
+		nn[3] = "Apr";
+		nn[4] = "May";
+		nn[5] = "Jun";
+		nn[6] = "Jul";
+		nn[7] = "Aug";
+		nn[8] = "Sep";
+		nn[9] = "Oct";
+		nn[10] = "Nov";
+		nn[11] = "Dec";
+
+		_TIMESTAMP_TO_WEEK = n;
+		_TIMESTAMP_TO_MONTH = nn;
+	}
+
+	/**
+	 * HTTPタイムスタンプを取得.
+	 * 
+	 * @param mode [true]の場合、ハイフン区切りの条件で出力します.
+	 * @param date 出力対象の日付オブジェクトを設定します.
+	 * @return String タイムスタンプ値が返却されます.
+	 */
+	public static final String createTimestamp(boolean mode, java.util.Date date) {
+		StringBuilder buf = new StringBuilder();
+		try {
+			String tmp;
+			Calendar cal = new GregorianCalendar(DateConvert.GMT_TIMEZONE);
+			cal.setTime(date);
+			buf.append(_TIMESTAMP_TO_WEEK[cal.get(Calendar.DAY_OF_WEEK)]);
+			tmp = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
+			if (mode) {
+				buf.append("00".substring(tmp.length())).append(tmp).append("-");
+				buf.append(_TIMESTAMP_TO_MONTH[cal.get(Calendar.MONTH)]).append("-");
+			} else {
+				buf.append("00".substring(tmp.length())).append(tmp).append(" ");
+				buf.append(_TIMESTAMP_TO_MONTH[cal.get(Calendar.MONTH)]).append(" ");
+			}
+			tmp = String.valueOf(cal.get(Calendar.YEAR));
+			buf.append("0000".substring(tmp.length())).append(tmp).append(" ");
+			tmp = String.valueOf(cal.get(Calendar.HOUR_OF_DAY));
+			buf.append("00".substring(tmp.length())).append(tmp).append(":");
+
+			tmp = String.valueOf(cal.get(Calendar.MINUTE));
+			buf.append("00".substring(tmp.length())).append(tmp).append(":");
+
+			tmp = String.valueOf(cal.get(Calendar.SECOND));
+			buf.append("00".substring(tmp.length())).append(tmp).append(" ");
+			buf.append("GMT");
+		} catch (Exception e) {
+			throw new ConvertException("タイムスタンプ生成に失敗", e);
+		}
+		return buf.toString();
+	}
+
+	/**
+	 * HTTPタイムスタンプを取得.
+	 * 
+	 * @param buf  出力先のStringBuilderを設定します.
+	 * @param mode [true]の場合、ハイフン区切りの条件で出力します.
+	 * @param date 出力対象の日付オブジェクトを設定します.
+	 */
+	public static final void createTimestamp(StringBuilder buf, boolean mode, java.util.Date date) {
+		try {
+			String tmp;
+			Calendar cal = new GregorianCalendar(DateConvert.GMT_TIMEZONE);
+			cal.setTime(date);
+			buf.append(_TIMESTAMP_TO_WEEK[cal.get(Calendar.DAY_OF_WEEK)]);
+			tmp = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
+			if (mode) {
+				buf.append("00".substring(tmp.length())).append(tmp).append("-");
+				buf.append(_TIMESTAMP_TO_MONTH[cal.get(Calendar.MONTH)]).append("-");
+			} else {
+				buf.append("00".substring(tmp.length())).append(tmp).append(" ");
+				buf.append(_TIMESTAMP_TO_MONTH[cal.get(Calendar.MONTH)]).append(" ");
+			}
+			tmp = String.valueOf(cal.get(Calendar.YEAR));
+			buf.append("0000".substring(tmp.length())).append(tmp).append(" ");
+			tmp = String.valueOf(cal.get(Calendar.HOUR_OF_DAY));
+			buf.append("00".substring(tmp.length())).append(tmp).append(":");
+
+			tmp = String.valueOf(cal.get(Calendar.MINUTE));
+			buf.append("00".substring(tmp.length())).append(tmp).append(":");
+
+			tmp = String.valueOf(cal.get(Calendar.SECOND));
+			buf.append("00".substring(tmp.length())).append(tmp).append(" ");
+			buf.append("GMT");
+		} catch (Exception e) {
+			throw new ConvertException("タイムスタンプ生成に失敗", e);
+		}
+	}
 
 	/**
 	 * Web上の日付フォーマットをTimestampに変換. こんな感じのフォーマット[Wed, 19-Mar-2014 03:55:33 GMT]を解析して
@@ -441,22 +548,22 @@ public final class DateConvert {
 	 * @return Date
 	 */
 	public static final Date stringToDate(String s) {
+		Date value;
 		try {
-			if(isISO8601(s)) {
-				return DateConvert.getISO8601(s);
+			if((value = DateConvert.getISO8601(s)) != null) {
+				return value;
 			}
-		} catch (Exception e) {
-		}
+		} catch(Exception e) {}
 		try {
-			return DateConvert.getTimestamp(s);
-		} catch (Exception e) {
-			try {
-				return DateConvert.getWebTimestamp(s);
-			} catch (ConvertException ce) {
-				throw ce;
-			} catch (Exception ee) {
-				throw new ConvertException(ee);
+			if((value = DateConvert.getTimestamp(s)) != null) {
+				return value;
 			}
-		}
+		} catch(Exception e) {}
+		try {
+			if((value = DateConvert.getWebTimestamp(s)) != null) {
+				return value;
+			}
+		} catch(Exception e) {}
+		throw new ConvertException("Date string conversion failed: " + s);
 	}
 }
