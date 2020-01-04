@@ -5,6 +5,9 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
+import rhigin.lib.jdbc.runner.JDBCConnect.Delete;
+import rhigin.lib.jdbc.runner.JDBCConnect.Insert;
+import rhigin.lib.jdbc.runner.JDBCConnect.Update;
 import rhigin.util.OList;
 
 /**
@@ -91,7 +94,6 @@ public class JDBCBatch {
 	 * @param args
 	 * @return
 	 */
-	@SuppressWarnings("resource")
 	public JDBCBatch add(String sql, Object... args) {
 		jcon.check();
 		PreparedStatement stmt = null;
@@ -99,7 +101,8 @@ public class JDBCBatch {
 			sql = JDBCUtils.sql(jcon.kind, sql);
 			if(psCache == null || (stmt = psCache.get(sql)) == null) {
 				stmt = jcon.conn.prepareStatement(sql, Statement.NO_GENERATED_KEYS);
-				JDBCUtils.preParams(stmt, stmt.getParameterMetaData(), args);
+				JDBCUtils.preParams(stmt, stmt.getParameterMetaData(),
+					JDBCUtils.appendSequence(jcon, args));
 				stmt.addBatch();
 				if(batchList == null) {
 					batchList = new OList<Statement>();
@@ -110,7 +113,8 @@ public class JDBCBatch {
 				batchList.add(stmt);
 				psCache.put(sql, stmt);
 			} else {
-				JDBCUtils.preParams(stmt, stmt.getParameterMetaData(), args);
+				JDBCUtils.preParams(stmt, stmt.getParameterMetaData(),
+					JDBCUtils.appendSequence(jcon, args));
 				stmt.addBatch();
 			}
 			batchLength ++;
@@ -135,4 +139,32 @@ public class JDBCBatch {
 		jcon.check();
 		return batchLength;
 	}
+	
+	/**
+	 * DeleteSQL処理.
+	 * @param list
+	 * @return
+	 */
+	public Delete delete(Object... list) {
+		return new Delete(null, this, list);
+	}
+	
+	/**
+	 * InsertSQL処理.
+	 * @param list
+	 * @return
+	 */
+	public Insert insert(Object... list) {
+		return new Insert(null, this, list);
+	}
+	
+	/**
+	 * UpdateSQL処理.
+	 * @param list
+	 * @return
+	 */
+	public Update update(Object... list) {
+		return new Update(null, this, list);
+	}
+
 }

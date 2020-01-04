@@ -191,20 +191,6 @@ public class JDBCConnect {
 		return execQuery(sql, 1, args);
 	}
 	
-	// シーケンスIDを付与.
-	private final Object[] appendSequence(Object[] args) {
-		if(sequence == null) {
-			return args;
-		}
-		final int len = args == null ? 0 : args.length;
-		for(int i = 0; i < len; i ++) {
-			if(args[i] instanceof Time12) {
-				args[i] = Time12SequenceId.toString(sequence.next());
-			}
-		}
-		return args;
-	}
-	
 	// クエリ実行.
 	private JDBCRow execQuery(String sql, int limit, Object[] args) {
 		check();
@@ -221,7 +207,8 @@ public class JDBCConnect {
 			if(fsize > 0) {
 				stmt.setFetchSize(fsize);
 			}
-			JDBCUtils.preParams(stmt, stmt.getParameterMetaData(), appendSequence(args));
+			JDBCUtils.preParams(stmt, stmt.getParameterMetaData(),
+				JDBCUtils.appendSequence(this, args));
 			rs = stmt.executeQuery();
 			JDBCRow ret = JDBCRow.create(rs, this, stmt);
 			closeable.reg(stmt).reg(rs);
@@ -252,7 +239,8 @@ public class JDBCConnect {
 		PreparedStatement stmt = null;
 		try {
 			stmt = conn.prepareStatement(JDBCUtils.sql(kind, sql), Statement.NO_GENERATED_KEYS);
-			JDBCUtils.preParams(stmt, stmt.getParameterMetaData(), appendSequence(args));
+			JDBCUtils.preParams(stmt, stmt.getParameterMetaData(),
+				JDBCUtils.appendSequence(this, args));
 			int ret = stmt.executeUpdate();
 			stmt.close(); stmt = null;
 			return ret;
@@ -280,7 +268,8 @@ public class JDBCConnect {
 		try {
 			stmt = conn.prepareStatement(JDBCUtils.sql(kind, sql), Statement.RETURN_GENERATED_KEYS);
 			stmt.setMaxRows(1);
-			JDBCUtils.preParams(stmt, stmt.getParameterMetaData(), appendSequence(args));
+			JDBCUtils.preParams(stmt, stmt.getParameterMetaData(),
+				JDBCUtils.appendSequence(this, args));
 			stmt.executeUpdate();
 			rs = stmt.getGeneratedKeys();
 			JDBCRow ret = JDBCRow.create(rs, this, stmt);
@@ -457,7 +446,7 @@ public class JDBCConnect {
 	 * @return
 	 */
 	public Delete delete(Object... list) {
-		return new Delete(this, list);
+		return new Delete(this, null, list);
 	}
 	
 	/**
@@ -466,7 +455,7 @@ public class JDBCConnect {
 	 * @return
 	 */
 	public Insert insert(Object... list) {
-		return new Insert(this, list);
+		return new Insert(this, null, list);
 	}
 	
 	/**
@@ -475,7 +464,34 @@ public class JDBCConnect {
 	 * @return
 	 */
 	public Update update(Object... list) {
-		return new Update(this, list);
+		return new Update(this, null, list);
+	}
+	
+	/**
+	 * DeleteSQLバッチ処理.
+	 * @param list
+	 * @return
+	 */
+	public Delete deleteBatch(Object... list) {
+		return batch.delete(list);
+	}
+	
+	/**
+	 * InsertSQLバッチ処理.
+	 * @param list
+	 * @return
+	 */
+	public Insert insertBatch(Object... list) {
+		return batch.insert(list);
+	}
+	
+	/**
+	 * UpdateSQLバッチ処理.
+	 * @param list
+	 * @return
+	 */
+	public Update updateBatch(Object... list) {
+		return batch.update(list);
 	}
 	
 	/**
@@ -795,11 +811,13 @@ public class JDBCConnect {
 	 */
 	public static final class Delete {
 		private JDBCConnect conns;
+		private JDBCBatch batch;
 		private String name;
 		private String where;
 		
-		public Delete(JDBCConnect c, Object... list) {
+		public Delete(JDBCConnect c, JDBCBatch b, Object... list) {
 			this.conns = c;
+			this.batch = b;
 			this.name = list == null || list.length == 0 ?
 				null : "" + list[0];
 		}
@@ -878,7 +896,14 @@ public class JDBCConnect {
 			if(name == null || name.isEmpty()) {
 				throw new JDBCException("Table name is not set.");
 			}
-			return conns.execUpdate(sql(), args);
+			if(conns != null) {
+				return conns.execUpdate(sql(), args);
+			} else if(batch != null) {
+				batch.add(sql(), args);
+				return 0;
+			} else {
+				throw new JDBCException("Execution object is not set.");
+			}
 		}
 	}
 	
@@ -887,10 +912,12 @@ public class JDBCConnect {
 	 */
 	public static final class Insert {
 		private JDBCConnect conns;
+		private JDBCBatch batch;
 		private String name;
 		
-		public Insert(JDBCConnect c, Object... list) {
+		public Insert(JDBCConnect c, JDBCBatch b, Object... list) {
 			this.conns = c;
+			this.batch = b;
 			this.name = list == null || list.length == 0 ?
 				null : "" + list[0];
 		}
@@ -972,7 +999,14 @@ public class JDBCConnect {
 					params[cnt++] = args[i+1];
 				}
 			}
-			return conns.execInsert(sql(cols), params);
+			if(conns != null) {
+				return conns.execInsert(sql(cols), params);
+			} else if(batch != null) {
+				batch.add(sql(cols), args);
+				return null;
+			} else {
+				throw new JDBCException("Execution object is not set.");
+			}
 		}
 	}
 	
@@ -981,6 +1015,7 @@ public class JDBCConnect {
 	 */
 	public static final class Update {
 		private JDBCConnect conns;
+		private JDBCBatch batch;
 		private String name;
 		private String where;
 		private String[] columns;
@@ -991,7 +1026,7 @@ public class JDBCConnect {
 		 * @param c
 		 * @param list
 		 */
-		protected Update(JDBCConnect c, Object... list) {
+		protected Update(JDBCConnect c, JDBCBatch b, Object... list) {
 			if(list != null) {
 				if(list.length >= 1) {
 					name = "" + list[0];
@@ -999,6 +1034,7 @@ public class JDBCConnect {
 				}
 			}
 			this.conns = c;
+			this.batch = b;
 		}
 		
 		/**
@@ -1132,14 +1168,23 @@ public class JDBCConnect {
 			if(name == null || name.isEmpty()) {
 				throw new JDBCException("Table name is not set.");
 			}
+			Object[] pms = null;
 			if(args.length != 0) {
 				int all = args.length + params.length;
-				Object[] pms = new Object[all];
-				System.arraycopy(params, 0, pms, 0, params.length);
-				System.arraycopy(args, 0, pms, params.length, args.length);
-				return conns.execUpdate(sql(), pms);
+				Object[] p = new Object[all];
+				System.arraycopy(params, 0, p, 0, params.length);
+				System.arraycopy(args, 0, p, params.length, args.length);
+				pms = p;
 			} else {
-				return conns.execUpdate(sql(), params);
+				pms = params;
+			}
+			if(conns != null) {
+				return conns.execUpdate(sql(), pms);
+			} else if(batch != null) {
+				batch.add(sql(), pms);
+				return 0;
+			} else {
+				throw new JDBCException("Execution object is not set.");
 			}
 		}
 	}

@@ -10,15 +10,37 @@ import java.sql.ResultSet;
 import java.sql.Types;
 import java.util.List;
 
+import rhigin.lib.jdbc.runner.JDBCConnect.Time12;
 import rhigin.util.ByteArrayIO;
 import rhigin.util.Converter;
 import rhigin.util.ObjectList;
+import rhigin.util.Time12SequenceId;
 
 /**
  * JDBCユーティリティ.
  */
 public final class JDBCUtils {
 	private JDBCUtils() {
+	}
+
+	/**
+	 * シーケンスIDを付与.
+	 * 
+	 * @param conns
+	 * @param args
+	 * @return
+	 */
+	public static final Object[] appendSequence(JDBCConnect conns, Object[] args) {
+		if(conns.sequence == null) {
+			return args;
+		}
+		final int len = args == null ? 0 : args.length;
+		for(int i = 0; i < len; i ++) {
+			if(args[i] instanceof Time12) {
+				args[i] = Time12SequenceId.toString(conns.sequence.next());
+			}
+		}
+		return args;
 	}
 
 	/**

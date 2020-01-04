@@ -186,7 +186,8 @@ public class JDBC implements JavaRequire {
 			new ConnectFunctions(12, c), new ConnectFunctions(13, c), new ConnectFunctions(14, c),
 			new ConnectFunctions(15, c), new ConnectFunctions(16, c), new ConnectFunctions(17, c),
 			new ConnectFunctions(18, c), new ConnectFunctions(19, c), new ConnectFunctions(20, c),
-			new ConnectFunctions(21, c)
+			new ConnectFunctions(21, c), new ConnectFunctions(22, c), new ConnectFunctions(23, c),
+			new ConnectFunctions(24, c)
 		});
 	}
 	
@@ -322,6 +323,18 @@ public class JDBC implements JavaRequire {
 					{
 						return createUpdate(conn.update(args));
 					}
+				case 22: // deleteBatch.
+					{
+						return createDelete(conn.deleteBatch(args));
+					}
+				case 23: // insertBatch.
+					{
+						return createInsert(conn.insertBatch(args));
+					}
+				case 24: // updateBatch.
+					{
+						return createUpdate(conn.updateBatch(args));
+					}
 				}
 			} catch (RhiginException re) {
 				throw re;
@@ -356,6 +369,9 @@ public class JDBC implements JavaRequire {
 			case 19: return "delete";
 			case 20: return "insert";
 			case 21: return "update";
+			case 22: return "deleteBatch";
+			case 23: return "insertBatch";
+			case 24: return "updateBatch";
 			}
 			return "unknown";
 		}
@@ -366,6 +382,80 @@ public class JDBC implements JavaRequire {
 			Object[] ret = new Object[len];
 			System.arraycopy(src, n, ret, 0, len);
 			return ret;
+		}
+	};
+	
+	// JDBC行情報を生成.
+	private static final RhiginObject createRow(JDBCRow r) {
+		return new RhiginObject("JDBCRow", new RhiginFunction[] {
+			new RowFunctions(0, r), new RowFunctions(1, r), new RowFunctions(2, r), new RowFunctions(3, r),
+			new RowFunctions(4, r), new RowFunctions(5, r)
+		});
+	}
+	
+	// Rowオブジェクトのメソッド群. 
+	private static final class RowFunctions extends RhiginFunction {
+		private final int type;
+		private final JDBCRow row;
+
+		RowFunctions(int t, JDBCRow r) {
+			this.type = t;
+			this.row = r;
+		}
+		
+		@Override
+		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			try {
+				switch (type) {
+				case 0: // close.
+					{
+						row.close();
+					}
+					break;
+				case 1: // isClose.
+					{
+						return row.isClose();
+					}
+				case 2: // hasNext.
+					{
+						return row.hasNext();
+					}
+				case 3: // next.
+					{
+						return row.next();
+					}
+				case 4: // rows.
+					{
+						if(args.length == 0) {
+							return row.getRows();
+						} else {
+							return row.getRows(Converter.convertInt(args[0]));
+						}
+					}
+				case 5: // toString.
+					{
+						return row.toString();
+					}
+				}
+			} catch (RhiginException re) {
+				throw re;
+			} catch (Exception e) {
+				throw new RhiginException(500, e);
+			}
+			return Undefined.instance;
+		}
+		
+		@Override
+		public final String getName() {
+			switch (type) {
+			case 0: return "close";
+			case 1: return "isClose";
+			case 2: return "hasNext";
+			case 3: return "next";
+			case 4: return "rows";
+			case 5: return "toString";
+			}
+			return "unknown";
 		}
 	};
 	
@@ -488,7 +578,7 @@ public class JDBC implements JavaRequire {
 			}
 			return "unknown";
 		}
-	}
+	};
 	
 	// Deleteオブジェクトを生成.
 	private static final RhiginObject createDelete(Delete o) {
@@ -547,7 +637,7 @@ public class JDBC implements JavaRequire {
 			}
 			return "unknown";
 		}
-	}
+	};
 	
 	// Insertオブジェクトを生成.
 	private static final RhiginObject createInsert(Insert o) {
@@ -600,7 +690,7 @@ public class JDBC implements JavaRequire {
 			}
 			return "unknown";
 		}
-	}
+	};
 	
 	// Updateオブジェクトを生成.
 	private static final RhiginObject createUpdate(Update o) {
@@ -662,80 +752,6 @@ public class JDBC implements JavaRequire {
 			case 1: return "columns";
 			case 2: return "where";
 			case 3: return "execute";
-			}
-			return "unknown";
-		}
-	}
-	
-	// JDBC行情報を生成.
-	private static final RhiginObject createRow(JDBCRow r) {
-		return new RhiginObject("JDBCRow", new RhiginFunction[] {
-			new RowFunctions(0, r), new RowFunctions(1, r), new RowFunctions(2, r), new RowFunctions(3, r),
-			new RowFunctions(4, r), new RowFunctions(5, r)
-		});
-	}
-	
-	// Rowオブジェクトのメソッド群. 
-	private static final class RowFunctions extends RhiginFunction {
-		private final int type;
-		private final JDBCRow row;
-
-		RowFunctions(int t, JDBCRow r) {
-			this.type = t;
-			this.row = r;
-		}
-		
-		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
-			try {
-				switch (type) {
-				case 0: // close.
-					{
-						row.close();
-					}
-					break;
-				case 1: // isClose.
-					{
-						return row.isClose();
-					}
-				case 2: // hasNext.
-					{
-						return row.hasNext();
-					}
-				case 3: // next.
-					{
-						return row.next();
-					}
-				case 4: // rows.
-					{
-						if(args.length == 0) {
-							return row.getRows();
-						} else {
-							return row.getRows(Converter.convertInt(args[0]));
-						}
-					}
-				case 5: // toString.
-					{
-						return row.toString();
-					}
-				}
-			} catch (RhiginException re) {
-				throw re;
-			} catch (Exception e) {
-				throw new RhiginException(500, e);
-			}
-			return Undefined.instance;
-		}
-		
-		@Override
-		public final String getName() {
-			switch (type) {
-			case 0: return "close";
-			case 1: return "isClose";
-			case 2: return "hasNext";
-			case 3: return "next";
-			case 4: return "rows";
-			case 5: return "toString";
 			}
 			return "unknown";
 		}
