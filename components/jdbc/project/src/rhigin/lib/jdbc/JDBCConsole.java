@@ -271,7 +271,7 @@ public class JDBCConsole {
 			if(!noConsole) {
 				JDBCRow row = null;
 				try {
-					row = conns.insert(sql);
+					row = conns.execInsert(sql);
 					System.out.println(row);
 				} finally {
 					if(row != null) {
@@ -279,14 +279,14 @@ public class JDBCConsole {
 					}
 				}
 			} else {
-				int ret = conns.update(sql);
+				int ret = conns.execUpdate(sql);
 				if(!noConsole) {
 					System.out.println(ret);
 				}
 			}
 			break;
 		case JDBCUtils.SQL_SQL:
-			int ret = conns.update(sql);
+			int ret = conns.execUpdate(sql);
 			if(!noConsole) {
 				System.out.println(ret);
 			}

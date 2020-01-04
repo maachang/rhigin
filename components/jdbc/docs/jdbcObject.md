@@ -175,25 +175,14 @@ var jdbc = require("@rhigin/lib/JDBC");
 var conn = jdbc.connect("h2db");
 
 // 先頭の１件のみ取得.
-var res = jdbc.fquery("select * from name_age_list;");
-```
-
-lqueryは、リミット値を設定して、データを取得します。
-
-```js
-var jdbc = require("@rhigin/lib/JDBC");
-
-var conn = jdbc.connect("h2db");
-
-// ５件まで取得.
-var res = jdbc.fquery("select * from name_age_list;", 5);
+var res = jdbc.first("select * from name_age_list;");
 ```
 
 _
 
-### 5-2-2）insert
+### 5-2-2）execInsert
 
-insertは、SQL文のInsertを利用する場合に使います。
+execInsertは、SQL文のInsertを利用する場合に使います。
 
 「AUTO_INCREMENT」定義のカラムが存在する場合は、その値が返却されます。
 
@@ -203,7 +192,7 @@ var jdbc = require("@rhigin/lib/JDBC");
 var conn = jdbc.connect("h2db");
 
 // 1件のデータを追加.
-var result = conn.insert("INSERT INTO name_age_list(NAME, AGE) VALUES (?, ?);", "tanaka", 38);
+var result = conn.execInsert("INSERT INTO name_age_list(NAME, AGE) VALUES (?, ?);", "tanaka", 38);
 conn.commit();
 
 console.log(result);
@@ -221,9 +210,9 @@ console.log(result);
 
 _
 
-### 5-2-3）update
+### 5-2-3）execUpdate
 
-updateは、SQL文のSelectや「AUTO_INCREMENT」があるInsert「以外」の返却値がResultSetで無いSQL文の場合に利用します。
+execUpdateは、SQL文のSelectや「AUTO_INCREMENT」があるInsert「以外」の返却値がResultSetで無いSQL文の場合に利用します。
 
 ```js
 var jdbc = require("@rhigin/lib/JDBC");
@@ -231,7 +220,7 @@ var jdbc = require("@rhigin/lib/JDBC");
 var conn = jdbc.connect("h2db");
 
 // 1件のデータを更新.
-var result = conn.update("UPDATE name_age_list SET age=? WHERE name=?;", 41, "suzuki");
+var result = conn.execUpdate("UPDATE name_age_list SET age=? WHERE name=?;", 41, "suzuki");
 conn.commit();
 
 console.log(result);

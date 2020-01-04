@@ -8,6 +8,10 @@ import rhigin.RhiginConfig;
 import rhigin.RhiginException;
 import rhigin.lib.jdbc.JDBCCore;
 import rhigin.lib.jdbc.runner.JDBCConnect;
+import rhigin.lib.jdbc.runner.JDBCConnect.Delete;
+import rhigin.lib.jdbc.runner.JDBCConnect.Insert;
+import rhigin.lib.jdbc.runner.JDBCConnect.Select;
+import rhigin.lib.jdbc.runner.JDBCConnect.Update;
 import rhigin.lib.jdbc.runner.JDBCRow;
 import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.JavaRequire;
@@ -181,7 +185,8 @@ public class JDBC implements JavaRequire {
 			new ConnectFunctions(9, c), new ConnectFunctions(10, c), new ConnectFunctions(11, c),
 			new ConnectFunctions(12, c), new ConnectFunctions(13, c), new ConnectFunctions(14, c),
 			new ConnectFunctions(15, c), new ConnectFunctions(16, c), new ConnectFunctions(17, c),
-			new ConnectFunctions(18, c)
+			new ConnectFunctions(18, c), new ConnectFunctions(19, c), new ConnectFunctions(20, c),
+			new ConnectFunctions(21, c)
 		});
 	}
 	
@@ -206,62 +211,55 @@ public class JDBC implements JavaRequire {
 						}
 						argsException("JDBCConnect");
 					}
-				case 1: // fquery.
+				case 1: // first.
 					{
 						if(args.length > 0) {
 							return createRow(conn.first("" + args[0], getParams(1, args)));
 						}
 						argsException("JDBCConnect");
 					}
-				case 2: // lquery.
-					{
-						if(args.length > 1 && Converter.isNumeric(args[1])) {
-							return createRow(conn.limit("" + args[0],Converter.convertInt(args[1]), getParams(2, args)));
-						}
-						argsException("JDBCConnect");
-					}
-				case 3: // update.
+				case 2: // execUpdate.
 					{
 						if(args.length > 0) {
-							return conn.update("" + args[0], getParams(1, args));
+							return conn.execUpdate("" + args[0], getParams(1, args));
 						}
 						argsException("JDBCConnect");
 					}
-				case 4: // insert.
+				case 3: // execInsert.
 					{
 						if(args.length > 0) {
-							return createRow(conn.insert("" + args[0], getParams(1, args)));
+							return createRow(conn.execInsert("" + args[0], getParams(1, args)));
 						}
 						argsException("JDBCConnect");
 					}
-				case 5: // commit.
+				case 4: // commit.
 					{
 						conn.commit();
 					}
 					break;
-				case 6: // rollback.
+				case 5: // rollback.
 					{
 						conn.rollback();
 					}
 					break;
-				case 7: // close.
+				case 6: // close.
 					{
 						conn.close();
 					}
 					break;
-				case 8: // isClose.
+				case 7: // isClose.
 					{
 						return conn.isClose();
 					}
-				case 9: // kind.
+				case 8: // kind.
 					{
 						return conn.getKind();
 					}
-				case 10: // isAutoCommit.
+				case 9: // isAutoCommit.
 					{
 						return conn.isAutoCommit();
 					}
-				case 11: // setAutoCommit.
+				case 10: // setAutoCommit.
 					{
 						if(args.length > 0) {
 							final boolean ret = conn.isAutoCommit();
@@ -270,11 +268,11 @@ public class JDBC implements JavaRequire {
 						}
 						argsException("JDBCConnect");
 					}
-				case 12: // getFetchSize.
+				case 11: // getFetchSize.
 					{
 						return conn.getFetchSize();
 					}
-				case 13: // setFetchSize.
+				case 12: // setFetchSize.
 					{
 						if(args.length > 0 && Converter.isNumeric(args[0])) {
 							final int ret = conn.getFetchSize();
@@ -283,16 +281,16 @@ public class JDBC implements JavaRequire {
 						}
 						argsException("JDBCConnect");
 					}
-				case 14: // clearBatch.
+				case 13: // clearBatch.
 					{
 						conn.clearBatch();
 					}
 					break;
-				case 15: // executeBatch.
+				case 14: // executeBatch.
 					{
 						return new FixedArray<Integer>(conn.executeBatch());
 					}
-				case 16: // addBatch.
+				case 15: // addBatch.
 					{
 						if(args.length > 0) {
 							conn.addBatch("" + args[0], getParams(1, args));
@@ -300,13 +298,29 @@ public class JDBC implements JavaRequire {
 						}
 						argsException("JDBCConnect");
 					}
-				case 17: // batchSize.
+				case 16: // batchSize.
 					{
 						return conn.batchSize();
 					}
-				case 18: // sequenceId.
+				case 17: // sequenceId.
 					{
 						return conn.getSequenceId();
+					}
+				case 18: // select.
+					{
+						return createSelect(conn.select(args));
+					}
+				case 19: // delete.
+					{
+						return createDelete(conn.delete(args));
+					}
+				case 20: // insert.
+					{
+						return createInsert(conn.insert(args));
+					}
+				case 21: // update.
+					{
+						return createUpdate(conn.update(args));
 					}
 				}
 			} catch (RhiginException re) {
@@ -321,24 +335,27 @@ public class JDBC implements JavaRequire {
 		public final String getName() {
 			switch (type) {
 			case 0: return "query";
-			case 1: return "fquery";
-			case 2: return "lquery";
-			case 3: return "update";
-			case 4: return "insert";
-			case 5: return "commit";
-			case 6: return "rollback";
-			case 7: return "close";
-			case 8: return "isClose";
-			case 9: return "kind";
-			case 10: return "isAutoCommit";
-			case 11: return "setAutoCommit";
-			case 12: return "getFetchSize";
-			case 13: return "setFetchSize";
-			case 14: return "clearBatch";
-			case 15: return "executeBatch";
-			case 16: return "addBatch";
-			case 17: return "batchSize";
-			case 18: return "sequenceId";
+			case 1: return "first";
+			case 2: return "execUpdate";
+			case 3: return "execInsert";
+			case 4: return "commit";
+			case 5: return "rollback";
+			case 6: return "close";
+			case 7: return "isClose";
+			case 8: return "kind";
+			case 9: return "isAutoCommit";
+			case 10: return "setAutoCommit";
+			case 11: return "getFetchSize";
+			case 12: return "setFetchSize";
+			case 13: return "clearBatch";
+			case 14: return "executeBatch";
+			case 15: return "addBatch";
+			case 16: return "batchSize";
+			case 17: return "sequenceId";
+			case 18: return "select";
+			case 19: return "delete";
+			case 20: return "insert";
+			case 21: return "update";
 			}
 			return "unknown";
 		}
@@ -352,6 +369,303 @@ public class JDBC implements JavaRequire {
 		}
 	};
 	
+	// Selectオブジェクトを生成.
+	private static final RhiginObject createSelect(Select o) {
+		return new RhiginObject("Select", new RhiginFunction[] {
+			new SelectFunction(0, o), new SelectFunction(1, o), new SelectFunction(2, o), new SelectFunction(3, o),
+			new SelectFunction(4, o), new SelectFunction(5, o), new SelectFunction(6, o), new SelectFunction(7, o),
+			new SelectFunction(8, o), new SelectFunction(9, o), new SelectFunction(10, o)
+		});
+	}
+	
+	// Selectオブジェクトのメソッド群. 
+	private static final class SelectFunction extends RhiginFunction {
+		private final int type;
+		private final Select object;
+
+		SelectFunction(int t, Select o) {
+			this.type = t;
+			this.object = o;
+		}
+		
+		@Override
+		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			try {
+				switch (type) {
+				case 0: // "name";
+					{
+						if(args.length > 0) {
+							object.name("" + args[0]);
+						} else {
+							object.name(null);
+						}
+						break;
+					}
+				case 1: // "columns";
+					{
+						object.columns(args);
+						break;
+					}
+				case 2: // "where";
+					{
+						object.where(args);
+						break;
+					}
+				case 3: // "groupby";
+					{
+						object.groupby(args);
+						break;
+					}
+				case 4: // "having";
+					{
+						object.having(args);
+						break;
+					}
+				case 5: // "orderby";
+					{
+						object.orderby(args);
+						break;
+					}
+				case 6: // "ather";
+					{
+						if(args.length > 0) {
+							object.ather("" + args[0]);
+						} else {
+							object.ather(null);
+						}
+						break;
+					}
+				case 7: // "range";
+					{
+						object.range(args);
+						break;
+					}
+				case 8: // "offset";
+					{
+						if(args.length > 0) {
+							object.offset(args[0]);
+						} else {
+							object.offset(null);
+						}
+						break;
+					}
+				case 9: // "limit";
+					{
+						if(args.length > 0) {
+							object.limit(args[0]);
+						} else {
+							object.limit(null);
+						}
+						break;
+					}
+				case 10: // "execute";
+					{
+						return createRow(object.execute(args));
+					}
+				}
+			} catch (RhiginException re) {
+				throw re;
+			} catch (Exception e) {
+				throw new RhiginException(500, e);
+			}
+			return Undefined.instance;
+		}
+		
+		@Override
+		public final String getName() {
+			switch (type) {
+			case 0: return "name";
+			case 1: return "columns";
+			case 2: return "where";
+			case 3: return "groupby";
+			case 4: return "having";
+			case 5: return "orderby";
+			case 6: return "ather";
+			case 7: return "range";
+			case 8: return "offset";
+			case 9: return "limit";
+			case 10: return "execute";
+			}
+			return "unknown";
+		}
+	}
+	
+	// Deleteオブジェクトを生成.
+	private static final RhiginObject createDelete(Delete o) {
+		return new RhiginObject("Delete", new RhiginFunction[] {
+			new DeleteFunction(0, o), new DeleteFunction(1, o), new DeleteFunction(2, o)
+		});
+	}
+	
+	// Deleteオブジェクトのメソッド群. 
+	private static final class DeleteFunction extends RhiginFunction {
+		private final int type;
+		private final Delete object;
+
+		DeleteFunction(int t, Delete o) {
+			this.type = t;
+			this.object = o;
+		}
+		
+		@Override
+		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			try {
+				switch (type) {
+				case 0: // "name";
+					{
+						if(args.length > 0) {
+							object.name("" + args[0]);
+						} else {
+							object.name(null);
+						}
+						break;
+					}
+				case 1: // "where";
+					{
+						object.where(args);
+						break;
+					}
+				case 2: // "execute";
+					{
+						return object.execute(args);
+					}
+				}
+			} catch (RhiginException re) {
+				throw re;
+			} catch (Exception e) {
+				throw new RhiginException(500, e);
+			}
+			return Undefined.instance;
+		}
+		
+		@Override
+		public final String getName() {
+			switch (type) {
+			case 0: return "name";
+			case 1: return "where";
+			case 2: return "execute";
+			}
+			return "unknown";
+		}
+	}
+	
+	// Insertオブジェクトを生成.
+	private static final RhiginObject createInsert(Insert o) {
+		return new RhiginObject("Insert", new RhiginFunction[] {
+			new InsertFunction(0, o), new InsertFunction(1, o)
+		});
+	}
+	
+	// Insertオブジェクトのメソッド群. 
+	private static final class InsertFunction extends RhiginFunction {
+		private final int type;
+		private final Insert object;
+
+		InsertFunction(int t, Insert o) {
+			this.type = t;
+			this.object = o;
+		}
+		
+		@Override
+		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			try {
+				switch (type) {
+				case 0: // "name";
+					{
+						if(args.length > 0) {
+							object.name("" + args[0]);
+						} else {
+							object.name(null);
+						}
+						break;
+					}
+				case 1: // "execute";
+					{
+						return object.execute(args);
+					}
+				}
+			} catch (RhiginException re) {
+				throw re;
+			} catch (Exception e) {
+				throw new RhiginException(500, e);
+			}
+			return Undefined.instance;
+		}
+		
+		@Override
+		public final String getName() {
+			switch (type) {
+			case 0: return "name";
+			case 1: return "execute";
+			}
+			return "unknown";
+		}
+	}
+	
+	// Updateオブジェクトを生成.
+	private static final RhiginObject createUpdate(Update o) {
+		return new RhiginObject("Update", new RhiginFunction[] {
+			new UpdateFunction(0, o), new UpdateFunction(1, o), new UpdateFunction(2, o), new UpdateFunction(3, o)
+		});
+	}
+	
+	// Updateオブジェクトのメソッド群. 
+	private static final class UpdateFunction extends RhiginFunction {
+		private final int type;
+		private final Update object;
+
+		UpdateFunction(int t, Update o) {
+			this.type = t;
+			this.object = o;
+		}
+		
+		@Override
+		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			try {
+				switch (type) {
+				case 0: // "name";
+					{
+						if(args.length > 0) {
+							object.name("" + args[0]);
+						} else {
+							object.name(null);
+						}
+						break;
+					}
+				case 1: // "columns";
+					{
+						object.columns(args);
+						break;
+					}
+				case 2: // "where";
+					{
+						object.where(args);
+						break;
+					}
+				case 3: // "execute";
+					{
+						return object.execute(args);
+					}
+				}
+			} catch (RhiginException re) {
+				throw re;
+			} catch (Exception e) {
+				throw new RhiginException(500, e);
+			}
+			return Undefined.instance;
+		}
+		
+		@Override
+		public final String getName() {
+			switch (type) {
+			case 0: return "name";
+			case 1: return "columns";
+			case 2: return "where";
+			case 3: return "execute";
+			}
+			return "unknown";
+		}
+	}
 	
 	// JDBC行情報を生成.
 	private static final RhiginObject createRow(JDBCRow r) {

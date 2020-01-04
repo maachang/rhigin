@@ -11,6 +11,9 @@ import rhigin.RhiginException;
  * Rhigin用Function. jsに組み込みたいオリジナルのFunctionを作成したい場合に、継承して実装します.
  */
 public abstract class RhiginFunction implements Function {
+	/** 親オブジェクト. **/
+	protected RhiginObject PARENT = null;
+	
 	@Override
 	public void delete(String arg0) {
 	}

@@ -34,7 +34,7 @@ public class CsvReader implements Iterator<Map<String, Object>>, Closeable, Auto
 	 * @throws IOException
 	 */
 	public CsvReader(String n, String c) throws IOException {
-		this(n, "Windows-31J", c);
+		this(n, "UTF8", c);
 	}
 
 	/**

@@ -14,8 +14,10 @@ import rhigin.lib.jdbc.pooling.AtomicPoolingManager;
 import rhigin.lib.jdbc.pooling.AtomicPoolingMonitor;
 import rhigin.lib.jdbc.runner.JDBCCloseable;
 import rhigin.lib.jdbc.runner.JDBCConnect;
+import rhigin.lib.jdbc.runner.JDBCConnect.Time12;
 import rhigin.lib.jdbc.runner.JDBCException;
 import rhigin.lib.jdbc.runner.JDBCKind;
+import rhigin.scripts.ExecuteScript;
 import rhigin.util.FixedArray;
 import rhigin.util.Flag;
 import rhigin.util.Time12SequenceId;
@@ -138,6 +140,7 @@ public class JDBCCore {
 				man.register(p); p = null;
 			}
 			mon.startThread();
+			ExecuteScript.addOriginals("TIME12", new Time12());
 			startup.set(true);
 		}
 		return closeable;
@@ -352,5 +355,5 @@ public class JDBCCore {
 		}
 		return ret;
 	}
-
+	
 }

@@ -5,10 +5,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Map;
+
+import org.mozilla.javascript.Undefined;
 
 import rhigin.lib.jdbc.pooling.AtomicPoolConnection;
 import rhigin.util.ArrayMap;
+import rhigin.util.BlankScriptable;
+import rhigin.util.Converter;
 import rhigin.util.Time12SequenceId;
 
 /**
@@ -28,6 +33,30 @@ public class JDBCConnect {
 	/** 無効なシーケンスID. **/
 	public static final String NON_SEQUENCE = "f///////////////";
 	
+	/**
+	 * Time12SequenceID発行オブジェクト.
+	 * 
+	 * preparedStatementの引数にこのオブジェクトをセットすると、
+	 * Time12SequenceIdのシーケンスIDを採番してくれます。
+	 */
+	public static final class Time12 implements BlankScriptable {
+		public Time12() {}
+		public boolean equals(Object o) {
+			if(o == null) {
+				return false;
+			}
+			return Time12.class.equals(o.getClass());
+		}
+		public Object getDefaultValue(Class<?> clazz) {
+			return (clazz == null || String.class.equals(clazz)) ? toString() : Undefined.instance;
+		}
+		public String getClassName() {
+			return "TIME12";
+		}
+		public String toString() {
+			return "TIME12";
+		}
+	}
 	
 	/**
 	 * コンストラクタ.
@@ -149,7 +178,7 @@ public class JDBCConnect {
 	 * @return
 	 */
 	public JDBCRow query(String sql, Object... args) {
-		return _query(sql, 0, args);
+		return execQuery(sql, 0, args);
 	}
 	
 	/**
@@ -159,28 +188,32 @@ public class JDBCConnect {
 	 * @return
 	 */
 	public JDBCRow first(String sql, Object...args) {
-		return _query(sql, 1, args);
+		return execQuery(sql, 1, args);
 	}
 	
-	/**
-	 * クエリ実行をして指定リミット数を取得.
-	 * @param sql
-	 * @param args
-	 * @return
-	 */
-	public JDBCRow limit(String sql, int limit, Object...args) {
-		return _query(sql, limit, args);
+	// シーケンスIDを付与.
+	private final Object[] appendSequence(Object[] args) {
+		if(sequence == null) {
+			return args;
+		}
+		final int len = args == null ? 0 : args.length;
+		for(int i = 0; i < len; i ++) {
+			if(args[i] instanceof Time12) {
+				args[i] = Time12SequenceId.toString(sequence.next());
+			}
+		}
+		return args;
 	}
 	
 	// クエリ実行.
-	private JDBCRow _query(String sql, int limit, Object[] args) {
+	private JDBCRow execQuery(String sql, int limit, Object[] args) {
 		check();
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
 			stmt = conn.prepareStatement(JDBCUtils.sql(kind, sql),
 				ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-			stmt.setMaxRows(limit > 0 ? limit : 0);
+			stmt.setMaxRows(limit > 0 && limit < 1024 ? (int)limit : 0);
 			int fsize = fetchSize > 0 ? fetchSize : stmt.getFetchSize();
 			if(fsize > 0 && limit > 0 && fsize > limit) {
 				fsize = limit;
@@ -188,7 +221,7 @@ public class JDBCConnect {
 			if(fsize > 0) {
 				stmt.setFetchSize(fsize);
 			}
-			JDBCUtils.preParams(stmt, stmt.getParameterMetaData(), args);
+			JDBCUtils.preParams(stmt, stmt.getParameterMetaData(), appendSequence(args));
 			rs = stmt.executeQuery();
 			JDBCRow ret = JDBCRow.create(rs, this, stmt);
 			closeable.reg(stmt).reg(rs);
@@ -214,12 +247,12 @@ public class JDBCConnect {
 	 * @param args
 	 * @return
 	 */
-	public int update(String sql, Object... args) {
+	public int execUpdate(String sql, Object... args) {
 		check();
 		PreparedStatement stmt = null;
 		try {
 			stmt = conn.prepareStatement(JDBCUtils.sql(kind, sql), Statement.NO_GENERATED_KEYS);
-			JDBCUtils.preParams(stmt, stmt.getParameterMetaData(), args);
+			JDBCUtils.preParams(stmt, stmt.getParameterMetaData(), appendSequence(args));
 			int ret = stmt.executeUpdate();
 			stmt.close(); stmt = null;
 			return ret;
@@ -240,14 +273,14 @@ public class JDBCConnect {
 	 * @param args
 	 * @return
 	 */
-	public JDBCRow insert(String sql, Object... args) {
+	public JDBCRow execInsert(String sql, Object... args) {
 		check();
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
 			stmt = conn.prepareStatement(JDBCUtils.sql(kind, sql), Statement.RETURN_GENERATED_KEYS);
 			stmt.setMaxRows(1);
-			JDBCUtils.preParams(stmt, stmt.getParameterMetaData(), args);
+			JDBCUtils.preParams(stmt, stmt.getParameterMetaData(), appendSequence(args));
 			stmt.executeUpdate();
 			rs = stmt.getGeneratedKeys();
 			JDBCRow ret = JDBCRow.create(rs, this, stmt);
@@ -407,6 +440,708 @@ public class JDBCConnect {
 		// シーケンスIDが利用出来ない場合は、最大値を返却.
 		return sequence == null ? NON_SEQUENCE :
 			Time12SequenceId.toString(sequence.next());
+	}
+	
+	/**
+	 * SelectSQL処理.
+	 * @param list
+	 * @return
+	 */
+	public Select select(Object... list) {
+		return new Select(this, list);
+	}
+	
+	/**
+	 * DeleteSQL処理.
+	 * @param list
+	 * @return
+	 */
+	public Delete delete(Object... list) {
+		return new Delete(this, list);
+	}
+	
+	/**
+	 * InsertSQL処理.
+	 * @param list
+	 * @return
+	 */
+	public Insert insert(Object... list) {
+		return new Insert(this, list);
+	}
+	
+	/**
+	 * UpdateSQL処理.
+	 * @param list
+	 * @return
+	 */
+	public Update update(Object... list) {
+		return new Update(this, list);
+	}
+	
+	/**
+	 * Select用SQLオブジェクト.
+	 */
+	public static final class Select {
+		private JDBCConnect conns;
+		private String name;
+		private Object[] columns;
+		private String where;
+		private String groupby;
+		private String having;
+		private String orderby;
+		private String ather;
+		private Integer offset;
+		private Integer limit;
+		
+		/**
+		 * コンストラクタ.
+		 * @param c
+		 * @param list
+		 */
+		protected Select(JDBCConnect c, Object[] list) {
+			if(list != null) {
+				int len = list.length;
+				if(len >= 1) {
+					this.name = "" + list[0];
+					if(len > 1) {
+						this.columns = new String[len-1];
+						for(int i = 1, j = 0; i < len; i ++, j ++) {
+							this.columns[j] = list[i];
+						}
+					}
+				}
+			}
+			this.conns = c;
+		}
+		
+		/**
+		 * テーブル名を設定.
+		 * @param table
+		 * @return
+		 */
+		public Select name(String table) {
+			this.name = table;
+			return this;
+		}
+		
+		/**
+		 * 取得カラムを設定.
+		 * @param col
+		 * @return
+		 */
+		public Select columns(Object... col) {
+			if(col != null && col.length > 0) {
+				columns = col;
+			} else {
+				columns = null;
+			}
+			return this;
+		}
+		
+		/**
+		 * 取得項目条件を設定.
+		 * @param where
+		 * @return
+		 */
+		public Select where(Object... where) {
+			if(where == null || where.length == 0) {
+				this.where = null;
+				return this;
+			}
+			if(where.length == 1) {
+				String wstr = "" + where[0];
+				if(wstr != null && !wstr.isEmpty()) {
+					if(!wstr.trim().toLowerCase().startsWith("where")) {
+						wstr = "WHERE " + wstr;
+					}
+				}
+				this.where = wstr;
+			} else {
+				int len = where.length;
+				StringBuilder buf = new StringBuilder("WHERE ");
+				for(int i = 0; i < len; i ++) {
+					if(i != 0) {
+						buf.append(" AND ");
+					}
+					buf.append(where[i]);
+				}
+				this.where = buf.toString();
+			}
+			return this;
+		}
+		
+		/**
+		 * group byの設定.
+		 * @param columns
+		 * @return
+		 */
+		public Select groupby(Object... columns) {
+			if(columns == null || columns.length <= 0) {
+				this.groupby = null;
+				return this;
+			} else if(columns.length == 1) {
+				String sql = "" + columns[0];
+				if(!sql.trim().toLowerCase().startsWith("group by")) {
+					sql = "GROUP BY " + sql;
+				}
+				this.groupby = sql;
+				return this;
+			}
+			int len = columns.length;
+			StringBuilder buf = new StringBuilder("GROUP BY ");
+			for(int i = 0; i < len; i ++) {
+				if(i != 0) {
+					buf.append(", ");
+				}
+				buf.append(columns[i]);
+			}
+			this.groupby = buf.toString();
+			return this;
+		}
+		
+		/**
+		 * group byの条件をセット.
+		 * @param where
+		 * @return
+		 */
+		public Select having(Object... having) {
+			if(having == null || having.length == 0) {
+				this.having = null;
+				return this;
+			}
+			if(having.length == 1) {
+				String hstr = "" + having[0];
+				if(hstr != null && !hstr.isEmpty()) {
+					if(!hstr.trim().toLowerCase().startsWith("having")) {
+						hstr = "HAVING " + hstr;
+					}
+				}
+				this.having = hstr;
+			} else {
+				int len = having.length;
+				StringBuilder buf = new StringBuilder("HAVING ");
+				for(int i = 0; i < len; i ++) {
+					if(i != 0) {
+						buf.append(" AND ");
+					}
+					buf.append(having[i]);
+				}
+				this.having = buf.toString();
+			}
+			return this;
+		}
+		
+		/**
+		 * order byの設定.
+		 * @param columns [boolean] true=asc,false=desc [String] columns.
+		 * @return
+		 */
+		public Select orderby(Object... columns) {
+			if(columns == null || columns.length <= 0) {
+				this.orderby = null;
+				return this;
+			} else if(columns.length == 1) {
+				String sql = "" + columns[0];
+				if(!sql.trim().toLowerCase().startsWith("order by")) {
+					sql = "ORDER BY " + sql;
+				}
+				this.orderby = sql;
+				return this;
+			}
+			boolean first = true;
+			String before = null;
+			StringBuilder buf = new StringBuilder("ORDER BY ");
+			int len = columns.length;
+			for(int i = 0; i < len; i++) {
+				if(columns[i] instanceof Boolean) {
+					if(before != null) {
+						if(!first) {
+							buf.append(", ");
+						}
+						if((Boolean)columns[i]) {
+							buf.append(before).append(" ASC");
+						} else {
+							buf.append(before).append(" DESC");
+						}
+						first = false;
+					}
+					before = null;
+				} else {
+					before = "" + columns[i];
+				}
+			}
+			if(before != null) {
+				if(!first) {
+					buf.append(", ");
+				}
+				buf.append(before).append(" ASC");
+			}
+			this.orderby = buf.toString();
+			return this;
+		}
+		
+		/**
+		 * order by 以降のSQL設定.
+		 * @param ather
+		 * @return
+		 */
+		public Select ather(String ather) {
+			this.ather = ather;
+			return this;
+		}
+		
+		/**
+		 * offset limit を設定.
+		 * @param args
+		 * @return
+		 */
+		public Select range(Object... args) {
+			if(args.length >= 1) {
+				this.offset = Converter.convertInt(args[0]);
+			}
+			if(args.length >= 2) {
+				this.limit = Converter.convertInt(args[1]);
+			}
+			return this;
+		}
+		
+		/**
+		 * オフセットを設定.
+		 * @param offset
+		 * @return
+		 */
+		public Select offset(Object offset) {
+			this.offset = Converter.convertInt(offset);
+			return this;
+		}
+		
+		/**
+		 * リミットを設定.
+		 * @param limit
+		 * @return
+		 */
+		public Select limit(Object limit) {
+			this.limit = Converter.convertInt(limit);
+			return this;
+		}
+		
+		// SQLを作成.
+		private String sql() {
+			StringBuilder buf = new StringBuilder("SELECT ");
+			if(columns != null && columns.length > 0) {
+				int len = columns.length;
+				for(int i = 0; i < len; i ++) {
+					if(i != 0) {
+						buf.append(", ");
+					}
+					buf.append(columns[i]);
+				}
+			} else {
+				buf.append("*");
+			}
+			buf.append(" FROM ").append(name);
+			if(where != null && !where.isEmpty()) {
+				buf.append(" ").append(where);
+			}
+			if(groupby != null && !groupby.isEmpty()) {
+				buf.append(" ").append(groupby);
+			}
+			if(having != null && !having.isEmpty()) {
+				buf.append(" ").append(having);
+			}
+			if(orderby != null && !orderby.isEmpty()) {
+				buf.append(" ").append(orderby);
+			}
+			if(ather != null && !ather.isEmpty()) {
+				buf.append(" ").append(ather);
+			}
+			if(limit != null && limit >= 0) {
+				buf.append(" LIMIT ").append(limit);
+			}
+			if(offset != null && offset >= 0) {
+				buf.append(" OFFSET ").append(offset);
+			}
+			buf.append(";");
+			return buf.toString();
+		}
+		
+		/**
+		 * 文字列を出力.
+		 * @retrun
+		 */
+		public String toString() {
+			try {
+				return sql();
+			} catch(Exception e) {
+				return "error";
+			}
+		}
+		
+		/**
+		 * 実行処理.
+		 * @param args パラメータを設定します.
+		 * @return
+		 */
+		public JDBCRow execute(Object... args) {
+			if(name == null || name.isEmpty()) {
+				throw new JDBCException("Table name is not set.");
+			}
+			return conns.execQuery(sql(), limit == null || limit < 0 ? 0 : limit, args);
+		}
+	}
+	
+	/**
+	 * 削除用SQLオブジェクト.
+	 */
+	public static final class Delete {
+		private JDBCConnect conns;
+		private String name;
+		private String where;
+		
+		public Delete(JDBCConnect c, Object... list) {
+			this.conns = c;
+			this.name = list == null || list.length == 0 ?
+				null : "" + list[0];
+		}
+		
+		/**
+		 * テーブル名を設定.
+		 * @param table
+		 * @return
+		 */
+		public Delete name(String table) {
+			this.name = table;
+			return this;
+		}
+		
+		/**
+		 * 取得項目条件を設定.
+		 * @param where
+		 * @return
+		 */
+		public Delete where(Object... where) {
+			if(where == null || where.length == 0) {
+				this.where = null;
+				return this;
+			}
+			if(where.length == 1) {
+				String wstr = "" + where[0];
+				if(wstr != null && !wstr.isEmpty()) {
+					if(!wstr.trim().toLowerCase().startsWith("where")) {
+						wstr = "WHERE " + wstr;
+					}
+				}
+				this.where = wstr;
+			} else {
+				int len = where.length;
+				StringBuilder buf = new StringBuilder("WHERE ");
+				for(int i = 0; i < len; i ++) {
+					if(i != 0) {
+						buf.append(" AND ");
+					}
+					buf.append(where[i]);
+				}
+				this.where = buf.toString();
+			}
+			return this;
+		}
+		
+		// SQLを作成.
+		private String sql() {
+			StringBuilder buf = new StringBuilder("DELETE ")
+				.append(" FROM ").append(name);
+			if(where != null && !where.isEmpty()) {
+				buf.append(" ").append(where);
+			}
+			buf.append(";");
+			return buf.toString();
+		}
+		
+		/**
+		 * 文字列を出力.
+		 * @retrun
+		 */
+		public String toString() {
+			try {
+				return sql();
+			} catch(Exception e) {
+				return "error";
+			}
+		}
+		
+		/**
+		 * 実行処理.
+		 * @param args パラメータを設定します.
+		 * @return
+		 */
+		public int execute(Object... args) {
+			if(name == null || name.isEmpty()) {
+				throw new JDBCException("Table name is not set.");
+			}
+			return conns.execUpdate(sql(), args);
+		}
+	}
+	
+	/**
+	 * Insert用SQLオブジェクト.
+	 */
+	public static final class Insert {
+		private JDBCConnect conns;
+		private String name;
+		
+		public Insert(JDBCConnect c, Object... list) {
+			this.conns = c;
+			this.name = list == null || list.length == 0 ?
+				null : "" + list[0];
+		}
+		
+		/**
+		 * テーブル名を設定.
+		 * @param table
+		 * @return
+		 */
+		public Insert name(String table) {
+			this.name = table;
+			return this;
+		}
+		
+		// SQLを作成.
+		private String sql(String[] columns) {
+			StringBuilder buf = new StringBuilder("INSERT INTO ")
+				.append(name).append("(");
+			int len = columns.length;
+			for(int i = 0; i < len; i ++) {
+				if(i != 0) {
+					buf.append(", ");
+				}
+				buf.append(columns[i]);
+			}
+			buf.append(") VALUES (");
+			for(int i = 0; i < len; i ++) {
+				if(i != 0) {
+					buf.append(", ");
+				}
+				buf.append("?");
+			}
+			return buf.append(");").toString();
+		}
+		
+		/**
+		 * 文字列を出力.
+		 * @retrun
+		 */
+		public String toString() {
+			return "" + name;
+		}
+		
+		/**
+		 * 実行処理.
+		 * @param args パラメータを設定します.
+		 * @return
+		 */
+		@SuppressWarnings("rawtypes")
+		public JDBCRow execute(Object... args) {
+			if(args == null || args.length == 0) {
+				throw new JDBCException("The parameter to be inserted does not exist.");
+			}
+			if(name == null || name.isEmpty()) {
+				throw new JDBCException("Table name is not set.");
+			}
+			int cnt = 0;
+			String[] cols = null;
+			Object[] params = null;
+			int len = args.length;
+			if(len == 1 && args[0] instanceof Map) {
+				Object key;
+				Map m = (Map)args[0];
+				len = m.size();
+				cols = new String[len];
+				params = new Object[len];
+				Iterator it = m.keySet().iterator();
+				while(it.hasNext()) {
+					key = it.next();
+					cols[cnt] = Converter.convertString(key);
+					params[cnt++] = m.get(key);
+				}
+			} else {
+				int colLen = len >> 1;
+				cols = new String[colLen];
+				params = new Object[colLen];
+				for(int i = 0; i < len; i += 2) {
+					cols[cnt] = Converter.convertString(args[i]);
+					params[cnt++] = args[i+1];
+				}
+			}
+			return conns.execInsert(sql(cols), params);
+		}
+	}
+	
+	/**
+	 * 削除用SQLオブジェクト.
+	 */
+	public static final class Update {
+		private JDBCConnect conns;
+		private String name;
+		private String where;
+		private String[] columns;
+		private Object[] params;
+
+		/**
+		 * コンストラクタ.
+		 * @param c
+		 * @param list
+		 */
+		protected Update(JDBCConnect c, Object... list) {
+			if(list != null) {
+				if(list.length >= 1) {
+					name = "" + list[0];
+					setColumns(1, list);
+				}
+			}
+			this.conns = c;
+		}
+		
+		/**
+		 * テーブル名を設定.
+		 * @param table
+		 * @return
+		 */
+		public Update name(String table) {
+			this.name = table;
+			return this;
+		}
+		
+		/**
+		 * 更新カラムと要素を追加.
+		 * @param args
+		 * @return
+		 */
+		public Update columns(Object... args) {
+			setColumns(0, args);
+			return this;
+		}
+		
+		// カラムをセット.
+		@SuppressWarnings("rawtypes")
+		private void setColumns(int off, Object... args) {
+			if(args == null || args.length <= off) {
+				this.columns = null;
+				this.params = null;
+				return;
+			}
+			int cnt = 0;
+			String[] cols = null;
+			Object[] params = null;
+			int len = args.length;
+			if(len == off + 1 && args[off] instanceof Map) {
+				Object key;
+				Map m = (Map)args[off];
+				len = m.size();
+				cols = new String[len];
+				params = new Object[len];
+				Iterator it = m.keySet().iterator();
+				while(it.hasNext()) {
+					key = it.next();
+					cols[cnt] = Converter.convertString(key);
+					params[cnt++] = m.get(key);
+				}
+			} else {
+				int colLen = (len - off) >> 1;
+				cols = new String[colLen];
+				params = new Object[colLen];
+				for(int i = off; i < len; i += 2) {
+					cols[cnt] = Converter.convertString(args[i]);
+					params[cnt++] = args[i+1];
+				}
+			}
+			this.columns = cols;
+			this.params = params;
+		}
+		
+		/**
+		 * 取得項目条件を設定.
+		 * @param where
+		 * @return
+		 */
+		public Update where(Object... where) {
+			if(where == null || where.length == 0) {
+				this.where = null;
+				return this;
+			}
+			if(where.length == 1) {
+				String wstr = "" + where[0];
+				if(wstr != null && !wstr.isEmpty()) {
+					if(!wstr.trim().toLowerCase().startsWith("where")) {
+						wstr = "WHERE " + wstr;
+					}
+				}
+				this.where = wstr;
+			} else {
+				int len = where.length;
+				StringBuilder buf = new StringBuilder("WHERE ");
+				for(int i = 0; i < len; i ++) {
+					if(i != 0) {
+						buf.append(" AND ");
+					}
+					buf.append(where[i]);
+				}
+				this.where = buf.toString();
+			}
+			return this;
+		}
+		
+		// SQLを作成.
+		private String sql() {
+			if(columns == null || params == null) {
+				throw new JDBCException("Update column information is not set.");
+			}
+			StringBuilder buf = new StringBuilder("UPDATE ")
+				.append(name).append(" SET ");
+			int len = columns.length;
+			for(int i = 0; i < len; i ++) {
+				if(i != 0) {
+					buf.append(", ");
+				}
+				buf.append(columns[i]).append("=?");
+			}
+			if(where != null && !where.isEmpty()) {
+				buf.append(" ").append(where);
+			}
+			buf.append(";");
+			return buf.toString();
+		}
+		
+		/**
+		 * 文字列を出力.
+		 * @retrun
+		 */
+		public String toString() {
+			try {
+				return sql();
+			} catch(Exception e) {
+				return "error";
+			}
+		}
+		
+		/**
+		 * 実行処理.
+		 * @param args パラメータを設定します.
+		 * @return
+		 */
+		public int execute(Object... args) {
+			if(name == null || name.isEmpty()) {
+				throw new JDBCException("Table name is not set.");
+			}
+			if(args.length != 0) {
+				int all = args.length + params.length;
+				Object[] pms = new Object[all];
+				System.arraycopy(params, 0, pms, 0, params.length);
+				System.arraycopy(args, 0, pms, params.length, args.length);
+				return conns.execUpdate(sql(), pms);
+			} else {
+				return conns.execUpdate(sql(), params);
+			}
+		}
 	}
 }
 

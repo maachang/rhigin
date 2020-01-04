@@ -27,6 +27,7 @@ public class RhiginObject implements BlankScriptable {
 		final FixedSearchArray<String> searchList = new FixedSearchArray<String>(len);
 		for (int i = 0; i < len; i++) {
 			searchList.add(list[i].getName(), i);
+			list[i].PARENT = this;
 		}
 		this.list = list;
 		this.searchList = searchList;
@@ -71,9 +72,20 @@ public class RhiginObject implements BlankScriptable {
 	public String toString() {
 		// toStringがメソッドで存在する場合は、その内容を呼び出す.
 		int no = searchList.search("toString");
-		if(no == -1) {
-			return "[" + name + "]";
+		if(no != -1) {
+			// エラーの場合は、標準表示.
+			try {
+				return "" + list[no].call(null, null, null, new Object[0]);
+			} catch(Exception e) {}
 		}
-		return "" + list[no].call(null, null, null, null);
+		return "[" + name + "]";
+	}
+	
+	/**
+	 * オブジェクト名を取得.
+	 * @return
+	 */
+	public String getName() {
+		return name;
 	}
  }

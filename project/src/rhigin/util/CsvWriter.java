@@ -25,7 +25,7 @@ public class CsvWriter implements Closeable, AutoCloseable {
 	 * @throws IOException
 	 */
 	public CsvWriter(String n, String c) throws IOException {
-		this(n, "Windows-31J", c);
+		this(n, "UTF8", c);
 	}
 
 	/**
