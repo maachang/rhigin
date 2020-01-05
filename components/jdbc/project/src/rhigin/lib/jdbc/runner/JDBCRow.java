@@ -13,6 +13,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import rhigin.scripts.JsonOut;
+import rhigin.util.AbstractEntryIterator;
 import rhigin.util.AbstractKeyIterator;
 import rhigin.util.ConvertGet;
 import rhigin.util.FixedSearchArray;
@@ -185,7 +186,7 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 	
 	// 1行のデータ.
 	@SuppressWarnings("rawtypes")
-	private static final class JDBCOneLine implements AbstractKeyIterator.Base<String>, Map<String, Object>, ConvertGet<String> {
+	private static final class JDBCOneLine implements AbstractKeyIterator.Base<String>, AbstractEntryIterator.Base<String, Object>, Map<String, Object>, ConvertGet<String> {
 		private final JDBCRow parent;
 		
 		private JDBCOneLine(JDBCRow p) {
@@ -268,11 +269,6 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 		}
 
 		@Override
-		public Set<Entry<String,Object>> entrySet() {
-			return null;
-		}
-
-		@Override
 		public int size() {
 			return parent.metaTypes.length;
 		}
@@ -319,7 +315,12 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 
 		@Override
 		public Set<String> keySet() {
-			return new AbstractKeyIterator.KeyIteratorSet<>(this);
+			return new AbstractKeyIterator.Set<>(this);
+		}
+
+		@Override
+		public Set<Entry<String, Object>> entrySet() {
+			return new AbstractEntryIterator.Set<>(this);
 		}
 
 		// original 取得.
@@ -331,6 +332,15 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 		@Override
 		public String getKey(int no) {
 			return parent.metaNames[no];
+		}
+
+		@Override
+		public Object getValue(int no) {
+			try {
+				return JDBCUtils.getResultColumn(parent.rs, parent.metaTypes[no], no + 1);
+			} catch(Exception e) {
+				throw new JDBCException(e);
+			}
 		}
 		
 		/**
@@ -344,7 +354,7 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 	
 	// 1行のデータ(copy).
 	@SuppressWarnings("rawtypes")
-	private static final class JDBCCopyLine implements AbstractKeyIterator.Base<String>, Map<String, Object>, ConvertGet<String> {
+	private static final class JDBCCopyLine implements AbstractKeyIterator.Base<String>, AbstractEntryIterator.Base<String, Object>, Map<String, Object>, ConvertGet<String> {
 		private final JDBCRow parent;
 		private final Object[] values;
 		
@@ -432,11 +442,6 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 		}
 
 		@Override
-		public Set<Entry<String,Object>> entrySet() {
-			return null;
-		}
-
-		@Override
 		public int size() {
 			return parent.metaTypes.length;
 		}
@@ -477,7 +482,12 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 
 		@Override
 		public Set<String> keySet() {
-			return new AbstractKeyIterator.KeyIteratorSet<>(this);
+			return new AbstractKeyIterator.Set<>(this);
+		}
+
+		@Override
+		public Set<Entry<String, Object>> entrySet() {
+			return new AbstractEntryIterator.Set<>(this);
 		}
 
 		// original 取得.
@@ -489,6 +499,11 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 		@Override
 		public String getKey(int no) {
 			return parent.metaNames[no];
+		}
+
+		@Override
+		public Object getValue(int no) {
+			return values[no];
 		}
 	}
 }

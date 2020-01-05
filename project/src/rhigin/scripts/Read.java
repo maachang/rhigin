@@ -1,10 +1,11 @@
-package rhigin.util;
+package rhigin.scripts;
 
-import java.util.AbstractList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import rhigin.util.ConvertGet;
 
 /**
  * 読み込み専用オブジェクト.
@@ -14,7 +15,7 @@ public class Read {
 	 * 読み込み専用のList.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static final class Arrays extends AbstractList implements ConvertGet<Integer> {
+	public static final class Arrays extends JavaScriptable.List implements ConvertGet<Integer> {
 		private boolean listMode = false;
 		private Object srcList = null;
 
@@ -72,7 +73,7 @@ public class Read {
 	 * 読み込み専用のMap.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static final class Maps implements Map<String, Object>, ConvertGet<String> {
+	public static final class Maps extends JavaScriptable.Map implements ConvertGet<String> {
 		Map<String, Object> srcMap = null;
 
 		public Maps(Map<String, Object> srcMap) {
@@ -117,7 +118,7 @@ public class Read {
 		}
 
 		@Override
-		public Object put(String name, Object value) {
+		public Object put(Object name, Object value) {
 			return null;
 		}
 
@@ -151,7 +152,7 @@ public class Read {
 		}
 
 		@Override
-		public void putAll(Map<? extends String, ? extends Object> arg0) {
+		public void putAll(Map arg0) {
 		}
 
 		@Override

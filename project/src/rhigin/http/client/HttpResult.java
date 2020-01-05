@@ -11,14 +11,14 @@ import java.util.zip.GZIPInputStream;
 
 import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.Json;
+import rhigin.util.AbstractEntryIterator;
 import rhigin.util.AbstractKeyIterator;
 import rhigin.util.ConvertMap;
 
 /**
  * HttpClient処理結果.
  */
-@SuppressWarnings("rawtypes")
-public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterator.Base<String>, ConvertMap {
+public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterator.Base<String>, AbstractEntryIterator.Base<String, String>, ConvertMap {
 	private byte[] headers = null;
 	private String headersString = null;
 
@@ -337,6 +337,22 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 	}
 
 	/**
+	 * HTTPヘッダ要素を取得.
+	 * 
+	 * @param no
+	 *            対象の項番を設定します.
+	 * @return String HTTPヘッダ要素が返却されます.
+	 */
+	@Override
+	public String getValue(int no) {
+		try {
+			return getHeader(getHeaders().get(no));
+		} catch (Exception e) {
+			throw new HttpClientException(500, e);
+		}
+	}
+
+	/**
 	 * HTTPヘッダ数を取得.
 	 * 
 	 * @return int HTTPヘッダ数が返却されます.
@@ -353,11 +369,21 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 	/**
 	 * KeySetを取得.
 	 * 
-	 * @return KeySet KeySet が返却されます.
+	 * @return Set KeySet が返却されます.
 	 */
 	@Override
-	public Set keySet() {
-		return new AbstractKeyIterator.KeyIteratorSet<>(this);
+	public Set<String> keySet() {
+		return new AbstractKeyIterator.Set<>(this);
+	}
+
+	/**
+	 * EntrySetを取得.
+	 * 
+	 * @return Set EntrySet が返却されます.
+	 */
+	@Override
+	public Set<Entry<String, String>> entrySet() {
+		return new AbstractEntryIterator.Set<>(this);
 	}
 
 	/**

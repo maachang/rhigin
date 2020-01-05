@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import rhigin.scripts.JavaScriptable;
+import rhigin.util.AbstractEntryIterator;
 import rhigin.util.AbstractKeyIterator;
 import rhigin.util.ArrayMap;
 import rhigin.util.ConvertGet;
@@ -12,7 +13,7 @@ import rhigin.util.ConvertGet;
  * Httpパラメータ.
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class Params extends JavaScriptable.Map implements AbstractKeyIterator.Base<String>, ConvertGet<Object> {
+public class Params extends JavaScriptable.Map implements AbstractKeyIterator.Base<String>, AbstractEntryIterator.Base<String, Object>, ConvertGet<Object> {
 	private Map map;
 	private Object[] keyList = null;
 
@@ -115,7 +116,24 @@ public class Params extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 	}
 
 	@Override
+	public Object getValue(int no) {
+		if (map instanceof ArrayMap) {
+			return ((ArrayMap) map).getListMap().rawData().get(no)[1];
+		} else {
+			if (keyList == null) {
+				keyList = map.keySet().toArray();
+			}
+			return map.get(keyList[no]);
+		}
+	}
+
+	@Override
 	public Set keySet() {
-		return new AbstractKeyIterator.KeyIteratorSet<>(this);
+		return new AbstractKeyIterator.Set<>(this);
+	}
+
+	@Override
+	public Set<Entry<String, Object>> entrySet() {
+		return new AbstractEntryIterator.Set<>(this);
 	}
 }

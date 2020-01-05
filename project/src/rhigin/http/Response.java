@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import rhigin.scripts.JavaScriptable;
+import rhigin.util.AbstractEntryIterator;
 import rhigin.util.AbstractKeyIterator;
 import rhigin.util.ConvertMap;
 import rhigin.util.Converter;
@@ -17,7 +18,7 @@ import rhigin.util.OList;
  * Response.
  */
 @SuppressWarnings("rawtypes")
-public class Response extends JavaScriptable.Map implements AbstractKeyIterator.Base<String>, ConvertMap {
+public class Response extends JavaScriptable.Map implements AbstractKeyIterator.Base<String>, AbstractEntryIterator.Base<String, Object>, ConvertMap {
 	private static final String DEFAULT_CONTENT_TYPE = "application/json; charset=UTF-8";
 	protected int status = 200;
 	protected ListMap header = new ListMap();
@@ -219,12 +220,22 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 	}
 
 	@Override
+	public Object getValue(int no) {
+		return header.rawData().get(no)[1];
+	}	
+
+	@Override
 	public int size() {
 		return header.size();
 	}
 
 	@Override
 	public Set keySet() {
-		return new AbstractKeyIterator.KeyIteratorSet<>(this);
+		return new AbstractKeyIterator.Set<>(this);
+	}
+
+	@Override
+	public Set<Entry<String, Object>> entrySet() {
+		return new AbstractEntryIterator.Set<>(this);
 	}
 }

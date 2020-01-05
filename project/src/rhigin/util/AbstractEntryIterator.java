@@ -6,13 +6,15 @@ import java.util.NoSuchElementException;
 /**
  * KeySet, Iterator実装支援.
  */
-public class AbstractKeyIterator {
+public class AbstractEntryIterator {
 
 	/**
-	 * Map.keySet 実装で必要な基本オブジェクト. このオブジェクトを継承してkeySetメソッドを実装し、そこで return
-	 * KeyIteratorSet<String>(this); のように返却します.
+	 * Map.keySet 実装で必要な基本オブジェクト.
+	 * このオブジェクトを継承してkeySetメソッドを実装し、そこで
+	 *   return AbstractEntryIterator.Set<>(this);
+	 * のように返却します.
 	 */
-	public static interface Base<K> {
+	public static interface Base<K, V> {
 		/**
 		 * キーを取得.
 		 * 
@@ -27,17 +29,56 @@ public class AbstractKeyIterator {
 		 * @return
 		 */
 		public int size();
+
+		/**
+		 * 要素を取得.
+		 * @param no
+		 * @return
+		 */
+		public V getValue(int no);
 	}
-
+	
 	/**
-	 * Key用Iteartor.
+	 * KeyValue.
 	 */
-	public static class Iterator<K> implements java.util.Iterator<K> {
-		private Base<K> base;
-		private int nowPos;
-		private K target;
+	@SuppressWarnings("unchecked")
+	private static class Entry<K, V> implements java.util.Map.Entry<K, V> {
+		Object key;
+		Object value;
+		
+		public Entry(K k, V v) {
+			key = k;
+			value = v;
+		}
 
-		protected Iterator(Base<K> base) {
+		@Override
+		public K getKey() {
+			return (K)key;
+		}
+
+		@Override
+		public V getValue() {
+			return (V)value;
+		}
+
+		@Override
+		public V setValue(V arg0) {
+			Object o = value;
+			value = arg0;
+			return (V)o;
+		}
+		
+	}
+	
+	/**
+	 * Entry用Iteartor.
+	 */
+	public static class Iterator<K, V> implements java.util.Iterator<java.util.Map.Entry<K, V>> {
+		private Base<K, V> base;
+		private int nowPos;
+		private AbstractEntryIterator.Entry<K, V> target;
+
+		protected Iterator(Base<K, V> base) {
 			this.base = base;
 			this.nowPos = -1;
 		}
@@ -46,7 +87,8 @@ public class AbstractKeyIterator {
 			if (target == null) {
 				nowPos++;
 				if (base.size() > nowPos) {
-					target = base.getKey(nowPos);
+					target = new AbstractEntryIterator.Entry<K, V>(
+						base.getKey(nowPos), base.getValue(nowPos));
 					return true;
 				}
 				return false;
@@ -60,11 +102,11 @@ public class AbstractKeyIterator {
 		}
 
 		@Override
-		public K next() {
+		public java.util.Map.Entry<K, V> next() {
 			if (getNext() == false) {
 				throw new NoSuchElementException();
 			}
-			K ret = target;
+			Entry<K, V> ret = target;
 			target = null;
 			return ret;
 		}
@@ -74,14 +116,14 @@ public class AbstractKeyIterator {
 			throw new UnsupportedOperationException();
 		}
 	}
-	
-	/**
-	 * KeySet.
-	 */
-	public static class Set<K> implements java.util.Set<K> {
-		private Base<K> base;
 
-		public Set(Base<K> base) {
+	/**
+	 * EntrySet.
+	 */
+	public static class Set<K,V> implements java.util.Set<java.util.Map.Entry<K, V>> {
+		private Base<K, V> base;
+
+		public Set(Base<K, V> base) {
 			this.base = base;
 		}
 
@@ -110,8 +152,8 @@ public class AbstractKeyIterator {
 		}
 
 		@Override
-		public Iterator<K> iterator() {
-			return new Iterator<K>(base);
+		public java.util.Iterator<java.util.Map.Entry<K, V>> iterator() {
+			return new AbstractEntryIterator.Iterator<>(base);
 		}
 
 		@Override
@@ -131,22 +173,12 @@ public class AbstractKeyIterator {
 		}
 
 		@Override
-		public boolean add(K e) {
-			return false;
-		}
-
-		@Override
 		public boolean remove(Object o) {
 			return false;
 		}
 
 		@Override
 		public boolean containsAll(Collection<?> c) {
-			return false;
-		}
-
-		@Override
-		public boolean addAll(Collection<? extends K> c) {
 			return false;
 		}
 
@@ -172,6 +204,16 @@ public class AbstractKeyIterator {
 		@Override
 		public int hashCode() {
 			return -1;
+		}
+
+		@Override
+		public boolean add(java.util.Map.Entry<K, V> arg0) {
+			return false;
+		}
+
+		@Override
+		public boolean addAll(Collection<? extends java.util.Map.Entry<K, V>> arg0) {
+			return false;
 		}
 	}
 }

@@ -9,6 +9,7 @@ import rhigin.RhiginException;
 import rhigin.net.NioElement;
 import rhigin.net.NioReadBuffer;
 import rhigin.scripts.JavaScriptable;
+import rhigin.util.AbstractEntryIterator;
 import rhigin.util.AbstractKeyIterator;
 import rhigin.util.ConvertMap;
 
@@ -16,7 +17,7 @@ import rhigin.util.ConvertMap;
  * Httpヘッダ情報. 基本HTTPヘッダ情報のみを保持します. (bodyデータは非保持).
  */
 @SuppressWarnings("rawtypes")
-public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Base<String>, ConvertMap {
+public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Base<String>, AbstractEntryIterator.Base<String, String>, ConvertMap {
 	protected NioElement element;
 	protected String method;
 	protected String url;
@@ -249,6 +250,15 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 	}
 
 	@Override
+	public String getValue(int no) {
+		try {
+			return getHeader(getHeaders().get(no));
+		} catch (Exception e) {
+			throw new RhiginException(500, e);
+		}
+	}
+
+	@Override
 	public int size() {
 		try {
 			List<String> list = getHeaders();
@@ -260,6 +270,11 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 
 	@Override
 	public Set keySet() {
-		return new AbstractKeyIterator.KeyIteratorSet<>(this);
+		return new AbstractKeyIterator.Set<>(this);
+	}
+
+	@Override
+	public Set<Entry<String, String>> entrySet() {
+		return new AbstractEntryIterator.Set<>(this);
 	}
 }

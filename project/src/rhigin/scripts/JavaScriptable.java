@@ -5,7 +5,6 @@ import java.util.AbstractList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
@@ -41,6 +40,9 @@ public class JavaScriptable {
 		public abstract Set keySet();
 		
 		@Override
+		public abstract Set entrySet();
+		
+		@Override
 		public abstract int size();
 		
 		@Override
@@ -57,11 +59,6 @@ public class JavaScriptable {
 		@Override
 		public boolean containsValue(Object arg0) {
 			return false;
-		}
-
-		@Override
-		public Set entrySet() {
-			return null;
 		}
 
 		@Override

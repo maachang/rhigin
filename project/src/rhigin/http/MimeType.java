@@ -11,6 +11,7 @@ import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.RhiginFunction;
+import rhigin.util.AbstractEntryIterator;
 import rhigin.util.AbstractKeyIterator;
 import rhigin.util.ConvertMap;
 
@@ -18,7 +19,7 @@ import rhigin.util.ConvertMap;
  * MimeType.
  */
 @SuppressWarnings("rawtypes")
-public class MimeType extends JavaScriptable.Map implements AbstractKeyIterator.Base<String>, ConvertMap {
+public class MimeType extends JavaScriptable.Map implements AbstractKeyIterator.Base<String>, AbstractEntryIterator.Base<String, Object>, ConvertMap {
 
 	/** MimeTypeコンフィグファイル名. **/
 	public static final String MIME_CONF = "mime.conf";
@@ -208,6 +209,11 @@ public class MimeType extends JavaScriptable.Map implements AbstractKeyIterator.
 		}
 		return (String) keys[no];
 	}
+	
+	@Override
+	public Object getValue(int no) {
+		return mimeTable.get(getKey(no));
+	}	
 
 	@Override
 	public int size() {
@@ -249,6 +255,11 @@ public class MimeType extends JavaScriptable.Map implements AbstractKeyIterator.
 	@Override
 	public Set keySet() {
 		return mimeTable.keySet();
+	}
+
+	@Override
+	public Set<Entry<String, Object>> entrySet() {
+		return new AbstractEntryIterator.Set<>(this);
 	}
 
 	// [js]mimeファンクション.

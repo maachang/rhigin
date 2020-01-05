@@ -10,11 +10,14 @@ import rhigin.util.BlankScriptable;
 /**
  * js内のToStringを呼び出す処理.
  * 
- * それぞれ オブジェクトの先頭で protected final ToStringFunction.Execute toStringFunction =
- * new ToStringFunction.Execute(this); を宣言します。 Scriptable.get(String,
- * Scriptable); Scriptable.has(String, Scriptable); に "toString".equals
- * の場合に、getで「toStringFunction」を返却させます. hasの場合は[true]を返却されます.
+ * それぞれ オブジェクトの先頭で
+ *  protected final ToStringFunction.Execute toStringFunction = new ToStringFunction.Execute(this);
+ * を宣言します。
+ *  Scriptable.get(String, Scriptable);
+ *  Scriptable.has(String, Scriptable);
+ * に "toString".equalsの場合に、getで「toStringFunction」を返却させます.
  * 
+ * hasの場合は[true]を返却されます.
  */
 public abstract class ToStringFunction {
 	// jsで呼び出すtoStringファンクション.
