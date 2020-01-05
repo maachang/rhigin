@@ -205,7 +205,7 @@ public class JDBCCsv {
 			c = (String)row.get(""+i);
 			// １６文字のシーケンスIDを付与する場合。
 			if(Alphabet.eq("{seq}", c) || Alphabet.eq("{sequence}", c)) {
-				c = conns.getSequenceId();
+				c = conns.TIME12();
 			// 数値のシーケンスIDを付与する場合。
 			} else if(Alphabet.eq("{num}", c) || Alphabet.eq("{number}", c)) {
 				c = "" + (counter[0] ++);

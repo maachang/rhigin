@@ -30,6 +30,9 @@ public class JDBCCore {
 	/** デフォルトのJDBCコンフィグ名. **/
 	public static final String DEF_JDBC_JSON_CONFIG_NAME = "jdbc";
 	
+	/** TIME12. **/
+	public static final String TIME12 = "TIME12";
+	
 	protected final Flag startup = new Flag(false);
 	protected final Flag end = new Flag(false);
 	protected final AtomicPoolingManager man = new AtomicPoolingManager();
@@ -140,7 +143,7 @@ public class JDBCCore {
 				man.register(p); p = null;
 			}
 			mon.startThread();
-			ExecuteScript.addOriginals("TIME12", new Time12());
+			ExecuteScript.addOriginals(TIME12, new Time12());
 			startup.set(true);
 		}
 		return closeable;

@@ -45,7 +45,7 @@ public class RhiginObject implements BlankScriptable {
 
 	@Override
 	public boolean has(String k, Scriptable s) {
-		return  searchList.search(k) != -1;
+		return searchList.search(k) != -1;
 	}
 
 	@Override

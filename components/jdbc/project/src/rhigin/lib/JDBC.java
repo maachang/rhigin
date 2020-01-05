@@ -179,6 +179,7 @@ public class JDBC implements JavaRequire {
 	// JDBCコネクションオブジェクトを生成.
 	private static final RhiginObject createConnect(JDBCConnect c) {
 		return new RhiginObject("JDBCConnect", new RhiginFunction[] {
+			new ConnectFunctions(-1, c),
 			new ConnectFunctions(0, c), new ConnectFunctions(1, c), new ConnectFunctions(2, c),
 			new ConnectFunctions(3, c), new ConnectFunctions(4, c), new ConnectFunctions(5, c),
 			new ConnectFunctions(6, c), new ConnectFunctions(7, c), new ConnectFunctions(8, c),
@@ -303,9 +304,9 @@ public class JDBC implements JavaRequire {
 					{
 						return conn.batchSize();
 					}
-				case 17: // sequenceId.
+				case 17: // TIME12.
 					{
-						return conn.getSequenceId();
+						return conn.TIME12();
 					}
 				case 18: // select.
 					{
@@ -364,7 +365,7 @@ public class JDBC implements JavaRequire {
 			case 14: return "executeBatch";
 			case 15: return "addBatch";
 			case 16: return "batchSize";
-			case 17: return "sequenceId";
+			case 17: return JDBCCore.TIME12;
 			case 18: return "select";
 			case 19: return "delete";
 			case 20: return "insert";
@@ -383,6 +384,7 @@ public class JDBC implements JavaRequire {
 			System.arraycopy(src, n, ret, 0, len);
 			return ret;
 		}
+		
 	};
 	
 	// JDBC行情報を生成.
@@ -464,7 +466,7 @@ public class JDBC implements JavaRequire {
 		return new RhiginObject("Select", new RhiginFunction[] {
 			new SelectFunction(0, o), new SelectFunction(1, o), new SelectFunction(2, o), new SelectFunction(3, o),
 			new SelectFunction(4, o), new SelectFunction(5, o), new SelectFunction(6, o), new SelectFunction(7, o),
-			new SelectFunction(8, o), new SelectFunction(9, o), new SelectFunction(10, o)
+			new SelectFunction(8, o), new SelectFunction(9, o), new SelectFunction(10, o), new SelectFunction(11, o)
 		});
 	}
 	
@@ -552,6 +554,10 @@ public class JDBC implements JavaRequire {
 					{
 						return createRow(object.execute(args));
 					}
+				case 11: // "toString";
+					{
+						return object.toString();
+					}
 				}
 			} catch (RhiginException re) {
 				throw re;
@@ -575,6 +581,7 @@ public class JDBC implements JavaRequire {
 			case 8: return "offset";
 			case 9: return "limit";
 			case 10: return "execute";
+			case 11: return "toString";
 			}
 			return "unknown";
 		}
@@ -722,9 +729,9 @@ public class JDBC implements JavaRequire {
 						}
 						break;
 					}
-				case 1: // "columns";
+				case 1: // "set";
 					{
-						object.columns(args);
+						object.set(args);
 						break;
 					}
 				case 2: // "where";
@@ -749,7 +756,7 @@ public class JDBC implements JavaRequire {
 		public final String getName() {
 			switch (type) {
 			case 0: return "name";
-			case 1: return "columns";
+			case 1: return "set";
 			case 2: return "where";
 			case 3: return "execute";
 			}

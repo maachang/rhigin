@@ -53,13 +53,12 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>, Map<String, O
 		this.list = list;
 	}
 
-	/**
-	 * クリア.
-	 */
+	@Override
 	public void clear() {
 		list.clear();
 	}
 
+	@Override
 	public Object put(String name, Object value) {
 		if (name == null || value == null) {
 			return null;
@@ -67,6 +66,7 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>, Map<String, O
 		return list.put(name.toString(), value);
 	}
 
+	@Override
 	public boolean containsKey(Object key) {
 		if (key == null) {
 			return false;
@@ -74,6 +74,7 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>, Map<String, O
 		return list.containsKey(key.toString());
 	}
 
+	@Override
 	public Object get(Object key) {
 		if (key == null) {
 			return null;
@@ -81,6 +82,7 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>, Map<String, O
 		return list.get(key.toString());
 	}
 
+	@Override
 	public Object remove(Object key) {
 		if (key == null) {
 			return null;
@@ -88,10 +90,12 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>, Map<String, O
 		return list.remove(key.toString());
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return list.size() == 0;
 	}
 
+	@Override
 	public void putAll(Map toMerge) {
 		if (toMerge == null) {
 			return;
@@ -106,6 +110,7 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>, Map<String, O
 		}
 	}
 
+	@Override
 	public boolean containsValue(Object value) {
 		OList<Object[]> n = list.rawData();
 		if (value == null) {
@@ -126,14 +131,17 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>, Map<String, O
 		return false;
 	}
 
+	@Override
 	public Set<Entry<String,Object>> entrySet() {
 		return null;
 	}
 
+	@Override
 	public int size() {
 		return list.size();
 	}
 
+	@Override
 	public String toString() {
 		Object[] v;
 		OList<Object[]> n = list.rawData();
@@ -150,6 +158,7 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>, Map<String, O
 		return buf.append("}").toString();
 	}
 
+	@Override
 	public Collection<Object> values() {
 		ArrayList<Object> ret = new ArrayList<Object>();
 		OList<Object[]> n = list.rawData();
@@ -164,6 +173,7 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>, Map<String, O
 		return list;
 	}
 
+	@Override
 	public Set<String> keySet() {
 		return new AbstractKeyIterator.KeyIteratorSet<>(this);
 	}

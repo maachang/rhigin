@@ -413,18 +413,18 @@ public class JDBCConnect {
 	}
 	
 	/**
-	 * シーケンスIDが利用可能かチェック.
+	 * １２バイト、１６文字（Base64）のシーケンスIDが利用可能かチェック.
 	 * @return
 	 */
-	public boolean isSequenceId() {
+	public boolean isTIME12() {
 		return sequence != null;
 	}
 	
 	/**
-	 * シーケンスIDを取得.
+	 * １２バイト、１６文字（Base64）のシーケンスIDを取得.
 	 * @return
 	 */
-	public String getSequenceId() {
+	public String TIME12() {
 		check();
 		// シーケンスIDが利用出来ない場合は、最大値を返却.
 		return sequence == null ? NON_SEQUENCE :
@@ -743,6 +743,9 @@ public class JDBCConnect {
 		
 		// SQLを作成.
 		private String sql() {
+			if(name == null || name.isEmpty()) {
+				throw new JDBCException("Table name is not set.");
+			}
 			StringBuilder buf = new StringBuilder("SELECT ");
 			if(columns != null && columns.length > 0) {
 				int len = columns.length;
@@ -761,9 +764,9 @@ public class JDBCConnect {
 			}
 			if(groupby != null && !groupby.isEmpty()) {
 				buf.append(" ").append(groupby);
-			}
-			if(having != null && !having.isEmpty()) {
-				buf.append(" ").append(having);
+				if(having != null && !having.isEmpty()) {
+					buf.append(" ").append(having);
+				}
 			}
 			if(orderby != null && !orderby.isEmpty()) {
 				buf.append(" ").append(orderby);
@@ -799,9 +802,6 @@ public class JDBCConnect {
 		 * @return
 		 */
 		public JDBCRow execute(Object... args) {
-			if(name == null || name.isEmpty()) {
-				throw new JDBCException("Table name is not set.");
-			}
 			return conns.execQuery(sql(), limit == null || limit < 0 ? 0 : limit, args);
 		}
 	}
@@ -841,8 +841,7 @@ public class JDBCConnect {
 			if(where == null || where.length == 0) {
 				this.where = null;
 				return this;
-			}
-			if(where.length == 1) {
+			} else if(where.length == 1) {
 				String wstr = "" + where[0];
 				if(wstr != null && !wstr.isEmpty()) {
 					if(!wstr.trim().toLowerCase().startsWith("where")) {
@@ -866,6 +865,9 @@ public class JDBCConnect {
 		
 		// SQLを作成.
 		private String sql() {
+			if(name == null || name.isEmpty()) {
+				throw new JDBCException("Table name is not set.");
+			}
 			StringBuilder buf = new StringBuilder("DELETE ")
 				.append(" FROM ").append(name);
 			if(where != null && !where.isEmpty()) {
@@ -893,9 +895,6 @@ public class JDBCConnect {
 		 * @return
 		 */
 		public int execute(Object... args) {
-			if(name == null || name.isEmpty()) {
-				throw new JDBCException("Table name is not set.");
-			}
 			if(conns != null) {
 				return conns.execUpdate(sql(), args);
 			} else if(batch != null) {
@@ -934,6 +933,9 @@ public class JDBCConnect {
 		
 		// SQLを作成.
 		private String sql(String[] columns) {
+			if(name == null || name.isEmpty()) {
+				throw new JDBCException("Table name is not set.");
+			}
 			StringBuilder buf = new StringBuilder("INSERT INTO ")
 				.append(name).append("(");
 			int len = columns.length;
@@ -970,9 +972,6 @@ public class JDBCConnect {
 		public JDBCRow execute(Object... args) {
 			if(args == null || args.length == 0) {
 				throw new JDBCException("The parameter to be inserted does not exist.");
-			}
-			if(name == null || name.isEmpty()) {
-				throw new JDBCException("Table name is not set.");
 			}
 			int cnt = 0;
 			String[] cols = null;
@@ -1052,7 +1051,7 @@ public class JDBCConnect {
 		 * @param args
 		 * @return
 		 */
-		public Update columns(Object... args) {
+		public Update set(Object... args) {
 			setColumns(0, args);
 			return this;
 		}
@@ -1069,18 +1068,26 @@ public class JDBCConnect {
 			String[] cols = null;
 			Object[] params = null;
 			int len = args.length;
-			if(len == off + 1 && args[off] instanceof Map) {
-				Object key;
-				Map m = (Map)args[off];
-				len = m.size();
-				cols = new String[len];
-				params = new Object[len];
-				Iterator it = m.keySet().iterator();
-				while(it.hasNext()) {
-					key = it.next();
-					cols[cnt] = Converter.convertString(key);
-					params[cnt++] = m.get(key);
+			if(len == off + 1) {
+				// map形式で設定されている場合.
+				if(args[off] instanceof Map) {
+					Object key;
+					Map m = (Map)args[off];
+					len = m.size();
+					cols = new String[len];
+					params = new Object[len];
+					Iterator it = m.keySet().iterator();
+					while(it.hasNext()) {
+						key = it.next();
+						cols[cnt] = Converter.convertString(key);
+						params[cnt++] = m.get(key);
+					}
+				// 文字列で設定されている場合.
+				} else {
+					cols = new String[] {"" + args[off]};
+					params = null;
 				}
+			// columns , value のように設定されている.
 			} else {
 				int colLen = (len - off) >> 1;
 				cols = new String[colLen];
@@ -1128,7 +1135,9 @@ public class JDBCConnect {
 		
 		// SQLを作成.
 		private String sql() {
-			if(columns == null || params == null) {
+			if(name == null || name.isEmpty()) {
+				throw new JDBCException("Table name is not set.");
+			} else if(columns == null || params == null) {
 				throw new JDBCException("Update column information is not set.");
 			}
 			StringBuilder buf = new StringBuilder("UPDATE ")
@@ -1165,16 +1174,19 @@ public class JDBCConnect {
 		 * @return
 		 */
 		public int execute(Object... args) {
-			if(name == null || name.isEmpty()) {
-				throw new JDBCException("Table name is not set.");
-			}
 			Object[] pms = null;
 			if(args.length != 0) {
-				int all = args.length + params.length;
-				Object[] p = new Object[all];
-				System.arraycopy(params, 0, p, 0, params.length);
-				System.arraycopy(args, 0, p, params.length, args.length);
-				pms = p;
+				if(params == null || params.length == 0) {
+					pms = args;
+				} else {
+					int all = args.length + params.length;
+					Object[] p = new Object[all];
+					System.arraycopy(params, 0, p, 0, params.length);
+					System.arraycopy(args, 0, p, params.length, args.length);
+					pms = p;
+				}
+			} else if(params == null || params.length == 0) {
+				pms = new Object[0];
 			} else {
 				pms = params;
 			}

@@ -2,35 +2,78 @@ package rhigin.scripts;
 
 import java.lang.reflect.Array;
 import java.util.AbstractList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.function.ToStringFunction;
-import rhigin.util.BlankMap;
 import rhigin.util.BlankScriptable;
 
 /**
  * javaオブジェクトを rhino の Scriptableに変更するオブジェクト.
  */
 public class JavaScriptable {
-	// Mapオブジェクト変換.
+	// Javascript用のMapオブジェクト変換.
 	@SuppressWarnings("rawtypes")
-	public static abstract class Map implements BlankScriptable, BlankMap {
+	public static abstract class Map implements BlankScriptable, java.util.Map {
 		protected final ToStringFunction.Execute toStringFunction = new ToStringFunction.Execute(this);
 
+		/** 実装が必要な部分. **/
+		
+		@Override
 		public abstract Object get(Object name);
 
+		@Override
 		public abstract boolean containsKey(Object name);
 
+		@Override
 		public abstract Object put(Object name, Object value);
 
+		@Override
 		public abstract Object remove(Object name);
 
+		@Override
 		public abstract Set keySet();
+		
+		@Override
+		public abstract int size();
+		
+		@Override
+		public boolean isEmpty() {
+			return size() == 0;
+		}
+		
+		/** 実装はどちらでも良い部分. **/
+		
+		@Override
+		public void clear() {
+		}
+		
+		@Override
+		public boolean containsValue(Object arg0) {
+			return false;
+		}
+
+		@Override
+		public Set entrySet() {
+			return null;
+		}
+
+		@Override
+		public void putAll(java.util.Map arg0) {
+		}
+
+		@Override
+		public Collection values() {
+			return null;
+		}
+		
+		/** Scriptable な部分. **/
 
 		@Override
 		public boolean has(String name, Scriptable start) {
@@ -60,6 +103,9 @@ public class JavaScriptable {
 
 		@Override
 		public Object[] getIds() {
+			if(this.size() == 0) {
+				return new Object[0];
+			}
 			int cnt = 0;
 			final int len = this.size();
 			final Object[] ret = new Object[len];
@@ -82,11 +128,11 @@ public class JavaScriptable {
 
 		@Override
 		public String toString() {
-			return Json.encode(this);
+			return JsonOut.toString(this);
 		}
 	}
 
-	// Listオブジェクト変換.
+	// Javascript用のListオブジェクト変換.
 	@SuppressWarnings("rawtypes")
 	public static abstract class List extends AbstractList implements BlankScriptable {
 		protected final ToStringFunction.Execute toStringFunction = new ToStringFunction.Execute(this);
@@ -177,7 +223,7 @@ public class JavaScriptable {
 
 		@Override
 		public String toString() {
-			return Json.encode(this);
+			return JsonOut.toString(this);
 		}
 	}
 
@@ -239,6 +285,11 @@ public class JavaScriptable {
 		public Object remove(Object name) {
 			return srcMap.remove(name);
 		}
+		
+		@Override
+		public int size() {
+			return srcMap.size();
+		}
 
 		@Override
 		public Set keySet() {
@@ -250,6 +301,26 @@ public class JavaScriptable {
 			return srcMap.isEmpty();
 		}
 
+		@Override
+		public Collection<Object> values() {
+			return srcMap.values();
+		}
+		
+		@Override
+		public boolean containsValue(Object arg0) {
+			return srcMap.containsValue(arg0);
+		}
+
+		@Override
+		public Set<Entry<String, Object>> entrySet() {
+			return srcMap.entrySet();
+		}
+		
+		@Override
+		public void putAll(java.util.Map arg0) {
+			srcMap.putAll(arg0);
+		}
+		
 		@Override
 		public String getClassName() {
 			return "WrapMap";

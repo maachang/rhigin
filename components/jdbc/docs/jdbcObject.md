@@ -10,6 +10,14 @@ JDBC接続コンポーネントでは、以下の機能が提供されます。
 
 - [5-3）JDBCRowオブジェクト](#5-3jdbcrowオブジェクト)
 
+- [5-4）Selectオブジェクト](#5-4Selectオブジェクト)
+
+- [5-5）Deleteオブジェクト](#5-5Deleteオブジェクト)
+
+- [5-6）Insertオブジェクト](#5-6Insertオブジェクト)
+
+- [5-7）Updateオブジェクト](#5-7Updateオブジェクト)
+
 _
 
 以下より、これらの利用方法について説明します。
@@ -152,6 +160,34 @@ var jdbc = require("@rhigin/lib/JDBC");
 var conn = jdbc.connect("h2db");
 ```
 JDBCコネクションを利用する場合は、上記のようにjavascript上から呼び出します。
+
+また、特殊ワード ``TIME12` を使って、PreparedStatementのパラメータに設定することで、１２バイトのシーケンスIDがセットされます。
+
+＜例＞
+```js
+var jdbc = require("@rhigin/lib/JDBC");
+var conn = jdbc.connect("h2db");
+
+conn.execInsert("INSERT INTO NAME_AGE_TABLE(NAME, AGE) VALUES (?, ?);", TIME12, 999);
+conn.commit();
+
+var row = conn.query("SELECT * FROM NAME_AGE_TABLE WHERE AGE=?", 999);
+console.log(row);
+```
+
+```js
+[
+  {
+    "ID": 4,
+    "NAME": "AAABb2SKdjAAAAAA",
+    "AGE": 999
+  }
+]
+```
+
+この１２バイトのシーケンスIDは、JSON接続定義で設定されている、マシンIDを含む８バイトのUnixTimeを含んだユニークなシーケンスIDが生成されます。
+
+ただ、この機能は [JDBCConnect.TIME12()](#5-2-10TIME12) と特性が同じなので、JDBC接続定義のJDBCConnectでない場合は、正しく取得出来ません。
 
 _
 
@@ -365,7 +401,7 @@ _
 
 SQLの実行処理は、１SQL実行毎に毎度サーバに送られますが、バッチ実行の場合はまとめて送信します。
 
-addBatch:
+**addBatch:**
 
 バッチ実行用のSQLを設定します.
 ```js
@@ -377,7 +413,7 @@ var conn = jdbc.connect("h2db");
 conn.addBatch("INSERT INTO name_age_list(NAME, AGE) VALUES (?, ?);", "sato", 26);
 ```
 
-executeBatch:
+**executeBatch:**
 
 登録されたバッチ実行の内容をまとめて送信します.
 ```js
@@ -394,7 +430,7 @@ conn.addBatch("INSERT INTO name_age_list(NAME, AGE) VALUES (?, ?);", "nikaido", 
 conn.executeBatch();
 ```
 
-clearBatch:
+**clearBatch:**
 
 実行中のバッチをキャンセルします。
 ```js
@@ -411,7 +447,7 @@ conn.addBatch("INSERT INTO name_age_list(NAME, AGE) VALUES (?, ?);", "nikaido", 
 conn.clearBatch();
 ```
 
-batchSize:
+**batchSize:**
 
 登録されているバッチ数を取得します。
 ```js
@@ -435,9 +471,9 @@ console.log(conn.batchSize());
 
 _
 
-### 5-2-10）sequenceId
+### 5-2-10）TIME12
 
-１６文字のシーケンスIDを取得します。
+１２バイトのバイナリ、１６文字（Base64)のシーケンスIDを取得します。
 
 ```js
 var jdbc = require("@rhigin/lib/JDBC");
@@ -446,13 +482,13 @@ var jdbc = require("@rhigin/lib/JDBC");
 var conn = jdbc.connect("h2db");
 
 // シーケンスIDを出力.
-console.log("JDBC接続定義 h2db: " + conn.sequenceId());
+console.log("JDBC接続定義 h2db: " + conn.TIME12());
 
 // 直接接続.
 conn = jdbc.connect("org.h2.Driver", "jdbc:h2:./h2db/h2db");
 
 // 直接接続の場合は、シーケンスIDは取得出来ない。
-console.log("直接接続: " + conn.sequenceId());
+console.log("直接接続: " + conn.TIME12());
 ```
 
 実行結果：
@@ -461,6 +497,91 @@ JDBC接続定義 h2db: AAABb2SKdjAAAAAA
 直接接続: f///////////////
 ```
 直接接続では、シーケンスIDの発行は行なえないので `f///////////////` が返却されます。
+
+_
+
+### 5-2-11）Select,Delete,Insert,Update
+
+各種よく利用する専用のSQL命令用のオブジェクトが提供されます。
+
+**Selectオブジェクト**
+
+Select文のオブジェクト。
+
+```js
+var jdbc = require("@rhigin/lib/JDBC");
+var conn = jdbc.connect("h2db");
+
+// NAME_AGE_LIST テーブル向けのSelectオブジェクトを取得.
+var sel = conn.select("name_age_list");
+
+var rows = sel.where("id=?").execute(2);
+```
+
+Selectオブジェクトの使い方については [5-4）Selectオブジェクト](#5-4Selectオブジェクト) を参照してください。
+
+_
+
+**Deleteオブジェクト**
+
+Delete文のオブジェクト。
+
+```js
+var jdbc = require("@rhigin/lib/JDBC");
+var conn = jdbc.connect("h2db");
+
+// NAME_AGE_LIST テーブル向けのDeleteオブジェクトを取得.
+var del = conn.delete("name_age_list");
+
+// または、conn.deleteBatchでバッチ実行用オブジェクトを取得できる.
+// var del = conn.deleteBatch("name_age_list");
+
+del.where("id=?").execute(2);
+```
+
+Deleteオブジェクトの使い方については [5-5）Deleteオブジェクト](#5-5Deleteオブジェクト) を参照してください。
+
+_
+
+**Insertオブジェクト**
+
+Insert文のオブジェクト。
+
+```js
+var jdbc = require("@rhigin/lib/JDBC");
+var conn = jdbc.connect("h2db");
+
+// NAME_AGE_LIST テーブル向けのInsertオブジェクトを取得.
+var ist = conn.insert("name_age_list");
+
+// または、conn.insertBatchでバッチ実行用オブジェクトを取得できる.
+// var ist = conn.insertBatch("name_age_list");
+
+ist.execute("name", "xyz", "age", 99);
+```
+
+Insertオブジェクトの使い方については [5-6）Insertオブジェクト](#5-6Insertオブジェクト) を参照してください。
+
+_
+
+**Updateオブジェクト**
+
+Update文のオブジェクト。
+
+```js
+var jdbc = require("@rhigin/lib/JDBC");
+var conn = jdbc.connect("h2db");
+
+// NAME_AGE_LIST テーブル向けのUpdateオブジェクトを取得.
+var upd = conn.update("name_age_list");
+
+// または、conn.updateBatchでバッチ実行用オブジェクトを取得できる.
+// var upd = conn.updateBatch("name_age_list");
+
+upd.set("age", 48).where("name=?").execute("fujita");
+```
+
+Updateオブジェクトの使い方については [5-7）Updateオブジェクト](#5-7Updateオブジェクト) を参照してください。
 
 _
 
@@ -549,6 +670,97 @@ console.log("isClose: " + result.isClose());
 isClose: false
 isClose: true
 ```
+
+_
+
+_
+
+## 5-4）Selectオブジェクト
+
+Selectオブジェクトの使い方について、説明します。
+
+```js
+var jdbc = require("@rhigin/lib/JDBC");
+var conn = jdbc.connect("h2db");
+
+// NAME_AGE_LIST テーブル向けのSelectオブジェクトを取得.
+var sel = conn.select("name_age_list");
+
+var rows = sel.where("id=?").execute(2);
+```
+
+_
+
+### 5-4-1）JDBCConnect.select
+
+Selectオブジェクトを生成します。
+
+```js
+JDBCConnect.select(tableName, columns ...);
+```
+
+```sql
+SELECT columns ... FROM tableName;
+```
+
+第一引数にテーブル名、第二引数以降に表示させるカラム名群を設定します。
+
+```js
+var jdbc = require("@rhigin/lib/JDBC");
+var conn = jdbc.connect("h2db");
+
+var sel = conn.select("name_age_list", "name", "age");
+
+// SELECT name, age FROM name_age_list; で実行.
+var rows = sel.execute();
+```
+
+_
+
+### 5-4-2）Select.name
+
+テーブル名を設定します。
+
+```js
+Select.name(tableName);
+```
+
+```sql
+SELECT * FROM tableName;
+```
+
+_
+
+### 5-4-3）Select.columns
+
+表示するカラム名を設定します。
+
+```js
+Select.columns(columns...);
+```
+
+```sql
+SELECT columns... FROM テーブル名;
+```
+
+たとえば、カウントを取得したい場合は、以下のように設定します。
+
+```js
+var jdbc = require("@rhigin/lib/JDBC");
+var conn = jdbc.connect("h2db");
+
+var sel = conn.select("name_age_list", "COUNT(ID) AS id_count");
+
+// SELECT COUNT(ID) FROM name_age_list; で実行.
+var rows = sel.execute();
+```
+
+_
+
+### 5-4-4）Select.where
+
+
+
 
 _
 
