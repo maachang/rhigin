@@ -132,12 +132,10 @@ public class FCipherObject {
 		}
 	};
 
-	// オブジェクトリスト.
-	private static final RhiginFunction[] list = { new Execute(0), new Execute(1), new Execute(2), new Execute(3),
-			new Execute(4), new Execute(5), new Execute(6) };
-
 	// シングルトン.
-	private static final RhiginObject THIS = new RhiginObject("FCipher", list);
+	private static final RhiginObject THIS = new RhiginObject("FCipher", new RhiginFunction[] {
+			new Execute(0), new Execute(1), new Execute(2), new Execute(3),
+			new Execute(4), new Execute(5), new Execute(6) });
 
 	public static final RhiginObject getInstance() {
 		return THIS;

@@ -71,11 +71,12 @@ public class RhiginObject implements BlankScriptable {
 	@Override
 	public String toString() {
 		// toStringがメソッドで存在する場合は、その内容を呼び出す.
-		int no = searchList.search("toString");
+		final int no = searchList.search("toString");
 		if(no != -1) {
 			// エラーの場合は、標準表示.
 			try {
-				return "" + list[no].call(null, null, null, new Object[0]);
+				return "" + list[no]
+					.call(null, null, null, new Object[0]);
 			} catch(Exception e) {}
 		}
 		return "[" + name + "]";
@@ -88,4 +89,4 @@ public class RhiginObject implements BlankScriptable {
 	public String getName() {
 		return name;
 	}
- }
+}

@@ -12,7 +12,7 @@ import rhigin.RhiginException;
  */
 public abstract class RhiginFunction implements Function {
 	/** 親オブジェクト. **/
-	protected RhiginObject PARENT = null;
+	protected Scriptable PARENT = null;
 	
 	@Override
 	public void delete(String arg0) {

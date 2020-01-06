@@ -691,7 +691,7 @@ var rows = sel.where("id=?").execute(2);
 
 _
 
-### 5-4-1）JDBCConnect.select
+### 5-4-1）select
 
 Selectオブジェクトを生成します。
 
@@ -717,7 +717,7 @@ var rows = sel.execute();
 
 _
 
-### 5-4-2）Select.name
+### 5-4-2）name
 
 テーブル名を設定します。
 
@@ -731,7 +731,7 @@ SELECT * FROM tableName;
 
 _
 
-### 5-4-3）Select.columns
+### 5-4-3）columns
 
 表示するカラム名を設定します。
 
@@ -757,7 +757,7 @@ var rows = sel.execute();
 
 _
 
-### 5-4-4）Select.where
+### 5-4-4）where
 
 
 

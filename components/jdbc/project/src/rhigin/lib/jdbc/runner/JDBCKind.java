@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
+import rhigin.scripts.JsMap;
 import rhigin.scripts.JsonOut;
 import rhigin.util.ArrayMap;
 import rhigin.util.Converter;
@@ -448,12 +449,13 @@ public class JDBCKind {
 	 * Kind設定内容をMapで取得.
 	 * @return
 	 */
-	public Map<String, Object> getMap() {
-		return new ArrayMap(
+	@SuppressWarnings("unchecked")
+	public Map<Object, Object> getMap() {
+		return new JsMap(
 			"name", name, "driver", driver, "url", url, "user", user,
 			"password", password, "readOnly", readOnly, "urlParams", urlParams,
 			"busyTimeout", busyTimeout, "transactionLevel", transactionLevel, "fetchSize", fetchSize,
-			"params", new ArrayMap(params), "poolingSize", poolingSize, "poolingTimeout", poolingTimeout,
+			"params", new JsMap(params), "poolingSize", poolingSize, "poolingTimeout", poolingTimeout,
 			"notSemicolon", notSemicolon, "machineId", machineId);
 	}
 	

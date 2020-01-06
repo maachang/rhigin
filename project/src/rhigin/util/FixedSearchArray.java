@@ -75,11 +75,25 @@ public class FixedSearchArray<K> {
 	
 	/**
 	 * コンストラクタ.
-	 * @param len 排列数を設定します.
+	 * @param len 格納データ数を設定します.
 	 */
 	@SuppressWarnings("unchecked")
 	public FixedSearchArray(int len) {
 		keys = new SearchKey[len];
+	}
+	
+	/**
+	 * コンストラクタ.
+	 * @param args 追加情報群を設定します.
+	 */
+	@SuppressWarnings("unchecked")
+	public FixedSearchArray(K... args) {
+		int len = args.length;
+		keys = new SearchKey[len];
+		for(int i = 0; i < len; i ++) {
+			keys[count ++] = new SearchKey<K>(args[i], i);
+		}
+		Arrays.sort(keys);
 	}
 	
 	/**

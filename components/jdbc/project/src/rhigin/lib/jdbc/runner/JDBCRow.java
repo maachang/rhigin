@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.JsonOut;
 import rhigin.util.AbstractEntryIterator;
 import rhigin.util.AbstractKeyIterator;
@@ -122,6 +123,7 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 		return true;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> next() {
 		check();
@@ -148,6 +150,7 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 	 * @param max
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public List<Map<String, Object>> getRows(int max) {
 		check();
 		max = max <= 0 ? 0 : max;
@@ -186,7 +189,8 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 	
 	// 1行のデータ.
 	@SuppressWarnings("rawtypes")
-	private static final class JDBCOneLine implements AbstractKeyIterator.Base<String>, AbstractEntryIterator.Base<String, Object>, Map<String, Object>, ConvertGet<String> {
+	private static final class JDBCOneLine extends JavaScriptable.Map
+		implements AbstractKeyIterator.Base<String>, AbstractEntryIterator.Base<String, Object>, ConvertGet<String> {
 		private final JDBCRow parent;
 		
 		private JDBCOneLine(JDBCRow p) {
@@ -198,7 +202,7 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 		}
 
 		@Override
-		public Object put(String name, Object value) {
+		public Object put(Object name, Object value) {
 			return null;
 		}
 
@@ -319,7 +323,7 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 		}
 
 		@Override
-		public Set<Entry<String, Object>> entrySet() {
+		public Set<java.util.Map.Entry<String, Object>> entrySet() {
 			return new AbstractEntryIterator.Set<>(this);
 		}
 
@@ -354,7 +358,8 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 	
 	// 1行のデータ(copy).
 	@SuppressWarnings("rawtypes")
-	private static final class JDBCCopyLine implements AbstractKeyIterator.Base<String>, AbstractEntryIterator.Base<String, Object>, Map<String, Object>, ConvertGet<String> {
+	private static final class JDBCCopyLine extends JavaScriptable.Map
+		implements AbstractKeyIterator.Base<String>, AbstractEntryIterator.Base<String, Object>, ConvertGet<String> {
 		private final JDBCRow parent;
 		private final Object[] values;
 		
@@ -379,7 +384,7 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 		}
 
 		@Override
-		public Object put(String name, Object value) {
+		public Object put(Object name, Object value) {
 			return null;
 		}
 
@@ -486,7 +491,7 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 		}
 
 		@Override
-		public Set<Entry<String, Object>> entrySet() {
+		public Set<java.util.Map.Entry<String, Object>> entrySet() {
 			return new AbstractEntryIterator.Set<>(this);
 		}
 

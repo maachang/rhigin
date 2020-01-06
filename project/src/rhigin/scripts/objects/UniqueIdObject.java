@@ -89,12 +89,10 @@ public class UniqueIdObject {
 		}
 	};
 
-	// オブジェクトリスト.
-	private static final RhiginFunction[] list = { new Execute(0), new Execute(1), new Execute(2), new Execute(3),
-			new Execute(4) };
-
 	// シングルトン.
-	private static final RhiginObject THIS = new RhiginObject("UniqueId", list);
+	private static final RhiginObject THIS = new RhiginObject("UniqueId",
+		new Execute(0), new Execute(1), new Execute(2), new Execute(3),
+		new Execute(4));
 
 	public static final RhiginObject getInstance() {
 		return THIS;

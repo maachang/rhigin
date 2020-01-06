@@ -82,11 +82,9 @@ public class FCompObject {
 		}
 	};
 
-	// オブジェクトリスト.
-	private static final RhiginFunction[] list = { new Execute(0), new Execute(1) };
-
 	// シングルトン.
-	private static final RhiginObject THIS = new RhiginObject("FComp", list);
+	private static final RhiginObject THIS = new RhiginObject("FComp", new RhiginFunction[] {
+		new Execute(0), new Execute(1) });
 
 	public static final RhiginObject getInstance() {
 		return THIS;

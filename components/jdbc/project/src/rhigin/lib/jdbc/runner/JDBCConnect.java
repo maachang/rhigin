@@ -11,7 +11,7 @@ import java.util.Map;
 import org.mozilla.javascript.Undefined;
 
 import rhigin.lib.jdbc.pooling.AtomicPoolConnection;
-import rhigin.util.ArrayMap;
+import rhigin.scripts.JsMap;
 import rhigin.util.BlankScriptable;
 import rhigin.util.Converter;
 import rhigin.util.Time12SequenceId;
@@ -306,12 +306,13 @@ public class JDBCConnect {
 	 * kind設定を取得.
 	 * @return
 	 */
-	public Map<String, Object> getKind() {
+	@SuppressWarnings("unchecked")
+	public Map<Object, Object> getKind() {
 		check();
 		if(conn instanceof AtomicPoolConnection) {
 			return ((AtomicPoolConnection)conn).getKind().getMap();
 		}
-		return new ArrayMap();
+		return new JsMap();
 	}
 	
 	/**

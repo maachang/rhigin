@@ -17,9 +17,12 @@ import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.JavaRequire;
 import rhigin.scripts.RhiginEndScriptCall;
 import rhigin.scripts.RhiginFunction;
+import rhigin.scripts.RhiginInstanceObject;
+import rhigin.scripts.RhiginInstanceObject.ObjectFunction;
 import rhigin.scripts.RhiginObject;
 import rhigin.util.Converter;
 import rhigin.util.FixedArray;
+import rhigin.util.FixedSearchArray;
 
 /**
  * [js]JDBCコンポーネント.
@@ -176,23 +179,55 @@ public class JDBC implements JavaRequire {
 		
 	};
 	
+	// JDBCコネクションメソッド名群.
+	private static final String[] JDBC_CONNECT_NAMES = new String[] {
+		"query"
+		,"first"
+		,"execUpdate"
+		,"execInsert"
+		,"commit"
+		,"rollback"
+		,"close"
+		,"isClose"
+		,"kind"
+		,"isAutoCommit"
+		,"setAutoCommit"
+		,"getFetchSize"
+		,"setFetchSize"
+		,"clearBatch"
+		,"executeBatch"
+		,"addBatch"
+		,"batchSize"
+		,JDBCCore.TIME12
+		,"select"
+		,"delete"
+		,"insert"
+		,"update"
+		,"deleteBatch"
+		,"insertBatch"
+		,"updateBatch"
+	};
+	
+	// JDBCコネクションメソッド生成処理.
+	private static final ObjectFunction JDBC_CONNECT_FUNCTIONS = new ObjectFunction() {
+		private FixedSearchArray<String> word = new FixedSearchArray<String>(JDBC_CONNECT_NAMES);
+		public RhiginFunction create(int no, Object... params) {
+			return new ConnectFunctions(no, (JDBCConnect)params[0]);
+		}
+		public String[] functionNames() {
+			return JDBC_CONNECT_NAMES;
+		}
+		public FixedSearchArray<String> getWord() {
+			return word;
+		}
+	};
+	
 	// JDBCコネクションオブジェクトを生成.
-	private static final RhiginObject createConnect(JDBCConnect c) {
-		return new RhiginObject("JDBCConnect", new RhiginFunction[] {
-			new ConnectFunctions(-1, c),
-			new ConnectFunctions(0, c), new ConnectFunctions(1, c), new ConnectFunctions(2, c),
-			new ConnectFunctions(3, c), new ConnectFunctions(4, c), new ConnectFunctions(5, c),
-			new ConnectFunctions(6, c), new ConnectFunctions(7, c), new ConnectFunctions(8, c),
-			new ConnectFunctions(9, c), new ConnectFunctions(10, c), new ConnectFunctions(11, c),
-			new ConnectFunctions(12, c), new ConnectFunctions(13, c), new ConnectFunctions(14, c),
-			new ConnectFunctions(15, c), new ConnectFunctions(16, c), new ConnectFunctions(17, c),
-			new ConnectFunctions(18, c), new ConnectFunctions(19, c), new ConnectFunctions(20, c),
-			new ConnectFunctions(21, c), new ConnectFunctions(22, c), new ConnectFunctions(23, c),
-			new ConnectFunctions(24, c)
-		});
+	private static final RhiginInstanceObject createConnect(JDBCConnect c) {
+		return new RhiginInstanceObject("JDBCConnect", JDBC_CONNECT_FUNCTIONS, c);
 	}
 	
-	// Connectオブジェクトのメソッド群. 
+	// Connectオブジェクトのメソッド群.
 	private static final class ConnectFunctions extends RhiginFunction {
 		private final int type;
 		private final JDBCConnect conn;
@@ -347,34 +382,7 @@ public class JDBC implements JavaRequire {
 		
 		@Override
 		public final String getName() {
-			switch (type) {
-			case 0: return "query";
-			case 1: return "first";
-			case 2: return "execUpdate";
-			case 3: return "execInsert";
-			case 4: return "commit";
-			case 5: return "rollback";
-			case 6: return "close";
-			case 7: return "isClose";
-			case 8: return "kind";
-			case 9: return "isAutoCommit";
-			case 10: return "setAutoCommit";
-			case 11: return "getFetchSize";
-			case 12: return "setFetchSize";
-			case 13: return "clearBatch";
-			case 14: return "executeBatch";
-			case 15: return "addBatch";
-			case 16: return "batchSize";
-			case 17: return JDBCCore.TIME12;
-			case 18: return "select";
-			case 19: return "delete";
-			case 20: return "insert";
-			case 21: return "update";
-			case 22: return "deleteBatch";
-			case 23: return "insertBatch";
-			case 24: return "updateBatch";
-			}
-			return "unknown";
+			return JDBC_CONNECT_NAMES[type];
 		}
 		
 		// 連続パラメータの分離.
@@ -387,12 +395,33 @@ public class JDBC implements JavaRequire {
 		
 	};
 	
+	// JDBC行情報メソッド名群.
+	private static final String[] JDBC_ROW_NAMES = new String[] {
+		"close"
+		,"isClose"
+		,"hasNext"
+		,"next"
+		,"rows"
+		,"toString"
+	};
+	
+	// JDBC行情報メソッド生成処理.
+	private static final ObjectFunction JDBC_ROW_FUNCTIONS = new ObjectFunction() {
+		private FixedSearchArray<String> word = new FixedSearchArray<String>(JDBC_ROW_NAMES);
+		public RhiginFunction create(int no, Object... params) {
+			return new RowFunctions(no, (JDBCRow)params[0]);
+		}
+		public String[] functionNames() {
+			return JDBC_ROW_NAMES;
+		}
+		public FixedSearchArray<String> getWord() {
+			return word;
+		}
+	};
+	
 	// JDBC行情報を生成.
-	private static final RhiginObject createRow(JDBCRow r) {
-		return new RhiginObject("JDBCRow", new RhiginFunction[] {
-			new RowFunctions(0, r), new RowFunctions(1, r), new RowFunctions(2, r), new RowFunctions(3, r),
-			new RowFunctions(4, r), new RowFunctions(5, r)
-		});
+	private static final RhiginInstanceObject createRow(JDBCRow r) {
+		return new RhiginInstanceObject("JDBCRow", JDBC_ROW_FUNCTIONS, r);
 	}
 	
 	// Rowオブジェクトのメソッド群. 
@@ -449,28 +478,46 @@ public class JDBC implements JavaRequire {
 		
 		@Override
 		public final String getName() {
-			switch (type) {
-			case 0: return "close";
-			case 1: return "isClose";
-			case 2: return "hasNext";
-			case 3: return "next";
-			case 4: return "rows";
-			case 5: return "toString";
-			}
-			return "unknown";
+			return JDBC_ROW_NAMES[type];
+		}
+	};
+	
+	// JDBCSelectメソッド名群.
+	private static final String[] JDBC_SELECT_NAMES = new String[] {
+		"name"
+		,"columns"
+		,"where"
+		,"groupby"
+		,"having"
+		,"orderby"
+		,"ather"
+		,"range"
+		,"offset"
+		,"limit"
+		,"execute"
+		,"toString"
+	};
+	
+	// JDBCSelectメソッド生成処理.
+	private static final ObjectFunction JDBC_SELECT_FUNCTIONS = new ObjectFunction() {
+		private FixedSearchArray<String> word = new FixedSearchArray<String>(JDBC_SELECT_NAMES);
+		public RhiginFunction create(int no, Object... params) {
+			return new SelectFunction(no, (Select)params[0]);
+		}
+		public String[] functionNames() {
+			return JDBC_SELECT_NAMES;
+		}
+		public FixedSearchArray<String> getWord() {
+			return word;
 		}
 	};
 	
 	// Selectオブジェクトを生成.
-	private static final RhiginObject createSelect(Select o) {
-		return new RhiginObject("Select", new RhiginFunction[] {
-			new SelectFunction(0, o), new SelectFunction(1, o), new SelectFunction(2, o), new SelectFunction(3, o),
-			new SelectFunction(4, o), new SelectFunction(5, o), new SelectFunction(6, o), new SelectFunction(7, o),
-			new SelectFunction(8, o), new SelectFunction(9, o), new SelectFunction(10, o), new SelectFunction(11, o)
-		});
+	private static final RhiginInstanceObject createSelect(Select o) {
+		return new RhiginInstanceObject("Select", JDBC_SELECT_FUNCTIONS, o);
 	}
 	
-	// Selectオブジェクトのメソッド群. 
+	// Selectオブジェクトのメソッド群.
 	private static final class SelectFunction extends RhiginFunction {
 		private final int type;
 		private final Select object;
@@ -564,37 +611,42 @@ public class JDBC implements JavaRequire {
 			} catch (Exception e) {
 				throw new RhiginException(500, e);
 			}
-			return Undefined.instance;
+			return PARENT;
 		}
 		
 		@Override
 		public final String getName() {
-			switch (type) {
-			case 0: return "name";
-			case 1: return "columns";
-			case 2: return "where";
-			case 3: return "groupby";
-			case 4: return "having";
-			case 5: return "orderby";
-			case 6: return "ather";
-			case 7: return "range";
-			case 8: return "offset";
-			case 9: return "limit";
-			case 10: return "execute";
-			case 11: return "toString";
-			}
-			return "unknown";
+			return JDBC_SELECT_NAMES[type];
+		}
+	};
+	
+	// JDBCDeleteメソッド名群.
+	private static final String[] JDBC_DELETE_NAMES = new String[] {
+		"name"
+		,"where"
+		,"execute"
+	};
+	
+	// JDBCDeleteメソッド生成処理.
+	private static final ObjectFunction JDBC_DELETE_FUNCTIONS = new ObjectFunction() {
+		private FixedSearchArray<String> word = new FixedSearchArray<String>(JDBC_DELETE_NAMES);
+		public RhiginFunction create(int no, Object... params) {
+			return new DeleteFunction(no, (Delete)params[0]);
+		}
+		public String[] functionNames() {
+			return JDBC_DELETE_NAMES;
+		}
+		public FixedSearchArray<String> getWord() {
+			return word;
 		}
 	};
 	
 	// Deleteオブジェクトを生成.
-	private static final RhiginObject createDelete(Delete o) {
-		return new RhiginObject("Delete", new RhiginFunction[] {
-			new DeleteFunction(0, o), new DeleteFunction(1, o), new DeleteFunction(2, o)
-		});
+	private static final RhiginInstanceObject createDelete(Delete o) {
+		return new RhiginInstanceObject("Delete", JDBC_DELETE_FUNCTIONS, o);
 	}
 	
-	// Deleteオブジェクトのメソッド群. 
+	// Deleteオブジェクトのメソッド群.
 	private static final class DeleteFunction extends RhiginFunction {
 		private final int type;
 		private final Delete object;
@@ -632,28 +684,41 @@ public class JDBC implements JavaRequire {
 			} catch (Exception e) {
 				throw new RhiginException(500, e);
 			}
-			return Undefined.instance;
+			return PARENT;
 		}
 		
 		@Override
 		public final String getName() {
-			switch (type) {
-			case 0: return "name";
-			case 1: return "where";
-			case 2: return "execute";
-			}
-			return "unknown";
+			return JDBC_DELETE_NAMES[type];
+		}
+	};
+	
+	// JDBCInsertメソッド名群.
+	private static final String[] JDBC_INSERT_NAMES = new String[] {
+		"name"
+		,"execute"
+	};
+	
+	// JDBCDeleteメソッド生成処理.
+	private static final ObjectFunction JDBC_INSERT_FUNCTIONS = new ObjectFunction() {
+		private FixedSearchArray<String> word = new FixedSearchArray<String>(JDBC_INSERT_NAMES);
+		public RhiginFunction create(int no, Object... params) {
+			return new InsertFunction(no, (Insert)params[0]);
+		}
+		public String[] functionNames() {
+			return JDBC_INSERT_NAMES;
+		}
+		public FixedSearchArray<String> getWord() {
+			return word;
 		}
 	};
 	
 	// Insertオブジェクトを生成.
-	private static final RhiginObject createInsert(Insert o) {
-		return new RhiginObject("Insert", new RhiginFunction[] {
-			new InsertFunction(0, o), new InsertFunction(1, o)
-		});
+	private static final RhiginInstanceObject createInsert(Insert o) {
+		return new RhiginInstanceObject("Insert", JDBC_INSERT_FUNCTIONS, o);
 	}
 	
-	// Insertオブジェクトのメソッド群. 
+	// Insertオブジェクトのメソッド群.
 	private static final class InsertFunction extends RhiginFunction {
 		private final int type;
 		private final Insert object;
@@ -686,27 +751,44 @@ public class JDBC implements JavaRequire {
 			} catch (Exception e) {
 				throw new RhiginException(500, e);
 			}
-			return Undefined.instance;
+			return PARENT;
 		}
 		
 		@Override
 		public final String getName() {
-			switch (type) {
-			case 0: return "name";
-			case 1: return "execute";
-			}
-			return "unknown";
+			return JDBC_INSERT_NAMES[type];
 		}
 	};
 	
+	// JDBCUpdateメソッド名群.
+	private static final String[] JDBC_UPDATE_NAMES = new String[] {
+		"name"
+		,"set"
+		,"where"
+		,"execute"
+	};
+	
+	// JDBCUpdateメソッド生成処理.
+	private static final ObjectFunction JDBC_UPDATE_FUNCTIONS = new ObjectFunction() {
+		private FixedSearchArray<String> word = new FixedSearchArray<String>(JDBC_UPDATE_NAMES);
+		public RhiginFunction create(int no, Object... params) {
+			return new UpdateFunction(no, (Update)params[0]);
+		}
+		public String[] functionNames() {
+			return JDBC_UPDATE_NAMES;
+		}
+		public FixedSearchArray<String> getWord() {
+			return word;
+		}
+	};
+
+	
 	// Updateオブジェクトを生成.
-	private static final RhiginObject createUpdate(Update o) {
-		return new RhiginObject("Update", new RhiginFunction[] {
-			new UpdateFunction(0, o), new UpdateFunction(1, o), new UpdateFunction(2, o), new UpdateFunction(3, o)
-		});
+	private static final RhiginInstanceObject createUpdate(Update o) {
+		return new RhiginInstanceObject("Update", JDBC_UPDATE_FUNCTIONS, o);
 	}
 	
-	// Updateオブジェクトのメソッド群. 
+	// Updateオブジェクトのメソッド群.
 	private static final class UpdateFunction extends RhiginFunction {
 		private final int type;
 		private final Update object;
@@ -749,18 +831,12 @@ public class JDBC implements JavaRequire {
 			} catch (Exception e) {
 				throw new RhiginException(500, e);
 			}
-			return Undefined.instance;
+			return PARENT;
 		}
 		
 		@Override
 		public final String getName() {
-			switch (type) {
-			case 0: return "name";
-			case 1: return "set";
-			case 2: return "where";
-			case 3: return "execute";
-			}
-			return "unknown";
+			return JDBC_UPDATE_NAMES[type];
 		}
 	};
 }

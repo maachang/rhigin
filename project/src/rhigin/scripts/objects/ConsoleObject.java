@@ -126,12 +126,10 @@ public class ConsoleObject {
 		}
 	}
 
-	// オブジェクトリスト.
-	private static final RhiginFunction[] list = { new Execute(0), new Execute(1), new Execute(2), new Execute(3),
-			new Execute(4), new Execute(5), new Execute(6) };
-
 	// シングルトン.
-	private static final RhiginObject THIS = new RhiginObject("console", list);
+	private static final RhiginObject THIS = new RhiginObject("console", new RhiginFunction[] {
+			new Execute(0), new Execute(1), new Execute(2), new Execute(3),
+			new Execute(4), new Execute(5), new Execute(6) });
 
 	public static final RhiginObject getInstance() {
 		return THIS;

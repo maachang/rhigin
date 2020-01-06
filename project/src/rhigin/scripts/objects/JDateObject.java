@@ -7,8 +7,11 @@ import org.mozilla.javascript.Wrapper;
 
 import rhigin.RhiginException;
 import rhigin.scripts.RhiginFunction;
-import rhigin.scripts.RhiginObject;
+import rhigin.scripts.RhiginInstanceObject;
+import rhigin.scripts.RhiginInstanceObject.ObjectFunction;
 import rhigin.util.Converter;
+import rhigin.util.DateConvert;
+import rhigin.util.FixedSearchArray;
 
 /**
  * [js]Java用日付オブジェクト.
@@ -24,6 +27,53 @@ public class JDateObject extends RhiginFunction {
 	public String getName() {
 		return "JDate";
 	}
+	
+	// メソッド名群.
+	private static final String[] FUNCTION_NAMES = new String[] {
+		"clone"
+		,"getDate"
+		,"getDay"
+		,"getHours"
+		,"getMinutes"
+		,"getMonth"
+		,"getSeconds"
+		,"getTime"
+		,"getTimezoneOffset"
+		,"getYear"
+		,"toGMTString"
+		,"toLocaleString"
+		,"getFullYear"
+		,"after"
+		,"before"
+		,"compareTo"
+		,"equals"
+		,"parse"
+		,"setDate"
+		,"setHours"
+		,"setMinutes"
+		,"setMonth"
+		,"setSeconds"
+		,"setTime"
+		,"setYear"
+		,"setFullYear"
+		,"toString"
+		,"hashCode"
+		,"object"
+	};
+	
+	// メソッド生成処理.
+	private static final ObjectFunction FUNCTIONS = new ObjectFunction() {
+		private FixedSearchArray<String> word = new FixedSearchArray<String>(FUNCTION_NAMES);
+		public RhiginFunction create(int no, Object... params) {
+			return new Execute(no, (java.util.Date)params[0]);
+		}
+		public String[] functionNames() {
+			return FUNCTION_NAMES;
+		}
+		public FixedSearchArray<String> getWord() {
+			return word;
+		}
+	};
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -61,16 +111,7 @@ public class JDateObject extends RhiginFunction {
 		if (date == null) {
 			throw new RhiginException(500, "Failed to initialize JDate object");
 		}
-
-		return new JDateClass("JDate",
-				new RhiginFunction[] { new Execute(0, date), new Execute(1, date), new Execute(2, date),
-						new Execute(3, date), new Execute(4, date), new Execute(5, date), new Execute(6, date),
-						new Execute(7, date), new Execute(8, date), new Execute(9, date), new Execute(10, date),
-						new Execute(11, date), new Execute(12, date), new Execute(13, date), new Execute(14, date),
-						new Execute(15, date), new Execute(16, date), new Execute(17, date), new Execute(18, date),
-						new Execute(19, date), new Execute(20, date), new Execute(20, date), new Execute(21, date),
-						new Execute(22, date), new Execute(23, date), new Execute(24, date), new Execute(25, date),
-						new Execute(26, date), new Execute(27, date), new Execute(99, date) });
+		return new RhiginInstanceObject("JDate", FUNCTIONS, date);
 	}
 
 	// JDate用メソッド群.
@@ -86,41 +127,44 @@ public class JDateObject extends RhiginFunction {
 		@SuppressWarnings({ "deprecation", "static-access" })
 		@Override
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
-			switch (type) {
-			case 0:
-				return date.clone();
-			case 1:
-				return date.getDate();
-			case 2:
-				return date.getDay();
-			case 3:
-				return date.getHours();
-			case 4:
-				return date.getMinutes();
-			case 5:
-				return date.getMonth();
-			case 6:
-				return date.getSeconds();
-			case 7:
-				return date.getTime();
-			case 8:
-				return date.getTimezoneOffset();
-			case 9:
-				return date.getYear();
-			case 10:
-				return date.toGMTString();
-			case 11:
-				return date.toLocaleString();
-			case 12:
-				return date.getYear() + 1900;
-			case 26:
-				return date.toString();
-			case 27:
-				return date.hashCode();
-			case 99:
-				return date;
-			}
-			if (args.length >= 1) {
+			if (args.length <= 0) {
+				// 引数がなしの条件.
+				switch (type) {
+				case 0:
+					return date.clone();
+				case 1:
+					return date.getDate();
+				case 2:
+					return date.getDay();
+				case 3:
+					return date.getHours();
+				case 4:
+					return date.getMinutes();
+				case 5:
+					return date.getMonth();
+				case 6:
+					return date.getSeconds();
+				case 7:
+					return date.getTime();
+				case 8:
+					return date.getTimezoneOffset();
+				case 9:
+					return date.getYear();
+				case 10:
+					return date.toGMTString();
+				case 11:
+					return date.toLocaleString();
+				case 12:
+					return date.getYear() + 1900;
+				case 26:
+					return DateConvert.getISO8601(date);
+				case 27:
+					return date.hashCode();
+				case 28:
+					return date;
+				}
+			} else {
+				// 引数が必要な場合.
 				Object o = args[0];
 				switch (type) {
 				case 13:
@@ -159,94 +203,14 @@ public class JDateObject extends RhiginFunction {
 					break;
 				}
 			}
-			return argsError(args);
+			// 引数が必要な条件で、引数が無い場合はエラー.
+			argsException("JDate");
+			return null;
 		}
 
 		@Override
 		public final String getName() {
-			switch (type) {
-			case 0:
-				return "clone";
-			case 1:
-				return "getDate";
-			case 2:
-				return "getDay";
-			case 3:
-				return "getHours";
-			case 4:
-				return "getMinutes";
-			case 5:
-				return "getMonth";
-			case 6:
-				return "getSeconds";
-			case 7:
-				return "getTime";
-			case 8:
-				return "getTimezoneOffset";
-			case 9:
-				return "getYear";
-			case 10:
-				return "toGMTString";
-			case 11:
-				return "toLocaleString";
-			case 12:
-				return "getFullYear";
-			case 13:
-				return "after";
-			case 14:
-				return "before";
-			case 15:
-				return "compareTo";
-			case 16:
-				return "equals";
-			case 17:
-				return "parse";
-			case 18:
-				return "setDate";
-			case 19:
-				return "setHours";
-			case 20:
-				return "setMinutes";
-			case 21:
-				return "setMonth";
-			case 22:
-				return "setSeconds";
-			case 23:
-				return "setTime";
-			case 24:
-				return "setYear";
-			case 25:
-				return "setFullYear";
-			case 26:
-				return "toString";
-			case 27:
-				return "hashCode";
-			case 99:
-				return "object";
-			}
-			return "unknown";
-		}
-
-		private final Object argsError(Object[] args) {
-			switch (type) {
-			case 13:
-			case 14:
-			case 15:
-			case 16:
-			case 17:
-			case 18:
-			case 19:
-			case 20:
-			case 21:
-			case 22:
-			case 23:
-			case 24:
-			case 25:
-				if (!(args.length >= 1)) {
-					argsException("JDate");
-				}
-			}
-			return Undefined.instance;
+			return FUNCTION_NAMES[type];
 		}
 
 		@Override
@@ -254,24 +218,7 @@ public class JDateObject extends RhiginFunction {
 			return date.toString();
 		}
 	}
-
-	// JDate用クラス.
-	private static final class JDateClass extends RhiginObject implements Wrapper {
-		public JDateClass(String name, RhiginFunction[] list) {
-			super(name, list);
-		}
-
-		@Override
-		public String toString() {
-			return ((Execute) get("object", null)).date.toString();
-		}
-
-		@Override
-		public Object unwrap() {
-			return ((Execute) get("object", null)).date;
-		}
-	}
-
+	
 	/**
 	 * スコープにライブラリを登録.
 	 * 

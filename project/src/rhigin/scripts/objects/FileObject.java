@@ -10,13 +10,15 @@ import java.io.InputStream;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
-import org.mozilla.javascript.Wrapper;
 
 import rhigin.RhiginException;
 import rhigin.scripts.RhiginFunction;
+import rhigin.scripts.RhiginInstanceObject;
+import rhigin.scripts.RhiginInstanceObject.ObjectFunction;
 import rhigin.scripts.RhiginObject;
 import rhigin.util.Converter;
 import rhigin.util.FileUtil;
+import rhigin.util.FixedSearchArray;
 import rhigin.util.Stats;
 
 /**
@@ -107,12 +109,7 @@ public class FileObject {
 					case 17:
 						return FileUtil.getFileName("" + args[0]);
 					case 18:
-						Stats stats = new Stats("" + args[0]);
-						return new JStatsObject("Stats", new RhiginFunction[] { new StatsExecute(0, stats),
-								new StatsExecute(1, stats), new StatsExecute(2, stats), new StatsExecute(3, stats),
-								new StatsExecute(4, stats), new StatsExecute(5, stats), new StatsExecute(6, stats),
-								new StatsExecute(7, stats), new StatsExecute(8, stats), new StatsExecute(9, stats),
-								new StatsExecute(99, stats) });
+						return new RhiginInstanceObject("Stats", FUNCTIONS, new Stats("" + args[0]));
 					case 19:
 						return new FileInputStream("" + args[0]);
 					case 20:
@@ -246,6 +243,35 @@ public class FileObject {
 			}
 		}
 	};
+	
+	// メソッド名群.
+	private static final String[] FUNCTION_NAMES = new String[] {
+		"isDirectory"
+		,"isFile"
+		,"isSymbolicLink"
+		,"mode"
+		,"atimeMS"
+		,"mtimeMS"
+		,"birthtimeMS"
+		,"atime"
+		,"mtime"
+		,"birthtime"
+		,"object"
+	};
+
+	// メソッド生成処理.
+	private static final ObjectFunction FUNCTIONS = new ObjectFunction() {
+		private FixedSearchArray<String> word = new FixedSearchArray<String>(FUNCTION_NAMES);
+		public RhiginFunction create(int no, Object... params) {
+			return new StatsExecute(no, (Stats)params[0]);
+		}
+		public String[] functionNames() {
+			return FUNCTION_NAMES;
+		}
+		public FixedSearchArray<String> getWord() {
+			return word;
+		}
+	};
 
 	// stats.
 	private static final class StatsExecute extends RhiginFunction {
@@ -281,7 +307,7 @@ public class FileObject {
 					return ctx.newObject(scope, "Date", new Object[] { stats.mtime() });
 				case 9:
 					return ctx.newObject(scope, "Date", new Object[] { stats.birthtime() });
-				case 99:
+				case 10:
 					return stats;
 				}
 				return Undefined.instance;
@@ -292,57 +318,18 @@ public class FileObject {
 
 		@Override
 		public final String getName() {
-			switch (type) {
-			case 0:
-				return "isDirectory";
-			case 1:
-				return "isFile";
-			case 2:
-				return "isSymbolicLink";
-			case 3:
-				return "mode";
-			case 4:
-				return "atimeMS";
-			case 5:
-				return "mtimeMS";
-			case 6:
-				return "birthtimeMS";
-			case 7:
-				return "atime";
-			case 8:
-				return "mtime";
-			case 9:
-				return "birthtime";
-			case 99:
-				return "object";
-			}
-			return "unknown";
+			return FUNCTION_NAMES[type];
 		}
 	};
 
-	// オブジェクトリスト.
-	private static final RhiginFunction[] list = { new Execute(0), new Execute(1), new Execute(2), new Execute(3),
-			new Execute(4), new Execute(5), new Execute(6), new Execute(7), new Execute(8), new Execute(9),
-			new Execute(10), new Execute(11), new Execute(12), new Execute(13), new Execute(14), new Execute(15),
-			new Execute(16), new Execute(17), new Execute(18), new Execute(19), new Execute(20) };
-
 	// シングルトン.
-	private static final RhiginObject THIS = new RhiginObject("File", list);
+	private static final RhiginObject THIS = new RhiginObject("File", new RhiginFunction[] { new Execute(0), new Execute(1), new Execute(2), new Execute(3),
+		new Execute(4), new Execute(5), new Execute(6), new Execute(7), new Execute(8), new Execute(9),
+		new Execute(10), new Execute(11), new Execute(12), new Execute(13), new Execute(14), new Execute(15),
+		new Execute(16), new Execute(17), new Execute(18), new Execute(19), new Execute(20) });
 
 	public static final RhiginObject getInstance() {
 		return THIS;
-	}
-
-	// JDate用クラス.
-	private static final class JStatsObject extends RhiginObject implements Wrapper {
-		public JStatsObject(String name, RhiginFunction[] list) {
-			super(name, list);
-		}
-
-		@Override
-		public Object unwrap() {
-			return ((StatsExecute) get("object", null)).stats.getPath();
-		}
 	}
 
 	/**

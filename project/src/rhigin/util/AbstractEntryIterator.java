@@ -1,5 +1,6 @@
 package rhigin.util;
 
+import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
@@ -166,10 +167,17 @@ public class AbstractEntryIterator {
 			return ret;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
-		@SuppressWarnings("hiding")
-		public <Object> Object[] toArray(Object[] a) {
-			return null;
+		public <T> T[] toArray(T[] ret) {
+			int len = base.size();
+			if(ret.length < len) {
+				ret = (T[])Array.newInstance(ret.getClass(), len);
+			}
+			for (int i = 0; i < len; i++) {
+				ret[i] = (T)base.getKey(i);
+			}
+			return ret;
 		}
 
 		@Override

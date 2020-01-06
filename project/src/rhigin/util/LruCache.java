@@ -28,7 +28,7 @@ public class LruCache<K, V> {
 	 * コンストラクタ.
 	 *
 	 * @param size
-	 *            最大数
+	 *            最大数を設定.
 	 */
 	public LruCache(int size) {
 		top = null;

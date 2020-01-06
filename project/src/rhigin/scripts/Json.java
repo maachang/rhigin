@@ -11,7 +11,6 @@ import org.mozilla.javascript.Undefined;
 import org.mozilla.javascript.Wrapper;
 
 import rhigin.RhiginException;
-import rhigin.util.ArrayMap;
 import rhigin.util.Converter;
 import rhigin.util.DateConvert;
 import rhigin.util.ObjectList;
@@ -269,6 +268,7 @@ public final class Json {
 	}
 
 	/** Json-Token解析. **/
+	@SuppressWarnings("unchecked")
 	private static final Object createJsonInfo(int[] n, List<Object> token, int type, int no, int len) {
 		String value;
 		StringBuilder before = null;
@@ -323,9 +323,9 @@ public final class Json {
 		}
 		// map.
 		else if (type == TYPE_MAP) {
-			Map<String, Object> ret;
-			// ret = new HashMap<String, Object>();
-			ret = new ArrayMap();
+			Map<Object, Object> ret;
+			// ret = new HashMap<Object, Object>();
+			ret = new JsMap();
 			String key = null;
 			for (int i = no + 1; i < len; i++) {
 				value = (String) token.get(i);

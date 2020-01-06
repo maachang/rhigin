@@ -5,21 +5,26 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.RhiginFunction;
-import rhigin.scripts.RhiginObject;
+import rhigin.scripts.RhiginInstanceObject;
+import rhigin.scripts.RhiginInstanceObject.ObjectFunction;
 import rhigin.util.Converter;
+import rhigin.util.FixedSearchArray;
 import rhigin.util.Xor128;
 
 /**
  * [js]Xor128乱数発生. 高速な処理に対して、精度の高い乱数を発生させます.
  * 
- * var r = new Xor128(nanoTime()); // r.setSeet(nanoTime()); var n = r.next();
+ * var r = new Xor128(nanoTime());
+ * // r.setSeet(nanoTime());
+ * 
+ * var n = r.next();
  */
 public final class Xor128Object {
-	private static final class Execute extends RhiginFunction {
+	private static final class InstanceObject extends RhiginFunction {
 		private final int type;
 		private final Xor128 xor128;
 
-		Execute(int t, Xor128 o) {
+		InstanceObject(int t, Xor128 o) {
 			type = t;
 			xor128 = o;
 		}
@@ -40,13 +45,7 @@ public final class Xor128Object {
 
 		@Override
 		public final String getName() {
-			switch (type) {
-			case 0:
-				return "seet";
-			case 1:
-				return "nextInt";
-			}
-			return "unknown";
+			return FUNCTION_NAMES[type];
 		}
 
 		private final Object argsError(Object[] args, int len) {
@@ -60,7 +59,28 @@ public final class Xor128Object {
 			return Undefined.instance;
 		}
 	};
-
+	
+	// メソッド名群.
+	private static final String[] FUNCTION_NAMES = new String[] {
+		"seet"
+		,"nextInt"
+	};
+	
+	// メソッド生成処理.
+	private static final ObjectFunction FUNCTIONS = new ObjectFunction() {
+		private FixedSearchArray<String> word = new FixedSearchArray<String>(FUNCTION_NAMES);
+		public RhiginFunction create(int no, Object... params) {
+			return new InstanceObject(no, (Xor128)params[0]);
+		}
+		public String[] functionNames() {
+			return FUNCTION_NAMES;
+		}
+		public FixedSearchArray<String> getWord() {
+			return word;
+		}
+	};
+	
+	// インスタンス生成用オブジェクト.
 	private static final class Instance extends RhiginFunction {
 		@Override
 		public Scriptable construct(Context ctx, Scriptable thisObj, Object[] args) {
@@ -68,7 +88,7 @@ public final class Xor128Object {
 			if (args.length >= 1 && Converter.isNumeric(args[0])) {
 				xor128.setSeet(Converter.convertLong(args[0]));
 			}
-			return new RhiginObject("Xor128", new RhiginFunction[] { new Execute(0, xor128), new Execute(1, xor128) });
+			return new RhiginInstanceObject("Xor128", FUNCTIONS, xor128);
 		}
 
 		@Override
@@ -78,7 +98,6 @@ public final class Xor128Object {
 	};
 
 	private static final Instance THIS = new Instance();
-
 	public static final RhiginFunction getInstance() {
 		return THIS;
 	}

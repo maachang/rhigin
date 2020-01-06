@@ -14,7 +14,10 @@ import org.mozilla.javascript.Undefined;
 
 import rhigin.http.Http;
 import rhigin.scripts.RhiginFunction;
+import rhigin.scripts.RhiginInstanceObject;
+import rhigin.scripts.RhiginInstanceObject.ObjectFunction;
 import rhigin.scripts.RhiginObject;
+import rhigin.util.FixedSearchArray;
 
 /**
  * ロック管理オブジェクト.
@@ -114,8 +117,13 @@ public class LockObjects {
 	/**
 	 * [js]ロックオブジェクト.
 	 * 
-	 * var lock = new Lock("test"); lock.lock(); try { ... } finally {
-	 * lock.unlock(); }
+	 * var lock = new Lock("test");
+	 * lock.lock();
+	 * try {
+	 *   ...
+	 * } finally {
+	 *   lock.unlock();
+	 * }
 	 */
 	private static class LockObject extends RhiginFunction {
 		protected static final String HEAD = "#";
@@ -126,7 +134,28 @@ public class LockObjects {
 		}
 
 		// ロック管理オブジェクト.
-		protected static final ConcurrentHashMap<String, KeyWeakReference<Object>> locks = new ConcurrentHashMap<String, KeyWeakReference<Object>>();
+		protected static final ConcurrentHashMap<String, KeyWeakReference<Object>> locks =
+			new ConcurrentHashMap<String, KeyWeakReference<Object>>();
+
+		// メソッド名群.
+		private static final String[] FUNCTION_NAMES = new String[] {
+			"lock"
+			,"unlock"
+		};
+
+		// メソッド生成処理.
+		private static final ObjectFunction FUNCTIONS = new ObjectFunction() {
+			private FixedSearchArray<String> word = new FixedSearchArray<String>(FUNCTION_NAMES);
+			public RhiginFunction create(int no, Object... params) {
+				return new Execute(no, (Lock)params[0]);
+			}
+			public String[] functionNames() {
+				return FUNCTION_NAMES;
+			}
+			public FixedSearchArray<String> getWord() {
+				return word;
+			}
+		};
 
 		@Override
 		public String getName() {
@@ -154,7 +183,7 @@ public class LockObjects {
 			} else {
 				lock = new ReentrantLock();
 			}
-			return new RhiginObject("Lock", new RhiginFunction[] { new Execute(0, lock), new Execute(1, lock) });
+			return new RhiginInstanceObject("Lock", FUNCTIONS, lock);
 		}
 
 		// ロック・アンロック処理.
@@ -179,7 +208,7 @@ public class LockObjects {
 
 			@Override
 			public final String getName() {
-				return type == 0 ? "lock" : "unlock";
+				return FUNCTION_NAMES[type];
 			}
 		};
 	}
@@ -208,6 +237,28 @@ public class LockObjects {
 		public String getName() {
 			return "RwLock";
 		}
+		
+		// メソッド名群.
+		private static final String[] FUNCTION_NAMES = new String[] {
+			"wlock"
+			,"wulock"
+			,"rlock"
+			,"rulock"
+		};
+
+		// メソッド生成処理.
+		private static final ObjectFunction FUNCTIONS = new ObjectFunction() {
+			private FixedSearchArray<String> word = new FixedSearchArray<String>(FUNCTION_NAMES);
+			public RhiginFunction create(int no, Object... params) {
+				return new Execute(no, (ReadWriteLock)params[0]);
+			}
+			public String[] functionNames() {
+				return FUNCTION_NAMES;
+			}
+			public FixedSearchArray<String> getWord() {
+				return word;
+			}
+		};
 
 		// new Object() で呼ばれる.
 		@Override
@@ -230,8 +281,7 @@ public class LockObjects {
 			} else {
 				lock = new ReentrantReadWriteLock();
 			}
-			return new RhiginObject("RwLock", new RhiginFunction[] { new Execute(0, lock), new Execute(1, lock),
-					new Execute(2, lock), new Execute(3, lock) });
+			return new RhiginInstanceObject("RwLock", FUNCTIONS, lock);
 		}
 
 		// ロック・アンロック処理.
