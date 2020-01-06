@@ -16,7 +16,6 @@ import rhigin.http.Http;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginInstanceObject;
 import rhigin.scripts.RhiginInstanceObject.ObjectFunction;
-import rhigin.scripts.RhiginObject;
 import rhigin.util.FixedSearchArray;
 
 /**
@@ -149,9 +148,6 @@ public class LockObjects {
 			public RhiginFunction create(int no, Object... params) {
 				return new Execute(no, (Lock)params[0]);
 			}
-			public String[] functionNames() {
-				return FUNCTION_NAMES;
-			}
 			public FixedSearchArray<String> getWord() {
 				return word;
 			}
@@ -252,9 +248,6 @@ public class LockObjects {
 			public RhiginFunction create(int no, Object... params) {
 				return new Execute(no, (ReadWriteLock)params[0]);
 			}
-			public String[] functionNames() {
-				return FUNCTION_NAMES;
-			}
 			public FixedSearchArray<String> getWord() {
 				return word;
 			}
@@ -315,17 +308,7 @@ public class LockObjects {
 
 			@Override
 			public final String getName() {
-				switch (type) {
-				case 0:
-					return "wlock";
-				case 1:
-					return "wulock";
-				case 2:
-					return "rlock";
-				case 3:
-					return "rulock";
-				}
-				return "unknown";
+				return FUNCTION_NAMES[type];
 			}
 		};
 	}

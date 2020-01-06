@@ -2,8 +2,6 @@ package rhigin.scripts.objects;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.Undefined;
-import org.mozilla.javascript.Wrapper;
 
 import rhigin.RhiginException;
 import rhigin.scripts.RhiginFunction;
@@ -66,9 +64,6 @@ public class JDateObject extends RhiginFunction {
 		private FixedSearchArray<String> word = new FixedSearchArray<String>(FUNCTION_NAMES);
 		public RhiginFunction create(int no, Object... params) {
 			return new Execute(no, (java.util.Date)params[0]);
-		}
-		public String[] functionNames() {
-			return FUNCTION_NAMES;
 		}
 		public FixedSearchArray<String> getWord() {
 			return word;

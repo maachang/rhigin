@@ -11,10 +11,28 @@ import rhigin.util.FixedSearchArray;
  */
 public class RhiginInstanceObject implements BlankScriptable {
 	protected String name;
-	protected FixedSearchArray<String> functionSearchList;
 	protected ObjectFunction objectFunction;
 	protected Object[] params;
 	protected RhiginFunction[] list;
+	
+	/**
+	 * オブジェクト用メソッド作成処理.
+	 */
+	public static interface ObjectFunction {
+		/**
+		 * Function作成.
+		 * @param no
+		 * @param params
+		 * @return
+		 */
+		public RhiginFunction create(int no, Object... params);
+		
+		/**
+		 * メソッド検索ワードを取得.
+		 * @return
+		 */
+		public FixedSearchArray<String> getWord();
+	}
 
 	/**
 	 * コンストラクタ.
@@ -26,15 +44,14 @@ public class RhiginInstanceObject implements BlankScriptable {
 	 */
 	public RhiginInstanceObject(String name, ObjectFunction of, Object... params) {
 		this.name = name;
-		this.functionSearchList = of.getWord();
 		this.objectFunction = of;
 		this.params = params;
-		this.list = new RhiginFunction[functionSearchList.size()];
+		this.list = new RhiginFunction[objectFunction.getWord().size()];
 	}
 
 	@Override
 	public Object get(String k, Scriptable s) {
-		int no = functionSearchList.search(k);
+		int no = objectFunction.getWord().search(k);
 		if(no != -1) {
 			RhiginFunction ret = list[no];
 			if(ret == null) {
@@ -49,15 +66,16 @@ public class RhiginInstanceObject implements BlankScriptable {
 
 	@Override
 	public boolean has(String k, Scriptable s) {
-		return functionSearchList.search(k) != -1;
+		return objectFunction.getWord().search(k) != -1;
 	}
 
 	@Override
 	public Object[] getIds() {
-		final int len = functionSearchList.size();
+		FixedSearchArray<String> s = objectFunction.getWord();
+		final int len = s.size();
 		Object[] ret = new Object[len];
 		for (int i = 0; i < len; i ++) {
-			ret[i] = functionSearchList.get(i);
+			ret[i] = s.get(i);
 		}
 		return ret;
 	}
@@ -75,7 +93,7 @@ public class RhiginInstanceObject implements BlankScriptable {
 	@Override
 	public String toString() {
 		// toStringがメソッドで存在する場合は、その内容を呼び出す.
-		final int no = functionSearchList.search("toString");
+		final int no = objectFunction.getWord().search("toString");
 		if(no != -1) {
 			// エラーの場合は、標準表示.
 			try {
@@ -92,30 +110,5 @@ public class RhiginInstanceObject implements BlankScriptable {
 	 */
 	public String getName() {
 		return name;
-	}
-	
-	/**
-	 * オブジェクト用メソッド作成処理.
-	 */
-	public static interface ObjectFunction {
-		/**
-		 * Function作成.
-		 * @param no
-		 * @param params
-		 * @return
-		 */
-		public RhiginFunction create(int no, Object... params);
-		
-		/**
-		 * メソッド名一覧を取得.
-		 * @return String[]
-		 */
-		public String[] functionNames();
-		
-		/**
-		 * メソッド検索ワードを取得.
-		 * @return
-		 */
-		public FixedSearchArray<String> getWord();
 	}
 }

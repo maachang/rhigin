@@ -265,9 +265,6 @@ public class FileObject {
 		public RhiginFunction create(int no, Object... params) {
 			return new StatsExecute(no, (Stats)params[0]);
 		}
-		public String[] functionNames() {
-			return FUNCTION_NAMES;
-		}
 		public FixedSearchArray<String> getWord() {
 			return word;
 		}

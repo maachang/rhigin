@@ -72,9 +72,6 @@ public final class Xor128Object {
 		public RhiginFunction create(int no, Object... params) {
 			return new InstanceObject(no, (Xor128)params[0]);
 		}
-		public String[] functionNames() {
-			return FUNCTION_NAMES;
-		}
 		public FixedSearchArray<String> getWord() {
 			return word;
 		}

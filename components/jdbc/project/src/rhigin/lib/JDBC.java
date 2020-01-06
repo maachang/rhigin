@@ -214,9 +214,6 @@ public class JDBC implements JavaRequire {
 		public RhiginFunction create(int no, Object... params) {
 			return new ConnectFunctions(no, (JDBCConnect)params[0]);
 		}
-		public String[] functionNames() {
-			return JDBC_CONNECT_NAMES;
-		}
 		public FixedSearchArray<String> getWord() {
 			return word;
 		}
@@ -411,9 +408,6 @@ public class JDBC implements JavaRequire {
 		public RhiginFunction create(int no, Object... params) {
 			return new RowFunctions(no, (JDBCRow)params[0]);
 		}
-		public String[] functionNames() {
-			return JDBC_ROW_NAMES;
-		}
 		public FixedSearchArray<String> getWord() {
 			return word;
 		}
@@ -503,9 +497,6 @@ public class JDBC implements JavaRequire {
 		private FixedSearchArray<String> word = new FixedSearchArray<String>(JDBC_SELECT_NAMES);
 		public RhiginFunction create(int no, Object... params) {
 			return new SelectFunction(no, (Select)params[0]);
-		}
-		public String[] functionNames() {
-			return JDBC_SELECT_NAMES;
 		}
 		public FixedSearchArray<String> getWord() {
 			return word;
@@ -633,9 +624,6 @@ public class JDBC implements JavaRequire {
 		public RhiginFunction create(int no, Object... params) {
 			return new DeleteFunction(no, (Delete)params[0]);
 		}
-		public String[] functionNames() {
-			return JDBC_DELETE_NAMES;
-		}
 		public FixedSearchArray<String> getWord() {
 			return word;
 		}
@@ -705,9 +693,6 @@ public class JDBC implements JavaRequire {
 		public RhiginFunction create(int no, Object... params) {
 			return new InsertFunction(no, (Insert)params[0]);
 		}
-		public String[] functionNames() {
-			return JDBC_INSERT_NAMES;
-		}
 		public FixedSearchArray<String> getWord() {
 			return word;
 		}
@@ -773,9 +758,6 @@ public class JDBC implements JavaRequire {
 		private FixedSearchArray<String> word = new FixedSearchArray<String>(JDBC_UPDATE_NAMES);
 		public RhiginFunction create(int no, Object... params) {
 			return new UpdateFunction(no, (Update)params[0]);
-		}
-		public String[] functionNames() {
-			return JDBC_UPDATE_NAMES;
 		}
 		public FixedSearchArray<String> getWord() {
 			return word;
