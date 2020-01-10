@@ -2,14 +2,12 @@ package rhigin.util;
 
 import java.util.Arrays;
 
-import rhigin.RhiginException;
-
 /**
  * 検索リスト.
  * 
  * バイナリサーチで、リスト情報を高速検索.
  */
-public class FixedSearchArray<K> {
+public final class FixedSearchArray<K> {
 	
 	// 検索キー.
 	@SuppressWarnings("rawtypes")
@@ -41,7 +39,7 @@ public class FixedSearchArray<K> {
 	
 	// 検索キーで検索.
 	@SuppressWarnings("rawtypes")
-	private final int searchKey(SearchKey[] keys, K target) {
+	private final int searchKey(final SearchKey[] keys, final K target) {
 		int ret = binarySearch(keys, target);
 		if(ret == -1) {
 			return -1;
@@ -51,7 +49,7 @@ public class FixedSearchArray<K> {
 
 	// バイナリサーチ.
 	@SuppressWarnings("rawtypes")
-	private final int binarySearch(SearchKey[] keys, K n) {
+	private final int binarySearch(final SearchKey[] keys, final K n) {
 		int low = 0;
 		int high = keys.length - 1;
 		int mid, cmp;
@@ -78,7 +76,7 @@ public class FixedSearchArray<K> {
 	 * @param len 格納データ数を設定します.
 	 */
 	@SuppressWarnings("unchecked")
-	public FixedSearchArray(int len) {
+	public FixedSearchArray(final int len) {
 		keys = new SearchKey[len];
 	}
 	
@@ -86,14 +84,15 @@ public class FixedSearchArray<K> {
 	 * コンストラクタ.
 	 * @param args 追加情報群を設定します.
 	 */
-	@SuppressWarnings("unchecked")
-	public FixedSearchArray(K... args) {
-		int len = args.length;
-		keys = new SearchKey[len];
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public FixedSearchArray(final K... args) {
+		final int len = args.length;
+		final SearchKey[] k = new SearchKey[len];
 		for(int i = 0; i < len; i ++) {
-			keys[count ++] = new SearchKey<K>(args[i], i);
+			k[count ++] = new SearchKey<K>(args[i], i);
 		}
-		Arrays.sort(keys);
+		Arrays.sort(k);
+		keys = k;
 	}
 	
 	/**
@@ -102,13 +101,26 @@ public class FixedSearchArray<K> {
 	 * @param no
 	 * @return
 	 */
-	public FixedSearchArray<K> add(K key, int no) {
-		if(count >= keys.length) {
-			throw new RhiginException("max arrays:" + keys.length);
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public final FixedSearchArray<K> add(final K key, final int no) {
+		if(key == null) {
+			return this;
 		}
-		keys[count ++] = new SearchKey<K>(key, no);
 		if(count >= keys.length) {
-			Arrays.sort(keys);
+			// 初期指定長より追加はできるが、遅いので多用は控えるように.
+			int len = keys.length;
+			SearchKey[] k = new SearchKey[len + 1];
+			if(len > 0) {
+				System.arraycopy(keys, 0, k, 0, len);
+			}
+			k[count ++] = new SearchKey<K>(key, no);
+			Arrays.sort(k);
+			keys = k;
+		} else {
+			keys[count ++] = new SearchKey<K>(key, no);
+			if(count >= keys.length) {
+				Arrays.sort(keys);
+			}
 		}
 		return this;
 	}
@@ -118,7 +130,7 @@ public class FixedSearchArray<K> {
 	 * この内容がtrueで無い場合は、検索出来ません.
 	 * @return
 	 */
-	public boolean isFix() {
+	public final boolean isFix() {
 		return count == keys.length;
 	}
 	
@@ -127,7 +139,7 @@ public class FixedSearchArray<K> {
 	 * @param target
 	 * @return
 	 */
-	public int search(K target) {
+	public final int search(final K target) {
 		if(count == keys.length) {
 			return searchKey(keys, target);
 		}
@@ -138,7 +150,7 @@ public class FixedSearchArray<K> {
 	 * データ数を取得.
 	 * @return
 	 */
-	public int size() {
+	public final int size() {
 		return keys.length;
 	}
 	
@@ -147,7 +159,7 @@ public class FixedSearchArray<K> {
 	 * @param no
 	 * @return
 	 */
-	public K get(int no) {
+	public final K get(final int no) {
 		return keys[no].key;
 	}
 	
@@ -156,7 +168,7 @@ public class FixedSearchArray<K> {
 	 * @param no
 	 * @return
 	 */
-	public int getNo(int no) {
+	public final int getNo(final int no) {
 		return keys[no].no;
 	}
 }

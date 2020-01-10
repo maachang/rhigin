@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * Time 12 byte(96bit) シーケンスID発行処理.
  */
 public class Time12SequenceId {
+	public static final int ID_LENGTH = 12;
 	private final AtomicInteger nowId = new AtomicInteger(0);
 	private final AtomicLong nowTime = new AtomicLong(-1L);
 	private int machineId = 0;

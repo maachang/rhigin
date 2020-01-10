@@ -886,22 +886,17 @@ public class FastReflect {
 			if (cs != null) {
 				Constructor c;
 				int len = cs.length;
-				int cnt = 0;
+				OList<ConstractorElement> lst = new OList<ConstractorElement>(len);
 				for (int i = 0; i < len; i++) {
 					c = cs[i];
 					if (Modifier.isPublic(c.getModifiers())) {
-						cnt++;
+						lst.add(new ConstractorElement(c));
 					}
-				}
-				ConstractorElement[] lst = new ConstractorElement[cnt];
-				cnt = 0;
-				for (int i = 0; i < len; i++) {
-					c = cs[i];
-					if (Modifier.isPublic(c.getModifiers())) {
-						lst[cnt++] = new ConstractorElement(c);
-					}
-				}
-				list = lst;
+				} 
+				Object[] o = lst.toArray();
+				len = lst.size();
+				list = new ConstractorElement[len];
+				System.arraycopy(o, 0, list, 0, len);
 			}
 		}
 
