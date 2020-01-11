@@ -95,7 +95,8 @@ public class RhiginBatch {
 			try {
 				ExecuteScript.execute(new RhiginContext(), script);
 			} finally {
-				ExecuteScript.callEndScripts(cache);
+				ExecuteScript.callEndScripts(false, cache);
+				ExecuteScript.callEndScripts(true, cache);
 			}
 			return true;
 		} catch (Exception e) {

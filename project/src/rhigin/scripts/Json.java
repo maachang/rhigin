@@ -11,6 +11,7 @@ import org.mozilla.javascript.Undefined;
 import org.mozilla.javascript.Wrapper;
 
 import rhigin.RhiginException;
+import rhigin.scripts.objects.JDateObject;
 import rhigin.util.Converter;
 import rhigin.util.DateConvert;
 import rhigin.util.ObjectList;
@@ -106,6 +107,14 @@ public final class Json {
 			}
 		} else if (target instanceof IdScriptableObject) {
 			final java.util.Date d = getJSDate((IdScriptableObject) target);
+			if (d == null) {
+				buf.append("null");
+			} else {
+				buf.append("\"").append(dateToString(d)).append("\"");
+			}
+		} else if (target instanceof RhiginInstanceObject &&
+			"JDate".equals(((RhiginInstanceObject)target).getName())) {
+			final java.util.Date d = (java.util.Date)((RhiginInstanceObject)target).getParams(0);
 			if (d == null) {
 				buf.append("null");
 			} else {
@@ -208,7 +217,7 @@ public final class Json {
 		}
 		// ISO8601の日付フォーマットかチェック.
 		if (DateConvert.isISO8601(json)) {
-			return stringToDate(json);
+			return JDateObject.newObject(stringToDate(json));
 		}
 		return json;
 	}

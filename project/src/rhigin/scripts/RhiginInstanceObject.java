@@ -111,4 +111,21 @@ public class RhiginInstanceObject implements BlankScriptable {
 	public String getName() {
 		return name;
 	}
+	
+	/**
+	 * パラメータを取得.
+	 * @param no
+	 * @return
+	 */
+	public Object getParams(int no) {
+		return params[no];
+	}
+	
+	/**
+	 * パラメータサイズを取得.
+	 * @return
+	 */
+	public int paramsSize() {
+		return params == null ? 0 : params.length;
+	}
 }

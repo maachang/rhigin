@@ -49,6 +49,7 @@ public class JDBCKind {
 	
 	/**
 	 * コンフィグ情報を読み込む.
+	 * @param name
 	 * @param conf
 	 * @return
 	 */

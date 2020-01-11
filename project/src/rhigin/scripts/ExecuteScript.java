@@ -17,6 +17,8 @@ import org.mozilla.javascript.Wrapper;
 import rhigin.RhiginConfig;
 import rhigin.RhiginConstants;
 import rhigin.RhiginException;
+import rhigin.logs.Log;
+import rhigin.logs.LogFactory;
 import rhigin.scripts.compile.CompileCache;
 import rhigin.scripts.function.ArgsFunction;
 import rhigin.scripts.function.Base64Functions;
@@ -73,6 +75,9 @@ public class ExecuteScript {
 	
 	/** スクリプト終了処理管理. **/
 	private static final OList<RhiginEndScriptCall> endScriptCallList = new OList<RhiginEndScriptCall>();
+	
+	/** システム終了処理管理. **/
+	private static final OList<RhiginEndScriptCall> exitSystemScriptCallList = new OList<RhiginEndScriptCall>();
 
 	static {
 		// Context初期化.
@@ -462,18 +467,49 @@ public class ExecuteScript {
 	}
 	
 	/**
-	 * スクリプト終了時に実行する処理群を実行.
+	 * システム終了時に実行する処理を追加.
+	 * @param endScript
+	 */
+	public static final void addExitSystemScripts(RhiginEndScriptCall... exitSystemScripts) {
+		final int len = exitSystemScripts.length;
+		for(int i = 0; i < len; i ++) {
+			exitSystemScriptCallList.add(exitSystemScripts[i]);
+		}
+	}
+	
+	/**
+	 * システム終了時に実行する処理群を取得.
+	 * @return
+	 */
+	public static final OList<RhiginEndScriptCall> getExitSystemScriptList() {
+		return exitSystemScriptCallList;
+	}
+	
+	/**
+	 * スクリプト終了時、システム終了時に実行する処理群を実行.
+	 * @param exitSystemFlag
 	 * @param cache
 	 */
-	public static final void callEndScripts(final CompileCache cache) {
-		final int len = endScriptCallList.size();
+	public static final void callEndScripts(boolean exitSystemFlag, CompileCache cache) {
+		final OList<RhiginEndScriptCall> list = exitSystemFlag ? exitSystemScriptCallList : endScriptCallList;
+		final int len = list.size();
 		if(len > 0) {
+			// システム終了時の場合は、キャッシュが無い場合は作成して処理させる.
+			if(exitSystemFlag && cache == null) {
+				cache = new CompileCache();
+			}
 			RhiginEndScriptCall n;
+			final Log log = LogFactory.create();
 			final RhiginContext context = new RhiginContext();
 			for(int i = 0; i < len; i ++) {
-				n = endScriptCallList.get(i);
+				n = list.get(i);
 				if(n != null) {
-					n.call(context, cache);
+					try {
+						n.call(context, cache);
+					} catch(Exception e) {
+						// ログ出力.
+						log.error(e);
+					}
 				}
 			}
 		}

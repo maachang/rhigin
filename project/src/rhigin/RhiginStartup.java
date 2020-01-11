@@ -47,6 +47,9 @@ public class RhiginStartup {
 	/** スクリプト実行後の終了処理を一時格納先. **/
 	private static final String STARTUP_END_CALL_SCRIPT = "_$endCallScripts";
 
+	/** システム終了時の処理を一時格納先. **/
+	private static final String STARTUP_EXIT_SYSTEM_CALL_SCRIPT = "_$exitSystemCallScripts";
+	
 	/**
 	 * ログファクトリの初期化.
 	 * 
@@ -178,17 +181,25 @@ public class RhiginStartup {
 
 		// 初期設定用のスクリプト実行.
 		if (FileUtil.isFile(STARTUP_JS)) {
+			final List<RhiginEndScriptCall> endScriptCallList = new ObjectList<RhiginEndScriptCall>();
+			final List<RhiginEndScriptCall> exitScriptCallList = new ObjectList<RhiginEndScriptCall>();
+			
 			// スクリプト実行用のコンテキスト.
 			// スタートアップ専用のオブジェクトは、ここに設定する.
-			RhiginContext context = new RhiginContext();
+			final RhiginContext context = new RhiginContext();
 
 			// スタートアップで、ExecuteScript実行時に利用可能にしたいオブジェクトを設定.
-			ArrayMap originals = new ArrayMap();
+			final ArrayMap originals = new ArrayMap();
 			context.setAttribute(STARTUP_OBJECT, originals);
-			List<RhiginEndScriptCall> endScriptCallList = new ObjectList<RhiginEndScriptCall>();
-			context.setAttribute(STARTUP_END_CALL_SCRIPT, endScriptCallList);
 			context.setAttribute(addOrigin.getName(), addOrigin);
+			
+			// スクリプト終了時のスクリプト実行.
+			context.setAttribute(STARTUP_END_CALL_SCRIPT, endScriptCallList);
 			context.setAttribute(addEndCall.getName(), addEndCall);
+			
+			// システム終了時のスクリプト実行.
+			context.setAttribute(STARTUP_EXIT_SYSTEM_CALL_SCRIPT, exitScriptCallList);
+			context.setAttribute(addExitSystemCall.getName(), addExitSystemCall);
 			
 			Reader r = null;
 			try {
@@ -215,12 +226,18 @@ public class RhiginStartup {
 					ExecuteScript.addOriginals((String)n[0], n[1]);
 				}
 			}
-			// ExecuteScriptの終了時にスタートアップで登録した終了処理スクリプトを追加.
+			// ExecuteScriptの終了時にスタートアップで登録した終了処理系のスクリプトを追加.
 			{
 				List<RhiginEndScriptCall> list = endScriptCallList;
 				int len = list.size();
 				for(int i = 0; i < len; i ++) {
 					ExecuteScript.addEndScripts(list.get(i));
+				}
+				
+				list = exitScriptCallList;
+				len = list.size();
+				for(int i = 0; i < len; i ++) {
+					ExecuteScript.addExitSystemScripts(list.get(i));
 				}
 			}
 		}
@@ -245,6 +262,11 @@ public class RhiginStartup {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static final List<RhiginEndScriptCall> getEndScriptCall(Scriptable scope) {
 		return (List) scope.get(STARTUP_END_CALL_SCRIPT, null);
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static final List<RhiginEndScriptCall> getExitSystemScriptCall(Scriptable scope) {
+		return (List) scope.get(STARTUP_EXIT_SYSTEM_CALL_SCRIPT, null);
 	}
 	
 
@@ -295,5 +317,34 @@ public class RhiginStartup {
 			return "endCall";
 		}
 	};
+	
+	// システム終了時の処理を追加.
+	private static final RhiginFunction addExitSystemCall = new RhiginFunction() {
+		@Override
+		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			if (args.length >= 1) {
+				try {
+					Object o = args[0];
+					if(o instanceof NativeJavaObject) {
+						o = ((NativeJavaObject)o).unwrap();
+					}
+					if(o instanceof RhiginEndScriptCall) {
+						getExitSystemScriptCall(scope).add((RhiginEndScriptCall)o);
+					} else {
+						getExitSystemScriptCall(scope).add(new ExecuteJsByEndScriptCall("" + o));
+					}
+				} catch (Exception e) {
+					throw new RhiginException(500, e);
+				}
+			}
+			return Undefined.instance;
+		}
+
+		@Override
+		public final String getName() {
+			return "exitSystemCall";
+		}
+	};
+
 
 }

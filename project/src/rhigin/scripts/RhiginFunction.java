@@ -14,6 +14,14 @@ public abstract class RhiginFunction implements Function {
 	/** 親オブジェクト. **/
 	protected Scriptable PARENT = null;
 	
+	/**
+	 * 親となるrhiginオブジェクトをセット.
+	 * @param p
+	 */
+	public void setRhiginObject(Scriptable p) {
+		PARENT = p;
+	}
+	
 	@Override
 	public void delete(String arg0) {
 	}

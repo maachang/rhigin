@@ -439,7 +439,7 @@ public class HttpWorkerThread extends Thread {
 			} finally {
 				
 				// スクリプト終了処理.
-				ExecuteScript.callEndScripts(cache);
+				ExecuteScript.callEndScripts(false, cache);
 			}
 			
 		} catch (RhiginException re) {

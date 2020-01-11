@@ -20,6 +20,16 @@ import rhigin.util.Xor128;
  * var n = r.next();
  */
 public final class Xor128Object {
+	
+	/**
+	 * オブジェクトを作成.
+	 * @param x
+	 * @return
+	 */
+	public static final RhiginInstanceObject newObject(Xor128 x) {
+		return new RhiginInstanceObject("Xor128", FUNCTIONS, x);
+	}
+	
 	private static final class InstanceObject extends RhiginFunction {
 		private final int type;
 		private final Xor128 xor128;
@@ -85,7 +95,7 @@ public final class Xor128Object {
 			if (args.length >= 1 && Converter.isNumeric(args[0])) {
 				xor128.setSeet(Converter.convertLong(args[0]));
 			}
-			return new RhiginInstanceObject("Xor128", FUNCTIONS, xor128);
+			return newObject(xor128);
 		}
 
 		@Override

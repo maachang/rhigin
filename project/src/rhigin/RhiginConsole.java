@@ -95,7 +95,7 @@ public class RhiginConsole {
 						System.out.println("");
 						return;
 					} else if ("end".equals(cmd) || "close".equals(cmd)) {
-						ExecuteScript.callEndScripts(cache);
+						ExecuteScript.callEndScripts(false, cache);
 						context = new RhiginContext();
 						System.out.println("");
 						continue;
@@ -131,7 +131,8 @@ public class RhiginConsole {
 				}
 			}
 		} finally {
-			ExecuteScript.callEndScripts(cache);
+			ExecuteScript.callEndScripts(false, cache);
+			ExecuteScript.callEndScripts(true, cache);
 			console.close();
 		}
 	}

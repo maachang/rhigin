@@ -16,8 +16,10 @@ import rhigin.lib.jdbc.runner.JDBCCloseable;
 import rhigin.lib.jdbc.runner.JDBCConnect;
 import rhigin.lib.jdbc.runner.JDBCConnect.Time12;
 import rhigin.lib.jdbc.runner.JDBCException;
+import rhigin.lib.jdbc.runner.JDBCSystemCloseable;
 import rhigin.lib.jdbc.runner.JDBCKind;
 import rhigin.scripts.ExecuteScript;
+import rhigin.scripts.RhiginEndScriptCall;
 import rhigin.util.FixedArray;
 import rhigin.util.Flag;
 import rhigin.util.Time12SequenceId;
@@ -95,13 +97,13 @@ public class JDBCCore {
 	 * @param args
 	 * @return
 	 */
-	public JDBCCloseable startup(String configName, String[] args) {
+	public RhiginEndScriptCall[] startup(String configName, String[] args) {
 		checkDestroy();
 		if(!startup.get()) {
 			final RhiginConfig conf = RhiginStartup.initLogFactory(false, true, args);
 			return startup(conf, configName);
 		}
-		return closeable;
+		return new RhiginEndScriptCall[] { closeable, new JDBCSystemCloseable(this) };
 	}
 	
 	/**
@@ -110,7 +112,7 @@ public class JDBCCore {
 	 * @param configName
 	 * @return
 	 */
-	public JDBCCloseable startup(RhiginConfig conf, String configName) {
+	public RhiginEndScriptCall[] startup(RhiginConfig conf, String configName) {
 		checkDestroy();
 		if(!startup.get()) {
 			String jdbcJsonConfigName = DEF_JDBC_JSON_CONFIG_NAME;
@@ -119,7 +121,7 @@ public class JDBCCore {
 			}
 			startup(conf.get(jdbcJsonConfigName));
 		}
-		return closeable;
+		return new RhiginEndScriptCall[] { closeable, new JDBCSystemCloseable(this) };
 	}
 	
 	/**
@@ -128,7 +130,7 @@ public class JDBCCore {
 	 * @return
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public JDBCCloseable startup(Map<String, Object> conf) {
+	public RhiginEndScriptCall[] startup(Map<String, Object> conf) {
 		checkDestroy();
 		if(conf == null || conf.size() == 0) {
 			throw new JDBCException("jdbc connection definition config object is not set");
@@ -146,7 +148,7 @@ public class JDBCCore {
 			ExecuteScript.addOriginals(TIME12, new Time12());
 			startup.set(true);
 		}
-		return closeable;
+		return new RhiginEndScriptCall[] { closeable, new JDBCSystemCloseable(this) };
 	}
 	
 	/**
