@@ -18,7 +18,6 @@ public class JsChangesCode {
 	public static final String changeCode(String src) {
 		src = templateLiteral(src);
 		src = textBlocks(src);
-		
 		return src;
 	}
 	
@@ -218,7 +217,7 @@ public class JsChangesCode {
 	private static final String changeVal(String src) {
 		char c;
 		boolean yen = false;
-		int sp = 0;
+		int sp = 0, vp = -1;
 		int start = -1;
 		final StringBuilder buf = new StringBuilder((int)(src.length() * 1.5));
 		final int len = src.length();
@@ -228,6 +227,7 @@ public class JsChangesCode {
 				if(start == 0) {
 					if(c == '{') {
 						start = 1;
+						vp = i + 1;
 						buf.append("\" + (");
 					} else {
 						start = -1;
@@ -235,9 +235,8 @@ public class JsChangesCode {
 					}
 				} else if(c == '}') {
 					start = -1;
+					buf.append(Indent.downIndentDoubleCote(src.substring(vp, i)));
 					buf.append(") + \"");
-				} else {
-					buf.append(c);
 				}
 			} else if(c == '$' && !yen) {
 				start = 0;
