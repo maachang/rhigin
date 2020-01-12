@@ -24,6 +24,7 @@ import rhigin.scripts.function.ArgsFunction;
 import rhigin.scripts.function.Base64Functions;
 import rhigin.scripts.function.BinaryFunction;
 import rhigin.scripts.function.EntityFunctions;
+import rhigin.scripts.function.EvalFunction;
 import rhigin.scripts.function.GcFunction;
 import rhigin.scripts.function.GetClassFunction;
 import rhigin.scripts.function.GetEnvFunction;
@@ -192,9 +193,9 @@ public class ExecuteScript {
 
 	// スクリプト情報を生成.
 	private static final Reader getScript(Reader r, String headerScript, String footerScript) throws Exception {
-		if (headerScript.length() == 0 && footerScript.length() == 0) {
-			return r;
-		}
+		//if (headerScript.isEmpty() && footerScript.isEmpty()) {
+		//	return r;
+		//}
 		int len;
 		char[] c = new char[1024];
 		StringBuilder buf = new StringBuilder(headerScript);
@@ -204,7 +205,7 @@ public class ExecuteScript {
 		c = null;
 		buf.append(footerScript);
 
-		return new StringReader(buf.toString());
+		return new StringReader(JsChangesCode.changeCode(buf.toString()));
 	}
 
 	/**
@@ -382,6 +383,7 @@ public class ExecuteScript {
 
 		// rhigin用の基本オブジェクトを設定.
 		RequireFunction.regFunctions(scope);
+		EvalFunction.regFunctions(scope);
 		GcFunction.regFunctions(scope);
 		GlobalFunction.regFunctions(scope);
 		LogFactoryFunction.regFunctions(scope);

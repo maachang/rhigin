@@ -133,5 +133,26 @@ public class LevelCore {
 		checkDestroy();
 		return startup.get();
 	}
-
+	
+	/**
+	 * LevelConfigを取得.
+	 * @return
+	 */
+	public LevelConfig getConfig() {
+		check();
+		return config;
+	}
+	
+	/**
+	 * マシンIDを取得.
+	 * 
+	 * @return
+	 */
+	public int getMachineId() {
+		check();
+		return manager.getMachineId();
+	}
+	
+	
+	
 }

@@ -59,6 +59,38 @@ public class RhiginConsole {
 		return false;
 	}
 	
+	// ゼロサプレスを取得.
+	private static final String zero() {
+		StringBuilder buf = new StringBuilder();
+		int len = RhiginConstants.NAME.length();
+		for(int i = 0; i < len; i ++) {
+			buf.append("0");
+		}
+		return buf.toString();
+	}
+	
+	// コマンドの先頭のスペース・タブ情報を取得.
+	private static final String cmdHead(String cmd) {
+		if(cmd == null) {
+			return null;
+		}
+		char c;
+		int len = cmd.length();
+		for(int i = 0; i < len; i ++) {
+			c = cmd.charAt(i);
+			if(!(c == ' ' || c == '\t')) {
+				return cmd.substring(0, i);
+			}
+		}
+		return cmd;
+	}
+	
+	/**
+	 * コンソール処理.
+	 * @param conf
+	 * @param console
+	 * @throws Exception
+	 */
 	public void console(RhiginConfig conf, ConsoleInKey console) throws Exception {
 		// 開始処理.
 		HttpInfo httpInfo = RhiginStartup.startup(conf);
@@ -76,29 +108,59 @@ public class RhiginConsole {
 		try {
 			Object o;
 			String cmd;
+			String cmdHead;
+			String allCmd = null;
+			String zero = zero();
+			String simbol;
+			int cmdLineCount = 0;
 			RhiginContext context = new RhiginContext();
 			while (true) {
 				try {
-					if ((cmd = console.readLine(RhiginConstants.NAME + "> ")) == null) {
+					if(cmdLineCount == 0) {
+						simbol = RhiginConstants.NAME;
+					} else {
+						simbol = zero.substring((""+cmdLineCount).length()) + cmdLineCount;
+					}
+					// コマンド入力.
+					cmd = console.readLine(simbol + "> ");
+					cmdHead = cmdHead(cmd);
+					if (cmd == null) {
 						// null返却の場合は、ctrl+cの可能性があるので、
 						// 終了処理をおこなってコンソール処理終了.
 						System.out.println("");
 						return;
 					} else if ((cmd = cmd.trim()).length() == 0) {
-						continue;
-					} else if ("?".equals(cmd) || "help".equals(cmd)) {
+						if(cmdLineCount == 0) {
+							continue;
+						}
+					} else if (cmdLineCount == 0 && ("?".equals(cmd) || "help".equals(cmd))) {
 						System.out.println("exit [quit]   Exit the console.");
 						System.out.println("end  [close]  Terminate javascript processing.");
 						System.out.println("");
 						continue;
-					} else if ("exit".equals(cmd) || "quit".equals(cmd)) {
+					} else if (cmdLineCount == 0 && ("exit".equals(cmd) || "quit".equals(cmd))) {
 						System.out.println("");
 						return;
-					} else if ("end".equals(cmd) || "close".equals(cmd)) {
+					} else if (cmdLineCount == 0 && ("end".equals(cmd) || "close".equals(cmd))) {
 						ExecuteScript.callEndScripts(false, cache);
 						context = new RhiginContext();
 						System.out.println("");
 						continue;
+					} else if (cmd.endsWith("\\")) {
+						// 行の最後に￥マークをセットした場合は、次のコマンドと連結できる.
+						if(cmdLineCount == 0) {
+							allCmd = cmdHead + cmd.substring(0, cmd.length() - 1).trim() + "\n";
+						} else {
+							allCmd += cmdHead + cmd.substring(0, cmd.length() - 1).trim() + "\n";
+						}
+						cmdLineCount ++;
+						continue;
+					}
+					if(cmdLineCount != 0) {
+						cmd = allCmd + cmdHead + cmd;
+						allCmd = null;
+						cmdLineCount = 0;
+						System.out.println(">" + cmd);
 					}
 					o = ExecuteScript.execute(context, cmd);
 					cmd = null;

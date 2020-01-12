@@ -14,7 +14,7 @@ import rhigin.scripts.objects.JDateObject.JDateInstanceObject;
 import rhigin.util.Converter;
 
 /**
- * Rhiginに対応したオリジナルなvalue変換処理.
+ * Rhiginに対応したオリジナルなLevelValues変換処理.
  */
 public class RhiginOriginCode extends OriginCode {
 	@Override
