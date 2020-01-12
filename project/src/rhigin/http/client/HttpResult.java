@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
+import rhigin.http.client.HttpClient.NoULCode;
 import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.Json;
 import rhigin.util.AbstractEntryIterator;
 import rhigin.util.AbstractKeyIterator;
-import rhigin.util.Alphabet;
 import rhigin.util.ConvertMap;
 
 /**
@@ -94,7 +94,7 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 			return null;
 		}
 		
-		final int p = Alphabet.indexOf(headersString, key + ": ");
+		final int p = NoULCode.indexOf(headersString, key + ": ", 0);
 		if (p == -1) {
 			return null;
 		}
@@ -288,7 +288,7 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 	// 受信データがGZIP圧縮されているかチェック.
 	protected final boolean isResponseGzip() {
 		final String value = getHeader("content-encoding");
-		if (Alphabet.eq("gzip", value)) {
+		if (NoULCode.eq("gzip", value)) {
 			return true;
 		}
 		return false;
@@ -414,7 +414,7 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 			return responseType();
 		} else if ("gzip".equals(key) || "isGzip".equals(key)) {
 			return isGzip();
-		} else if ("contentType".equals(key) || Alphabet.eq("content-type", ""+key)) {
+		} else if ("contentType".equals(key) || NoULCode.eq("content-type", ""+key)) {
 			return getContentType();
 		}
 		try {

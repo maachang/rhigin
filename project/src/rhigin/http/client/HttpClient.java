@@ -15,7 +15,6 @@ import java.util.zip.GZIPInputStream;
 
 import rhigin.RhiginConstants;
 import rhigin.scripts.Json;
-import rhigin.util.Alphabet;
 import rhigin.util.ArrayMap;
 import rhigin.util.ByteArrayIO;
 import rhigin.util.Converter;
@@ -101,32 +100,28 @@ public class HttpClient {
 			header = new ArrayMap();
 		}
 		HttpResult ret = null;
-		method = method.toUpperCase();
 		// methodがJSONの場合は、POSTでJSON送信用の処理に変換する.
-		if (Alphabet.eq("JSON", method)) {
+		if (NoULCode.eq("JSON", (method = method.toUpperCase()))) {
 			method = "POST";
 			params = Json.encode(params);
-			header.put("Content-Type", "application/json");
+			header.put("Content-Type", "application/json; charset=utf-8");
 		}
+		int status;
+		String location;
 		int cnt = 0;
 		while (true) {
 			ret = _connect(bodyFile, method, url, params, header);
-			int status = ret.getStatus();
-			if (!(status == 301 || status == 302 || status == 303 || status == 307 || status == 308)) {
+			if (!((status = ret.getStatus()) == 301 || status == 302 || status == 303 || status == 307 || status == 308) ||
+				(location = ret.getHeader("location")) == null) {
 				break;
-			}
-			String location = ret.getHeader("Location");
-			if (location == null) {
-				break;
-			}
-			if (status == 301 || status == 302 || status == 303) {
+			} else if (status == 301 || status == 302 || status == 303) {
 				method = "GET";
 				params = null;
 			}
 			url = location;
 			cnt++;
 			if (cnt > MAX_RETRY) {
-				throw new HttpClientException(500, "リトライ回数の制限を越えました");
+				throw new HttpClientException(500, "Retry limit exceeded.");
 			}
 		}
 		return ret;
@@ -146,13 +141,11 @@ public class HttpClient {
 			} else if (params instanceof Map) {
 				params = convertParams((Map) params);
 			}
-
 			// リクエスト送信.
 			socket = createSocket(urlArray);
 			out = new BufferedOutputStream(socket.getOutputStream());
 			createHttpRequest(out, method, urlArray, params, header);
 			out.flush();
-
 			// レスポンス受信.
 			in = new BufferedInputStream(socket.getInputStream());
 			HttpResult ret = receive(bodyFile, url, in);
@@ -162,7 +155,6 @@ public class HttpClient {
 			out = null;
 			socket.close();
 			socket = null;
-
 			return ret;
 		} catch(Exception e) {
 			throw new HttpClientException(500, e);
@@ -223,7 +215,7 @@ public class HttpClient {
 			path = url.substring(p);
 		}
 		if (!Converter.isNumeric(port)) {
-			throw new IOException("ポート番号が数字ではありません:" + port);
+			throw new IOException("Port number is not a number: " + port);
 		}
 		return new String[] { protocol, domain, port, path };
 	}
@@ -265,7 +257,7 @@ public class HttpClient {
 			Map header) throws IOException {
 		byte[] b = null;
 		String url = urlArray[3];
-		if (Alphabet.eq("get", method) || Alphabet.eq("delete", method) || Alphabet.eq("options", method)) {
+		if (NoULCode.eq("get", method) || NoULCode.eq("delete", method) || NoULCode.eq("options", method)) {
 			if (params instanceof byte[]) {
 				if (((byte[]) params).length > 0) {
 					params = new String((byte[]) params, "UTF8");
@@ -310,13 +302,13 @@ public class HttpClient {
 			while (it.hasNext()) {
 				// 登録できない内容を削除.
 				if ((k = it.next()) == null ||
-					Alphabet.eq((h = "" + k), "host") || Alphabet.eq(h, "accept-encoding") ||
-					Alphabet.eq(h, "connection") || Alphabet.eq(h, "content-length") ||
-					Alphabet.eq(h, "transfer-encoding") ||
+					NoULCode.eq((h = "" + k), "host") || NoULCode.eq(h, "accept-encoding") ||
+					NoULCode.eq(h, "connection") || NoULCode.eq(h, "content-length") ||
+					NoULCode.eq(h, "transfer-encoding") ||
 					(v = header.get(k)) == null) {
 					continue;
 				}
-				if(Alphabet.eq(h, "content-type")) {
+				if(NoULCode.eq(h, "content-type")) {
 					contentTypeFlag = true;
 				}
 				buf.append(h).append(": ").append(v).append("\r\n");
@@ -324,7 +316,7 @@ public class HttpClient {
 		}
 		// post系の場合.
 		boolean chunked = false;
-		if (Alphabet.eq("post", method) || Alphabet.eq("put", method) || Alphabet.eq("patch", method)) {
+		if (NoULCode.eq("post", method) || NoULCode.eq("put", method) || NoULCode.eq("patch", method)) {
 			if (!contentTypeFlag) {
 				buf.append("Content-Type: ").append("application/x-www-form-urlencoded").append("\r\n");
 			}
@@ -520,7 +512,7 @@ public class HttpClient {
 						// chunked.
 						else {
 							value = result.getHeader("transfer-encoding");
-							if (Alphabet.eq("chunked", value)) {
+							if (NoULCode.eq("chunked", value)) {
 								bodyLength = -1;
 								chunkedBuffer = new ByteArrayIO();
 							}
@@ -757,5 +749,89 @@ public class HttpClient {
 			}
 		}
 		return ret;
+	}
+	
+	// 大文字小文字区別なしの判別.
+	protected static final class NoULCode {
+		
+		/** アルファベットの半角全角変換値. **/
+		private static final char[] _mM = new char[65536];
+		static {
+			int len = _mM.length;
+			for (int i = 0; i < len; i++) {
+				_mM[i] = (char) i;
+			}
+			int code = (int) 'a';
+			int alpha = (int) ('z' - 'a') + 1;
+			for (int i = 0; i < alpha; i++) {
+				_mM[i + code] = (char) (code + i);
+			}
+			int target = (int) 'A';
+			for (int i = 0; i < alpha; i++) {
+				_mM[i + target] = (char) (code + i);
+			}
+		}
+		
+		// 大文字小文字区別なしの判別.
+		protected static final boolean eq(String src, String dest) {
+			if (src == null || dest == null) {
+				return false;
+			}
+			int len = src.length();
+			if (len == dest.length()) {
+				for (int i = 0; i < len; i++) {
+					if (_mM[src.charAt(i)] != _mM[dest.charAt(i)]) {
+						return false;
+					}
+				}
+				return true;
+			}
+			return false;
+		}
+		
+		// 文字コードのチェック.
+		protected static final boolean oneEq(char s, char d) {
+			return _mM[s] == _mM[d];
+		}
+		
+		// indexOf.
+		protected static final int indexOf(final String buf, final String chk, final int off) {
+			final int len = chk.length();
+			// 単数文字検索.
+			if (len == 1) {
+				int i = off;
+				final char first = chk.charAt(0);
+				if (!oneEq(first, buf.charAt(i))) {
+					final int vLen = buf.length();
+					while (++i < vLen && !oneEq(first, buf.charAt(i)))
+						;
+					if (vLen != i) {
+						return i;
+					}
+				} else {
+					return i;
+				}
+			}
+			// 複数文字検索.
+			else {
+				int j, k, next;
+				final char first = chk.charAt(0);
+				final int vLen = buf.length() - (len - 1);
+				for (int i = off; i < vLen; i++) {
+					if (!oneEq(first, buf.charAt(i))) {
+						while (++i < vLen && !oneEq(first, buf.charAt(i)))
+							;
+					}
+					if (i < vLen) {
+						for (next = i + len, j = i + 1, k = 1; j < next && oneEq(buf.charAt(j), chk.charAt(k)); j++, k++)
+							;
+						if (j == next) {
+							return i;
+						}
+					}
+				}
+			}
+			return -1;
+		}
 	}
 }
