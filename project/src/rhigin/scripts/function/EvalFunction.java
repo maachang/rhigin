@@ -11,7 +11,7 @@ import rhigin.scripts.RhiginFunction;
 /**
  * eval実行.
  * 
- * rhiginでは、スクリプトの拡張を行っているので、ExecuteScriptで処理する.
+ * rhiginでは、スクリプトの拡張を行っているので、evalの命令はExecuteScriptで処理する.
  */
 public class EvalFunction extends RhiginFunction {
 	private static final EvalFunction THIS = new EvalFunction();

@@ -223,7 +223,7 @@ public class HttpWorkerThread extends Thread {
 			}
 
 			// 大容量ファイル受信が要求されてる場合.
-			if (HttpConstants.POST_FILE_OUT_CONTENT_TYPE.equals(request.getString("Content-Type"))) {
+			if (HttpConstants.POST_FILE_OUT_CONTENT_TYPE.equals(request.getString("content-type"))) {
 				// 受信データが存在する場合.
 				HttpPostBodyFile file = em.getHttpPostBodyFile(xor128);
 				if (buffer.size() > 0) {
@@ -492,7 +492,7 @@ public class HttpWorkerThread extends Thread {
 		req.setBody(null);
 
 		// Body内容がJSON形式の場合.
-		String contentType = (String) req.get("Content-Type");
+		String contentType = (String) req.get("content-type");
 		if (contentType.indexOf("application/json") == 0) {
 			return Json.decode(v);
 		} else if ("application/x-www-form-urlencoded".equals(contentType)) {
@@ -518,7 +518,7 @@ public class HttpWorkerThread extends Thread {
 
 	/** GZIP返却許可チェック. **/
 	private static final boolean isGzip(Request req) throws IOException {
-		String n = (String) req.get("Accept-Encoding");
+		String n = (String) req.get("accept-encoding");
 		if (n == null || n.indexOf("gzip") == -1) {
 			return false;
 		}

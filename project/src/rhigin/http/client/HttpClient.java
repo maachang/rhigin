@@ -15,6 +15,7 @@ import java.util.zip.GZIPInputStream;
 
 import rhigin.RhiginConstants;
 import rhigin.scripts.Json;
+import rhigin.util.Alphabet;
 import rhigin.util.ArrayMap;
 import rhigin.util.ByteArrayIO;
 import rhigin.util.Converter;
@@ -24,7 +25,7 @@ import rhigin.util.Converter;
  */
 @SuppressWarnings("rawtypes")
 public class HttpClient {
-	private static final int MAX_BINARY_BODY_LENGTH = 0x00100000;
+	private static final int MAX_BINARY_BODY_LENGTH = 0x00100000 * 5; // 5Mbyte.
 	private static final int TIMEOUT = 30000;
 	private static final int MAX_RETRY = 9;
 	private static final String USER_AGENT = RhiginConstants.NAME;
@@ -102,7 +103,7 @@ public class HttpClient {
 		HttpResult ret = null;
 		method = method.toUpperCase();
 		// methodがJSONの場合は、POSTでJSON送信用の処理に変換する.
-		if ("JSON".equals(method)) {
+		if (Alphabet.eq("JSON", method)) {
 			method = "POST";
 			params = Json.encode(params);
 			header.put("Content-Type", "application/json");
@@ -264,7 +265,7 @@ public class HttpClient {
 			Map header) throws IOException {
 		byte[] b = null;
 		String url = urlArray[3];
-		if ("GET".equals(method) || "DELETE".equals(method) || "OPTIONS".equals(method)) {
+		if (Alphabet.eq("get", method) || Alphabet.eq("delete", method) || Alphabet.eq("options", method)) {
 			if (params instanceof byte[]) {
 				if (((byte[]) params).length > 0) {
 					params = new String((byte[]) params, "UTF8");
@@ -300,34 +301,31 @@ public class HttpClient {
 		buf.append("Accept-Encoding: gzip, deflate\r\n");
 		buf.append("Connection: close\r\n");
 
+		boolean contentTypeFlag = false;
 		// ヘッダユーザ定義.
 		if (header != null && header.size() > 0) {
-
-			// 登録できない内容を削除.
-			header.remove("Host");
-			header.remove("Accept-Encoding");
-			header.remove("Connection");
-			header.remove("Content-Length");
-			header.remove("Transfer-Encoding");
-
+			String h;
 			Object k, v;
 			Iterator it = header.keySet().iterator();
 			while (it.hasNext()) {
-				k = it.next();
-				if (k == null) {
+				// 登録できない内容を削除.
+				if ((k = it.next()) == null ||
+					Alphabet.eq((h = "" + k), "host") || Alphabet.eq(h, "accept-encoding") ||
+					Alphabet.eq(h, "connection") || Alphabet.eq(h, "content-length") ||
+					Alphabet.eq(h, "transfer-encoding") ||
+					(v = header.get(k)) == null) {
 					continue;
 				}
-				v = header.get(k);
-				if (v == null) {
-					continue;
+				if(Alphabet.eq(h, "content-type")) {
+					contentTypeFlag = true;
 				}
-				buf.append(k).append(": ").append(v).append("\r\n");
+				buf.append(h).append(": ").append(v).append("\r\n");
 			}
 		}
 		// post系の場合.
 		boolean chunked = false;
-		if ("POST".equals(method) || "PUT".equals(method) || "PATCH".equals(method)) {
-			if (header != null && !header.containsKey("Content-Type")) {
+		if (Alphabet.eq("post", method) || Alphabet.eq("put", method) || Alphabet.eq("patch", method)) {
+			if (!contentTypeFlag) {
 				buf.append("Content-Type: ").append("application/x-www-form-urlencoded").append("\r\n");
 			}
 			if (params instanceof String) {
@@ -515,14 +513,14 @@ public class HttpClient {
 						result = new HttpResult(url, status, b);
 						b = null;
 						// content-length.
-						String value = result.getHeader("Content-Length");
+						String value = result.getHeader("content-length");
 						if (Converter.isNumeric(value)) {
 							bodyLength = Integer.parseInt(value);
 						}
 						// chunked.
 						else {
-							value = result.getHeader("Transfer-Encoding");
-							if ("chunked".equals(value)) {
+							value = result.getHeader("transfer-encoding");
+							if (Alphabet.eq("chunked", value)) {
 								bodyLength = -1;
 								chunkedBuffer = new ByteArrayIO();
 							}
@@ -558,7 +556,7 @@ public class HttpClient {
 						chunkedBuffer = null;
 					}
 				}
-
+				
 				// ヘッダ受信が完了し、Body情報の取得中.
 				if (bodyLength == 0) {
 					// 0byteデータ.
@@ -570,6 +568,7 @@ public class HttpClient {
 					if (bodyFile != null) {
 						result.setReponseBodyFile(bodyFile);
 						bodyFile = null;
+						return result;
 					} else if (buffer.size() >= bodyLength) {
 						b = new byte[bodyLength];
 						buffer.read(b);
@@ -579,8 +578,8 @@ public class HttpClient {
 							result.setResponseBody(b);
 						}
 						b = null;
+						return result;
 					}
-					return result;
 				}
 				// chunked受信.
 				else if (bodyLength == -1) {

@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import rhigin.RhiginException;
 import rhigin.net.NioReadBuffer;
+import rhigin.util.Alphabet;
 import rhigin.util.Converter;
 
 /**
@@ -31,7 +32,7 @@ public class Request extends Header {
 
 	public String getBodyText() {
 		try {
-			return new String(body, charset((String) get("Content-Type")));
+			return new String(body, charset((String) get("content-type")));
 		} catch (RhiginException re) {
 			throw re;
 		} catch (Exception e) {
@@ -40,7 +41,7 @@ public class Request extends Header {
 	}
 
 	private static final String charset(String contentType) {
-		int p = contentType.indexOf(" charset=");
+		int p = Alphabet.indexOf(contentType, " charset=");
 		if (p == -1) {
 			return "UTF8";
 		}
@@ -56,7 +57,7 @@ public class Request extends Header {
 		if (contentLength != null) {
 			return contentLength;
 		}
-		String ret = (String) this.get("Content-Length");
+		String ret = (String) this.get("content-length");
 		if (ret == null) {
 			return -1;
 		}

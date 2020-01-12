@@ -13,6 +13,7 @@ import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.Json;
 import rhigin.util.AbstractEntryIterator;
 import rhigin.util.AbstractKeyIterator;
+import rhigin.util.Alphabet;
 import rhigin.util.ConvertMap;
 
 /**
@@ -92,8 +93,8 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 		if (headersString == null) {
 			return null;
 		}
-
-		final int p = headersString.indexOf(key + ": ");
+		
+		final int p = Alphabet.indexOf(headersString, key + ": ");
 		if (p == -1) {
 			return null;
 		}
@@ -156,7 +157,7 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 	private final String getContentType() {
 		if (contentType == null) {
 			try {
-				contentType = getHeader("Content-Type");
+				contentType = getHeader("content-type");
 			} catch (Exception e) {
 				contentType = null;
 			}
@@ -286,8 +287,8 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 
 	// 受信データがGZIP圧縮されているかチェック.
 	protected final boolean isResponseGzip() {
-		final String value = getHeader("Content-Encoding");
-		if ("gzip".equals(value)) {
+		final String value = getHeader("content-encoding");
+		if (Alphabet.eq("gzip", value)) {
 			return true;
 		}
 		return false;
@@ -413,7 +414,7 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 			return responseType();
 		} else if ("gzip".equals(key) || "isGzip".equals(key)) {
 			return isGzip();
-		} else if ("Content-Type".equals(key)) {
+		} else if ("contentType".equals(key) || Alphabet.eq("content-type", ""+key)) {
 			return getContentType();
 		}
 		try {

@@ -8,6 +8,7 @@ import org.mozilla.javascript.Scriptable;
 import rhigin.RhiginException;
 import rhigin.http.client.HttpClient;
 import rhigin.scripts.RhiginFunction;
+import rhigin.util.ArrayMap;
 
 /**
  * [js]HttpClient.
@@ -15,7 +16,7 @@ import rhigin.scripts.RhiginFunction;
  * httpClient(method, url, option)
  *   method: Httpメソッド [GET, POST, DELETE, PUT, PATCH, OPTION]
  *   url: 接続先URL (http://yahoo.co.jp).
- *   option: Mapで設定.
+ *   option: Map or [key, value... ] で設定.
  *     params: パラメータを設定する場合は、この名前で設定します.
  *     header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
  *     bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
@@ -48,12 +49,26 @@ public class HttpClientFunction extends RhiginFunction {
 	 * @return HttpResult 返却データが返されます.
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		if (args.length >= 2) {
 			String method = "" + args[0];
 			String url = "" + args[1];
-			Map option = (args.length >= 3 && args[2] instanceof Map) ? (Map) args[2] : null;
+			Map option = null;
+			int len = args.length;
+			// オプションが設定されている場合.
+			if(len >= 3) {
+				// mapの場合.
+				if(args[2] instanceof Map) {
+					option = (Map)args[2];
+				// key, value ... の場合.
+				} else if(len >= 4) {
+					option = new ArrayMap();
+					for(int i = 2; i < len; i += 2) {
+						option.put("" + args[i], args[i+1]);
+					}
+				}
+			}
 			try {
 				return HttpClient.connect(method, url, option);
 			} catch (Exception e) {

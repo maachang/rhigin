@@ -11,6 +11,7 @@ import rhigin.net.NioReadBuffer;
 import rhigin.scripts.JavaScriptable;
 import rhigin.util.AbstractEntryIterator;
 import rhigin.util.AbstractKeyIterator;
+import rhigin.util.Alphabet;
 import rhigin.util.ConvertMap;
 
 /**
@@ -134,7 +135,7 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 	 */
 	protected String getHeader(String key) throws IOException {
 		getHeaderString();
-		int p = headersString.indexOf(key + ": ");
+		int p = Alphabet.indexOf(headersString, key + ": ");
 		if (p == -1) {
 			return null;
 		}
@@ -187,7 +188,7 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 			return getRemoteAddress();
 		} else if ("port".equals(key)) {
 			return getRemotePort();
-		} else if ("Content-Type".equals(key)) {
+		} else if ("contentType".equals(key) || Alphabet.eq("content-type", "" + key)) {
 			if (contntType == null) {
 				try {
 					contntType = getHeader(key.toString());
