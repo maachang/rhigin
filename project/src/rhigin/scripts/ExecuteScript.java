@@ -43,6 +43,7 @@ import rhigin.scripts.objects.ConsoleObject;
 import rhigin.scripts.objects.FCipherObject;
 import rhigin.scripts.objects.FCompObject;
 import rhigin.scripts.objects.FileObject;
+import rhigin.scripts.objects.FunctionObject;
 import rhigin.scripts.objects.JDateObject;
 import rhigin.scripts.objects.JSONObject;
 import rhigin.scripts.objects.JwtObject;
@@ -371,6 +372,7 @@ public class ExecuteScript {
 
 		// オブジェクトの登録.
 		ConsoleObject.regFunctions(scope);
+		FunctionObject.regFunctions(scope);
 		Xor128Object.regFunctions(scope);
 		JSONObject.regFunctions(scope);
 		JwtObject.regFunctions(scope);

@@ -19,7 +19,7 @@ public class ValidateFunction extends RhiginFunction {
 	public static final ValidateFunction getInstance() {
 		return THIS;
 	}
-
+	
 	@Override
 	public String getName() {
 		return "validate";

@@ -1,16 +1,17 @@
 package rhigin.scripts;
 
+import java.util.List;
+
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
-import rhigin.RhiginException;
-
 /**
- * Rhigin用Function. jsに組み込みたいオリジナルのFunctionを作成したい場合に、継承して実装します.
+ * Rhigin用Function.
+ * 
+ * rhigin用のjsに組み込みたいオリジナルのFunctionを作成したい場合に、継承して実装します.
  */
-public abstract class RhiginFunction implements Function {
+public abstract class RhiginFunction extends AbstractFunction {
 	/** 親オブジェクト. **/
 	protected Scriptable PARENT = null;
 	
@@ -23,122 +24,96 @@ public abstract class RhiginFunction implements Function {
 	}
 	
 	@Override
-	public void delete(String arg0) {
-	}
-
-	@Override
-	public void delete(int arg0) {
-	}
-
-	@Override
 	public Object get(String arg0, Scriptable arg1) {
-		return null;
-	}
-
-	@Override
-	public Object get(int arg0, Scriptable arg1) {
-		return null;
-	}
-
-	@Override
-	public String getClassName() {
-		return getName();
-	}
-
-	@Override
-	public Object getDefaultValue(Class<?> clazz) {
-		return (clazz == null || String.class.equals(clazz)) ? toString() : Undefined.instance;
-	}
-
-	@Override
-	public Object[] getIds() {
-		return null;
-	}
-
-	@Override
-	public Scriptable getParentScope() {
-		return null;
-	}
-
-	@Override
-	public Scriptable getPrototype() {
-		return null;
-	}
-
-	@Override
-	public boolean has(String arg0, Scriptable arg1) {
-		return false;
-	}
-
-	@Override
-	public boolean has(int arg0, Scriptable arg1) {
-		return false;
-	}
-
-	@Override
-	public boolean hasInstance(Scriptable arg0) {
-		return false;
-	}
-
-	@Override
-	public void put(String arg0, Scriptable arg1, Object arg2) {
-	}
-
-	@Override
-	public void put(int arg0, Scriptable arg1, Object arg2) {
-	}
-
-	@Override
-	public void setParentScope(Scriptable arg0) {
-	}
-
-	@Override
-	public void setPrototype(Scriptable arg0) {
-	}
-
-	/**
-	 * Function の内容を実装する場合は、こちらを実装してください.
-	 */
-	@Override
-	public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		if("apply".equals(arg0)) {
+			return new ApplyFunction(this);
+		} else if("call".equals(arg0)) {
+			return new CallFunction(this);
+		}
 		return Undefined.instance;
 	}
-
-	/**
-	 * new XXX のようなオブジェクトを作成する場合には、こちらを実装します. また、戻り値は
-	 * rhigin.scripts.objects.RhiginObjectを利用すると、楽に作成できると思います.
-	 */
+	
 	@Override
-	public Scriptable construct(Context arg0, Scriptable arg1, Object[] arg2) {
-		return null;
+	public boolean has(String arg0, Scriptable arg1) {
+		return "apply".equals(arg0) || "call".equals(arg0);
 	}
-
+	
 	@Override
-	public String toString() {
-		return "function " + getName() + "() {\n  [native code]\n}";
+	public Object[] getIds() {
+		return new Object[] {
+			"apply", "call"
+		};
 	}
-
-	/**
-	 * function名を設定します.
-	 */
-	public String getName() {
-		return "";
-	}
-
-	/**
-	 * 引数エラーを返却.
-	 */
-	protected Object argsException() {
-		return argsException(null);
-	}
-
-	/**
-	 * 引数エラーを返却.
-	 */
-	protected Object argsException(String objName) {
-		if (objName == null) {
-			throw new RhiginException(500, "Insufficient arguments for " + getName() + ".");
+	
+	// xxx.apply(scope, argsArray);
+	private static final class ApplyFunction extends AbstractFunction {
+		AbstractFunction src;
+		ApplyFunction(AbstractFunction s) {
+			src = s;
 		}
-		throw new RhiginException(500, "Insufficient arguments for " + objName + "." + getName() + ".");
+		@Override
+		public String getName() {
+			return "apply";
+		}
+		
+		@SuppressWarnings("rawtypes")
+		@Override
+		public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			if(args == null || args.length == 0) {
+				return Undefined.instance;
+			}
+			Scriptable sc;
+			if(args[0] == null || !(args[0] instanceof Scriptable)) {
+				sc = thisObj;
+			} else {
+				sc = (Scriptable)args[0];
+			}
+			Object[] params = null;
+			if(args.length >= 2 && args[1] instanceof List) {
+				List list = (List)args[1];
+				int len = list.size();
+				params = new Object[len];
+				for(int i = 0; i < len; i ++) {
+					params[i] = list.get(i);
+				}
+			} else {
+				params = new Object[0];
+			}
+			return src.call(cx, scope, sc, params);
+		}
+	}
+	
+	// xxx.call(scope, args ...);
+	private static final class CallFunction extends AbstractFunction {
+		AbstractFunction src;
+		CallFunction(AbstractFunction s) {
+			src = s;
+		}
+		@Override
+		public String getName() {
+			return "call";
+		}
+		
+		@Override
+		public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			if(args == null || args.length == 0) {
+				return Undefined.instance;
+			}
+			Scriptable sc;
+			if(args[0] == null || !(args[0] instanceof Scriptable)) {
+				sc = thisObj;
+			} else {
+				sc = (Scriptable)args[0];
+			}
+			Object[] params = null;
+			if(args.length >= 2) {
+				int len = args.length - 1;
+				params = new Object[len];
+				System.arraycopy(args, 1, params, 0, len);
+			} else {
+				params = new Object[0];
+			}
+			return src.call(cx, scope, sc, params);
+		}
 	}
 }

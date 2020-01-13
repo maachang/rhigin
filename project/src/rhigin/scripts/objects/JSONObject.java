@@ -23,7 +23,7 @@ public final class JSONObject {
 		Execute(int t) {
 			this.type = t;
 		}
-
+		
 		@Override
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if (args.length >= 1) {

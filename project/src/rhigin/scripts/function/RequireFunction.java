@@ -2,6 +2,7 @@ package rhigin.scripts.function;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.Undefined;
 
 import rhigin.RhiginException;
 import rhigin.http.Http;
@@ -42,6 +43,22 @@ public final class RequireFunction extends RhiginFunction {
 		}
 		return ret;
 	}
+	
+	@Override
+	public Object get(String arg0, Scriptable arg1) {
+		return Undefined.instance;
+	}
+	
+	@Override
+	public boolean has(String arg0, Scriptable arg1) {
+		return false;
+	}
+	
+	@Override
+	public Object[] getIds() {
+		return ZERO_ARRAY;
+	}
+
 
 	// ヘッダ・フッタ.
 	private static final String HEADER_SCRIPT = "'use strict';(function(_g){var _$def_$exports={};var module= {exports:_$def_$exports};var exports=_$def_$exports;\n";
