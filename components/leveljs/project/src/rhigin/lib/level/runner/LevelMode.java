@@ -24,8 +24,13 @@ public class LevelMode {
 		if(args != null && args.length >= 1) {
 			if(args[0] instanceof LevelOption) {
 				option = (LevelOption)args[0];
+			} else if(args[0] instanceof LevelMode) {
+				option = ((LevelMode)args[0]).getOption().copyObject();
 			} else {
 				option = new LevelOption();
+				// 初期タイプをセット.
+				option.setType(LevelOption.TYPE_NONE);
+				option.setExpansion(OperatorKeyType.KEY_NONE);
 				set(args);
 			}
 		}
@@ -38,7 +43,7 @@ public class LevelMode {
 	 *             args.length == 1 and args[0] = Map : Mapオブジェクトで各パラメータを設定します.
 	 *             key, value ... : 偶数にキー名、奇数に要素を設定します.
 	 *             
-	 *             type:        キータイプ(String or Number).
+	 *             type:        Operatorキータイプ(String or Number).
 	 *             writeBuffer: 書き込みバッファ数(Number).
 	 *             maxOpenFile: オープン最大ファイル数(Number).
 	 *             blockSize:   ブロックサイズ(Number).
@@ -54,11 +59,17 @@ public class LevelMode {
 			Map map = (Map)args[0];
 			Object o = map.get("type");
 			if(o != null) {
+				int okType = -1;
 				if(o instanceof String) {
-					option.setType(Converter.convertString(o));
+					okType = OperatorKeyType.convertStringByKeyType(Converter.convertString(o));
 				} else if(Converter.isNumeric(o)) {
-					option.setType(Converter.convertInt(o));
+					okType = Converter.convertInt(o);
 				}
+				int loType = OperatorKeyType.convertLevelOptionType(okType);
+				// leveldb用のキータイプをセット.
+				option.setType(loType);
+				// Leveljs用のキータイプをセット.
+				option.setExpansion(okType);
 			}
 			if((o = map.get("writeBuffer")) != null && Converter.isNumeric(o)) {
 				option.setWriteBufferSize(Converter.convertInt(o));
@@ -80,11 +91,17 @@ public class LevelMode {
 					k = Converter.convertString(args[i]);
 					o = args[i + 1];
 					if(Alphabet.eq(k, "type")) {
+						int okType = -1;
 						if(o instanceof String) {
-							option.setType(Converter.convertString(o));
+							okType = OperatorKeyType.convertStringByKeyType(Converter.convertString(o));
 						} else if(Converter.isNumeric(o)) {
-							option.setType(Converter.convertInt(o));
+							okType = Converter.convertInt(o);
 						}
+						int loType = OperatorKeyType.convertLevelOptionType(okType);
+						// leveldb用のキータイプをセット.
+						option.setType(loType);
+						// Leveljs用のキータイプをセット.
+						option.setExpansion(okType);
 					} else if(Alphabet.eq(k, "writeBuffer") && Converter.isNumeric(o)) {
 						option.setWriteBufferSize(Converter.convertInt(o));
 					} else if(Alphabet.eq(k, "maxOpenFile") && Converter.isNumeric(o)) {
@@ -113,7 +130,8 @@ public class LevelMode {
 	 */
 	@SuppressWarnings("rawtypes")
 	public Map get() {
-		return new JsMap("type", LevelOption.stringType(option.getType())
+		return new JsMap("leveldbType", LevelOption.stringType(option.getType())
+			,"operatorKeyType", OperatorKeyType.toString(getOperatorType())
 			,"writeBuffer", option.getWriteBufferSize()
 			,"maxOpenFile", option.getMaxOpenFiles()
 			,"blockSize", option.getBlockSize()
@@ -128,5 +146,29 @@ public class LevelMode {
 	@Override
 	public String toString() {
 		return JsonOut.toString(get());
+	}
+	
+	public String getType() {
+		return LevelOption.stringType(option.getType());
+	}
+	
+	public int getWriteBuffer() {
+		return option.getWriteBufferSize();
+	}
+	
+	public int getMaxOpenFile() {
+		return option.getMaxOpenFiles();
+	}
+	
+	public int getBlockSize() {
+		return option.getBlockSize();
+	}
+	
+	public int getBlockCache() {
+		return option.getBlockCache();
+	}
+	
+	public int getOperatorType() {
+		return OperatorKeyType.getKeyType(option);
 	}
 }

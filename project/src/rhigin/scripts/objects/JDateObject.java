@@ -264,6 +264,13 @@ public class JDateObject extends RhiginFunction {
 		public String toLocaleString() {
 			return date.toLocaleString();
 		}
+		// 拡張.
+		public void setFullYear(int y) {
+			date.setYear(y + 1900);
+		}
+		public int getFullYear() {
+			return date.getYear() + 1900;
+		}
 	}
 	
 	// メソッド名群.

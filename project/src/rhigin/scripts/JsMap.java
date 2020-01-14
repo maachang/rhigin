@@ -10,8 +10,9 @@ import rhigin.util.ListMap;
 /**
  * Javascript用Map.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class JsMap extends JavaScriptable.Map {
-	private ArrayMap srcMap;
+	private Map srcMap;
 	/**
 	 * コンストラクタ.
 	 */
@@ -29,8 +30,8 @@ public class JsMap extends JavaScriptable.Map {
 	/**
 	 * コンストラクタ.
 	 */
-	public JsMap(final Map<String, Object> v) {
-		srcMap = new ArrayMap(v);
+	public JsMap(final Map v) {
+		srcMap = v;
 	}
 
 	/**
@@ -44,7 +45,9 @@ public class JsMap extends JavaScriptable.Map {
 	 * ListMapをセット.
 	 */
 	public void setRaw(ListMap list) {
-		srcMap.setRaw(list);
+		if(srcMap instanceof ArrayMap) {
+			((ArrayMap)srcMap).setRaw(list);
+		}
 	}
 
 	@Override
@@ -57,7 +60,7 @@ public class JsMap extends JavaScriptable.Map {
 		if(name == null) {
 			return null;
 		}
-		return srcMap.put(name.toString(), value);
+		return srcMap.put(name, value);
 	}
 
 	@Override
@@ -80,7 +83,6 @@ public class JsMap extends JavaScriptable.Map {
 		return srcMap.isEmpty();
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
 	public void putAll(Map toMerge) {
 		srcMap.putAll(toMerge);
@@ -102,21 +104,24 @@ public class JsMap extends JavaScriptable.Map {
 	}
 
 	@Override
-	public Collection<Object> values() {
+	public Collection values() {
 		return srcMap.values();
 	}
 
 	public ListMap getListMap() {
-		return srcMap.getListMap();
+		if(srcMap instanceof ArrayMap) {
+			return ((ArrayMap)srcMap).getListMap();
+		}
+		return null;
 	}
 
 	@Override
-	public Set<String> keySet() {
+	public Set keySet() {
 		return srcMap.keySet();
 	}
 
 	@Override
-	public Set<Entry<String, Object>> entrySet() {
+	public Set entrySet() {
 		return srcMap.entrySet();
 	}
 }

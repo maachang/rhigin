@@ -31,7 +31,7 @@ public class RhiginOriginCode extends OriginCode {
 	}
 	
 	/** JSDateオブジェクトの場合は、java.util.Dateに変換. **/
-	protected static final Object getJSDate(Object o) {
+	public static final Object getJSDate(Object o) {
 		if (o instanceof JDateInstanceObject) {
 			// JDate.
 			return ((JDateInstanceObject)o).getTime();

@@ -32,6 +32,7 @@ import rhigin.scripts.function.GlobalFunction;
 import rhigin.scripts.function.HttpClientFunction;
 import rhigin.scripts.function.LogFactoryFunction;
 import rhigin.scripts.function.NanoTimeFunction;
+import rhigin.scripts.function.ParseIntFunction;
 import rhigin.scripts.function.RandomFunction;
 import rhigin.scripts.function.RequireFunction;
 import rhigin.scripts.function.RhiginEnvFunction;
@@ -385,6 +386,7 @@ public class ExecuteScript {
 
 		// rhigin用の基本オブジェクトを設定.
 		RequireFunction.regFunctions(scope);
+		ParseIntFunction.regFunctions(scope);
 		EvalFunction.regFunctions(scope);
 		GcFunction.regFunctions(scope);
 		GlobalFunction.regFunctions(scope);
