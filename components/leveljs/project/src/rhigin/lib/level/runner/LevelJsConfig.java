@@ -11,14 +11,14 @@ import rhigin.scripts.JsonOut;
 /**
  * Leveldbコンフィグ.
  */
-public class LevelConfig {
+public class LevelJsConfig {
 	protected String path;
 	protected Integer machineId;
 	
 	/**
 	 * コンストラクタ.
 	 */
-	protected LevelConfig() {
+	protected LevelJsConfig() {
 		
 	}
 	
@@ -27,8 +27,8 @@ public class LevelConfig {
 	 * @param conf
 	 * @return
 	 */
-	public static final LevelConfig create(Map<String, Object> json) {
-		LevelConfig ret = new LevelConfig();
+	public static final LevelJsConfig create(Map<String, Object> json) {
+		LevelJsConfig ret = new LevelJsConfig();
 		ret.path = Converter.convertString(json.get("path"));
 		if(ret.path == null || ret.path.isEmpty()) {
 			ret.path = LevelOperatorConstants.DEFAULT_LEVEL_DB_FOLDER;
@@ -46,8 +46,8 @@ public class LevelConfig {
 	 * @param machineId
 	 * @return
 	 */
-	public static final LevelConfig create(String path, Integer machineId) {
-		LevelConfig ret = new LevelConfig();
+	public static final LevelJsConfig create(String path, Integer machineId) {
+		LevelJsConfig ret = new LevelJsConfig();
 		ret.path = path;
 		ret.machineId = machineId;
 		if(ret.path == null || ret.path.isEmpty()) {

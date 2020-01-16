@@ -85,5 +85,4 @@ public class RhiginOriginCode extends OriginCode {
 		}
 		return null;
 	}
-
 }

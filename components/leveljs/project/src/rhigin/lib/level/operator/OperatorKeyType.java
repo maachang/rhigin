@@ -1,10 +1,11 @@
-package rhigin.lib.level.runner;
+package rhigin.lib.level.operator;
 
 import org.maachang.leveldb.LevelOption;
 import org.maachang.leveldb.LeveldbException;
 import org.maachang.leveldb.util.Alphabet;
 import org.maachang.leveldb.util.Converter;
 
+import rhigin.lib.level.runner.RhiginOriginCode;
 import rhigin.scripts.objects.JDateObject;
 
 /**
@@ -215,7 +216,7 @@ public class OperatorKeyType {
 	 */
 	public static final int getKeyType(LevelOption opt) {
 		Object[] o = opt.getExpansion();
-		if(o == null || !Converter.isNumeric(o[0])) {
+		if(o == null || o.length == 0 || !Converter.isNumeric(o[0])) {
 			return OperatorKeyType.KEY_NONE;
 		}
 		return Converter.convertInt(o[0]);

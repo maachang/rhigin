@@ -3,10 +3,6 @@ package rhigin.lib.level.operator;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.maachang.leveldb.operator.LevelIterator;
-
-import rhigin.scripts.JsMap;
-
 /**
  * Operator用のIterator.
  */

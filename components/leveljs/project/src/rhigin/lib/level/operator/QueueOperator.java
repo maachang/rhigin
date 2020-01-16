@@ -4,28 +4,22 @@ import java.util.Map;
 
 import org.maachang.leveldb.operator.LevelQueue;
 
-import rhigin.lib.level.runner.LevelMode;
+import rhigin.scripts.JsMap;
 
 /**
  * キューオペレータ.
  */
-public class QueueOperator {
+public class QueueOperator implements Operator {
 	private LevelQueue queue;
+	private String name;
 	
 	/**
 	 * コンストラクタ.
 	 * @param q
 	 */
-	public QueueOperator(LevelQueue q) {
+	public QueueOperator(String n, LevelQueue q) {
 		queue = q;
-	}
-	
-	/**
-	 * オブジェクトが利用可能かチェック.
-	 * @return [true]の場合利用可能です.
-	 */
-	public boolean isAvailable() {
-		return !queue.isClose();
+		name = n;
 	}
 	
 	/**
@@ -47,7 +41,35 @@ public class QueueOperator {
 	 */
 	@SuppressWarnings("rawtypes")
 	public Map pop() {
-		return (Map)queue.get();
+		Object o = queue.get();
+		if(o == null) {
+			return null;
+		}
+		return new JsMap((Map)o);
+	}
+	
+	/**
+	 * オペレータ名を取得.
+	 * @return String オペレータ名が返却されます.
+	 */
+	public String getName() {
+		return name;
+	}
+	
+	/**
+	 * オペレータタイプを取得.
+	 * @return String オペレータタイプが返却されます.
+	 */
+	public String getOperatorType() {
+		return OperatorUtil.getOperatorType(queue);
+	}
+	
+	/**
+	 * オブジェクトが利用可能かチェック.
+	 * @return [true]の場合利用可能です.
+	 */
+	public boolean isAvailable() {
+		return !queue.isClose();
 	}
 	
 	/**
@@ -63,7 +85,7 @@ public class QueueOperator {
 	 * LevelModeを取得.
 	 * @return
 	 */
-	public LevelMode getMode() {
-		return new LevelMode(queue.getOption());
+	public OperatorMode getMode() {
+		return new OperatorMode(queue.getOption());
 	}
 }

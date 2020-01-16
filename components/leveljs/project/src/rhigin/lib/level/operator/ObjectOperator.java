@@ -8,21 +8,24 @@ import org.maachang.leveldb.operator.LevelIndexOperator;
 import org.maachang.leveldb.operator.LevelIterator;
 import org.maachang.leveldb.operator.LevelMap;
 
-import rhigin.lib.level.runner.LevelException;
-import rhigin.lib.level.runner.OperatorKeyType;
+import rhigin.lib.level.runner.LevelJsCloseable;
+import rhigin.lib.level.runner.LevelJsException;
 import rhigin.scripts.JsMap;
+import rhigin.util.FixedArray;
 
 /**
  * Objectオペレータ.
  */
 @SuppressWarnings("rawtypes")
-public class ObjectOperator extends Operator {
-	private LevelMap base;
-	private int keyType;
+public class ObjectOperator extends SearchOperator {
+	protected LevelMap base;
+	protected int keyType;
 	
-	public ObjectOperator(LevelMap o) {
+	public ObjectOperator(LevelJsCloseable c, String n, LevelMap o) {
+		this.closeable = c;
 		this.base = o;
-		keyType = OperatorKeyType.getKeyType(o.getOption());
+		this.name = n;
+		this.keyType = OperatorKeyType.getKeyType(o.getOption());
 	}
 
 	@Override
@@ -32,40 +35,40 @@ public class ObjectOperator extends Operator {
 
 	@Override
 	protected Object _put(Map value, int keyLen, Object[] keys) {
-		Object key = OperatorKeyType.convertKeyType(keyType, keys[0]);
+		final Object key = OperatorKeyType.convertKeyType(keyType, keys[0]);
 		base.put(key, value);
 		return null;
 	}
 
 	@Override
 	protected void _remove(int keyLen, Object[] keys) {
-		Object key = OperatorKeyType.convertKeyType(keyType, keys[0]);
+		final Object key = OperatorKeyType.convertKeyType(keyType, keys[0]);
 		base.remove(key);
 	}
 
 	@Override
 	protected Object _get(int keyLen, Object[] keys) {
-		Object key = OperatorKeyType.convertKeyType(keyType, keys[0]);
+		final Object key = OperatorKeyType.convertKeyType(keyType, keys[0]);
 		return base.get(key);
 	}
 
 	@Override
 	protected boolean _contains(int keyLen, Object[] keys) {
-		Object key = OperatorKeyType.convertKeyType(keyType, keys[0]);
+		final Object key = OperatorKeyType.convertKeyType(keyType, keys[0]);
 		return base.containsKey(key);
 	}
 
 	@Override
 	protected OperateIterator _iterator(boolean desc, int keyLen, Object[] keys) {
-		Object key = OperatorKeyType.convertKeyType(keyType, keys[0]);
+		final Object key = OperatorKeyType.convertKeyType(keyType, keys[0]);
 		return new SearchIterator(base.snapshot(desc, key), keyType, null);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected OperateIterator _search(boolean desc, int keyLen, Object[] keys) {
+	protected OperateIterator _range(boolean desc, int keyLen, Object[] keys) {
 		if(keyLen < 2) {
-			throw new LevelException("Two keys are required. \"0\" start key \"1\" end key");
+			throw new LevelJsException("Two keys are required. \"0\" start key \"1\" end key");
 		}
 		Comparable start = (Comparable)OperatorKeyType.convertKeyType(keyType, keys[0]);
 		Comparable end = (Comparable)OperatorKeyType.convertKeyType(keyType, keys[1]);
@@ -137,7 +140,7 @@ public class ObjectOperator extends Operator {
 		 * @return Object キー名が返却されます.
 		 */
 		public Object key() {
-			return OperatorKeyType.getRestoreKey(keyType, beforeKey);
+			return new FixedArray(OperatorKeyType.getRestoreKey(keyType, beforeKey));
 		}
 
 		@Override
@@ -213,7 +216,7 @@ public class ObjectOperator extends Operator {
 
 		@Override
 		public Object key() {
-			return OperatorKeyType.getRestoreKey(keyType, src.getKey());
+			return new FixedArray(OperatorKeyType.getRestoreKey(keyType, src.getKey()));
 		}
 	}
 }

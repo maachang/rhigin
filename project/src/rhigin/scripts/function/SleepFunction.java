@@ -24,7 +24,7 @@ public class SleepFunction extends RhiginFunction {
 
 	@Override
 	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
-		if (args.length >= 1 && Converter.isFloat(args[0])) {
+		if (args.length >= 1 && Converter.isNumeric(args[0])) {
 			try {
 				Thread.sleep(Converter.convertInt(args[0]));
 			} catch (Exception e) {

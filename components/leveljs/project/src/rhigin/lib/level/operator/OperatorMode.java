@@ -1,4 +1,4 @@
-package rhigin.lib.level.runner;
+package rhigin.lib.level.operator;
 
 import java.util.Map;
 
@@ -10,9 +10,9 @@ import rhigin.scripts.JsMap;
 import rhigin.scripts.JsonOut;
 
 /**
- * Leveldb オペレータ生成モード.
+ * オペレータ生成モード.
  */
-public class LevelMode {
+public class OperatorMode {
 	protected LevelOption option;
 	
 	/**
@@ -20,12 +20,12 @@ public class LevelMode {
 	 * 
 	 * @param args パラメータを設定します.
 	 */
-	public LevelMode(Object... args) {
+	public OperatorMode(Object... args) {
 		if(args != null && args.length >= 1) {
 			if(args[0] instanceof LevelOption) {
 				option = (LevelOption)args[0];
-			} else if(args[0] instanceof LevelMode) {
-				option = ((LevelMode)args[0]).getOption().copyObject();
+			} else if(args[0] instanceof OperatorMode) {
+				option = ((OperatorMode)args[0]).getOption().copyObject();
 			} else {
 				option = new LevelOption();
 				// 初期タイプをセット.
@@ -131,7 +131,7 @@ public class LevelMode {
 	@SuppressWarnings("rawtypes")
 	public Map get() {
 		return new JsMap("leveldbType", LevelOption.stringType(option.getType())
-			,"operatorKeyType", OperatorKeyType.toString(getOperatorType())
+			,"operatorType", OperatorKeyType.toString(getOperatorType())
 			,"writeBuffer", option.getWriteBufferSize()
 			,"maxOpenFile", option.getMaxOpenFiles()
 			,"blockSize", option.getBlockSize()

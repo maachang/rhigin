@@ -13,31 +13,25 @@ import org.mozilla.javascript.Undefined;
 import rhigin.RhiginConfig;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginThreadPool;
-import rhigin.util.AtomicNumber;
 import rhigin.util.Converter;
+import rhigin.util.Time12SequenceId;
 
 /**
  * スレッド関連のメソッド. setImmediate, setTimeout, setInterval
  * 
- * 実装したが、この機能は当面は利用しない。 そもそも、node.jsでは、非同期処理を多様するが、
- * rhiginでは「js実行」はスレッド上で行ってるので必要がない.
+ * 実装したが、この機能は当面は利用しない。
+ * そもそも、node.jsでは、非同期処理を多様するが、rhiginでは「js実行」はスレッド上で行ってるので必要がない.
  * 
  * なので、これらの機能もあえて使う必要はない.
  */
 public class ThreadFunction {
 	protected static final Object[] BLANK_ARGS = new Object[0];
-	private static final AtomicNumber ids = new AtomicNumber(0);
+	private static final Time12SequenceId idMan = new Time12SequenceId(0);
 	private static final Map<String, ScheduledFuture<?>> idMap = new ConcurrentHashMap<String, ScheduledFuture<?>>();
 
 	// 実行IDを取得.
 	private static final String getId() {
-		int ret = ids.inc();
-		if (ids.get() >= 0x7fffffff) {
-			ids.set(0);
-		}
-		String code = Integer.toString(ret, 16);
-		return new StringBuilder().append(Long.toString(System.currentTimeMillis(), 16)).append("-")
-				.append("00000000".substring(code.length())).append(code).toString();
+		return Time12SequenceId.toString(idMan.next());
 	}
 
 	// 非同期処理を行う.
@@ -51,8 +45,7 @@ public class ThreadFunction {
 					public void run() {
 						try {
 							f.call(ctx, scope, null, BLANK_ARGS);
-						} catch (Throwable t) {
-						}
+						} catch (Throwable t) {}
 					}
 				});
 			}
@@ -69,7 +62,7 @@ public class ThreadFunction {
 	private static final RhiginFunction setTimeout = new RhiginFunction() {
 		@Override
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
-			if (args.length >= 2 && args[0] instanceof Function && Converter.isFloat(args[1])) {
+			if (args.length >= 2 && args[0] instanceof Function && Converter.isNumeric(args[1])) {
 				Function f = (Function) args[0];
 				long time = Converter.convertLong(args[1]);
 				String id = getId();
@@ -121,7 +114,7 @@ public class ThreadFunction {
 	private static final RhiginFunction setInterval = new RhiginFunction() {
 		@Override
 		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
-			if (args.length >= 2 && args[0] instanceof Function && Converter.isFloat(args[1])) {
+			if (args.length >= 2 && args[0] instanceof Function && Converter.isNumeric(args[1])) {
 				Function f = (Function) args[0];
 				long time = Converter.convertLong(args[1]);
 				String id = getId();

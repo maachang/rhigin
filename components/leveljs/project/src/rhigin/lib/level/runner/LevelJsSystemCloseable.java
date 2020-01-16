@@ -1,6 +1,6 @@
 package rhigin.lib.level.runner;
 
-import rhigin.lib.level.LevelCore;
+import rhigin.lib.level.LevelJsCore;
 import rhigin.scripts.RhiginContext;
 import rhigin.scripts.RhiginEndScriptCall;
 import rhigin.scripts.compile.CompileCache;
@@ -8,10 +8,10 @@ import rhigin.scripts.compile.CompileCache;
 /**
  * システム終了時に呼び出す処理.
  */
-public class LevelSystemCloseable implements RhiginEndScriptCall {
-	private LevelCore core = null;
+public class LevelJsSystemCloseable implements RhiginEndScriptCall {
+	private LevelJsCore core = null;
 	
-	public LevelSystemCloseable(LevelCore c) {
+	public LevelJsSystemCloseable(LevelJsCore c) {
 		core = c;
 	}
 	

@@ -4,15 +4,26 @@ import java.util.List;
 import java.util.Map;
 
 import org.maachang.leveldb.LevelValues;
+import org.maachang.leveldb.operator.LevelLatLon;
+import org.maachang.leveldb.operator.LevelMap;
 import org.maachang.leveldb.operator.LevelOperator;
 import org.maachang.leveldb.operator.LevelOperatorManager;
+import org.maachang.leveldb.operator.LevelQueue;
+import org.maachang.leveldb.operator.LevelSequence;
 
 import rhigin.RhiginConfig;
 import rhigin.RhiginStartup;
-import rhigin.lib.level.runner.LevelConfig;
-import rhigin.lib.level.runner.LevelException;
-import rhigin.lib.level.runner.LevelMode;
-import rhigin.lib.level.runner.LevelSystemCloseable;
+import rhigin.lib.level.operator.LatLonOperator;
+import rhigin.lib.level.operator.ObjectOperator;
+import rhigin.lib.level.operator.Operator;
+import rhigin.lib.level.operator.OperatorMode;
+import rhigin.lib.level.operator.OperatorUtil;
+import rhigin.lib.level.operator.QueueOperator;
+import rhigin.lib.level.operator.SequenceOperator;
+import rhigin.lib.level.runner.LevelJsCloseable;
+import rhigin.lib.level.runner.LevelJsConfig;
+import rhigin.lib.level.runner.LevelJsException;
+import rhigin.lib.level.runner.LevelJsSystemCloseable;
 import rhigin.lib.level.runner.RhiginOriginCode;
 import rhigin.scripts.RhiginEndScriptCall;
 import rhigin.util.Flag;
@@ -20,20 +31,20 @@ import rhigin.util.Flag;
 /**
  * Leveldb コアオブジェクト.
  */
-public class LevelCore {
+public class LevelJsCore {
 	/** デフォルトのLEVELコンフィグ名. **/
 	public static final String DEF_LEVEL_JSON_CONFIG_NAME = "level";
-
 	
 	protected final Flag startup = new Flag(false);
 	protected final Flag end = new Flag(false);
-	private LevelConfig config = null;
-	private LevelOperatorManager manager = null;
+	protected LevelJsConfig config = null;
+	protected LevelOperatorManager manager = null;
+	protected LevelJsCloseable closeable = null;
 	
 	/**
 	 * コンストラクタ.
 	 */
-	public LevelCore() {
+	public LevelJsCore() {
 	}
 	
 	/**
@@ -41,6 +52,10 @@ public class LevelCore {
 	 */
 	public void destroy() {
 		if(end.setToGetBefore(true)) {
+			if(closeable != null) {
+				closeable.call(null, null);
+			}
+			closeable = null;
 			if(manager != null) {
 				manager.close();
 			}
@@ -51,7 +66,7 @@ public class LevelCore {
 	// オブジェクト破棄チェック.
 	protected void checkDestroy() {
 		if(end.get()) {
-			throw new LevelException("The object has been destroyed.");
+			throw new LevelJsException("The object has been destroyed.");
 		}
 	}
 	
@@ -60,7 +75,7 @@ public class LevelCore {
 	protected void check() {
 		if(!startup.get() || end.get()) {
 			if(!startup.get()) {
-				throw new LevelException("startup has not been performed.");
+				throw new LevelJsException("startup has not been performed.");
 			}
 			checkDestroy();
 		}
@@ -82,13 +97,16 @@ public class LevelCore {
 	 * @param argsc
 	 * @return
 	 */
-	public RhiginEndScriptCall startup(String configName, String[] args) {
+	public RhiginEndScriptCall[] startup(String configName, String[] args) {
 		checkDestroy();
 		if(!startup.get()) {
 			final RhiginConfig conf = RhiginStartup.initLogFactory(false, true, args);
 			return startup(conf, configName);
 		}
-		return new LevelSystemCloseable(this);
+		return new RhiginEndScriptCall[] {
+			closeable,
+			new LevelJsSystemCloseable(this)
+		};
 	}
 	
 	/**
@@ -98,7 +116,7 @@ public class LevelCore {
 	 * @param configName
 	 * @return
 	 */
-	public RhiginEndScriptCall startup(RhiginConfig conf, String configName) {
+	public RhiginEndScriptCall[] startup(RhiginConfig conf, String configName) {
 		checkDestroy();
 		if(!startup.get()) {
 			String jsonConfigName = DEF_LEVEL_JSON_CONFIG_NAME;
@@ -107,7 +125,10 @@ public class LevelCore {
 			}
 			startup(conf.get(jsonConfigName));
 		}
-		return new LevelSystemCloseable(this);
+		return new RhiginEndScriptCall[] {
+			closeable,
+			new LevelJsSystemCloseable(this)
+		};
 	}
 	
 	/**
@@ -116,20 +137,24 @@ public class LevelCore {
 	 * @param conf
 	 * @return
 	 */
-	public RhiginEndScriptCall startup(Map<String, Object> conf) {
+	public RhiginEndScriptCall[] startup(Map<String, Object> conf) {
 		checkDestroy();
 		if(conf == null || conf.size() == 0) {
-			throw new LevelException("level connection definition config object is not set.");
+			throw new LevelJsException("level connection definition config object is not set.");
 		}
 		if(!startup.get()) {
-			config = LevelConfig.create(conf);
+			config = LevelJsConfig.create(conf);
 			// Leveldbのマネージャ初期化.
 			manager = new LevelOperatorManager(config.getPath(), config.getMachineId());
 			// Rhigin向けvalue変換条件をセット.
 			LevelValues.setOriginCode(new RhiginOriginCode());
+			closeable = new LevelJsCloseable();
 			startup.set(true);
 		}
-		return new LevelSystemCloseable(this);
+		return new RhiginEndScriptCall[] {
+			closeable,
+			new LevelJsSystemCloseable(this)
+		};
 	}
 	
 	/**
@@ -147,7 +172,7 @@ public class LevelCore {
 	 * 
 	 * @return
 	 */
-	public LevelConfig getConfig() {
+	public LevelJsConfig getConfig() {
 		check();
 		return config;
 	}
@@ -169,7 +194,7 @@ public class LevelCore {
 	 * @param mode LevelModeを設定します.
 	 * @return [true]の場合、生成成功です.
 	 */
-	public boolean create(String name, LevelMode mode) {
+	public boolean createObject(String name, OperatorMode mode) {
 		check();
 		return manager.createMap(name, mode.getOption());
 	}
@@ -181,7 +206,7 @@ public class LevelCore {
 	 * @param mode LevelModeを設定します.
 	 * @return [true]の場合、生成成功です.
 	 */
-	public boolean createLatLon(String name, LevelMode mode) {
+	public boolean createLatLon(String name, OperatorMode mode) {
 		check();
 		return manager.createLatLon(name, mode.getOption());
 	}
@@ -193,7 +218,7 @@ public class LevelCore {
 	 * @param mode LevelModeを設定します.
 	 * @return [true]の場合、生成成功です.
 	 */
-	public boolean createSequence(String name, LevelMode mode) {
+	public boolean createSequence(String name, OperatorMode mode) {
 		check();
 		return manager.createSequence(name, mode.getOption());
 	}
@@ -205,7 +230,7 @@ public class LevelCore {
 	 * @param mode LevelModeを設定します.
 	 * @return [true]の場合、生成成功です.
 	 */
-	public boolean createQueue(String name, LevelMode mode) {
+	public boolean createQueue(String name, OperatorMode mode) {
 		check();
 		return manager.createQueue(name, mode.getOption());
 	}
@@ -260,29 +285,37 @@ public class LevelCore {
 	 * @param name
 	 * @return
 	 */
-	public LevelOperator get(String name) {
+	public Operator get(String name) {
 		check();
-		return manager.get(name);
+		final LevelOperator op = manager.get(name);
+		if(op != null) {
+			switch(op.getOperatorType()) {
+			case LevelOperator.LEVEL_MAP:
+				return new ObjectOperator(closeable, name, (LevelMap)op);
+			case LevelOperator.LEVEL_LAT_LON:
+				return new LatLonOperator(closeable, name, (LevelLatLon)op);
+			case LevelOperator.LEVEL_SEQUENCE:
+				return new SequenceOperator(closeable, name, (LevelSequence)op);
+			case LevelOperator.LEVEL_QUEUE:
+				return new QueueOperator(name, (LevelQueue)op);
+			}
+		}
+		return null;
 	}
 	
 	/**
 	 * 登録オペレータのオペレータタイプを取得.
 	 * 
-	 * @param name
-	 * @return
+	 * @param name 登録オペレータ名を設定します.
+	 * @return String オペレータタイプが返却されます.
+	 *                "object" の場合は ObjectOperatorです.
+	 *                "latlon" の場合は LatLonOperatorです.
+	 *                "sequence" の場合は SequenceOperatorです.
+	 *                "queue" の場合は QueueOperatorです.
 	 */
 	public String getOperatorType(String name) {
 		check();
-		LevelOperator op = manager.get(name);
-		if(op != null) {
-			switch(op.getOperatorType()) {
-			case LevelOperator.LEVEL_LAT_LON: return "latLon";
-			case LevelOperator.LEVEL_MAP: return "normal";
-			case LevelOperator.LEVEL_QUEUE: return "queue";
-			case LevelOperator.LEVEL_SEQUENCE: return "sequence";
-			}
-		}
-		return "none";
+		return OperatorUtil.getOperatorType(manager.get(name));
 	}
 	
 	/**
@@ -291,11 +324,11 @@ public class LevelCore {
 	 * @param name
 	 * @return
 	 */
-	public LevelMode getMode(String name) {
+	public OperatorMode getMode(String name) {
 		check();
 		LevelOperator op = manager.get(name);
 		if(op != null) {
-			return new LevelMode(op.getOption());
+			return new OperatorMode(op.getOption());
 		}
 		return null;
 	}
