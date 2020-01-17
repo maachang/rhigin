@@ -33,6 +33,8 @@ public class OperatorMode {
 				option.setExpansion(OperatorKeyType.KEY_NONE);
 				set(args);
 			}
+		} else {
+			option = new LevelOption();
 		}
 	}
 	
@@ -58,6 +60,9 @@ public class OperatorMode {
 		if(len == 1 && args[0] instanceof Map) {
 			Map map = (Map)args[0];
 			Object o = map.get("type");
+			if(o == null) {
+				o = map.get("operatorType");
+			}
 			if(o != null) {
 				int okType = -1;
 				if(o instanceof String) {

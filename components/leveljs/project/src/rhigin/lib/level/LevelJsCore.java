@@ -3,6 +3,7 @@ package rhigin.lib.level;
 import java.util.List;
 import java.util.Map;
 
+import org.maachang.leveldb.LevelOption;
 import org.maachang.leveldb.LevelValues;
 import org.maachang.leveldb.operator.LevelLatLon;
 import org.maachang.leveldb.operator.LevelMap;
@@ -16,6 +17,7 @@ import rhigin.RhiginStartup;
 import rhigin.lib.level.operator.LatLonOperator;
 import rhigin.lib.level.operator.ObjectOperator;
 import rhigin.lib.level.operator.Operator;
+import rhigin.lib.level.operator.OperatorKeyType;
 import rhigin.lib.level.operator.OperatorMode;
 import rhigin.lib.level.operator.OperatorUtil;
 import rhigin.lib.level.operator.QueueOperator;
@@ -33,7 +35,7 @@ import rhigin.util.Flag;
  */
 public class LevelJsCore {
 	/** デフォルトのLEVELコンフィグ名. **/
-	public static final String DEF_LEVEL_JSON_CONFIG_NAME = "level";
+	public static final String DEF_LEVEL_JS_JSON_CONFIG_NAME = "level";
 	
 	protected final Flag startup = new Flag(false);
 	protected final Flag end = new Flag(false);
@@ -119,7 +121,7 @@ public class LevelJsCore {
 	public RhiginEndScriptCall[] startup(RhiginConfig conf, String configName) {
 		checkDestroy();
 		if(!startup.get()) {
-			String jsonConfigName = DEF_LEVEL_JSON_CONFIG_NAME;
+			String jsonConfigName = DEF_LEVEL_JS_JSON_CONFIG_NAME;
 			if(configName != null && !configName.isEmpty()) {
 				jsonConfigName = configName;
 			}
@@ -196,6 +198,11 @@ public class LevelJsCore {
 	 */
 	public boolean createObject(String name, OperatorMode mode) {
 		check();
+		// オペレータキーが設定されていない場合はエラーを返却.
+		if(mode.getOperatorType() == OperatorKeyType.KEY_NONE) {
+			throw new LevelJsException(
+				"When creating an Object Operator, setting the Operator key Type is mandatory.");
+		}
 		return manager.createMap(name, mode.getOption());
 	}
 	
@@ -208,6 +215,12 @@ public class LevelJsCore {
 	 */
 	public boolean createLatLon(String name, OperatorMode mode) {
 		check();
+		// オペレータキーが設定されていない場合は、完全に無設定として設定する.
+		if(mode.getOperatorType() == OperatorKeyType.KEY_NONE) {
+			LevelOption opt = mode.getOption();
+			opt.setType(LevelOption.TYPE_NONE);
+			opt.setExpansion(OperatorKeyType.KEY_NONE);
+		}
 		return manager.createLatLon(name, mode.getOption());
 	}
 	
@@ -220,7 +233,11 @@ public class LevelJsCore {
 	 */
 	public boolean createSequence(String name, OperatorMode mode) {
 		check();
-		return manager.createSequence(name, mode.getOption());
+		// キーはシーケンスIDとなるので、オペレータキータイプは設定できない.
+		LevelOption opt = mode.getOption();
+		opt.setType(LevelOption.TYPE_NONE);
+		opt.setExpansion(OperatorKeyType.KEY_NONE);
+		return manager.createSequence(name, opt);
 	}
 
 	/**
@@ -232,6 +249,10 @@ public class LevelJsCore {
 	 */
 	public boolean createQueue(String name, OperatorMode mode) {
 		check();
+		// キーはシーケンスIDとなるので、オペレータキータイプは設定できない.
+		LevelOption opt = mode.getOption();
+		opt.setType(LevelOption.TYPE_NONE);
+		opt.setExpansion(OperatorKeyType.KEY_NONE);
 		return manager.createQueue(name, mode.getOption());
 	}
 	

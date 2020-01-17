@@ -65,9 +65,9 @@ public class RhiginOriginCode extends OriginCode {
 				LevelValues.byte8(buf, v);
 			}
 		} else if(o instanceof IdScriptableObject || o instanceof JDateInstanceObject) {
-			Object v = getJSDate(o);
+			final Object v = getJSDate(o);
 			if(v == null) {
-				LevelValues.head(buf, 0xff);
+				return false;
 			} else {
 				LevelValues.head(buf, JDATE_OBJECT_CODE);
 				LevelValues.byte8(buf, (Long)v);

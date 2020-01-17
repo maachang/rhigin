@@ -1,0 +1,30 @@
+#!/bin/bash
+################################################################################
+# rlibでコマンドでの対象コンポーネントの独自操作を行います.
+################################################################################
+COMPONENT_PATH=${1}
+TARGET_PROJECT_PATH=${2}
+ATHER_ARGS=${3}
+
+# ターゲットプロジェクトのパスが設定されていない場合は処理しない.
+if [ "${TARGET_PROJECT_PATH}" = "" ]; then
+    exit 1
+fi
+
+# コンフィグファイルをコピー.
+cp project/conf/*.json ${TARGET_PROJECT_PATH}/conf
+
+# binフォルダ配下の内容をコピー.
+#cd ../../bin
+#chmod 755 *
+#cp -a * ${TARGET_PROJECT_PATH}
+
+# [debug用]leveldb のコンパイル.
+cd ${COMPONENT_PATH}
+cd ../../../leveldb
+if [ $? = 0 ]; then
+    ant
+    cp leveldb-*.jar ${TARGET_PROJECT_PATH}/jar/leveljs
+fi
+
+exit 0

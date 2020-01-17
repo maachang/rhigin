@@ -1,0 +1,35 @@
+#!/bin/bash
+################################################################################
+# leveldb のライブラリをコンパイルして jar をproject/lib 配下にセットする.
+################################################################################
+COMPONENT_NAME=leveljs
+
+# 現在のパスを保持.
+NOW_PATH=` pwd`
+
+# コンポーネントパスをセット.
+COMPONENT_PATH="${RHIGIN_HOME}/../components/${COMPONENT_NAME}"
+
+# leveldbのパスを取得.
+LEVELDB_PATH="${RHIGIN_HOME}/../../leveldb"
+
+# leveldbパスに移動.
+cd ${LEVELDB_PATH}
+if [ $? != 0 ]; then
+    cd ${NOW_PATH}
+    echo "The specified leveldb path does not exist: ${LEVELDB_PATH}"
+    exit 1
+fi
+
+# antコンパイル.
+ant clean
+ant
+if [ $? != 0 ]; then
+    cd ${NOW_PATH}
+    exit 1
+fi
+
+# コピー.
+cp leveldb-*.jar ${COMPONENT_PATH}/project/lib/
+cd ${NOW_PATH}
+exit 0

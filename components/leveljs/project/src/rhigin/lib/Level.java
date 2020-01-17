@@ -5,16 +5,16 @@ import org.mozilla.javascript.Scriptable;
 import rhigin.scripts.JavaRequire;
 
 /**
- * [js] Level db用 I/O用コンポーネント.
+ * [js] Level js 用コンポーネント.
  * 
  * js 上で、以下のようにして呼び出します.
  * 
- * var leveldb = require("@rhigin/lib/Level");
+ * var level = require("@rhigin/lib/Level");
  */
 public class Level implements JavaRequire {
 	
 	/** コンポーネント名. **/
-	public static final String NAME = "Level";
+	public static final String NAME = "LevelJs";
 	
 	/** コンポーネントバージョン. **/
 	public static final String VERSION = "0.0.1";
@@ -28,6 +28,6 @@ public class Level implements JavaRequire {
 	 */
 	@Override
 	public Scriptable load() {
-		return null;
+		return LevelJsManagerJs.LEVEL_JS_INSTANCE;
 	}
 }

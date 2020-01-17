@@ -177,7 +177,7 @@ public class LevelJsManagerJs {
 		
 		// オペレータ名を取得.
 		private final String getOperatorName(int off, Object[] args) {
-			if(args == null || args.length <= off + 1||
+			if(args == null || args.length <= off||
 				!(args[off] instanceof String)) {
 				this.argsException("Level");
 			}

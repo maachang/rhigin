@@ -202,7 +202,7 @@ public class LevelJsOperatorJs {
 		
 		// オブジェクトを取得.
 		private final Object getObject(int off, Object[] args) {
-			if(args == null || args.length <= off + 1) {
+			if(args == null || args.length <= off) {
 				this.argsException(opName);
 			}
 			return args[off];
@@ -210,7 +210,7 @@ public class LevelJsOperatorJs {
 		
 		// 文字列を取得.
 		private final String getString(int off, Object[] args) {
-			if(args == null || args.length <= off + 1||
+			if(args == null || args.length <= off ||
 				!(args[off] instanceof String)) {
 				this.argsException(opName);
 			}
