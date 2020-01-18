@@ -36,6 +36,7 @@ public class LevelJsOperatorJs {
 		,"contains"
 		,"cursor"
 		,"range"
+		,"trancate"
 	};
 	
 	// オペレータ用メソッド生成処理.
@@ -165,15 +166,21 @@ public class LevelJsOperatorJs {
 				case 15: // cursor.
 				{
 					if(args == null || args.length == 0) {
-						this.argsException(opName);
+						return LevelJsCursorJs.create(op.cursor(false));
 					}
 					int off = 0;
 					boolean desc = false;
+					Object key = null;
 					if(args[0] instanceof Boolean) {
 						desc = (boolean)args[0];
 						off = 1;
+					} else if(args.length == 1) {
+						key = args[0];
 					}
-					OperateIterator it = op.cursor(desc, getParams(off, args));
+					if(args.length >= off + 1) {
+						key = getObject(off, args);
+					}
+					final OperateIterator it = op.cursor(desc, key);
 					return LevelJsCursorJs.create(it);
 				}
 				case 16: // range.
@@ -181,14 +188,25 @@ public class LevelJsOperatorJs {
 					if(args == null || args.length == 0) {
 						this.argsException(opName);
 					}
-					int off = 0;
 					boolean desc = false;
-					if(args[0] instanceof Boolean) {
-						desc = (boolean)args[0];
-						off = 1;
+					Object[] keys = null;
+					if(args.length >= 2) {
+						if(args[0] instanceof Boolean) {
+							desc = (boolean)args[0];
+							keys = getParams(1, args);
+						} else {
+							keys = args;
+						}
 					}
-					OperateIterator it = op.range(desc, getParams(off, args));
+					if(keys == null || keys.length < 2) {
+						this.argsException(opName);
+					}
+					OperateIterator it = op.range(desc, keys);
 					return LevelJsCursorJs.create(it);
+				}
+				case 17: // trancate.
+				{
+					return op.trancate();
 				}
 				
 				}

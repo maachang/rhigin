@@ -2,6 +2,9 @@ package rhigin.lib.level.operator;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.maachang.leveldb.operator.LevelIndex;
 import org.maachang.leveldb.operator.LevelIndex.LevelIndexIterator;
@@ -20,6 +23,9 @@ import rhigin.util.FixedArray;
 public abstract class SearchOperator implements Operator {
 	protected String name;
 	protected LevelJsCloseable closeable;
+	
+	// rwlock.
+	private final ReadWriteLock rw = new ReentrantReadWriteLock();
 	
 	/**
 	 * LevelIndexOperatorを取得.
@@ -62,51 +68,99 @@ public abstract class SearchOperator implements Operator {
 	
 	/**
 	 * カーソル取得.
+	 * @param lock 読み込みロックガセットされます.
 	 * @param desc 降順で取得する場合[true].
 	 * @param keyLen キー数を設定します.
 	 * @param keys キーを設定します.
 	 * @return OperateIterator OperateIteratorが返却されます.
 	 */
-	protected abstract OperateIterator _iterator(boolean desc, int keyLen, Object[] keys);
+	protected abstract OperateIterator _iterator(Lock lock, boolean desc, int keyLen, Object[] keys);
 	
 	/**
 	 * 範囲検索のカーソル取得.
+	 * @param lock 読み込みロックガセットされます.
 	 * @param desc 降順で取得する場合[true].
 	 * @param keyLen キー数を設定します.
 	 * @param keys キーを設定します.
 	 * @return OperateIterator OperateIteratorが返却されます.
 	 */
-	protected abstract OperateIterator _range(boolean desc, int keyLen, Object[] keys);
+	protected abstract OperateIterator _range(Lock lock, boolean desc, int keyLen, Object[] keys);
 	
 	/**
 	 * インデックスで検索、取得.
+	 * @param lock 読み込みロックガセットされます.
 	 * @param itr インデックスIteratorを設定します.
 	 * @return
 	 */
-	protected abstract OperateIterator _index(LevelIndexIterator itr);
+	protected abstract OperateIterator _index(Lock lock, LevelIndexIterator itr);
+	
+	/**
+	 * オペレータのクローズ.
+	 */
+	@Override
+	public void close() {
+		rw.writeLock().lock();
+		try {
+			_operator().close();
+		} finally {
+			rw.writeLock().unlock();
+		}
+	}
+	
+	/**
+	 * データ削除処理.
+	 * @return boolean [true]の場合、データ削除成功です.
+	 */
+	@Override
+	public boolean trancate() {
+		rw.writeLock().lock();
+		try {
+			return _operator().trancate();
+		} finally {
+			rw.writeLock().unlock();
+		}
+	}
 	
 	/**
 	 * オペレータ名を取得.
 	 * @return String オペレータ名が返却されます.
 	 */
+	@Override
 	public String getName() {
-		return name;
+		rw.readLock().lock();
+		try {
+			return name;
+		} finally {
+			rw.readLock().unlock();
+		}
 	}
 	
 	/**
 	 * オペレータタイプを取得.
 	 * @return String オペレータタイプが返却されます.
 	 */
+	@Override
 	public String getOperatorType() {
-		return OperatorUtil.getOperatorType(_operator());
+		rw.readLock().lock();
+		try {
+			return OperatorUtil.getOperatorType(_operator());
+		} finally {
+			rw.readLock().unlock();
+		}
 	}
 	
 	/**
 	 * オブジェクトが利用可能かチェック.
 	 * @return [true]の場合利用可能です.
 	 */
+	@Override
 	public boolean isAvailable() {
-		return !_operator().isClose();
+		rw.readLock().lock();
+		try {
+			return !_operator().isClose();
+		} finally {
+			rw.readLock().unlock();
+		}
 	}
 	
 	/**
@@ -114,16 +168,28 @@ public abstract class SearchOperator implements Operator {
 	 * 
 	 * @return boolean [true]の場合、空です.
 	 */
+	@Override
 	public boolean isEmpty() {
-		return _operator().getLeveldb().isEmpty();
+		rw.readLock().lock();
+		try {
+			return _operator().getLeveldb().isEmpty();
+		} finally {
+			rw.readLock().unlock();
+		}
 	}
 	
 	/**
 	 * LevelModeを取得.
 	 * @return
 	 */
+	@Override
 	public OperatorMode getMode() {
-		return new OperatorMode(_operator().getOption());
+		rw.readLock().lock();
+		try {
+			return new OperatorMode(_operator().getOption());
+		} finally {
+			rw.readLock().unlock();
+		}
 	}
 	
 	/**
@@ -136,15 +202,20 @@ public abstract class SearchOperator implements Operator {
 		if(columnName == null || columnName.length == 0) {
 			throw new LevelJsException("Column name is not set.");
 		}
-		int type = LevelIndex.convertStringByColumnType(columnType);
-		if(type != LevelIndex.INDEX_STRING &&
-			type != LevelIndex.INDEX_INT &&
-			type != LevelIndex.INDEX_LONG &&
-			type != LevelIndex.INDEX_FLOAT &&
-			type != LevelIndex.INDEX_DOUBLE) {
-			throw new LevelJsException("Invalid setting for index column: " + columnType);
+		rw.writeLock().lock();
+		try {
+			int type = LevelIndex.convertStringByColumnType(columnType);
+			if(type != LevelIndex.INDEX_STRING &&
+				type != LevelIndex.INDEX_INT &&
+				type != LevelIndex.INDEX_LONG &&
+				type != LevelIndex.INDEX_FLOAT &&
+				type != LevelIndex.INDEX_DOUBLE) {
+				throw new LevelJsException("Invalid setting for index column: " + columnType);
+			}
+			_operator().createIndex(type, columnName);
+		} finally {
+			rw.writeLock().unlock();
 		}
-		_operator().createIndex(type, columnName);
 	}
 	
 	/**
@@ -156,11 +227,16 @@ public abstract class SearchOperator implements Operator {
 		if(columnName == null || columnName.length == 0) {
 			throw new LevelJsException("Column name is not set.");
 		}
-		_operator().deleteIndex(columnName);
+		rw.writeLock().lock();
+		try {
+			_operator().deleteIndex(columnName);
+		} finally {
+			rw.writeLock().unlock();
+		}
 	}
 	
 	/*
-	 * インデックスの削除.
+	 * インデックスの存在チェック.
 	 * @param columnName カラム名を設定します.
 	 *                   設定方法は、hoge.moge.abc や "hoge", "moge", "abc"のように階層設定可能.
 	 */
@@ -168,7 +244,12 @@ public abstract class SearchOperator implements Operator {
 		if(columnName == null || columnName.length == 0) {
 			throw new LevelJsException("Column name is not set.");
 		}
-		return _operator().isIndex(columnName);
+		rw.readLock().lock();
+		try {
+			return _operator().isIndex(columnName);
+		} finally {
+			rw.readLock().unlock();
+		}
 	}
 	
 	/**
@@ -177,7 +258,12 @@ public abstract class SearchOperator implements Operator {
 	 * @return int インデックス数を取得します.
 	 */
 	public int indexSize() {
-		return _operator().indexSize();
+		rw.readLock().lock();
+		try {
+			return _operator().indexSize();
+		} finally {
+			rw.readLock().unlock();
+		}
 	}
 	
 	/**
@@ -186,7 +272,14 @@ public abstract class SearchOperator implements Operator {
 	 * @return List<String> インデックスカラム名群が返却されます.
 	 */
 	public List<String> indexs() {
-		return new FixedArray<String>(_operator().indexColumns());
+		String[] ret;
+		rw.readLock().lock();
+		try {
+			ret = _operator().indexColumns();
+		} finally {
+			rw.readLock().unlock();
+		}
+		return new FixedArray<String>(ret);
 	}
 	
 	// indexの要素変換.
@@ -235,14 +328,19 @@ public abstract class SearchOperator implements Operator {
 			throw new LevelJsException("Column name is not set.");
 		}
 		OperateIterator ret;
-		final LevelIndex idx = _operator().getLevelIndex(columnName);
-		if((key = trimIndexKey(idx, key)) == null) {
-			ret = _index(idx.getSortIndex(desc));
-		} else {
-			ret = _index(idx.get(desc, key));
-		}
-		if(ret != null) {
-			closeable.reg(ret);
+		rw.readLock().lock();
+		try {
+			final LevelIndex idx = _operator().getLevelIndex(columnName);
+			if((key = trimIndexKey(idx, key)) == null) {
+				ret = _index(rw.readLock(), idx.getSortIndex(desc));
+			} else {
+				ret = _index(rw.readLock(), idx.get(desc, key));
+			}
+			if(ret != null) {
+				closeable.reg(ret);
+			}
+		} finally {
+			rw.readLock().unlock();
 		}
 		return ret;
 	}
@@ -257,15 +355,20 @@ public abstract class SearchOperator implements Operator {
 		if(len <= 1) {
 			throw new LevelJsException("Key element information is not set.");
 		}
-		len --;
-		final Object v = params[len];
-		if(!(v instanceof Map)) {
-			// valueがMapで無い場合はエラー.
-			throw new LevelJsException("Element information must be set in Map format.");
+		rw.readLock().lock();
+		try {
+			len --;
+			final Object v = params[len];
+			if(!(v instanceof Map)) {
+				// valueがMapで無い場合はエラー.
+				throw new LevelJsException("Element information must be set in Map format.");
+			}
+			final Object[] keys = new Object[len];
+			System.arraycopy(params, 0, keys, 0, len);
+			return _put((Map)v, len, keys);
+		} finally {
+			rw.readLock().unlock();
 		}
-		final Object[] keys = new Object[len];
-		System.arraycopy(params, 0, keys, 0, len);
-		return _put((Map)v, len, keys);
 	}
 	
 	/**
@@ -276,7 +379,12 @@ public abstract class SearchOperator implements Operator {
 		if(keys == null || keys.length == 0) {
 			throw new LevelJsException("Search key information is not set.");
 		}
-		_remove(keys.length, keys);
+		rw.readLock().lock();
+		try {
+			_remove(keys.length, keys);
+		} finally {
+			rw.readLock().unlock();
+		}
 	}
 	
 	/**
@@ -288,11 +396,17 @@ public abstract class SearchOperator implements Operator {
 		if(keys == null || keys.length == 0) {
 			throw new LevelJsException("Search key information is not set.");
 		}
-		final Object o = _get(keys.length, keys);
-		if(o == null) {
-			return null;
+		Object ret;
+		rw.readLock().lock();
+		try {
+			ret = _get(keys.length, keys);
+			if(ret == null) {
+				return null;
+			}
+		} finally {
+			rw.readLock().unlock();
 		}
-		return new JsMap((Map)o);
+		return new JsMap((Map)ret);
 	}
 	
 	/**
@@ -304,7 +418,12 @@ public abstract class SearchOperator implements Operator {
 		if(keys == null || keys.length == 0) {
 			throw new LevelJsException("Search key information is not set.");
 		}
-		return _contains(keys.length, keys);
+		rw.readLock().lock();
+		try {
+			return _contains(keys.length, keys);
+		} finally {
+			rw.readLock().unlock();
+		}
 	}
 	
 	/**
@@ -313,11 +432,16 @@ public abstract class SearchOperator implements Operator {
 	 * @return OperateIterator OperateIteratorが返却されます.
 	 */
 	public OperateIterator cursor(boolean desc, Object... keys) {
-		final OperateIterator ret = _iterator(desc, keys == null ? 0 : keys.length, keys);
-		if(ret != null) {
-			closeable.reg(ret);
+		rw.readLock().lock();
+		try {
+			final OperateIterator ret = _iterator(rw.readLock(), desc, keys == null ? 0 : keys.length, keys);
+			if(ret != null) {
+				closeable.reg(ret);
+			}
+			return ret;
+		} finally {
+			rw.readLock().unlock();
 		}
-		return ret;
 	}
 	
 	/**
@@ -326,10 +450,15 @@ public abstract class SearchOperator implements Operator {
 	 * @return OperateIterator OperateIteratorが返却されます.
 	 */
 	public OperateIterator range(boolean desc, Object... keys) {
-		final OperateIterator ret = _range(desc, keys == null ? 0 : keys.length, keys);
-		if(ret != null) {
-			closeable.reg(ret);
+		rw.readLock().lock();
+		try {
+			final OperateIterator ret = _range(rw.readLock(), desc, keys == null ? 0 : keys.length, keys);
+			if(ret != null) {
+				closeable.reg(ret);
+			}
+			return ret;
+		} finally {
+			rw.readLock().unlock();
 		}
-		return ret;
 	}
 }

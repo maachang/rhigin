@@ -1,6 +1,7 @@
 package rhigin.lib.level.operator;
 
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
 
 import org.maachang.leveldb.Time12SequenceId;
 import org.maachang.leveldb.operator.LevelIndex.LevelIndexIterator;
@@ -111,14 +112,14 @@ public class LatLonOperator extends SearchOperator {
 	}
 
 	@Override
-	protected OperateIterator _iterator(boolean desc, int keyLen, Object[] keys) {
+	protected OperateIterator _iterator(Lock lock, boolean desc, int keyLen, Object[] keys) {
 		Object[] params = _getKeys(keyLen, keys);
-		return new SearchIterator(false, base.isSecondKeyBySequenceId(), keyType,
+		return new SearchIterator(lock, false, base.isSecondKeyBySequenceId(), keyType,
 			base.snapshot(desc, (Long)params[0], params[1]));
 	}
 
 	@Override
-	protected OperateIterator _range(boolean desc, int keyLen, Object[] keys) {
+	protected OperateIterator _range(Lock lock, boolean desc, int keyLen, Object[] keys) {
 		// 範囲取得なので、降順・昇順の取得はできない.
 		long qk;
 		int distance;
@@ -131,13 +132,13 @@ public class LatLonOperator extends SearchOperator {
 		} else {
 			throw new LevelJsException("The key specification is invalid.");
 		}
-		return new SearchIterator(true, base.isSecondKeyBySequenceId(), keyType,
+		return new SearchIterator(lock, true, base.isSecondKeyBySequenceId(), keyType,
 			base.snapshot(qk, distance));
 	}
 	
 	@Override
-	protected OperateIterator _index(LevelIndexIterator itr) {
-		return new IndexIterator(base.isSecondKeyBySequenceId(), keyType, itr);
+	protected OperateIterator _index(Lock lock, LevelIndexIterator itr) {
+		return new IndexIterator(lock, base.isSecondKeyBySequenceId(), keyType, itr);
 	}
 	
 	// iteratorのキー変換.
@@ -169,18 +170,26 @@ public class LatLonOperator extends SearchOperator {
 		private LevelIterator src;
 		private int keyType;
 		
-		public SearchIterator(boolean sf, boolean f, int k, LevelIterator it) {
+		private Lock lock;
+		
+		public SearchIterator(Lock lk, boolean sf, boolean f, int k, LevelIterator it) {
 			searchFlag = sf;
 			sequenceFlag = f;
 			src = it;
 			keyType = k;
+			lock = lk;
 		}
 		
 		/**
 		 * クローズ処理.
 		 */
 		public void close() {
-			src.close();
+			lock.lock();
+			try {
+				src.close();
+			} finally {
+				lock.unlock();
+			}
 		}
 		
 		/**
@@ -188,7 +197,12 @@ public class LatLonOperator extends SearchOperator {
 		 * @return
 		 */
 		public boolean isClose() {
-			return src.isClose();
+			lock.lock();
+			try {
+				return src.isClose();
+			} finally {
+				lock.unlock();
+			}
 		}
 		
 		/**
@@ -196,7 +210,12 @@ public class LatLonOperator extends SearchOperator {
 		 * @return
 		 */
 		public boolean isDesc() {
-			return searchFlag ? false : src.isReverse();
+			lock.lock();
+			try {
+				return searchFlag ? false : src.isReverse();
+			} finally {
+				lock.unlock();
+			}
 		}
 		
 		/**
@@ -204,17 +223,34 @@ public class LatLonOperator extends SearchOperator {
 		 * @return Object キー名が返却されます.
 		 */
 		public Object key() {
-			return LatLonOperator._resultKey(sequenceFlag, keyType, src.getKey());
+			Object o;
+			lock.lock();
+			try {
+				o = src.getKey();
+			} finally {
+				lock.unlock();
+			}
+			return LatLonOperator._resultKey(sequenceFlag, keyType, o);
 		}
 
 		@Override
 		public boolean hasNext() {
-			return src.hasNext();
+			lock.lock();
+			try {
+				return src.hasNext();
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		@Override
 		public Map next() {
-			return (Map)src.next();
+			lock.lock();
+			try {
+				return (Map)src.next();
+			} finally {
+				lock.unlock();
+			}
 		}
 	}
 	
@@ -224,40 +260,75 @@ public class LatLonOperator extends SearchOperator {
 		private LevelIndexIterator src;
 		private int keyType;
 		
-		public IndexIterator(boolean f, int k, LevelIndexIterator s) {
+		private Lock lock;
+		
+		public IndexIterator(Lock lk, boolean f, int k, LevelIndexIterator s) {
 			sequenceFlag = f;
 			keyType = k;
 			src = s;
+			lock = lk;
 		}
 
 		@Override
 		public boolean hasNext() {
-			return src.hasNext();
+			lock.lock();
+			try {
+				return src.hasNext();
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		@Override
 		public Map next() {
-			return src.next();
+			lock.lock();
+			try {
+				return src.next();
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		@Override
 		public void close() {
-			src.close();
+			lock.lock();
+			try {
+				src.close();
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		@Override
 		public boolean isClose() {
-			return src.isClose();
+			lock.lock();
+			try {
+				return src.isClose();
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		@Override
 		public boolean isDesc() {
-			return src.isReverse();
+			lock.lock();
+			try {
+				return src.isReverse();
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		@Override
 		public Object key() {
-			return LatLonOperator._resultKey(sequenceFlag, keyType, src.getKey());
+			Object o;
+			lock.lock();
+			try {
+				o = src.getKey();
+			} finally {
+				lock.unlock();
+			}
+			return LatLonOperator._resultKey(sequenceFlag, keyType, o);
 		}
 	}
 }

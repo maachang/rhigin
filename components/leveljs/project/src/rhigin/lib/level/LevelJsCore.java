@@ -268,16 +268,6 @@ public class LevelJsCore {
 	}
 	
 	/**
-	 * データの中身を全クリア.
-	 * @param name
-	 * @return
-	 */
-	public boolean trancate(String name) {
-		check();
-		return manager.trancate(name);
-	}
-
-	/**
 	 * 指定オペレータの名前変更.
 	 * 
 	 * @param src

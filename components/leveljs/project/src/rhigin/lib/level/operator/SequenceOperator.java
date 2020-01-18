@@ -2,6 +2,7 @@ package rhigin.lib.level.operator;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.locks.Lock;
 
 import org.maachang.leveldb.Time12SequenceId;
 import org.maachang.leveldb.operator.LevelIndex.LevelIndexIterator;
@@ -57,13 +58,13 @@ public class SequenceOperator extends SearchOperator {
 	}
 
 	@Override
-	protected OperateIterator _iterator(boolean desc, int keyLen, Object[] keys) {
+	protected OperateIterator _iterator(Lock lock, boolean desc, int keyLen, Object[] keys) {
 		final Object key = Converter.convertString(keys[0]);
-		return new SearchIterator(base.snapshot(desc, key), null);
+		return new SearchIterator(lock, base.snapshot(desc, key), null);
 	}
 
 	@Override
-	protected OperateIterator _range(boolean desc, int keyLen, Object[] keys) {
+	protected OperateIterator _range(Lock lock, boolean desc, int keyLen, Object[] keys) {
 		if(keyLen < 2) {
 			throw new LevelJsException("Two keys are required. \"0\" start key \"1\" end key");
 		}
@@ -83,12 +84,12 @@ public class SequenceOperator extends SearchOperator {
 			start = end;
 			end = c;
 		}
-		return new SearchIterator(base.snapshot(desc, start), end);
+		return new SearchIterator(lock, base.snapshot(desc, start), end);
 	}
 	
 	@Override
-	protected OperateIterator _index(LevelIndexIterator itr) {
-		return new IndexIterator(itr);
+	protected OperateIterator _index(Lock lock, LevelIndexIterator itr) {
+		return new IndexIterator(lock, itr);
 	}
 	
 	// 検索iterator.
@@ -101,17 +102,26 @@ public class SequenceOperator extends SearchOperator {
 		private String nextKey;
 		private Object nextValue;
 		
-		public SearchIterator(LevelIterator it, String e) {
+		private Lock lock;
+		
+		public SearchIterator(Lock lk, LevelIterator it, String e) {
 			src = it;
 			end = e;
 			exitFlag = false;
+			
+			lock = lk;
 		}
 		
 		/**
 		 * クローズ処理.
 		 */
 		public void close() {
-			src.close();
+			lock.lock();
+			try {
+				src.close();
+			} finally {
+				lock.unlock();
+			}
 		}
 		
 		/**
@@ -119,7 +129,12 @@ public class SequenceOperator extends SearchOperator {
 		 * @return
 		 */
 		public boolean isClose() {
-			return src.isClose();
+			lock.lock();
+			try {
+				return src.isClose();
+			} finally {
+				lock.unlock();
+			}
 		}
 		
 		/**
@@ -127,7 +142,12 @@ public class SequenceOperator extends SearchOperator {
 		 * @return
 		 */
 		public boolean isDesc() {
-			return src.isReverse();
+			lock.lock();
+			try {
+				return src.isReverse();
+			} finally {
+				lock.unlock();
+			}
 		}
 		
 		/**
@@ -135,29 +155,47 @@ public class SequenceOperator extends SearchOperator {
 		 * @return Object キー名が返却されます.
 		 */
 		public Object key() {
-			return new FixedArray(beforeKey);
+			Object o;
+			lock.lock();
+			try {
+				o = beforeKey;
+			} finally {
+				lock.unlock();
+			}
+			return new FixedArray(o);
 		}
 
 		@Override
 		public boolean hasNext() {
-			return _next();
+			lock.lock();
+			try {
+				return _next();
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		@Override
 		public Map next() {
-			if(nextKey == null && nextValue == null) {
-				if(!_next()) {
-					throw new NoSuchElementException();
+			Object ret;
+			lock.lock();
+			try {
+				if(nextKey == null && nextValue == null) {
+					if(!_next()) {
+						throw new NoSuchElementException();
+					}
 				}
+				beforeKey = nextKey;
+				ret = nextValue;
+				nextKey = null; nextValue = null;
+			} finally {
+				lock.unlock();
 			}
-			beforeKey = nextKey;
-			Object ret = nextValue;
-			nextKey = null; nextValue = null;
 			return new JsMap((Map)ret);
 		}
 		
 		private boolean _next() {
-			if(exitFlag || src.isClose()) {
+			if(exitFlag || src.isClose() || !src.hasNext()) {
 				close();
 				return false;
 			} else if(nextKey != null && nextValue != null) {
@@ -165,7 +203,7 @@ public class SequenceOperator extends SearchOperator {
 			}
 			nextValue = src.next();
 			nextKey = (String)src.getKey();
-			if(end != null && end.compareTo(nextKey) < 0) {
+			if(end != null && end.compareTo(nextKey) <= 0) {
 				// 終端を検出.
 				exitFlag = true;
 			}
@@ -175,39 +213,73 @@ public class SequenceOperator extends SearchOperator {
 	
 	// indexIterator.
 	private static final class IndexIterator implements OperateIterator {
-		LevelIndexIterator src;
-		public IndexIterator(LevelIndexIterator s) {
+		private LevelIndexIterator src;
+		private Lock lock;
+		
+		public IndexIterator(Lock lk, LevelIndexIterator s) {
 			src = s;
+			lock = lk;
 		}
 
 		@Override
 		public boolean hasNext() {
-			return src.hasNext();
+			lock.lock();
+			try {
+				return src.hasNext();
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		@Override
 		public Map next() {
-			return src.next();
+			lock.lock();
+			try {
+				return src.next();
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		@Override
 		public void close() {
-			src.close();
+			lock.lock();
+			try {
+				src.close();
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		@Override
 		public boolean isClose() {
-			return src.isClose();
+			lock.lock();
+			try {
+				return src.isClose();
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		@Override
 		public boolean isDesc() {
-			return src.isReverse();
+			lock.lock();
+			try {
+				return src.isReverse();
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		@Override
 		public Object key() {
-			Object o = src.getKey();
+			Object o;
+			lock.lock();
+			try {
+				o = src.getKey();
+			} finally {
+				lock.unlock();
+			}
 			if(o == null || !(o instanceof byte[])) {
 				return new FixedArray(null);
 			}

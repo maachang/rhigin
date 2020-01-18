@@ -2,6 +2,7 @@ package rhigin.lib.level.operator;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.locks.Lock;
 
 import org.maachang.leveldb.operator.LevelIndex.LevelIndexIterator;
 import org.maachang.leveldb.operator.LevelIndexOperator;
@@ -59,14 +60,17 @@ public class ObjectOperator extends SearchOperator {
 	}
 
 	@Override
-	protected OperateIterator _iterator(boolean desc, int keyLen, Object[] keys) {
+	protected OperateIterator _iterator(Lock lock, boolean desc, int keyLen, Object[] keys) {
+		if(keyLen == 0) {
+			return new SearchIterator(lock, base.snapshot(desc, null), keyType, null);
+		}
 		final Object key = OperatorKeyType.convertKeyType(keyType, keys[0]);
-		return new SearchIterator(base.snapshot(desc, key), keyType, null);
+		return new SearchIterator(lock, base.snapshot(desc, key), keyType, null);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected OperateIterator _range(boolean desc, int keyLen, Object[] keys) {
+	protected OperateIterator _range(Lock lock, boolean desc, int keyLen, Object[] keys) {
 		if(keyLen < 2) {
 			throw new LevelJsException("Two keys are required. \"0\" start key \"1\" end key");
 		}
@@ -86,12 +90,12 @@ public class ObjectOperator extends SearchOperator {
 			start = end;
 			end = c;
 		}
-		return new SearchIterator(base.snapshot(desc, start), keyType, end);
+		return new SearchIterator(lock, base.snapshot(desc, start), keyType, end);
 	}
 	
 	@Override
-	protected OperateIterator _index(LevelIndexIterator itr) {
-		return new IndexIterator(keyType, itr);
+	protected OperateIterator _index(Lock lock, LevelIndexIterator itr) {
+		return new IndexIterator(lock, keyType, itr);
 	}
 	
 	// 検索iterator.
@@ -105,18 +109,26 @@ public class ObjectOperator extends SearchOperator {
 		private Object nextKey;
 		private Object nextValue;
 		
-		public SearchIterator(LevelIterator it, int k, Comparable e) {
+		private Lock lock;
+		
+		public SearchIterator(Lock lk, LevelIterator it, int k, Comparable e) {
 			src = it;
 			keyType = k;
 			end = e;
 			exitFlag = false;
+			lock = lk;
 		}
 		
 		/**
 		 * クローズ処理.
 		 */
 		public void close() {
-			src.close();
+			lock.lock();
+			try {
+				src.close();
+			} finally {
+				lock.unlock();
+			}
 		}
 		
 		/**
@@ -124,7 +136,12 @@ public class ObjectOperator extends SearchOperator {
 		 * @return
 		 */
 		public boolean isClose() {
-			return src.isClose();
+			lock.lock();
+			try {
+				return src.isClose();
+			} finally {
+				lock.unlock();
+			}
 		}
 		
 		/**
@@ -132,7 +149,12 @@ public class ObjectOperator extends SearchOperator {
 		 * @return
 		 */
 		public boolean isDesc() {
-			return src.isReverse();
+			lock.lock();
+			try {
+				return src.isReverse();
+			} finally {
+				lock.unlock();
+			}
 		}
 		
 		/**
@@ -140,31 +162,49 @@ public class ObjectOperator extends SearchOperator {
 		 * @return Object キー名が返却されます.
 		 */
 		public Object key() {
-			return new FixedArray(OperatorKeyType.getRestoreKey(keyType, beforeKey));
+			Object o;
+			lock.lock();
+			try {
+				o = OperatorKeyType.getRestoreKey(keyType, beforeKey);
+			} finally {
+				lock.unlock();
+			}
+			return new FixedArray(o);
 		}
 
 		@Override
 		public boolean hasNext() {
-			return _next();
+			lock.lock();
+			try {
+				return _next();
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		@Override
 		public Map next() {
-			if(nextKey == null && nextValue == null) {
-				if(!_next()) {
-					throw new NoSuchElementException();
+			Object ret;
+			lock.lock();
+			try {
+				if(nextKey == null && nextValue == null) {
+					if(!_next()) {
+						throw new NoSuchElementException();
+					}
 				}
+				beforeKey = nextKey;
+				ret = nextValue;
+				nextKey = null; nextValue = null;
+			} finally {
+				lock.unlock();
 			}
-			beforeKey = nextKey;
-			Object ret = nextValue;
-			nextKey = null; nextValue = null;
 			return new JsMap((Map)ret);
 		}
 		
 		
 		@SuppressWarnings("unchecked")
 		private boolean _next() {
-			if(exitFlag || src.isClose()) {
+			if(exitFlag || src.isClose() || !src.hasNext()) {
 				close();
 				return false;
 			} else if(nextKey != null && nextValue != null) {
@@ -172,7 +212,7 @@ public class ObjectOperator extends SearchOperator {
 			}
 			nextValue = src.next();
 			nextKey = src.getKey();
-			if(end != null && end.compareTo(nextKey) < 0) {
+			if(end != null && end.compareTo(nextKey) <= 0) {
 				// 終端を検出.
 				exitFlag = true;
 			}
@@ -184,39 +224,75 @@ public class ObjectOperator extends SearchOperator {
 	private static final class IndexIterator implements OperateIterator {
 		LevelIndexIterator src;
 		int keyType;
-		public IndexIterator(int type, LevelIndexIterator s) {
+		
+		private Lock lock;
+		
+		public IndexIterator(Lock lk, int type, LevelIndexIterator s) {
 			src = s;
 			keyType = type;
+			lock = lk;
 		}
 
 		@Override
 		public boolean hasNext() {
-			return src.hasNext();
+			lock.lock();
+			try {
+				return src.hasNext();
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		@Override
 		public Map next() {
-			return src.next();
+			lock.lock();
+			try {
+				return src.next();
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		@Override
 		public void close() {
-			src.close();
+			lock.lock();
+			try {
+				src.close();
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		@Override
 		public boolean isClose() {
-			return src.isClose();
+			lock.lock();
+			try {
+				return src.isClose();
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		@Override
 		public boolean isDesc() {
-			return src.isReverse();
+			lock.lock();
+			try {
+				return src.isReverse();
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		@Override
 		public Object key() {
-			return new FixedArray(OperatorKeyType.getRestoreKey(keyType, src.getKey()));
+			Object o;
+			lock.lock();
+			try {
+				o = OperatorKeyType.getRestoreKey(keyType, src.getKey());
+			} finally {
+				lock.unlock();
+			}
+			return new FixedArray(o);
 		}
 	}
 }

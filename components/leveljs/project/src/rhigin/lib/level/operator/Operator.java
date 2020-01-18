@@ -5,6 +5,17 @@ package rhigin.lib.level.operator;
  */
 public interface Operator {
 	/**
+	 * オペレータのクローズ.
+	 */
+	public void close();
+	
+	/**
+	 * データ削除処理.
+	 * @return boolean [true]の場合、データ削除成功です.
+	 */
+	public boolean trancate();
+	
+	/**
 	 * オペレータ名を取得.
 	 * @return String オペレータ名が返却されます.
 	 */

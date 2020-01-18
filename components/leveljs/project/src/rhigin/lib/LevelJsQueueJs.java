@@ -24,6 +24,7 @@ public class LevelJsQueueJs {
 		,"mode"
 		,"push"
 		,"pop"
+		,"trancate"
 	};
 	
 	// Queueオペレータ用メソッド生成処理.
@@ -90,6 +91,10 @@ public class LevelJsQueueJs {
 				case 6: // pop.
 				{
 					return op.pop();
+				}
+				case 7: // trancate.
+				{
+					return op.trancate();
 				}
 				
 				}

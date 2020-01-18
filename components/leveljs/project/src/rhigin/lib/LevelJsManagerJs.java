@@ -31,7 +31,7 @@ public class LevelJsManagerJs {
 		new LevelJsManFunctions(4), new LevelJsManFunctions(5), new LevelJsManFunctions(6), new LevelJsManFunctions(7),
 		new LevelJsManFunctions(8), new LevelJsManFunctions(9), new LevelJsManFunctions(10), new LevelJsManFunctions(11),
 		new LevelJsManFunctions(12), new LevelJsManFunctions(13), new LevelJsManFunctions(14), new LevelJsManFunctions(15),
-		new LevelJsManFunctions(16), new LevelJsManFunctions(17), new LevelJsManFunctions(18)
+		new LevelJsManFunctions(16), new LevelJsManFunctions(17)
 	});
 	
 	/**
@@ -114,23 +114,18 @@ public class LevelJsManagerJs {
 					return CORE.delete(
 							getOperatorName(0, args));
 				}
-				case 11: // trancate.
-				{
-					return CORE.trancate(
-							getOperatorName(0, args));
-				}
-				case 12: // rename.
+				case 11: // rename.
 				{
 					return CORE.rename(
 							getOperatorName(0, args),
 							getOperatorName(1, args));
 				}
-				case 13: // contains.
+				case 12: // contains.
 				{
 					return CORE.contains(
 							getOperatorName(0, args));
 				}
-				case 14: // get.
+				case 13: // get.
 				{
 					final Operator op = CORE.get(
 							getOperatorName(0, args));
@@ -143,12 +138,12 @@ public class LevelJsManagerJs {
 					}
 					return Undefined.instance;
 				}
-				case 15: // operatorType.
+				case 14: // operatorType.
 				{
 					return CORE.getOperatorType(
 							getOperatorName(0, args));
 				}
-				case 16: // mode.
+				case 15: // mode.
 				{
 					OperatorMode ret = CORE.getMode(
 							getOperatorName(0, args));
@@ -157,11 +152,11 @@ public class LevelJsManagerJs {
 					}
 					return ret.get();
 				}
-				case 17: // names.
+				case 16: // names.
 				{
 					return CORE.names();
 				}
-				case 18: // length.
+				case 17: // length.
 				{
 					return CORE.size();
 				}
@@ -215,14 +210,13 @@ public class LevelJsManagerJs {
 			case 8: return "createSequence";
 			case 9: return "createQueue";
 			case 10: return "delete";
-			case 11: return "trancate";
-			case 12: return "rename";
-			case 13: return "contains";
-			case 14: return "get";
-			case 15: return "operatorType";
-			case 16: return "mode";
-			case 17: return "names";
-			case 18: return "length";
+			case 11: return "rename";
+			case 12: return "contains";
+			case 13: return "get";
+			case 14: return "operatorType";
+			case 15: return "mode";
+			case 16: return "names";
+			case 17: return "length";
 			}
 			return "unknown";
 		}
