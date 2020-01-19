@@ -43,8 +43,8 @@ public class LevelJsCursorJs {
 	 * @param c
 	 * @return
 	 */
-	public static final RhiginInstanceObject create(OperateIterator c) {
-		return new RhiginInstanceObject("Cursor", CURSOR_FUNCTIONS, c);
+	public static final RhiginInstanceObject create(String o, OperateIterator c) {
+		return new RhiginInstanceObject(o + "Cursor", CURSOR_FUNCTIONS, c);
 	}
 	
 	// カーソルのメソッド群. 

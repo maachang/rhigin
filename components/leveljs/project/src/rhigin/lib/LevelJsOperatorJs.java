@@ -132,7 +132,7 @@ public class LevelJsOperatorJs {
 					}
 					OperateIterator it = op.index(
 						desc, getObject(off, args), getParamsByString(off + 1, args));
-					return LevelJsCursorJs.create(it);
+					return LevelJsCursorJs.create("Index", it);
 				}
 				case 11: // put.
 				{
@@ -166,7 +166,7 @@ public class LevelJsOperatorJs {
 				case 15: // cursor.
 				{
 					if(args == null || args.length == 0) {
-						return LevelJsCursorJs.create(op.cursor(false));
+						return LevelJsCursorJs.create(opName, op.cursor(false));
 					}
 					int off = 0;
 					boolean desc = false;
@@ -181,7 +181,7 @@ public class LevelJsOperatorJs {
 						key = getObject(off, args);
 					}
 					final OperateIterator it = op.cursor(desc, key);
-					return LevelJsCursorJs.create(it);
+					return LevelJsCursorJs.create(opName, it);
 				}
 				case 16: // range.
 				{
@@ -202,7 +202,7 @@ public class LevelJsOperatorJs {
 						this.argsException(opName);
 					}
 					OperateIterator it = op.range(desc, keys);
-					return LevelJsCursorJs.create(it);
+					return LevelJsCursorJs.create(opName, it);
 				}
 				case 17: // trancate.
 				{
