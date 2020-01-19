@@ -37,6 +37,10 @@ public class LevelJsOperatorJs {
 		,"cursor"
 		,"range"
 		,"trancate"
+		,"close"
+		,"isWriteBatch"
+		,"commit"
+		,"rollback"
 	};
 	
 	// オペレータ用メソッド生成処理.
@@ -207,6 +211,26 @@ public class LevelJsOperatorJs {
 				case 17: // trancate.
 				{
 					return op.trancate();
+				}
+				case 18: // close.
+				{
+					if(op.isWriteBatch()) {
+						op.close();
+						return true;
+					}
+					return false;
+				}
+				case 19: // isWriteBatch.
+				{
+					return op.isWriteBatch();
+				}
+				case 20: // commit.
+				{
+					return op.commit();
+				}
+				case 21: // rollback.
+				{
+					return op.rollback();
 				}
 				
 				}

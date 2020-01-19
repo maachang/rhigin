@@ -1,6 +1,7 @@
 package rhigin.lib.level.runner;
 
 import rhigin.lib.level.operator.OperateIterator;
+import rhigin.lib.level.operator.Operator;
 import rhigin.scripts.RhiginContext;
 import rhigin.scripts.RhiginEndScriptCall;
 import rhigin.scripts.compile.CompileCache;
@@ -13,6 +14,7 @@ public class LevelJsCloseable implements RhiginEndScriptCall {
 	
 	// ローカル実態オブジェクト.
 	private static final class Entity {
+		public OList<Operator> writeBatchList;
 		public OList<OperateIterator> iteratorList;
 	}
 	
@@ -56,6 +58,24 @@ public class LevelJsCloseable implements RhiginEndScriptCall {
 	}
 	
 	/**
+	 * Operator をセット.
+	 * @param op writeBatchモードである必要があります.
+	 * @return
+	 */
+	public final LevelJsCloseable reg(Operator op) {
+		if(op.isWriteBatch()) {
+			Entity et = lo();
+			OList<Operator> list = et.writeBatchList;
+			if(list == null) {
+				list = new OList<Operator>();
+				et.writeBatchList = list;
+			}
+			list.add(op);
+		}
+		return this;
+	}
+	
+	/**
 	 * OperateIteratorクリア.
 	 * @return
 	 */
@@ -87,6 +107,37 @@ public class LevelJsCloseable implements RhiginEndScriptCall {
 	}
 	
 	/**
+	 * Operatorクリア.
+	 * @return
+	 */
+	public final LevelJsCloseable clearOperator() {
+		int len;
+		Entity et;
+		if((et = lo.get()) != null) {
+			final OList<Operator> list = et.writeBatchList;
+			if(list != null && (len = list.size()) > 0) {
+				boolean f;
+				Operator c;
+				for(int i = 0; i < len; i ++) {
+					c = list.get(i);
+					try {
+						f = c.isAvailable();
+					} catch(Exception e) {
+						f = true;
+					}
+					if(f) {
+						try {
+							c.close();
+						} catch(Exception e) {}
+					}
+				}
+				list.clear();
+			}
+		}
+		return this;
+	}
+	
+	/**
 	 * 今回のスクリプト実行で利用したJDBCオブジェクト関連のクローズ処理.
 	 * @params context
 	 * @params cache
@@ -94,6 +145,7 @@ public class LevelJsCloseable implements RhiginEndScriptCall {
 	@Override
 	public final void call(RhiginContext context, CompileCache cache) {
 		clearIterator();
+		clearOperator();
 		clearLo();
 	}
 }

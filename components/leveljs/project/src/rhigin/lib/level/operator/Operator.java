@@ -10,7 +10,7 @@ public interface Operator {
 	public void close();
 	
 	/**
-	 * データ削除処理.
+	 * 全データ削除処理.
 	 * @return boolean [true]の場合、データ削除成功です.
 	 */
 	public boolean trancate();
@@ -49,5 +49,22 @@ public interface Operator {
 	 * @return
 	 */
 	public OperatorMode getMode();
-
+	
+	/**
+	 * WriteBatchモードを取得.
+	 * @return
+	 */
+	public boolean isWriteBatch();
+	
+	/**
+	 * コミット処理.
+	 * @return boolean
+	 */
+	public boolean commit();
+	
+	/**
+	 * ロールバック処理.
+	 * @return boolean
+	 */
+	public boolean rollback();
 }

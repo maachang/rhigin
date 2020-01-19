@@ -4,8 +4,10 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.maachang.leveldb.LevelOption;
 import org.maachang.leveldb.operator.LevelQueue;
 
+import rhigin.lib.level.runner.LevelJsCloseable;
 import rhigin.scripts.JsMap;
 
 /**
@@ -20,11 +22,17 @@ public class QueueOperator implements Operator {
 	
 	/**
 	 * コンストラクタ.
-	 * @param q
+	 * @param c Closeableオブジェクトを設定.
+	 * @param n オペレータ名を設定.
+	 * @param q オペレータを設定.
 	 */
-	public QueueOperator(String n, LevelQueue q) {
+	public QueueOperator(LevelJsCloseable c, String n, LevelQueue q) {
 		queue = q;
 		name = n;
+		// writeBatchモードの場合、クローズ処理に登録.
+		if(q.isWriteBatch()) {
+			c.reg(this);
+		}
 	}
 	
 	/**
@@ -154,9 +162,58 @@ public class QueueOperator implements Operator {
 	 */
 	@Override
 	public OperatorMode getMode() {
+		LevelOption op;
 		rw.readLock().lock();
 		try {
-			return new OperatorMode(queue.getOption());
+			op = queue.getOption();
+		} finally {
+			rw.readLock().unlock();
+		}
+		return new OperatorMode(op);
+	}
+	
+	/**
+	 * WriteBatchモードを取得.
+	 * @return
+	 */
+	public boolean isWriteBatch() {
+		rw.readLock().lock();
+		try {
+			return queue.isWriteBatch();
+		} finally {
+			rw.readLock().unlock();
+		}
+	}
+	
+	/**
+	 * コミット処理.
+	 * @return boolean
+	 */
+	public boolean commit() {
+		rw.readLock().lock();
+		try {
+			if(queue.isWriteBatch()) {
+				queue.commit();
+				return true;
+			}
+			return false;
+		} finally {
+			rw.readLock().unlock();
+		}
+	}
+	
+	/**
+	 * ロールバック処理.
+	 * @return boolean
+	 */
+	public boolean rollback() {
+		rw.readLock().lock();
+		try {
+			if(queue.isWriteBatch()) {
+				queue.rollback();
+				return true;
+			}
+			return false;
 		} finally {
 			rw.readLock().unlock();
 		}

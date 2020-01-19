@@ -25,6 +25,10 @@ public class LevelJsQueueJs {
 		,"push"
 		,"pop"
 		,"trancate"
+		,"close"
+		,"isWriteBatch"
+		,"commit"
+		,"rollback"
 	};
 	
 	// Queueオペレータ用メソッド生成処理.
@@ -95,6 +99,26 @@ public class LevelJsQueueJs {
 				case 7: // trancate.
 				{
 					return op.trancate();
+				}
+				case 8: // close.
+				{
+					if(op.isWriteBatch()) {
+						op.close();
+						return true;
+					}
+					return false;
+				}
+				case 9: // isWriteBatch.
+				{
+					return op.isWriteBatch();
+				}
+				case 10: // commit.
+				{
+					return op.commit();
+				}
+				case 11: // rollback.
+				{
+					return op.rollback();
 				}
 				
 				}

@@ -4,12 +4,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Time 12 byte(96bit) シーケンスID発行処理.
+ * Time 20 byte(160bit) シーケンスID発行処理.
  */
-public class Time12SequenceId {
-	public static final int ID_LENGTH = 12;
+public class Time20SequenceId {
+	public static final int ID_LENGTH = 20;
 	private final AtomicInteger nowId = new AtomicInteger(0);
 	private final AtomicLong nowTime = new AtomicLong(-1L);
+	private final AtomicLong nowNano = new AtomicLong(-1L);
 	private int machineId = 0;
 
 	/**
@@ -18,7 +19,7 @@ public class Time12SequenceId {
 	 * @param id
 	 *            対象のマシンIDを設定します.
 	 */
-	public Time12SequenceId(int id) {
+	public Time20SequenceId(int id) {
 		machineId = id;
 	}
 
@@ -29,11 +30,14 @@ public class Time12SequenceId {
 	 *            対象のマシンIDを設定します.
 	 * @param lastTime
 	 *            設定した最終時間を設定します.
+	 * @param lastNano
+	 *            設定した最終ナノタイムを設定します.
 	 * @param lastId
 	 *            設定した最終IDを設定します.
 	 */
-	public Time12SequenceId(int id, long lastTime, int lastId) {
+	public Time20SequenceId(int id, long lastTime, long lastNano, int lastId) {
 		nowTime.set(lastTime);
+		nowNano.set(lastNano);
 		machineId = id;
 		nowId.set(lastId);
 	}
@@ -44,18 +48,8 @@ public class Time12SequenceId {
 	 * @param binary
 	 *            対象のバイナリを設定します.
 	 */
-	public Time12SequenceId(byte[] binary) {
+	public Time20SequenceId(byte[] binary) {
 		set(binary);
-	}
-
-	/**
-	 * 現在発行したシーケンスIDを再取得.
-	 * 
-	 * @param buf
-	 *            対象のバッファを設定します.
-	 */
-	public final void get(byte[] buf) {
-		createId(buf, machineId, nowTime.get(), nowId.get());
 	}
 
 	/**
@@ -64,11 +58,30 @@ public class Time12SequenceId {
 	 * @return byte[] シーケンスIDが発行されます.
 	 */
 	public final byte[] get() {
-		final byte[] ret = new byte[12];
-		get(ret);
+		return get();
+	}
+	
+	/**
+	 * 現在発行したシーケンスIDを再取得.
+	 * 
+	 * @param fooder 追加するバイナリを設定します.
+	 * @return byte[] シーケンスIDが発行されます.
+	 */
+	public final byte[] get(byte[] fooder) {
+		final byte[] ret = new byte[20 + (fooder == null ? 0 : fooder.length)];
+		_get(ret, fooder);
 		return ret;
 	}
-
+	
+	/**
+	 * 現在発行したシーケンスIDを再取得.
+	 * 
+	 * @param out シーケンスIDを受け取るバイナリを設定します.
+	 */
+	protected final void _get(byte[] out, byte[] fooder) {
+		_createId(out, machineId, nowTime.get(), nowNano.get(), nowId.get(), fooder);
+	}
+	
 	/**
 	 * シーケンスIDを設定.
 	 * 
@@ -87,47 +100,64 @@ public class Time12SequenceId {
 	public final int getMachineId() {
 		return (int) machineId;
 	}
-
+	
 	/**
 	 * シーケンスIDを発行.
 	 * 
 	 * @return byte[] シーケンスIDが発行されます.
 	 */
 	public final byte[] next() {
-		final byte[] ret = new byte[12];
-		next(ret);
+		return next(null);
+	}
+
+	/**
+	 * シーケンスIDを発行.
+	 * 
+	 * @param fooder 追加するバイナリを設定します.
+	 * @return byte[] シーケンスIDが発行されます.
+	 */
+	public final byte[] next(byte[] fooder) {
+		final byte[] ret = new byte[20 + (fooder == null ? 0 : fooder.length)];
+		_next(ret, fooder);
 		return ret;
 	}
 
 	/**
 	 * シーケンスIDを発行.
 	 * 
-	 * @param buf
-	 *            対象のバッファを設定します.
+	 * @param out シーケンスIDを受け取るバイナリを設定します.
 	 */
-	public final void next(byte[] out) {
+	protected final void _next(byte[] out, byte[] fooder) {
 		int id;
 		long beforeTime, time;
+		long beforeNano, nano;
 		while (true) {
 			id = nowId.get();
 			beforeTime = nowTime.get();
 			time = System.currentTimeMillis();
-
+			beforeNano = nowNano.get();
+			nano = System.nanoTime();
 			// システム時間が変更された場合.
 			if (time != beforeTime) {
-				if (nowTime.compareAndSet(beforeTime, time) && nowId.compareAndSet(id, 0)) {
-					createId(out, machineId, time, 0);
+				if (nowTime.compareAndSet(beforeTime, time) && nowNano.compareAndSet(beforeNano, nano) && nowId.compareAndSet(id, 0)) {
+					_createId(out, machineId, time, nano, 0, fooder);
 					break;
 				}
-				// シーケンスIDが一定を超える場合.
+			// ナノタイムが変更された場合.
+			} else if (nano != beforeNano) {
+				if (nowTime.compareAndSet(beforeTime, time) && nowNano.compareAndSet(beforeNano, nano) && nowId.compareAndSet(id, 0)) {
+					_createId(out, machineId, time, nano, 0, fooder);
+					break;
+				}
+			// シーケンスIDが一定を超える場合.
 			} else if (id + 1 > 0x0000ffff) {
-				if (nowTime.compareAndSet(beforeTime, beforeTime + 1L) && nowId.compareAndSet(id, 0)) {
-					createId(out, machineId, beforeTime + 1L, 0);
+				if (nowNano.compareAndSet(beforeNano, beforeNano + 1L) && nowId.compareAndSet(id, 0)) {
+					_createId(out, machineId, beforeTime, nano + 1L, 0, fooder);
 					break;
 				}
-				// シーケンスIDをセット.
+			// シーケンスIDをセット.
 			} else if (nowId.compareAndSet(id, id + 1)) {
-				createId(out, machineId, beforeTime, id + 1);
+				_createId(out, machineId, beforeTime, nano, id + 1, fooder);
 				break;
 			}
 		}
@@ -141,9 +171,10 @@ public class Time12SequenceId {
 	 * @param seqId
 	 * @return
 	 */
-	public static final byte[] createId(final int machineId, final long time, final int seqId) {
-		byte[] ret = new byte[12];
-		createId(ret, machineId, time, seqId);
+	public static final byte[] createId(final int machineId, final long time,
+		final long nano, final int seqId, final byte[] fooder) {
+		final byte[] ret = new byte[20 + (fooder == null ? 0 : fooder.length)];
+		_createId(ret, machineId, time, nano, seqId, fooder);
 		return ret;
 	}
 
@@ -155,7 +186,8 @@ public class Time12SequenceId {
 	 * @param time
 	 * @param seqId
 	 */
-	public static final void createId(final byte[] out, final int machineId, final long time, final int seqId) {
+	protected static final void _createId(final byte[] out, final int machineId, final long time,
+		final long nano, final int seqId, final byte[] fooder) {
 		out[0] = (byte) ((time & 0xff00000000000000L) >> 56L);
 		out[1] = (byte) ((time & 0x00ff000000000000L) >> 48L);
 		out[2] = (byte) ((time & 0x0000ff0000000000L) >> 40L);
@@ -164,16 +196,28 @@ public class Time12SequenceId {
 		out[5] = (byte) ((time & 0x0000000000ff0000L) >> 16L);
 		out[6] = (byte) ((time & 0x000000000000ff00L) >> 8L);
 		out[7] = (byte) ((time & 0x00000000000000ffL) >> 0L);
-		out[8] = (byte) ((seqId & 0x0000ff00) >> 8);
-		out[9] = (byte) ((seqId & 0x000000ff) >> 0);
-		out[10] = (byte) ((machineId & 0x0000ff00) >> 8);
-		out[11] = (byte) ((machineId & 0x000000ff) >> 0);
+		out[8] = (byte) ((nano & 0xff00000000000000L) >> 56L);
+		out[9] = (byte) ((nano & 0x00ff000000000000L) >> 48L);
+		out[10] = (byte) ((nano & 0x0000ff0000000000L) >> 40L);
+		out[11] = (byte) ((nano & 0x000000ff00000000L) >> 32L);
+		out[12] = (byte) ((nano & 0x00000000ff000000L) >> 24L);
+		out[13] = (byte) ((nano & 0x0000000000ff0000L) >> 16L);
+		out[14] = (byte) ((nano & 0x000000000000ff00L) >> 8L);
+		out[15] = (byte) ((nano & 0x00000000000000ffL) >> 0L);
+		out[16] = (byte) ((seqId & 0x0000ff00) >> 8);
+		out[17] = (byte) ((seqId & 0x000000ff) >> 0);
+		out[18] = (byte) ((machineId & 0x0000ff00) >> 8);
+		out[19] = (byte) ((machineId & 0x000000ff) >> 0);
+		if(out.length != 20) {
+			System.arraycopy(fooder, 0, out, 20, fooder.length);
+		}
 	}
 
 	// バイナリから、データ変換.
 	private final void setBinary(final byte[] value) {
 		nowId.set(getSequenceId(value));
 		nowTime.set(getTime(value));
+		nowNano.set(getNano(value));
 		machineId = getMachineId(value);
 	}
 
@@ -193,6 +237,19 @@ public class Time12SequenceId {
 				| (((long) value[4] & 0x00000000000000ffL) << 24L) | (((long) value[5] & 0x00000000000000ffL) << 16L)
 				| (((long) value[6] & 0x00000000000000ffL) << 8L) | (((long) value[7] & 0x00000000000000ffL) << 0L);
 	}
+	
+	/**
+	 * binaryから、ナノ時間を取得.
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public static final long getNano(final byte[] value) {
+		return (((long) value[8] & 0x00000000000000ffL) << 56L) | (((long) value[9] & 0x00000000000000ffL) << 48L)
+				| (((long) value[10] & 0x00000000000000ffL) << 40L) | (((long) value[11] & 0x00000000000000ffL) << 32L)
+				| (((long) value[12] & 0x00000000000000ffL) << 24L) | (((long) value[13] & 0x00000000000000ffL) << 16L)
+				| (((long) value[14] & 0x00000000000000ffL) << 8L) | (((long) value[15] & 0x00000000000000ffL) << 0L);
+	}
 
 	/**
 	 * binaryからシーケンスIDを取得.
@@ -201,7 +258,7 @@ public class Time12SequenceId {
 	 * @return
 	 */
 	public static final int getSequenceId(final byte[] value) {
-		return (((int) value[8] & 0x000000ff) << 8) | (((int) value[9] & 0x000000ff) << 0);
+		return (((int) value[16] & 0x000000ff) << 8) | (((int) value[17] & 0x000000ff) << 0);
 	}
 
 	/**
@@ -211,7 +268,7 @@ public class Time12SequenceId {
 	 * @return
 	 */
 	public static final int getMachineId(final byte[] value) {
-		return (((int) value[10] & 0x000000ff) << 8) | (((int) value[11] & 0x000000ff) << 0);
+		return (((int) value[18] & 0x000000ff) << 8) | (((int) value[19] & 0x000000ff) << 0);
 	}
 
 	/**
@@ -220,10 +277,10 @@ public class Time12SequenceId {
 	 * @param value
 	 */
 	public static final void first(final byte[] value) {
-		value[8] = 0;
-		value[9] = 0;
-		value[10] = 0;
-		value[11] = 0;
+		value[16] = 0;
+		value[17] = 0;
+		value[18] = 0;
+		value[19] = 0;
 	}
 
 	/**
@@ -244,8 +301,8 @@ public class Time12SequenceId {
 	 * @return
 	 */
 	public static final byte[] toBinary(String s) {
-		byte[] ret = new byte[12];
-		toBinary(ret, s);
+		byte[] ret = new byte[Base64.decodeOutSize(s)];
+		_toBinary(ret, s);
 		return ret;
 	}
 
@@ -255,7 +312,7 @@ public class Time12SequenceId {
 	 * @param o
 	 * @param s
 	 */
-	public static final void toBinary(byte[] o, String s) {
+	protected static final void _toBinary(byte[] o, String s) {
 		// base64で処理する.
 		Base64.decode(o, 0, s);
 	}

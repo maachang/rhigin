@@ -23,10 +23,20 @@ import rhigin.util.FixedArray;
 public class SequenceOperator extends SearchOperator {
 	private LevelSequence base = null;
 	
+	/**
+	 * コンストラクタ.
+	 * @param c Closeableオブジェクトを設定.
+	 * @param n オペレータ名を設定.
+	 * @param o オペレータを設定.
+	 */
 	public SequenceOperator(LevelJsCloseable c, String n, LevelSequence o) {
 		this.closeable = c;
 		this.base = o;
 		this.name = n;
+		// writeBatchモードの場合、クローズ処理に登録.
+		if(o.isWriteBatch()) {
+			c.reg(this);
+		}
 	}
 
 	@Override

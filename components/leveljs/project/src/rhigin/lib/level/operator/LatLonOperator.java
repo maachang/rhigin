@@ -24,11 +24,21 @@ public class LatLonOperator extends SearchOperator {
 	protected LevelLatLon base;
 	protected int keyType;
 	
+	/**
+	 * コンストラクタ.
+	 * @param c Closeableオブジェクトを設定.
+	 * @param n オペレータ名を設定.
+	 * @param o オペレータを設定.
+	 */
 	public LatLonOperator(LevelJsCloseable c, String n, LevelLatLon o) {
 		this.closeable = c;
 		this.base = o;
 		this.name = n;
 		this.keyType = OperatorKeyType.getKeyType(o.getOption());
+		// writeBatchモードの場合、クローズ処理に登録.
+		if(o.isWriteBatch()) {
+			c.reg(this);
+		}
 	}
 
 	@Override

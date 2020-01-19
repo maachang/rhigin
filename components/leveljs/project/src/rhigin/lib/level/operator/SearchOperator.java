@@ -6,6 +6,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.maachang.leveldb.LevelOption;
 import org.maachang.leveldb.operator.LevelIndex;
 import org.maachang.leveldb.operator.LevelIndex.LevelIndexIterator;
 import org.maachang.leveldb.operator.LevelIndexOperator;
@@ -184,9 +185,58 @@ public abstract class SearchOperator implements Operator {
 	 */
 	@Override
 	public OperatorMode getMode() {
+		LevelOption op;
 		rw.readLock().lock();
 		try {
-			return new OperatorMode(_operator().getOption());
+			op = _operator().getOption();
+		} finally {
+			rw.readLock().unlock();
+		}
+		return new OperatorMode(op);
+	}
+	
+	/**
+	 * WriteBatchモードを取得.
+	 * @return
+	 */
+	public boolean isWriteBatch() {
+		rw.readLock().lock();
+		try {
+			return _operator().isWriteBatch();
+		} finally {
+			rw.readLock().unlock();
+		}
+	}
+	
+	/**
+	 * コミット処理.
+	 * @return boolean
+	 */
+	public boolean commit() {
+		rw.readLock().lock();
+		try {
+			if(_operator().isWriteBatch()) {
+				_operator().commit();
+				return true;
+			}
+			return false;
+		} finally {
+			rw.readLock().unlock();
+		}
+	}
+	
+	/**
+	 * ロールバック処理.
+	 * @return boolean
+	 */
+	public boolean rollback() {
+		rw.readLock().lock();
+		try {
+			if(_operator().isWriteBatch()) {
+				_operator().rollback();
+				return true;
+			}
+			return false;
 		} finally {
 			rw.readLock().unlock();
 		}

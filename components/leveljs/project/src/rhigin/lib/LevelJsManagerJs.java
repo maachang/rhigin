@@ -10,6 +10,7 @@ import rhigin.RhiginConfig;
 import rhigin.RhiginException;
 import rhigin.lib.level.LevelJsCore;
 import rhigin.lib.level.operator.Operator;
+import rhigin.lib.level.operator.OperatorKeyType;
 import rhigin.lib.level.operator.OperatorMode;
 import rhigin.lib.level.operator.QueueOperator;
 import rhigin.lib.level.operator.SearchOperator;
@@ -31,7 +32,7 @@ public class LevelJsManagerJs {
 		new LevelJsManFunctions(4), new LevelJsManFunctions(5), new LevelJsManFunctions(6), new LevelJsManFunctions(7),
 		new LevelJsManFunctions(8), new LevelJsManFunctions(9), new LevelJsManFunctions(10), new LevelJsManFunctions(11),
 		new LevelJsManFunctions(12), new LevelJsManFunctions(13), new LevelJsManFunctions(14), new LevelJsManFunctions(15),
-		new LevelJsManFunctions(16), new LevelJsManFunctions(17)
+		new LevelJsManFunctions(16), new LevelJsManFunctions(17), new LevelJsManFunctions(18)
 	});
 	
 	/**
@@ -87,27 +88,33 @@ public class LevelJsManagerJs {
 				}
 				case 6: // createObject.
 				{
-					return CORE.createObject(
-							getOperatorName(0, args),
-							getOperatorMode(args));
+					String name = getOperatorName(0, args);
+					OperatorMode mode = getOperatorMode(args);
+					// オペレータキータイプが設定されて無い場合は、文字列のキータイプとする.
+					if(mode.getOperatorType() == OperatorKeyType.KEY_NONE) {
+						mode.set("type", OperatorKeyType.KEY_STRING);
+					}
+					return CORE.createObject(name, mode);
 				}
 				case 7: // createLatLon.
 				{
-					return CORE.createLatLon(
-							getOperatorName(0, args),
-							getOperatorMode(args));
+					String name = getOperatorName(0, args);
+					OperatorMode mode = getOperatorMode(args);
+					return CORE.createLatLon(name, mode);
 				}
 				case 8: // createSequence.
 				{
-					return CORE.createSequence(
-							getOperatorName(0, args),
-							getOperatorMode(args));
+					String name = getOperatorName(0, args);
+					OperatorMode mode = getOperatorMode(args);
+					return CORE.createSequence(name, mode);
 				}
 				case 9: // createQueue.
 				{
-					return CORE.createQueue(
-							getOperatorName(0, args),
-							getOperatorMode(args));
+					String name = getOperatorName(0, args);
+					OperatorMode mode = getOperatorMode(args);
+					// 必ずオペレータキータイプは「なし」.
+					mode.set("type", OperatorKeyType.KEY_NONE);
+					return CORE.createQueue(name, mode);
 				}
 				case 10: // delete.
 				{
@@ -127,6 +134,7 @@ public class LevelJsManagerJs {
 				}
 				case 13: // get.
 				{
+					// commit / rollback が利用出来ないモードで取得.
 					final Operator op = CORE.get(
 							getOperatorName(0, args));
 					if(op != null) {
@@ -138,12 +146,26 @@ public class LevelJsManagerJs {
 					}
 					return Undefined.instance;
 				}
-				case 14: // operatorType.
+				case 14: // writeBatch
+				{
+					// commit / rollback が利用出来るモードで取得.
+					final Operator op = CORE.getWriteBatch(
+							getOperatorName(0, args));
+					if(op != null) {
+						if(op instanceof SearchOperator) {
+							return LevelJsOperatorJs.create((SearchOperator)op);
+						} else if(op instanceof QueueOperator) {
+							return LevelJsQueueJs.create((QueueOperator)op);
+						}
+					}
+					return Undefined.instance;
+				}
+				case 15: // operatorType.
 				{
 					return CORE.getOperatorType(
 							getOperatorName(0, args));
 				}
-				case 15: // mode.
+				case 16: // mode.
 				{
 					OperatorMode ret = CORE.getMode(
 							getOperatorName(0, args));
@@ -152,11 +174,11 @@ public class LevelJsManagerJs {
 					}
 					return ret.get();
 				}
-				case 16: // names.
+				case 17: // names.
 				{
 					return CORE.names();
 				}
-				case 17: // length.
+				case 18: // length.
 				{
 					return CORE.size();
 				}
@@ -213,10 +235,11 @@ public class LevelJsManagerJs {
 			case 11: return "rename";
 			case 12: return "contains";
 			case 13: return "get";
-			case 14: return "operatorType";
-			case 15: return "mode";
-			case 16: return "names";
-			case 17: return "length";
+			case 14: return "writeBatch";
+			case 15: return "operatorType";
+			case 16: return "mode";
+			case 17: return "names";
+			case 18: return "length";
 			}
 			return "unknown";
 		}

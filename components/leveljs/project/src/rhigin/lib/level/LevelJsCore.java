@@ -308,7 +308,31 @@ public class LevelJsCore {
 			case LevelOperator.LEVEL_SEQUENCE:
 				return new SequenceOperator(closeable, name, (LevelSequence)op);
 			case LevelOperator.LEVEL_QUEUE:
-				return new QueueOperator(name, (LevelQueue)op);
+				return new QueueOperator(closeable, name, (LevelQueue)op);
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * 登録オペレータをWriteBatchモードで取得.
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public Operator getWriteBatch(String name) {
+		check();
+		final LevelOperator op = manager.get(name);
+		if(op != null) {
+			switch(op.getOperatorType()) {
+			case LevelOperator.LEVEL_MAP:
+				return new ObjectOperator(closeable, name, new LevelMap((LevelMap)op));
+			case LevelOperator.LEVEL_LAT_LON:
+				return new LatLonOperator(closeable, name, new LevelLatLon((LevelLatLon)op));
+			case LevelOperator.LEVEL_SEQUENCE:
+				return new SequenceOperator(closeable, name, new LevelSequence((LevelSequence)op));
+			case LevelOperator.LEVEL_QUEUE:
+				return new QueueOperator(closeable, name, new LevelQueue((LevelQueue)op));
 			}
 		}
 		return null;
