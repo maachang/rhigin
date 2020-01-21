@@ -265,6 +265,17 @@ public class ExecuteScript {
 				return ((Wrapper) ret).unwrap();
 			}
 			return ret;
+		} catch(WrapRhiginException wre) {
+			Throwable t = wre.getWrappedException();
+			if(t instanceof RhiginException) {
+				((RhiginException)t).setMessage(wre.getMessage());
+				throw (RhiginException)t;
+			}
+			throw new RhiginException(t);
+		} catch(RhiginException re) {
+			throw re;
+		} catch(Throwable t) {
+			throw new RhiginException(t);
 		} finally {
 			Context.exit();
 			EntityFunctions.exit();
@@ -359,6 +370,17 @@ public class ExecuteScript {
 				return ((Wrapper) ret).unwrap();
 			}
 			return ret;
+		} catch(WrapRhiginException wre) {
+			Throwable t = wre.getWrappedException();
+			if(t instanceof RhiginException) {
+				((RhiginException)t).setMessage(wre.getMessage());
+				throw (RhiginException)t;
+			}
+			throw new RhiginException(t);
+		} catch(RhiginException re) {
+			throw re;
+		} catch(Throwable t) {
+			throw new RhiginException(t);
 		} finally {
 			Context.exit();
 			EntityFunctions.exit();

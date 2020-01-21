@@ -4,7 +4,6 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
-import org.mozilla.javascript.WrappedException;
 
 import rhigin.RhiginException;
 
@@ -93,7 +92,7 @@ public abstract class AbstractFunction implements Function {
 		try {
 			return jcall(ctx, scope, thisObj, args);
 		} catch(Throwable t) {
-			throw new WrappedException(t);
+			throw new WrapRhiginException(t);
 		}
 	}
 	
@@ -107,7 +106,7 @@ public abstract class AbstractFunction implements Function {
 		try {
 			return jconstruct(arg0, arg1, arg2);
 		} catch(Throwable t) {
-			throw new WrappedException(t);
+			throw new WrapRhiginException(t);
 		}
 	}
 	
