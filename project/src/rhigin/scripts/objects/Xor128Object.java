@@ -40,7 +40,7 @@ public final class Xor128Object {
 		}
 
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			switch (type) {
 			case 0:
 				if (args.length >= 1 && Converter.isNumeric(args[0])) {
@@ -90,12 +90,17 @@ public final class Xor128Object {
 	// インスタンス生成用オブジェクト.
 	private static final class Instance extends RhiginFunction {
 		@Override
-		public Scriptable construct(Context ctx, Scriptable thisObj, Object[] args) {
+		public Scriptable jconstruct(Context ctx, Scriptable thisObj, Object[] args) {
 			final Xor128 xor128 = new Xor128();
 			if (args.length >= 1 && Converter.isNumeric(args[0])) {
 				xor128.setSeet(Converter.convertLong(args[0]));
 			}
 			return newObject(xor128);
+		}
+		
+		@Override
+		public Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			return Undefined.instance;
 		}
 
 		@Override

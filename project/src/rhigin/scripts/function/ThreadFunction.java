@@ -37,7 +37,7 @@ public class ThreadFunction {
 	// 非同期処理を行う.
 	private static final RhiginFunction setImmediate = new RhiginFunction() {
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if (args.length >= 1 && args[0] instanceof Function) {
 				Function f = (Function) args[0];
 				RhiginThreadPool.getInstance().getService().submit(new Runnable() {
@@ -61,7 +61,7 @@ public class ThreadFunction {
 	// 指定時間後に実行.
 	private static final RhiginFunction setTimeout = new RhiginFunction() {
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if (args.length >= 2 && args[0] instanceof Function && Converter.isNumeric(args[1])) {
 				Function f = (Function) args[0];
 				long time = Converter.convertLong(args[1]);
@@ -92,7 +92,7 @@ public class ThreadFunction {
 	// setTimeout処理をクリア.
 	private static final RhiginFunction clearTimeout = new RhiginFunction() {
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if (args.length >= 1) {
 				String id = "" + args[0];
 				ScheduledFuture<?> sf = idMap.get(id);
@@ -113,7 +113,7 @@ public class ThreadFunction {
 	// インターバル実行.
 	private static final RhiginFunction setInterval = new RhiginFunction() {
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if (args.length >= 2 && args[0] instanceof Function && Converter.isNumeric(args[1])) {
 				Function f = (Function) args[0];
 				long time = Converter.convertLong(args[1]);
@@ -144,7 +144,7 @@ public class ThreadFunction {
 	// インターバルクリア.
 	private static final RhiginFunction clearInterval = new RhiginFunction() {
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if (args.length >= 1) {
 				String id = "" + args[0];
 				ScheduledFuture<?> sf = idMap.get(id);

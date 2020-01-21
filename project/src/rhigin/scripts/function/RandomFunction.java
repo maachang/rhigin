@@ -29,7 +29,7 @@ public class RandomFunction extends RhiginFunction {
 	}
 
 	@Override
-	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+	public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		Xor128 r = xor128.get();
 		if (r == null) {
 			r = new Xor128(System.nanoTime());

@@ -273,7 +273,7 @@ public class RhiginStartup {
 	// スタートアップオブジェクト追加.
 	private static final RhiginFunction addOrigin = new RhiginFunction() {
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if (args.length >= 2) {
 				try {
 					getOriginal(scope).put("" + args[0], args[1]);
@@ -293,7 +293,7 @@ public class RhiginStartup {
 	// スクリプト実行後の終了処理を追加.
 	private static final RhiginFunction addEndCall = new RhiginFunction() {
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if (args.length >= 1) {
 				try {
 					Object o = args[0];
@@ -321,7 +321,7 @@ public class RhiginStartup {
 	// システム終了時の処理を追加.
 	private static final RhiginFunction addExitSystemCall = new RhiginFunction() {
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if (args.length >= 1) {
 				try {
 					Object o = args[0];

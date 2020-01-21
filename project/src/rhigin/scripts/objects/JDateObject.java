@@ -273,89 +273,6 @@ public class JDateObject extends RhiginFunction {
 		}
 	}
 	
-	// メソッド名群.
-	private static final String[] FUNCTION_NAMES = new String[] {
-		"clone"
-		,"getDate"
-		,"getDay"
-		,"getHours"
-		,"getMinutes"
-		,"getMonth"
-		,"getSeconds"
-		,"getTime"
-		,"getTimezoneOffset"
-		,"getYear"
-		,"toGMTString"
-		,"toLocaleString"
-		,"getFullYear"
-		,"after"
-		,"before"
-		,"compareTo"
-		,"equals"
-		,"parse"
-		,"setDate"
-		,"setHours"
-		,"setMinutes"
-		,"setMonth"
-		,"setSeconds"
-		,"setTime"
-		,"setYear"
-		,"setFullYear"
-		,"toString"
-		,"hashCode"
-		,"object"
-	};
-	
-	// メソッド生成処理.
-	private static final ObjectFunction FUNCTIONS = new ObjectFunction() {
-		private FixedSearchArray<String> word = new FixedSearchArray<String>(FUNCTION_NAMES);
-		public RhiginFunction create(int no, Object... params) {
-			return new JDateFunction(no, (java.util.Date)params[0]);
-		}
-		public FixedSearchArray<String> getWord() {
-			return word;
-		}
-	};
-
-	@SuppressWarnings("deprecation")
-	@Override
-	public Scriptable construct(Context ctx, Scriptable thisObject, Object[] args) {
-		java.util.Date date = null;
-		if (args.length >= 1) {
-			if (args.length >= 6) {
-				if (Converter.isNumeric(args[0]) && Converter.isNumeric(args[1]) && Converter.isNumeric(args[2])
-						&& Converter.isNumeric(args[3]) && Converter.isNumeric(args[4])
-						&& Converter.isNumeric(args[5])) {
-					date = new java.util.Date(Converter.convertInt(args[0]) - 1900, Converter.convertInt(args[1]),
-							Converter.convertInt(args[2]), Converter.convertInt(args[3]), Converter.convertInt(args[4]),
-							Converter.convertInt(args[5]));
-				}
-			} else if (args.length >= 5) {
-				if (Converter.isNumeric(args[0]) && Converter.isNumeric(args[1]) && Converter.isNumeric(args[2])
-						&& Converter.isNumeric(args[3]) && Converter.isNumeric(args[4])) {
-					date = new java.util.Date(Converter.convertInt(args[0]) - 1900, Converter.convertInt(args[1]),
-							Converter.convertInt(args[2]), Converter.convertInt(args[3]),
-							Converter.convertInt(args[4]));
-				}
-			} else if (args.length >= 3) {
-				if (Converter.isNumeric(args[0]) && Converter.isNumeric(args[1]) && Converter.isNumeric(args[2])) {
-					date = new java.util.Date(Converter.convertInt(args[0]) - 1900, Converter.convertInt(args[1]),
-							Converter.convertInt(args[2]));
-				}
-			} else if (Converter.isNumeric(args[0])) {
-				date = new java.util.Date(Converter.convertLong(args[0]));
-			} else {
-				date = new java.util.Date("" + args[0]);
-			}
-		} else {
-			date = new java.util.Date();
-		}
-		if (date == null) {
-			throw new RhiginException(500, "Failed to initialize JDate object");
-		}
-		return newObject(date);
-	}
-
 	// JDate用メソッド群.
 	private static final class JDateFunction extends RhiginFunction {
 		final int type;
@@ -368,7 +285,7 @@ public class JDateObject extends RhiginFunction {
 
 		@SuppressWarnings({ "deprecation", "static-access" })
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if (args.length <= 0) {
 				// 引数がなしの条件.
 				switch (type) {
@@ -461,6 +378,95 @@ public class JDateObject extends RhiginFunction {
 		}
 	}
 	
+	// メソッド名群.
+	private static final String[] FUNCTION_NAMES = new String[] {
+		"clone"
+		,"getDate"
+		,"getDay"
+		,"getHours"
+		,"getMinutes"
+		,"getMonth"
+		,"getSeconds"
+		,"getTime"
+		,"getTimezoneOffset"
+		,"getYear"
+		,"toGMTString"
+		,"toLocaleString"
+		,"getFullYear"
+		,"after"
+		,"before"
+		,"compareTo"
+		,"equals"
+		,"parse"
+		,"setDate"
+		,"setHours"
+		,"setMinutes"
+		,"setMonth"
+		,"setSeconds"
+		,"setTime"
+		,"setYear"
+		,"setFullYear"
+		,"toString"
+		,"hashCode"
+		,"object"
+	};
+	
+	// メソッド生成処理.
+	private static final ObjectFunction FUNCTIONS = new ObjectFunction() {
+		private FixedSearchArray<String> word = new FixedSearchArray<String>(FUNCTION_NAMES);
+		public RhiginFunction create(int no, Object... params) {
+			return new JDateFunction(no, (java.util.Date)params[0]);
+		}
+		public FixedSearchArray<String> getWord() {
+			return word;
+		}
+	};
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public Scriptable jconstruct(Context ctx, Scriptable thisObject, Object[] args) {
+		java.util.Date date = null;
+		if (args.length >= 1) {
+			if (args.length >= 6) {
+				if (Converter.isNumeric(args[0]) && Converter.isNumeric(args[1]) && Converter.isNumeric(args[2])
+						&& Converter.isNumeric(args[3]) && Converter.isNumeric(args[4])
+						&& Converter.isNumeric(args[5])) {
+					date = new java.util.Date(Converter.convertInt(args[0]) - 1900, Converter.convertInt(args[1]),
+							Converter.convertInt(args[2]), Converter.convertInt(args[3]), Converter.convertInt(args[4]),
+							Converter.convertInt(args[5]));
+				}
+			} else if (args.length >= 5) {
+				if (Converter.isNumeric(args[0]) && Converter.isNumeric(args[1]) && Converter.isNumeric(args[2])
+						&& Converter.isNumeric(args[3]) && Converter.isNumeric(args[4])) {
+					date = new java.util.Date(Converter.convertInt(args[0]) - 1900, Converter.convertInt(args[1]),
+							Converter.convertInt(args[2]), Converter.convertInt(args[3]),
+							Converter.convertInt(args[4]));
+				}
+			} else if (args.length >= 3) {
+				if (Converter.isNumeric(args[0]) && Converter.isNumeric(args[1]) && Converter.isNumeric(args[2])) {
+					date = new java.util.Date(Converter.convertInt(args[0]) - 1900, Converter.convertInt(args[1]),
+							Converter.convertInt(args[2]));
+				}
+			} else if (Converter.isNumeric(args[0])) {
+				date = new java.util.Date(Converter.convertLong(args[0]));
+			} else {
+				date = new java.util.Date("" + args[0]);
+			}
+		} else {
+			date = new java.util.Date();
+		}
+		if (date == null) {
+			throw new RhiginException(500, "Failed to initialize JDate object");
+		}
+		return newObject(date);
+	}
+
+	// コールさせない.
+	@Override
+	public Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		return Undefined.instance;
+	}
+
 	/**
 	 * スコープにライブラリを登録.
 	 * 

@@ -36,7 +36,7 @@ public class EntityFunctions {
 		}
 
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			Entity entity = local.get();
 			if (entity == null) {
 				entity = new Entity();
@@ -61,7 +61,7 @@ public class EntityFunctions {
 		}
 
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if (args.length >= 2) {
 				Entity entity = local.get();
 				if (entity == null) {

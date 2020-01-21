@@ -739,7 +739,7 @@ public class HttpWorkerThread extends Thread {
 	// [js]リダイレクト用メソッド.
 	private static final RhiginFunction redirect = new RhiginFunction() {
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			int status = 301;
 			String url = null;
 			if (args.length >= 1) {
@@ -771,7 +771,7 @@ public class HttpWorkerThread extends Thread {
 	// [js]エラー用メソッド.
 	private static final RhiginFunction error = new RhiginFunction() {
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			int status = 500;
 			String message = null;
 			if (args.length >= 1) {

@@ -26,7 +26,7 @@ public class ValidateFunction extends RhiginFunction {
 	}
 
 	@Override
-	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+	public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		final RhiginContext context = ExecuteScript.currentRhiginContext();
 		final Request req = (Request) context.getAttribute("request");
 		final Params pms = (Params) context.getAttribute("params");

@@ -50,7 +50,7 @@ public class HttpClientFunction extends RhiginFunction {
 	 */
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+	public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		if (args.length >= 2) {
 			String method = "" + args[0];
 			String url = "" + args[1];

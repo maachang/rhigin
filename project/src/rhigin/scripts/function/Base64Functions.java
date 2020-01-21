@@ -28,7 +28,7 @@ public class Base64Functions {
 		}
 
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if (args.length >= 1) {
 				if (args.length >= 2) {
 					boolean binaryFlag = (args[1] instanceof Boolean) ? (boolean) args[1] : false;
@@ -56,7 +56,7 @@ public class Base64Functions {
 		}
 
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if (args.length >= 1) {
 				if (args[0] instanceof byte[]) {
 					return Base64.encode((byte[]) args[0]);

@@ -33,21 +33,21 @@ public class FileObject {
 		}
 
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			try {
 				if (args.length >= 1) {
 					switch (type) {
-					case 0:
+					case 0: // isDir
 						return FileUtil.isDir("" + args[0]);
-					case 1:
+					case 1: // isFile
 						return FileUtil.isFile("" + args[0]);
-					case 2:
+					case 2: // readByString
 						if (args.length >= 2) {
 							return FileUtil.getFileString("" + args[0], "" + args[1]);
 						} else {
 							return FileUtil.getFileString("" + args[0], "UTF8");
 						}
-					case 3:
+					case 3: // writeByString
 						if (args.length >= 4) {
 							FileUtil.setFileString(Converter.convertBool(args[0]), "" + args[1], "" + args[2],
 									"" + args[3]);
@@ -57,38 +57,38 @@ public class FileObject {
 							FileUtil.setFileString(true, "" + args[0], "" + args[1], "UTF8");
 						}
 						break;
-					case 4:
+					case 4: // removeFile
 						FileUtil.removeFile("" + args[0]);
 						return Undefined.instance;
-					case 5:
+					case 5: // removeDir
 						FileUtil.removeFile("" + args[0]);
 						return Undefined.instance;
-					case 6:
+					case 6: // delete
 						FileUtil.delete("" + args[0]);
 						return Undefined.instance;
-					case 7:
+					case 7: // list
 						return FileUtil.list("" + args[0]);
-					case 8:
+					case 8: // length
 						return FileUtil.getFileLength("" + args[0]);
-					case 9:
+					case 9: // birthtime
 						return FileUtil.birthtime("" + args[0]);
-					case 10:
+					case 10: // atime
 						return FileUtil.atime("" + args[0]);
-					case 11:
+					case 11: // mtime
 						return FileUtil.mtime("" + args[0]);
-					case 12:
+					case 12: // rename
 						if (args.length >= 2) {
 							FileUtil.move("" + args[0], "" + args[1]);
 						}
 						break;
-					case 13:
+					case 13: // copy
 						if (args.length >= 2) {
 							FileUtil.copy("" + args[0], "" + args[1]);
 						}
 						break;
-					case 14:
+					case 14: // readFile
 						return FileUtil.getFile("" + args[0]);
-					case 15:
+					case 15: // writeFile
 						if (args.length >= 3) {
 							if (args[2] instanceof InputStream) {
 								setFileByInputStream(Converter.convertBool(args[0]), "" + args[1],
@@ -104,15 +104,15 @@ public class FileObject {
 							}
 						}
 						break;
-					case 16:
+					case 16: // fullPath
 						return FileUtil.getFullPath("" + args[0]);
-					case 17:
+					case 17: // fileName
 						return FileUtil.getFileName("" + args[0]);
-					case 18:
+					case 18: // stat
 						return new RhiginInstanceObject("Stats", FUNCTIONS, new Stats("" + args[0]));
-					case 19:
+					case 19: // inputStream
 						return new FileInputStream("" + args[0]);
-					case 20:
+					case 20: // outputStream
 						return new FileOutputStream("" + args[0]);
 					}
 				}
@@ -142,15 +142,15 @@ public class FileObject {
 			case 6:
 				return "delete";
 			case 7:
-				return "birthtime";
+				return "list";
 			case 8:
-				return "atime";
+				return "length";
 			case 9:
-				return "mtime";
+				return "birthtime";
 			case 10:
-				return "size";
+				return "atime";
 			case 11:
-				return "time";
+				return "mtime";
 			case 12:
 				return "rename";
 			case 13:
@@ -281,7 +281,7 @@ public class FileObject {
 		}
 
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			try {
 				switch (type) {
 				case 0:

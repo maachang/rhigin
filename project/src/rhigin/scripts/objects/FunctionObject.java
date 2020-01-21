@@ -5,6 +5,7 @@ import java.io.StringReader;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.Undefined;
 
 import rhigin.RhiginException;
 import rhigin.scripts.ExecuteScript;
@@ -20,7 +21,7 @@ public final class FunctionObject {
 	// インスタンス生成用オブジェクト.
 	private static final class Instance extends RhiginFunction {
 		@Override
-		public Scriptable construct(Context ctx, Scriptable thisObj, Object[] args) {
+		public Scriptable jconstruct(Context ctx, Scriptable thisObj, Object[] args) {
 			if(args == null || args.length == 0 || !(args[args.length - 1] instanceof String)) {
 				argsException("Function");
 				return null;
@@ -48,6 +49,11 @@ public final class FunctionObject {
 		public final String getName() {
 			return "Function";
 		}
+
+		@Override
+		public Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			return Undefined.instance;
+		}
 	};
 	
 	// Function実行用.
@@ -63,7 +69,7 @@ public final class FunctionObject {
 		}
 
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			return sc.call(ctx, scope, thisObj, args);
 		}
 

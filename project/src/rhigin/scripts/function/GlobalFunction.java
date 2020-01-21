@@ -29,7 +29,7 @@ public class GlobalFunction extends RhiginFunction {
 	}
 
 	@Override
-	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+	public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		return ExecuteScript.currentRhiginContext();
 	}
 	

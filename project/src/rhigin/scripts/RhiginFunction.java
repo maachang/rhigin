@@ -58,7 +58,7 @@ public abstract class RhiginFunction extends AbstractFunction {
 		
 		@SuppressWarnings("rawtypes")
 		@Override
-		public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public Object jcall(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if(args == null || args.length == 0) {
 				return Undefined.instance;
 			}
@@ -79,7 +79,7 @@ public abstract class RhiginFunction extends AbstractFunction {
 			} else {
 				params = new Object[0];
 			}
-			return src.call(cx, scope, sc, params);
+			return src.jcall(cx, scope, sc, params);
 		}
 	}
 	
@@ -95,7 +95,7 @@ public abstract class RhiginFunction extends AbstractFunction {
 		}
 		
 		@Override
-		public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public Object jcall(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if(args == null || args.length == 0) {
 				return Undefined.instance;
 			}
@@ -113,7 +113,7 @@ public abstract class RhiginFunction extends AbstractFunction {
 			} else {
 				params = new Object[0];
 			}
-			return src.call(cx, scope, sc, params);
+			return src.jcall(cx, scope, sc, params);
 		}
 	}
 }

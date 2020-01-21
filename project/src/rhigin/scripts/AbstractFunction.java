@@ -4,6 +4,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
+import org.mozilla.javascript.WrappedException;
 
 import rhigin.RhiginException;
 
@@ -87,20 +88,34 @@ public abstract class AbstractFunction implements Function {
 	public void setPrototype(Scriptable arg0) {
 	}
 
+	@Override
+	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		try {
+			return jcall(ctx, scope, thisObj, args);
+		} catch(Throwable t) {
+			throw new WrappedException(t);
+		}
+	}
+	
 	/**
 	 * Function の内容を実装する場合は、こちらを実装してください.
 	 */
-	@Override
-	public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
-		return Undefined.instance;
-	}
+	public abstract Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args);
 
+	@Override
+	public final Scriptable construct(Context arg0, Scriptable arg1, Object[] arg2) {
+		try {
+			return jconstruct(arg0, arg1, arg2);
+		} catch(Throwable t) {
+			throw new WrappedException(t);
+		}
+	}
+	
 	/**
 	 * new XXX のようなオブジェクトを作成する場合には、こちらを実装します.
 	 * また、戻り値は rhigin.scripts.objects.RhiginObject を利用すると、楽に作成できると思います.
 	 */
-	@Override
-	public Scriptable construct(Context arg0, Scriptable arg1, Object[] arg2) {
+	public Scriptable jconstruct(Context arg0, Scriptable arg1, Object[] arg2) {
 		throw new RhiginException("This method '" + getName() +
 			"' does not support instantiation.");
 	}

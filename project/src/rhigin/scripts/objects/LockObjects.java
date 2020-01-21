@@ -160,7 +160,7 @@ public class LockObjects {
 
 		// new Object() で呼ばれる.
 		@Override
-		public Scriptable construct(Context ctx, Scriptable thisObject, Object[] args) {
+		public Scriptable jconstruct(Context ctx, Scriptable thisObject, Object[] args) {
 			Lock lock = null;
 			Object value = null;
 			if (args.length > 0) {
@@ -181,6 +181,11 @@ public class LockObjects {
 			}
 			return new RhiginInstanceObject("Lock", FUNCTIONS, lock);
 		}
+		
+		@Override
+		public Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			return Undefined.instance;
+		}
 
 		// ロック・アンロック処理.
 		private static final class Execute extends RhiginFunction {
@@ -193,7 +198,7 @@ public class LockObjects {
 			}
 
 			@Override
-			public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 				if (type == 0) {
 					object.lock();
 				} else {
@@ -255,7 +260,7 @@ public class LockObjects {
 
 		// new Object() で呼ばれる.
 		@Override
-		public Scriptable construct(Context ctx, Scriptable thisObject, Object[] args) {
+		public Scriptable jconstruct(Context ctx, Scriptable thisObject, Object[] args) {
 			ReadWriteLock lock = null;
 			Object value = null;
 			if (args.length > 0) {
@@ -276,6 +281,11 @@ public class LockObjects {
 			}
 			return new RhiginInstanceObject("RwLock", FUNCTIONS, lock);
 		}
+		
+		@Override
+		public Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			return Undefined.instance;
+		}
 
 		// ロック・アンロック処理.
 		private static final class Execute extends RhiginFunction {
@@ -288,7 +298,7 @@ public class LockObjects {
 			}
 
 			@Override
-			public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 				switch (type) {
 				case 0:
 					object.writeLock().lock();

@@ -238,7 +238,7 @@ public class JavaScriptable {
 		}
 
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if (args.length >= 1) {
 				int len = args.length;
 				for (int i = 0; i < len; i++) {

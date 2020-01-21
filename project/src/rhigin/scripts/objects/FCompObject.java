@@ -22,7 +22,7 @@ public class FCompObject {
 		}
 
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			FCompBuffer buf = null;
 			if (args.length >= 1 && args[0] instanceof byte[]) {
 				if (args.length >= 3) {

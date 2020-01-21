@@ -18,7 +18,7 @@ public class GetClassFunction extends RhiginFunction {
 	}
 
 	@Override
-	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+	public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		if (args.length >= 1) {
 			return args[0] == null ? "null" : args[0].getClass().getName();
 		}

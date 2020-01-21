@@ -39,7 +39,7 @@ public class UniqueIdObject {
 		}
 
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if (type == 0) {
 				return UniqueIdObject.get().getUUID();
 			}

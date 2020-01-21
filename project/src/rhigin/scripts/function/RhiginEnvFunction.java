@@ -22,7 +22,7 @@ public class RhiginEnvFunction extends RhiginFunction {
 	}
 
 	@Override
-	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+	public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		final String ret = RhiginStartup.getRhiginEnv();
 		return ret == null ? "" : ret;
 	}

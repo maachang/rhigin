@@ -31,7 +31,7 @@ public class FCipherObject {
 		}
 
 		@Override
-		public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if (type == 0 || type == 1 || type == 2) {
 				if (args.length >= 1) {
 					if (type == 0) {
