@@ -10,7 +10,7 @@ import rhigin.RhiginException;
 /**
  * rhigin用Abstractメソッド.
  */
-public abstract class AbstractFunction implements Function {
+public abstract class AbstractRhiginFunction implements Function {
 	protected static final Object[] ZERO_ARRAY = new Object[] {};
 	
 	@Override
@@ -87,6 +87,7 @@ public abstract class AbstractFunction implements Function {
 	public void setPrototype(Scriptable arg0) {
 	}
 
+	// Funtion呼び出し処理.
 	@Override
 	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		try {
@@ -96,11 +97,7 @@ public abstract class AbstractFunction implements Function {
 		}
 	}
 	
-	/**
-	 * Function の内容を実装する場合は、こちらを実装してください.
-	 */
-	public abstract Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args);
-
+	// new コンストラクタ呼び出し処理.
 	@Override
 	public final Scriptable construct(Context arg0, Scriptable arg1, Object[] arg2) {
 		try {
@@ -109,6 +106,11 @@ public abstract class AbstractFunction implements Function {
 			throw new WrapRhiginException(t);
 		}
 	}
+	
+	/**
+	 * Function の内容を実装する場合は、こちらを実装してください.
+	 */
+	public abstract Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args);
 	
 	/**
 	 * new XXX のようなオブジェクトを作成する場合には、こちらを実装します.

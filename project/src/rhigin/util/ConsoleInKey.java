@@ -87,6 +87,11 @@ public class ConsoleInKey implements Closeable, AutoCloseable {
 				console = null;
 				in = null;
 				
+				// expandEventsをOFF.
+				// これをOFFにしないと！マークが使えなくなるのでOFFにする.
+				consoleReaderClass.getMethod("setExpandEvents", boolean.class)
+				.invoke(consoleReader, false);
+				
 				// Ctrl+Cを検知.
 				consoleReaderClass.getMethod("setHandleUserInterrupt", boolean.class)
 					.invoke(consoleReader, true);

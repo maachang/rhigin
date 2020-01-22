@@ -266,12 +266,13 @@ public class ExecuteScript {
 			}
 			return ret;
 		} catch(WrapRhiginException wre) {
+			// rhino用のラップ例外の場合は、RhiginExceptionに変換して返却.
 			Throwable t = wre.getWrappedException();
 			if(t instanceof RhiginException) {
 				((RhiginException)t).setMessage(wre.getMessage());
 				throw (RhiginException)t;
 			}
-			throw new RhiginException(t);
+			throw new RhiginException(wre.getStatus(), t);
 		} catch(RhiginException re) {
 			throw re;
 		} catch(Throwable t) {
@@ -371,12 +372,13 @@ public class ExecuteScript {
 			}
 			return ret;
 		} catch(WrapRhiginException wre) {
+			// rhino用のラップ例外の場合は、RhiginExceptionに変換して返却.
 			Throwable t = wre.getWrappedException();
 			if(t instanceof RhiginException) {
 				((RhiginException)t).setMessage(wre.getMessage());
 				throw (RhiginException)t;
 			}
-			throw new RhiginException(t);
+			throw new RhiginException(wre.getStatus(), t);
 		} catch(RhiginException re) {
 			throw re;
 		} catch(Throwable t) {
@@ -391,7 +393,7 @@ public class ExecuteScript {
 	// 基本オブジェクトをセット.
 	private static final void settingRhiginObject(Context ctx, Scriptable scope) throws Exception {
 		// rhiginバージョンをセット.
-		scope.put("rhigin", scope, RhiginConstants.VERSION);
+		scope.put("VERSION", scope, RhiginConstants.VERSION);
 
 		// オブジェクトの登録.
 		ConsoleObject.regFunctions(scope);

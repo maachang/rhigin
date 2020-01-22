@@ -11,7 +11,7 @@ import org.mozilla.javascript.Undefined;
  * 
  * rhigin用のjsに組み込みたいオリジナルのFunctionを作成したい場合に、継承して実装します.
  */
-public abstract class RhiginFunction extends AbstractFunction {
+public abstract class RhiginFunction extends AbstractRhiginFunction {
 	/** 親オブジェクト. **/
 	protected Scriptable PARENT = null;
 	
@@ -46,9 +46,9 @@ public abstract class RhiginFunction extends AbstractFunction {
 	}
 	
 	// xxx.apply(scope, argsArray);
-	private static final class ApplyFunction extends AbstractFunction {
-		AbstractFunction src;
-		ApplyFunction(AbstractFunction s) {
+	private static final class ApplyFunction extends AbstractRhiginFunction {
+		AbstractRhiginFunction src;
+		ApplyFunction(AbstractRhiginFunction s) {
 			src = s;
 		}
 		@Override
@@ -84,9 +84,9 @@ public abstract class RhiginFunction extends AbstractFunction {
 	}
 	
 	// xxx.call(scope, args ...);
-	private static final class CallFunction extends AbstractFunction {
-		AbstractFunction src;
-		CallFunction(AbstractFunction s) {
+	private static final class CallFunction extends AbstractRhiginFunction {
+		AbstractRhiginFunction src;
+		CallFunction(AbstractRhiginFunction s) {
 			src = s;
 		}
 		@Override
