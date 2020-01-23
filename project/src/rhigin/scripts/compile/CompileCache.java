@@ -85,7 +85,7 @@ public class CompileCache {
 		}
 		maxCacheSize = s;
 		try {
-			baseDir = FileUtil.getFullPath(b);
+			baseDir = FileUtil.getFullPath(b) + "/";
 		} catch (Exception e) {
 		}
 	}
@@ -164,18 +164,15 @@ public class CompileCache {
 		try {
 			// 対象ファイルパスをフルパスで取得.
 			jsName = FileUtil.getFullPath(jsName);
-			if (!jsName.startsWith(baseDir)) {
-				// ベースパス上のスクリプトファイルでない場合は、400エラーを返却.
-				throw new CompileException(400);
-			}
 			// 拡張子がjsでない場合は、jsを付与.
 			if (!jsName.toLowerCase().endsWith(".js")) {
 				jsName += ".js";
 			}
 			// 現在のファイル時間（存在しない場合は-1)を取得.
 			final long time = FileUtil.mtime(jsName);
-			// ベースパス以降を対象とする.
-			final String key = jsName.substring(baseDir.length());
+			// ベースパス内の場合は、ベースパス名を除外.
+			final String key = jsName.startsWith(baseDir) ?
+				jsName.substring(baseDir.length()) : jsName;
 			// 現在のキャッシュ情報を取得.
 			final LruCache<String, ScriptElement> c = cache();
 			ScriptElement ret = c.get(key);

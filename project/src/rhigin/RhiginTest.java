@@ -12,8 +12,8 @@ import rhigin.util.FileUtil;
 /**
  * rhigin用テスト.
  * 
- * jasmineを利用してテスト.
- * ${RHIGIN_HOME}/test/jasmine/jasmine-core.js を利用する.
+ * rtest.jsを利用してテスト.
+ * ${RHIGIN_HOME}/test/rtest/rtest.js を利用する.
  */
 public class RhiginTest {
 	
@@ -34,15 +34,15 @@ public class RhiginTest {
 			System.exit(0);
 			return;
 		} else if(params.isValue("-h", "--help")) {
-			System.out.println("rtest [-i] [-e] {specFileName}");
+			System.out.println("rtest [-i] [-e] {specFileName} ...");
 			System.out.println(" Perform test execution for rhigin using 'jasmine'.");
 			System.out.println("  [-i] [--init]");
 			System.out.println("    Perform test initialization.");
-			System.out.println("  [-e] [--env]");
+			System.out.println("  [-e] [--env] {name}");
 			System.out.println("    Set the environment name for reading the configuration.");
 			System.out.println("    For example, when `-e hoge` is specified, the configuration ");
 			System.out.println("    information under `./conf/hoge/` is read.");
-			System.out.println("  {specFileName}");
+			System.out.println("  {specFileName} ... ");
 			System.out.println("    If you want to run tests individually, set the Spec file name.");
 			System.exit(0);
 			return;
@@ -67,7 +67,11 @@ public class RhiginTest {
 		int ret = 0;
 		try {
 			RhiginConfig conf = RhiginStartup.initLogFactory(false);
-			test.executeTest(conf);
+			if(test.executeTest(conf)) {
+				ret = 0;
+			} else {
+				ret = 1;
+			}
 		} catch(Throwable t) {
 			t.printStackTrace();
 			ret = 1;
@@ -81,7 +85,7 @@ public class RhiginTest {
 	}
 	
 	// テスト実行.
-	private void executeTest(RhiginConfig conf) throws Exception {
+	private boolean executeTest(RhiginConfig conf) throws Exception {
 		// 開始処理.
 		HttpInfo httpInfo = RhiginStartup.startup(conf);
 
@@ -93,11 +97,17 @@ public class RhiginTest {
 		// ランダムオブジェクトをセット.
 		RandomFunction.init();
 		
-		// jasmineJSのファイル位置.
-		String jusminCoreJsFile = System.getenv("RHIGIN_HOME") + "/test/jasmine/lib/jasmine-core.js";
+		// rtestのファイル位置.
+		String scriptFile = "/test/rtest/rtest.js";
+		String rtestJsFile = System.getenv("RHIGIN_HOME") + scriptFile;
 		
+		// rtest 実行.
 		RhiginContext context = new RhiginContext();
-		Object o = ExecuteScript.execute(context, FileUtil.getFileString(jusminCoreJsFile, "UTF8"));
-		System.out.println(o);
+		Object ret = ExecuteScript.execute(context, FileUtil.getFileString(rtestJsFile, "UTF8"),
+			"${RHIGIN_HOME}" + scriptFile);
+		if(ret instanceof Boolean) {
+			return (Boolean)ret;
+		}
+		return false;
 	}
 }

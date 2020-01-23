@@ -55,7 +55,9 @@ JAR_DIR=jar
 
 # my jar ++.
 MY_JAR=${MY_JAR}:`sh ${BATCH_DIR}/sub/classpath.sh ${LIB_DIR}`
-MY_JAR=${MY_JAR}:`sh ${BATCH_DIR}/sub/classpath.sh ${JAR_DIR}`
+if [ -d ${JAR_DIR} ]; then
+    MY_JAR=${MY_JAR}:`sh ${BATCH_DIR}/sub/classpath.sh ${JAR_DIR}`
+fi
 
 # java option.
 OPT="${OPT} -Djava.awt.headless=true"

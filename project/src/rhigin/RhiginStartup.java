@@ -119,8 +119,12 @@ public class RhiginStartup {
 				}
 				confStat = null;
 			}
-
-			// メインコンフィグファイルが存在するかチェック.
+			
+			// サーバモードの場合は、コンフィグフォルダは必須.
+			if(!FileUtil.isDir(confDir) && server) {
+				throw new RhiginException("Config folder does not exist: " + confDir);
+			}
+			
 			config = new RhiginConfig(confDir);
 
 			// ログファクトリの初期化.
@@ -159,25 +163,28 @@ public class RhiginStartup {
 	/**
 	 * スタートアップ処理.
 	 * 
-	 * @param server
 	 * @param config
 	 * @return HttpInfo
 	 * @exception Exception
 	 */
 	public static final HttpInfo startup(RhiginConfig config) throws Exception {
-
+		boolean server = Http.isWebServerMode();
+		
 		// スレッドプーリングの初期化.
 		// ThreadFunction.init(config);
 
 		// ExecuteScriptにRhiginConfigの要素をセット.
 		ExecuteScript.addOriginals("config", config);
+		
+		// サーバモードの場合.
+		if(server) {
+			// ExecuteScriptにMimeTypeの要素をセット.
+			MimeType mime = MimeType.createMime(config.get("mime"));
+			ExecuteScript.addOriginals("mime", mime);
 
-		// ExecuteScriptにMimeTypeの要素をセット.
-		MimeType mime = MimeType.createMime(config.get("mime"));
-		ExecuteScript.addOriginals("mime", mime);
-
-		// サーバIDを取得、設定.
-		RhiginServerId.getInstance().getId();
+			// サーバIDを取得、設定.
+			RhiginServerId.getInstance().getId();
+		}
 
 		// 初期設定用のスクリプト実行.
 		if (FileUtil.isFile(STARTUP_JS)) {
@@ -244,7 +251,9 @@ public class RhiginStartup {
 
 		// HttpInfoを生成して返却.
 		HttpInfo httpInfo = new HttpInfo();
-		HttpInfo.load(httpInfo, config.get("http"));
+		if(server) {
+			HttpInfo.load(httpInfo, config.get("http"));
+		}
 		return httpInfo;
 	}
 

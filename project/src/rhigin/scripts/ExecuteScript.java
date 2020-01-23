@@ -51,6 +51,8 @@ import rhigin.scripts.objects.JwtObject;
 import rhigin.scripts.objects.LockObjects;
 import rhigin.scripts.objects.UniqueIdObject;
 import rhigin.scripts.objects.Xor128Object;
+import rhigin.util.EnvCache;
+import rhigin.util.FileUtil;
 import rhigin.util.ListMap;
 import rhigin.util.OList;
 
@@ -394,6 +396,9 @@ public class ExecuteScript {
 	private static final void settingRhiginObject(Context ctx, Scriptable scope) throws Exception {
 		// rhiginバージョンをセット.
 		scope.put("VERSION", scope, RhiginConstants.VERSION);
+		
+		// RHIGIN_HOMEをセット.
+		scope.put("RHIGIN_HOME", scope, RhiginConstants.RHIGIN_HOME);
 
 		// オブジェクトの登録.
 		ConsoleObject.regFunctions(scope);

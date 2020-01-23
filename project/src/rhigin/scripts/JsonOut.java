@@ -240,6 +240,8 @@ public class JsonOut {
 			} else {
 				buf.append("\"").append(Json.dateToString(d)).append("\"");
 			}
+		} else if(m instanceof Throwable) {
+			buf.append("\"").append(m).append("\"");
 		} else {
 			buf.append("null");
 		}

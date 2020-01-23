@@ -1,5 +1,9 @@
 package rhigin.util;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.util.List;
+
 import rhigin.RhiginException;
 
 /**
@@ -274,12 +278,52 @@ public class Base64 {
 	 * @param n
 	 * @return
 	 */
-	public static final String btoa(String n) {
+	@SuppressWarnings("rawtypes")
+	public static final String btoa(Object n) {
 		try {
-			return encode(n.getBytes("UTF8"));
+			if (n instanceof byte[]) {
+				return Base64.encode((byte[]) n);
+			} else if (n instanceof InputStream) {
+				InputStream in = null;
+				try {
+					int len;
+					byte[] bin = new byte[1024];
+					in = (InputStream) n;
+					ByteArrayOutputStream out = new ByteArrayOutputStream();
+					while ((len = in.read(bin)) != -1) {
+						out.write(bin, 0, len);
+					}
+					out.flush();
+					bin = out.toByteArray();
+					out.close();
+					out = null;
+					in.close();
+					in = null;
+					return Base64.encode(bin);
+				} catch (Exception e) {
+					throw new RhiginException(500, e);
+				} finally {
+					if(in != null) {
+						try {
+							in.close();
+						} catch(Exception e) {}
+					}
+				}
+			} else if(n instanceof List) {
+				List lst = (List)n;
+				int len = lst.size();
+				byte[] ret = new byte[len];
+				for(int i = 0; i < len; i ++) {
+					ret[i] = (byte)(Converter.convertInt(lst.get(i)) & 0x000000ff);
+				}
+				return Base64.encode(ret);
+			} else if(n instanceof String) {
+				return encode(Converter.convertString(n).getBytes("UTF8"));
+			}
 		} catch (Exception e) {
 			throw new RhiginException(500, e);
 		}
+		throw new RhiginException(500, "btoa Unknown type information is set: " + n);
 	}
 
 	/**

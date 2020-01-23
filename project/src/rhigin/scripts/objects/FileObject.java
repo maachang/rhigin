@@ -18,6 +18,7 @@ import rhigin.scripts.RhiginInstanceObject.ObjectFunction;
 import rhigin.scripts.RhiginObject;
 import rhigin.util.Converter;
 import rhigin.util.FileUtil;
+import rhigin.util.FixedArray;
 import rhigin.util.FixedSearchArray;
 import rhigin.util.Stats;
 
@@ -67,7 +68,13 @@ public class FileObject {
 						FileUtil.delete("" + args[0]);
 						return Undefined.instance;
 					case 7: // list
-						return FileUtil.list("" + args[0]);
+					{
+						String[] ret = FileUtil.list("" + args[0]);
+						if(ret == null || ret.length == 0) {
+							return new FixedArray<String>(new String[] {});
+						}
+						return new FixedArray<String>(ret);
+					}
 					case 8: // length
 						return FileUtil.getFileLength("" + args[0]);
 					case 9: // birthtime
