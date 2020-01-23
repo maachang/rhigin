@@ -40,7 +40,7 @@ public class RhiginBatch {
 				System.exit(1);
 				return;
 			}
-			RhiginConfig conf = RhiginStartup.initLogFactory(false);
+			RhiginConfig conf = RhiginStartup.initLogFactory(false, true);
 			RhiginBatch o = new RhiginBatch();
 			// バッチ実行.
 			if (!o.batch(conf, fileName)) {

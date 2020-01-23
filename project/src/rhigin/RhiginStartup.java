@@ -54,21 +54,23 @@ public class RhiginStartup {
 	 * ログファクトリの初期化.
 	 * 
 	 * @param server
+	 * @param console
 	 * @param args
 	 * @return RhiginConfig
 	 */
-	public static final RhiginConfig initLogFactory(boolean server, String[] args) {
-		return initLogFactory(server, false, args);
+	public static final RhiginConfig initLogFactory(boolean server, boolean console, String[] args) {
+		return initLogFactory(server, console, false, args);
 	}
 	
 	/**
 	 * ログファクトリの初期化.
 	 * 
 	 * @param server
+	 * @param console
 	 * @return RhiginConfig
 	 */
-	public static final RhiginConfig initLogFactory(boolean server) {
-		return initLogFactory(server, false);
+	public static final RhiginConfig initLogFactory(boolean server, boolean console) {
+		return initLogFactory(server, console, false);
 	}
 
 	
@@ -76,28 +78,30 @@ public class RhiginStartup {
 	 * ログファクトリの初期化.
 	 * 
 	 * @param server
+	 * @param console
 	 * @param noScript
 	 * @param args
 	 * @return RhiginConfig
 	 */
-	public static final RhiginConfig initLogFactory(boolean server, boolean noScript, String[] args) {
+	public static final RhiginConfig initLogFactory(boolean server, boolean console, boolean noScript, String[] args) {
 		// Args管理オブジェクトにセット.
 		Args.set(args);
-		return initLogFactory(server, noScript);
+		return initLogFactory(server, console, noScript);
 	}
 	
 	/**
 	 * ログファクトリの初期化.
 	 * 
 	 * @param server
+	 * @param console
 	 * @param noScript
 	 * @return RhiginConfig
 	 */
-	public static final RhiginConfig initLogFactory(boolean server, boolean noScript) {
+	public static final RhiginConfig initLogFactory(boolean server, boolean console, boolean noScript) {
 		RhiginConfig config = null;
 		try {
-			// webServerモードをセット.
-			Http.setWebServerMode(server);
+			// モードをセット.
+			Http.setMode(server, console);
 
 			// function, objectの初期化.
 			if(!noScript) {
@@ -138,6 +142,15 @@ public class RhiginStartup {
 		}
 		return config;
 	}
+	
+	/**
+	 * ロード済みのRhiginConfigを取得.
+	 * 
+	 * @return RhiginConfig
+	 */
+	public static final RhiginConfig getConfig() {
+		return ExecuteScript.getConfig();
+	}
 
 	/**
 	 * RhiginEnvを取得.
@@ -169,6 +182,7 @@ public class RhiginStartup {
 	 */
 	public static final HttpInfo startup(RhiginConfig config) throws Exception {
 		boolean server = Http.isWebServerMode();
+		boolean console = Http.isConsoleMode();
 		
 		// スレッドプーリングの初期化.
 		// ThreadFunction.init(config);
@@ -176,8 +190,8 @@ public class RhiginStartup {
 		// ExecuteScriptにRhiginConfigの要素をセット.
 		ExecuteScript.addOriginals("config", config);
 		
-		// サーバモードの場合.
-		if(server) {
+		// サーバモード及び、コンソールモードの場合.
+		if(server || console) {
 			// ExecuteScriptにMimeTypeの要素をセット.
 			MimeType mime = MimeType.createMime(config.get("mime"));
 			ExecuteScript.addOriginals("mime", mime);
@@ -251,7 +265,7 @@ public class RhiginStartup {
 
 		// HttpInfoを生成して返却.
 		HttpInfo httpInfo = new HttpInfo();
-		if(server) {
+		if(server || console) {
 			HttpInfo.load(httpInfo, config.get("http"));
 		}
 		return httpInfo;

@@ -102,7 +102,7 @@ public class LevelJsCore {
 	public RhiginEndScriptCall[] startup(String configName, String[] args) {
 		checkDestroy();
 		if(!startup.get()) {
-			final RhiginConfig conf = RhiginStartup.initLogFactory(false, true, args);
+			final RhiginConfig conf = RhiginStartup.getConfig();
 			return startup(conf, configName);
 		}
 		return new RhiginEndScriptCall[] {

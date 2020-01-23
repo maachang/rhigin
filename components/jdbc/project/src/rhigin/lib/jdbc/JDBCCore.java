@@ -16,8 +16,8 @@ import rhigin.lib.jdbc.runner.JDBCCloseable;
 import rhigin.lib.jdbc.runner.JDBCConnect;
 import rhigin.lib.jdbc.runner.JDBCConnect.Time12;
 import rhigin.lib.jdbc.runner.JDBCException;
-import rhigin.lib.jdbc.runner.JDBCSystemCloseable;
 import rhigin.lib.jdbc.runner.JDBCKind;
+import rhigin.lib.jdbc.runner.JDBCSystemCloseable;
 import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.RhiginEndScriptCall;
 import rhigin.util.FixedArray;
@@ -100,7 +100,7 @@ public class JDBCCore {
 	public RhiginEndScriptCall[] startup(String configName, String[] args) {
 		checkDestroy();
 		if(!startup.get()) {
-			final RhiginConfig conf = RhiginStartup.initLogFactory(false, true, args);
+			final RhiginConfig conf = RhiginStartup.getConfig();
 			return startup(conf, configName);
 		}
 		return new RhiginEndScriptCall[] { closeable, new JDBCSystemCloseable(this) };

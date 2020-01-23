@@ -204,7 +204,7 @@ public class Base64 {
 	public static final int decode(final byte[] out, final int off, final String base64) {
 		int i, j, k, len, allLen, etc;
 		if (base64 == null || (allLen = base64.length()) <= 0) {
-			throw new IllegalArgumentException("引数は不正です");
+			throw new IllegalArgumentException();
 		}
 		for (i = allLen - 1, etc = 0; i >= 0; i--) {
 			if (base64.charAt(i) == Base64.REMAINDER_ENC) {

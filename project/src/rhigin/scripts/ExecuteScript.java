@@ -32,6 +32,7 @@ import rhigin.scripts.function.GlobalFunction;
 import rhigin.scripts.function.HttpClientFunction;
 import rhigin.scripts.function.LogFactoryFunction;
 import rhigin.scripts.function.NanoTimeFunction;
+import rhigin.scripts.function.NumericFunctions;
 import rhigin.scripts.function.ParseIntFunction;
 import rhigin.scripts.function.RandomFunction;
 import rhigin.scripts.function.RequireFunction;
@@ -51,8 +52,6 @@ import rhigin.scripts.objects.JwtObject;
 import rhigin.scripts.objects.LockObjects;
 import rhigin.scripts.objects.UniqueIdObject;
 import rhigin.scripts.objects.Xor128Object;
-import rhigin.util.EnvCache;
-import rhigin.util.FileUtil;
 import rhigin.util.ListMap;
 import rhigin.util.OList;
 
@@ -427,6 +426,7 @@ public class ExecuteScript {
 		ArgsFunction.regFunctions(scope);
 		RandomFunction.regFunctions(scope);
 		Base64Functions.regFunctions(scope);
+		NumericFunctions.regFunctions(scope);
 		HttpClientFunction.regFunctions(scope);
 		NanoTimeFunction.regFunctions(scope);
 		SystemTimeFunction.regFunctions(scope);

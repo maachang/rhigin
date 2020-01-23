@@ -356,7 +356,7 @@ public final class DateConvert {
 			buf.append("00".substring(tmp.length())).append(tmp).append(" ");
 			buf.append("GMT");
 		} catch (Exception e) {
-			throw new ConvertException("タイムスタンプ生成に失敗", e);
+			throw new ConvertException("Timestamp generation failed.", e);
 		}
 		return buf.toString();
 	}
@@ -394,7 +394,7 @@ public final class DateConvert {
 			buf.append("00".substring(tmp.length())).append(tmp).append(" ");
 			buf.append("GMT");
 		} catch (Exception e) {
-			throw new ConvertException("タイムスタンプ生成に失敗", e);
+			throw new ConvertException("Timestamp generation failed.", e);
 		}
 	}
 

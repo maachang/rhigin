@@ -234,7 +234,7 @@ public class JsonOut {
 		} else if(m instanceof java.util.Date) {
 			buf.append("\"").append(Json.dateToString((java.util.Date)m)).append("\"");
 		} else if (m instanceof IdScriptableObject) {
-			final java.util.Date d = Json.getJSDate((IdScriptableObject) m);
+			final java.util.Date d = Json.getJSNativeDate((IdScriptableObject) m);
 			if(d == null) {
 				buf.append("null");
 			} else {

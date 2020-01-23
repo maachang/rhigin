@@ -34,7 +34,7 @@ public class ParseIntFunction extends RhiginFunction {
 			Converter.convertInt(args[1]) : 10;
 		if(o instanceof String) {
 			String s = (String)o;
-			if(s.startsWith("0x") || s.startsWith("0X")) {
+			if(s.length() > 2 && s.charAt(0) == '0' && (s.charAt(1) == 'x' || s.charAt(1) == 'X')) {
 				s = s.substring(2);
 				radix = 16;
 			}

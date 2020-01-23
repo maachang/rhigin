@@ -66,7 +66,7 @@ public class RhiginTest {
 		
 		int ret = 0;
 		try {
-			RhiginConfig conf = RhiginStartup.initLogFactory(false);
+			RhiginConfig conf = RhiginStartup.initLogFactory(false, false);
 			if(test.executeTest(conf)) {
 				ret = 0;
 			} else {

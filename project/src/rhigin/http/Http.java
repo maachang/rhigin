@@ -25,6 +25,12 @@ public final class Http {
 
 	/** webサーバモード. **/
 	private static boolean webServer = false;
+	
+	/** コンソールモード. **/
+	private static boolean consoleMode = false;
+	
+	/** 同期. **/
+	private static final Object sync = new Object();
 
 	/**
 	 * HttpInfoを取得.
@@ -36,13 +42,16 @@ public final class Http {
 	}
 
 	/**
-	 * WebServerモードを設定.
+	 * 起動モードを設定.
 	 * 
-	 * @param mode
-	 *            [true]の場合、WebServerモードです.
+	 * @param web [true]の場合、WebServerモードです.
+	 * @param console [true]の場合、コンソールモードです.
 	 */
-	public static final void setWebServerMode(boolean mode) {
-		webServer = mode;
+	public static final void setMode(boolean web, boolean console) {
+		synchronized(sync) {
+			webServer = web;
+			consoleMode = console;
+		}
 	}
 
 	/**
@@ -51,7 +60,20 @@ public final class Http {
 	 * @return boolean [true]の場合Webサーバです.
 	 */
 	public static final boolean isWebServerMode() {
-		return webServer;
+		synchronized(sync) {
+			return webServer;
+		}
+	}
+	
+	/**
+	 * コンソールモードを取得.
+	 * 
+	 * @return boolean [true]の場合コンソールモードです.
+	 */
+	public static final boolean isConsoleMode() {
+		synchronized(sync) {
+			return consoleMode;
+		}
 	}
 
 	/**

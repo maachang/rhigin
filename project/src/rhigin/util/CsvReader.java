@@ -164,7 +164,7 @@ public class CsvReader implements Iterator<Map<String, Object>>, Closeable, Auto
 
 		}
 		if (setMode && cnt != out.size()) {
-			throw new IOException("データ数が違います:" + out.size() + "/" + cnt);
+			throw new IOException("The number of data is different: " + out.size() + "/" + cnt);
 		}
 		return true;
 	}
@@ -256,11 +256,11 @@ public class CsvReader implements Iterator<Map<String, Object>>, Closeable, Auto
 		// ヘッダ情報を取得.
 		String line = reader.readLine();
 		if (line == null) {
-			throw new IOException("CSV情報の読み込みに失敗しました");
+			throw new IOException("Reading of CSV information failed.");
 		}
 		List<String> list = new ArrayList<String>();
 		if (!getCsv(list, line, cutCode)) {
-			throw new IOException("CSV情報の読み込みに失敗しました");
+			throw new IOException("Reading of CSV information failed.");
 		}
 		final int len = list.size();
 		final String[] lst = new String[len];

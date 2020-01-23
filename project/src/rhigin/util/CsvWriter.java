@@ -101,10 +101,10 @@ public class CsvWriter implements Closeable, AutoCloseable {
 	 */
 	public CsvWriter init(String... c) throws IOException {
 		if (c == null || c.length == 0) {
-			throw new IOException("ヘッダ情報が不正です");
+			throw new IOException("Header information is invalid.");
 		}
 		if (columns != null) {
-			throw new IOException("既にヘッダは設定されています");
+			throw new IOException("Header is already set.");
 		}
 		int len = c.length;
 		columns = c;
@@ -128,7 +128,7 @@ public class CsvWriter implements Closeable, AutoCloseable {
 	 */
 	public CsvWriter writeLine(Map<String, Object> line) throws IOException {
 		if (columns == null) {
-			throw new IOException("初期化が行われていません");
+			throw new IOException("Not initialized.");
 		}
 		int len = columns.length;
 		Object value;
@@ -165,7 +165,7 @@ public class CsvWriter implements Closeable, AutoCloseable {
 		int len = line.length;
 		for (int i = 0; i < len; i += 2) {
 			if (line[i] == null) {
-				throw new IOException("カラム名がnullになっています");
+				throw new IOException("Column name is null.");
 			}
 			map.put(line[i].toString(), line[i + 1]);
 		}

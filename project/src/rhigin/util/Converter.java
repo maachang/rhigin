@@ -54,6 +54,15 @@ public final class Converter {
 		}
 		char c;
 		String s = (String) num;
+		if(s.length() > 2 && s.charAt(0) == '0' && (s.charAt(1) == 'x' || s.charAt(1) == 'X')) {
+			// 16進数文字列の場合.
+			try {
+				Long.parseLong(s.substring(2), 16);
+			} catch(Exception e) {
+				return false;
+			}
+			return true;
+		}
 		int i, start, end, flg, dot;
 		start = flg = 0;
 		dot = -1;
@@ -103,12 +112,18 @@ public final class Converter {
 	 */
 	public static final boolean isFloat(Object n) {
 		if (Converter.isNumeric(n)) {
+			String s;
 			if (n instanceof Float || n instanceof Double || n instanceof BigDecimal) {
 				return true;
 			} else if (n instanceof String) {
-				return ((String) n).indexOf(".") != -1;
+				s = (String)n;
+			} else {
+				s = n.toString();
 			}
-			return n.toString().indexOf(".") != -1;
+			if(s.length() > 2 && s.charAt(0) == '0' && (s.charAt(1) == 'x' || s.charAt(1) == 'X')) {
+				return false;
+			}
+			return s.indexOf(".") != -1;
 		}
 		return false;
 	}
@@ -132,7 +147,7 @@ public final class Converter {
 		if (o instanceof String) {
 			return Converter.parseBoolean((String) o);
 		}
-		throw new ConvertException("BOOL型変換に失敗しました[" + o + "]");
+		throw new ConvertException("BOOL conversion failed: " + o);
 	}
 
 	/**
@@ -154,7 +169,7 @@ public final class Converter {
 		} else if (o instanceof Boolean) {
 			return ((Boolean) o).booleanValue() ? 1 : 0;
 		}
-		throw new ConvertException("Int型変換に失敗しました[" + o + "]");
+		throw new ConvertException("Int conversion failed: " + o);
 	}
 
 	/**
@@ -176,7 +191,7 @@ public final class Converter {
 		} else if (o instanceof Boolean) {
 			return ((Boolean) o).booleanValue() ? 1L : 0L;
 		}
-		throw new ConvertException("Long型変換に失敗しました[" + o + "]");
+		throw new ConvertException("Long conversion failed: " + o);
 	}
 
 	/**
@@ -197,7 +212,7 @@ public final class Converter {
 		} else if (o instanceof Boolean) {
 			return ((Boolean) o).booleanValue() ? 1F : 0F;
 		}
-		throw new ConvertException("Float型変換に失敗しました[" + o + "]");
+		throw new ConvertException("Float conversion failed: " + o);
 	}
 
 	/**
@@ -219,7 +234,7 @@ public final class Converter {
 		} else if (o instanceof Boolean) {
 			return ((Boolean) o).booleanValue() ? 1D : 0D;
 		}
-		throw new ConvertException("Double型変換に失敗しました[" + o + "]");
+		throw new ConvertException("Double conversion failed: " + o);
 	}
 
 	/**
@@ -270,7 +285,7 @@ public final class Converter {
 			}
 			return DateConvert.getDate((String) o);
 		}
-		throw new ConvertException("java.sql.Date型変換に失敗しました[" + o + "]");
+		throw new ConvertException("java.sql.Date conversion failed: " + o);
 	}
 
 	/** 時間のみ表現. **/
@@ -305,7 +320,7 @@ public final class Converter {
 			}
 			return DateConvert.getTime((String) o);
 		}
-		throw new ConvertException("java.sql.Time型変換に失敗しました[" + o + "]");
+		throw new ConvertException("java.sql.Time conversion failed: " + o);
 	}
 
 	/**
@@ -336,7 +351,7 @@ public final class Converter {
 				return new java.sql.Timestamp(d.getTime());
 			}
 		}
-		throw new ConvertException("java.sql.Timestamp型変換に失敗しました: " + o);
+		throw new ConvertException("java.sql.Timestamp conversion failed: " + o);
 	}
 
 	/**
@@ -362,7 +377,7 @@ public final class Converter {
 			}
 			return DateConvert.stringToDate((String) o);
 		}
-		throw new ConvertException("java.util.Date型変換に失敗しました: " + o);
+		throw new ConvertException("java.util.Date conversion failed: " + o);
 	}
 
 	/**
@@ -389,7 +404,7 @@ public final class Converter {
 			}
 		}
 		if (flg == 0) {
-			throw new ConvertException("Boolean変換に失敗しました: " + s);
+			throw new ConvertException("Boolean conversion failed: " + s);
 		}
 
 		if (isNumeric(s)) {
@@ -399,7 +414,7 @@ public final class Converter {
 		} else if (eqEng(s, start, len, "false") || eqEng(s, start, len, "f") || eqEng(s, start, len, "off")) {
 			return false;
 		}
-		throw new ConvertException("Boolean変換に失敗しました: " + s);
+		throw new ConvertException("Boolean conversion failed: " + s);
 	}
 
 	/**
@@ -432,7 +447,7 @@ public final class Converter {
 			}
 		}
 		if (v == 0) {
-			throw new ConvertException("Int数値変換に失敗しました: " + num);
+			throw new ConvertException("Int conversion failed: " + num);
 		}
 
 		v = 1;
@@ -442,7 +457,7 @@ public final class Converter {
 				ret += (v * (c - '0'));
 				v *= 10;
 			} else {
-				throw new ConvertException("Int数値変換に失敗しました: " + num);
+				throw new ConvertException("Int conversion failed: " + num);
 			}
 		}
 		return mFlg ? ret * -1 : ret;
@@ -479,7 +494,7 @@ public final class Converter {
 			}
 		}
 		if (flg == 0) {
-			throw new ConvertException("Long数値変換に失敗しました: " + num);
+			throw new ConvertException("Long conversion failed: " + num);
 		}
 
 		long v = 1L;
@@ -489,7 +504,7 @@ public final class Converter {
 				ret += (v * (long) (c - '0'));
 				v *= 10L;
 			} else {
-				throw new ConvertException("Long数値変換に失敗しました: " + num);
+				throw new ConvertException("Long conversion failed: " + num);
 			}
 		}
 		return mFlg ? ret * -1L : ret;
@@ -524,7 +539,7 @@ public final class Converter {
 			} else if (flg == 1 && CHECK_CHAR[c] != 0) {
 				if (c == '.') {
 					if (dot != -1) {
-						throw new ConvertException("Float数値変換に失敗しました: " + num);
+						throw new ConvertException("Float conversion failed: " + num);
 					}
 					dot = i;
 				} else {
@@ -534,7 +549,7 @@ public final class Converter {
 			}
 		}
 		if (flg == 0) {
-			throw new ConvertException("Float数値変換に失敗しました: " + num);
+			throw new ConvertException("Float conversion failed: " + num);
 		}
 
 		float v = 1f;
@@ -545,7 +560,7 @@ public final class Converter {
 					ret += (v * (float) (c - '0'));
 					v *= 10f;
 				} else {
-					throw new ConvertException("Float数値変換に失敗しました: " + num);
+					throw new ConvertException("Float conversion failed: " + num);
 				}
 			}
 			return mFlg ? ret * -1f : ret;
@@ -556,7 +571,7 @@ public final class Converter {
 					ret += (v * (float) (c - '0'));
 					v *= 10f;
 				} else {
-					throw new ConvertException("Float数値変換に失敗しました: " + num);
+					throw new ConvertException("Float conversion failed: " + num);
 				}
 			}
 			float dret = 0f;
@@ -567,7 +582,7 @@ public final class Converter {
 					dret += (v * (float) (c - '0'));
 					v *= 10f;
 				} else {
-					throw new ConvertException("Float数値変換に失敗しました: " + num);
+					throw new ConvertException("Float conversion failed: " + num);
 				}
 			}
 			return mFlg ? (ret + (dret / v)) * -1f : ret + (dret / v);
@@ -603,7 +618,7 @@ public final class Converter {
 			} else if (flg == 1 && CHECK_CHAR[c] != 0) {
 				if (c == '.') {
 					if (dot != -1) {
-						throw new ConvertException("Double数値変換に失敗しました: " + num);
+						throw new ConvertException("Double conversion failed: " + num);
 					}
 					dot = i;
 				} else {
@@ -613,7 +628,7 @@ public final class Converter {
 			}
 		}
 		if (flg == 0) {
-			throw new ConvertException("Double数値変換に失敗しました: " + num);
+			throw new ConvertException("Double conversion failed: " + num);
 		}
 
 		double v = 1d;
@@ -624,7 +639,7 @@ public final class Converter {
 					ret += (v * (double) (c - '0'));
 					v *= 10d;
 				} else {
-					throw new ConvertException("Double数値変換に失敗しました: " + num);
+					throw new ConvertException("Double conversion failed: " + num);
 				}
 			}
 			return mFlg ? ret * -1d : ret;
@@ -635,7 +650,7 @@ public final class Converter {
 					ret += (v * (double) (c - '0'));
 					v *= 10d;
 				} else {
-					throw new ConvertException("Double数値変換に失敗しました: " + num);
+					throw new ConvertException("Double conversion failed: " + num);
 				}
 			}
 			double dret = 0d;
@@ -646,7 +661,7 @@ public final class Converter {
 					dret += (v * (double) (c - '0'));
 					v *= 10d;
 				} else {
-					throw new ConvertException("Double数値変換に失敗しました: " + num);
+					throw new ConvertException("Double conversion failed: " + num);
 				}
 			}
 			return mFlg ? (ret + (dret / v)) * -1d : ret + (dret / v);
@@ -866,7 +881,7 @@ public final class Converter {
 		} else if (c >= 'a' && c <= 'f') {
 			return ((int) (c - 'a') & 0x0000000f) + 10;
 		}
-		throw new IOException("16進[" + c + "]数値ではありません");
+		throw new IOException("Not a hexadecimal value: " + c);
 	}
 
 	/** Hex文字列変換. **/
@@ -1034,7 +1049,7 @@ public final class Converter {
 				ret |= 15 << n;
 				break;
 			default:
-				throw new IOException("16進文字列に不正な文字列を検知: " + s);
+				throw new IOException("Not a hexadecimal value: " + s);
 			}
 			n += 4;
 		}

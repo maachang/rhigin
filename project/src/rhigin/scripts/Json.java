@@ -106,15 +106,7 @@ public final class Json {
 				encodeJsonArray(buf, base, target);
 			}
 		} else if (target instanceof IdScriptableObject) {
-			final java.util.Date d = getJSDate((IdScriptableObject) target);
-			if (d == null) {
-				buf.append("null");
-			} else {
-				buf.append("\"").append(dateToString(d)).append("\"");
-			}
-		} else if (target instanceof RhiginInstanceObject &&
-			"JDate".equals(((RhiginInstanceObject)target).getName())) {
-			final java.util.Date d = (java.util.Date)((RhiginInstanceObject)target).getParams(0);
+			final java.util.Date d = getJSNativeDate((IdScriptableObject) target);
 			if (d == null) {
 				buf.append("null");
 			} else {
@@ -420,8 +412,8 @@ public final class Json {
 		return DateConvert.stringToDate(s);
 	}
 
-	/** JSDateオブジェクトの場合は、java.util.Dateに変換. **/
-	protected static final java.util.Date getJSDate(IdScriptableObject io) {
+	/** JSのNativeDateオブジェクトの場合は、java.util.Dateに変換. **/
+	protected static final java.util.Date getJSNativeDate(IdScriptableObject io) {
 		if ("Date".equals(io.getClassName())) {
 			// NativeDate.
 			try {
@@ -430,7 +422,7 @@ public final class Json {
 				// これは rhinoのContextの範囲内でないとエラーになるので.
 				final Method md = io.getClass().getDeclaredMethod("getJSTimeValue");
 				md.setAccessible(true);
-				return new java.util.Date(Converter.convertLong(md.invoke(io)));
+				return JDateObject.newObject(Converter.convertLong(md.invoke(io)));
 			} catch (Exception e) {
 				// エラーの場合は処理しない.
 			}

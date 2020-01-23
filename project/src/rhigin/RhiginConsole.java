@@ -31,7 +31,7 @@ public class RhiginConsole {
 		}
 		int ret = 0;
 		try {
-			RhiginConfig conf = RhiginStartup.initLogFactory(false);
+			RhiginConfig conf = RhiginStartup.initLogFactory(false, true);
 			RhiginConsole o = new RhiginConsole();
 			o.console(conf, new ConsoleInKey(".rcons"));
 		} catch(Throwable t) {
