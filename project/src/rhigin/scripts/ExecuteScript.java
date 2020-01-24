@@ -14,15 +14,16 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Wrapper;
 
-import rhigin.RhiginConfig;
 import rhigin.RhiginConstants;
 import rhigin.RhiginException;
+import rhigin.RhiginStartup;
 import rhigin.logs.Log;
 import rhigin.logs.LogFactory;
 import rhigin.scripts.compile.CompileCache;
 import rhigin.scripts.function.ArgsFunction;
 import rhigin.scripts.function.Base64Functions;
 import rhigin.scripts.function.BinaryFunction;
+import rhigin.scripts.function.ColorOutFunction;
 import rhigin.scripts.function.EntityFunctions;
 import rhigin.scripts.function.EvalFunction;
 import rhigin.scripts.function.GcFunction;
@@ -41,6 +42,7 @@ import rhigin.scripts.function.ServerIdFunction;
 import rhigin.scripts.function.SleepFunction;
 import rhigin.scripts.function.SystemTimeFunction;
 import rhigin.scripts.function.ValidateFunction;
+import rhigin.scripts.objects.ColorOutObject;
 import rhigin.scripts.objects.ConsoleObject;
 import rhigin.scripts.objects.FCipherObject;
 import rhigin.scripts.objects.FCompObject;
@@ -398,6 +400,13 @@ public class ExecuteScript {
 		
 		// RHIGIN_HOMEをセット.
 		scope.put("RHIGIN_HOME", scope, RhiginConstants.RHIGIN_HOME);
+		
+		// OS情報をセット.
+		scope.put("OS_NAME", scope, RhiginStartup.getOsName());
+		scope.put("OS_BIT", scope, RhiginStartup.getOsBit());
+		
+		// コンフィグ情報をセット.
+		scope.put("config", scope, RhiginStartup.getConfig());
 
 		// オブジェクトの登録.
 		ConsoleObject.regFunctions(scope);
@@ -411,6 +420,7 @@ public class ExecuteScript {
 		UniqueIdObject.regFunctions(scope);
 		FCipherObject.regFunctions(scope);
 		FCompObject.regFunctions(scope);
+		ColorOutObject.regFunctions(scope);
 
 		// rhigin用の基本オブジェクトを設定.
 		RequireFunction.regFunctions(scope);
@@ -434,6 +444,7 @@ public class ExecuteScript {
 		ValidateFunction.regFunctions(scope);
 		EntityFunctions.regFunctions(scope);
 		RhiginEnvFunction.regFunctions(scope);
+		ColorOutFunction.regFunctions(scope);
 
 		// オリジナルオブジェクトを設定.
 		Object[] kv;
@@ -462,24 +473,6 @@ public class ExecuteScript {
 	 */
 	public static final ListMap getOriginal() {
 		return originalFunctionAndObjectList;
-	}
-	
-	/**
-	 * コンフィグオブジェクトを取得.
-	 * 
-	 * @return RhiginConfig
-	 */
-	public static final RhiginConfig getConfig() {
-		RhiginConfig ret = (RhiginConfig)originalFunctionAndObjectList.get("config");
-		if(ret == null) {
-			// 存在しない場合は、空を返却.
-			try {
-				ret = new RhiginConfig();
-			} catch(Exception e) {
-				throw new RhiginException(500, e);
-			}
-		}
-		return ret;
 	}
 	
 	/**

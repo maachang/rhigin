@@ -415,7 +415,6 @@ var expect = function(value) {
     o.toEqual = function(v) {
         try {
             var typeCheck = _checkType(value, v);
-            console.log("typeCheck:" + typeCheck);
             if(typeCheck != null) {
                 if(typeCheck) {
                     _result("toEqual", o["_$not"], true, value, v);

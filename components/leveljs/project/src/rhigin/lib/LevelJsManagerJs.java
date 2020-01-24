@@ -8,6 +8,7 @@ import org.mozilla.javascript.Undefined;
 
 import rhigin.RhiginConfig;
 import rhigin.RhiginException;
+import rhigin.RhiginStartup;
 import rhigin.lib.level.LevelJsCore;
 import rhigin.lib.level.operator.Operator;
 import rhigin.lib.level.operator.OperatorKeyType;
@@ -62,7 +63,7 @@ public class LevelJsManagerJs {
 					// スタートアップ登録されていない場合のみ実行.
 					if(!CORE.isStartup()) {
 						RhiginEndScriptCall[] es = null;
-						final RhiginConfig conf = ExecuteScript.getConfig();
+						final RhiginConfig conf = RhiginStartup.getConfig();
 						if(args.length > 0) {
 							es = CORE.startup(conf, "" + args[0]);
 						} else {

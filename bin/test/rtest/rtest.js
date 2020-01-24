@@ -77,10 +77,12 @@ var readArgsBySpecFiles = function(folder) {
         if(name.startsWith("/")) {
             name = name.substring(1).trim();
         }
-        if(isRTestFile(folder + "/" + name)) {
-            name = File.fullPath(folder + "/" + name);
+        name = File.fullPath(folder + "/" + name);
+        if(isRTestFile(name) || isRTestFile(name + ".js")) {
             if(File.isFile(name)) {
                 ret.push(name);
+            } else if(File.isFile(name + ".js")) {
+                ret.push(name + ".js");
             } else {
                 throw new Error(
                     "Spec file set by command argument does not exist: "
@@ -139,7 +141,8 @@ for(var i = 0; i < len; i ++) {
 var exitTime = Date.now() - startTime;
 
 //とりあえず表示させる.
-console.log("len: " + len + " time: " + exitTime + " msec");
-console.log(JSON.toString(result));
+println("len: " + len + " time: " + exitTime + " msec");
+println(colorOut("<#blue>hoge<#/end>moge"));
+println(JSON.toString(result));
 
 })(this);

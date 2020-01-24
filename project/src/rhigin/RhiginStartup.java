@@ -28,6 +28,7 @@ import rhigin.util.Args;
 import rhigin.util.ArrayMap;
 import rhigin.util.EnvCache;
 import rhigin.util.FileUtil;
+import rhigin.util.IsOs;
 import rhigin.util.OList;
 import rhigin.util.ObjectList;
 
@@ -37,7 +38,7 @@ import rhigin.util.ObjectList;
 public class RhiginStartup {
 	protected RhiginStartup() {
 	}
-
+	
 	/** サーバ起動時のスクリプトファイル名. **/
 	public static final String STARTUP_JS = "./index.js";
 
@@ -49,6 +50,38 @@ public class RhiginStartup {
 
 	/** システム終了時の処理を一時格納先. **/
 	private static final String STARTUP_EXIT_SYSTEM_CALL_SCRIPT = "_$exitSystemCallScripts";
+	
+	// コンフィグ情報.
+	private static RhiginConfig config = null;
+	
+	// OS名.
+	private static final String osName;
+	
+	// OSビット.
+	private static final int osBit;
+	
+	static {
+		// OS情報を取得.
+		Object[] v = createOs();
+		osName = (String)v[0];
+		osBit = (Integer)v[1];
+	}
+	
+	// OSの情報を生成.
+	private static final Object[] createOs() {
+		IsOs io = IsOs.getInstance();
+		int os = io.getOS();
+		String name = "etc";
+		if(os == IsOs.OS_WIN9X || os == IsOs.OS_WINNT) {
+			name = "Windows";
+		} else if(os == IsOs.OS_MACINTOSH && os == IsOs.OS_MAC_OS_X) {
+			name = "Mac";
+		} else if(os == IsOs.OS_UNIX) {
+			name = "Linux";
+		}
+		return new Object[] {name, io.getBit()};
+	}
+
 	
 	/**
 	 * ログファクトリの初期化.
@@ -129,12 +162,15 @@ public class RhiginStartup {
 				throw new RhiginException("Config folder does not exist: " + confDir);
 			}
 			
+			// コンフィグ情報をロード.
 			config = new RhiginConfig(confDir);
 
 			// ログファクトリの初期化.
 			if (config.has("logger")) {
 				LogFactory.setting(config.get("logger"));
 			}
+			// コンフィグ情報をセット.
+			setConfig(config);
 		} catch (Exception e) {
 			// エラーが出る場合は、処理終了.
 			e.printStackTrace();
@@ -144,12 +180,39 @@ public class RhiginStartup {
 	}
 	
 	/**
+	 * RhiginConfigを設定.
+	 * 
+	 * @param conf
+	 */
+	public static final void setConfig(RhiginConfig conf) {
+		config = conf;
+	}
+	
+	/**
 	 * ロード済みのRhiginConfigを取得.
 	 * 
 	 * @return RhiginConfig
 	 */
 	public static final RhiginConfig getConfig() {
-		return ExecuteScript.getConfig();
+		return config;
+	}
+	
+	/**
+	 * OS名を取得.
+	 * 
+	 * @return Windows, Mac, Linux, etc.
+	 */
+	public static final String getOsName() {
+		return osName;
+	}
+	
+	/**
+	 * Osビットを取得.
+	 * 
+	 * @return int 32 or 64.
+	 */
+	public static final int getOsBit() {
+		return osBit;
 	}
 
 	/**
@@ -187,8 +250,10 @@ public class RhiginStartup {
 		// スレッドプーリングの初期化.
 		// ThreadFunction.init(config);
 
-		// ExecuteScriptにRhiginConfigの要素をセット.
-		ExecuteScript.addOriginals("config", config);
+		// コンフィグ情報をセット.
+		if(getConfig() != config) {
+			setConfig(config);
+		}
 		
 		// サーバモード及び、コンソールモードの場合.
 		if(server || console) {
@@ -270,7 +335,7 @@ public class RhiginStartup {
 		}
 		return httpInfo;
 	}
-
+	
 	// rhiginスクリプトでのfunction, Objectの初期化処理.
 	private static final void initRhiginScriptFunctionObject() {
 		LockObjects.init();
