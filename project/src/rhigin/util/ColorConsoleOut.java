@@ -45,7 +45,7 @@ public class ColorConsoleOut {
 		int type = -1;
 		if(os == IsOs.OS_WIN9X || os == IsOs.OS_WINNT) {
 			type = IsOs.OS_WINNT;
-		} else if(os == IsOs.OS_MACINTOSH && os == IsOs.OS_MAC_OS_X) {
+		} else if(os == IsOs.OS_MACINTOSH || os == IsOs.OS_MAC_OS_X) {
 			type = IsOs.OS_MAC_OS_X;
 		} else if(os == IsOs.OS_UNIX) {
 			type = IsOs.OS_UNIX;
