@@ -74,7 +74,7 @@ public class RhiginStartup {
 		String name = "etc";
 		if(os == IsOs.OS_WIN9X || os == IsOs.OS_WINNT) {
 			name = "Windows";
-		} else if(os == IsOs.OS_MACINTOSH && os == IsOs.OS_MAC_OS_X) {
+		} else if(os == IsOs.OS_MACINTOSH || os == IsOs.OS_MAC_OS_X) {
 			name = "Mac";
 		} else if(os == IsOs.OS_UNIX) {
 			name = "Linux";

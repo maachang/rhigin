@@ -325,7 +325,7 @@ public class IsOs {
 
 			} else if (name.equals("macX")) {
 
-				ret = os_name.startsWith("mac os x") || os_name.startsWith("mac os");
+				ret = path_sp.equals(":") && (os_name.startsWith("mac os x") || os_name.startsWith("mac os"));
 
 			} else if (name.equals("mac")) {
 
