@@ -17,13 +17,14 @@ import rhigin.scripts.RhiginFunction;
  * rhiginでは、スクリプトの拡張を行っているので、Functionの命令はExecuteScriptで処理する.
  */
 public final class FunctionObject {
+	public static final String OBJECT_NAME = "Function";
 	
 	// インスタンス生成用オブジェクト.
 	private static final class Instance extends RhiginFunction {
 		@Override
 		public Scriptable jconstruct(Context ctx, Scriptable thisObj, Object[] args) {
 			if(args == null || args.length == 0 || !(args[args.length - 1] instanceof String)) {
-				argsException("Function");
+				argsException(OBJECT_NAME);
 				return null;
 			}
 			try {
@@ -47,7 +48,7 @@ public final class FunctionObject {
 
 		@Override
 		public final String getName() {
-			return "Function";
+			return OBJECT_NAME;
 		}
 
 		@Override
@@ -65,7 +66,7 @@ public final class FunctionObject {
 		
 		@Override
 		public String getName() {
-			return "Function";
+			return OBJECT_NAME;
 		}
 
 		@Override
@@ -87,6 +88,6 @@ public final class FunctionObject {
 	 *            登録先のスコープを設定します.
 	 */
 	public static final void regFunctions(Scriptable scope) {
-		scope.put("Function", scope, FunctionObject.getInstance());
+		scope.put(OBJECT_NAME, scope, FunctionObject.getInstance());
 	}
 }

@@ -11,10 +11,12 @@ import rhigin.util.Jwt;
 /**
  * [js]Jwtオブジェクト.
  * 
- * var a = Jwt.create("hoge", {a:"moge"}); var b = Jwt.payload(a); var c =
- * Jwt.validate("hoge", a);
+ * var a = Jwt.create("hoge", {a:"moge"});
+ * var b = Jwt.payload(a);
+ * var c = Jwt.validate("hoge", a);
  */
 public final class JwtObject {
+	public static final String OBJECT_NAME = "Jwt";
 	private static final class Execute extends RhiginFunction {
 		final int type;
 
@@ -60,17 +62,17 @@ public final class JwtObject {
 			switch (type) {
 			case 0:
 				if (!(args.length >= 2)) {
-					argsException("Jwt");
+					argsException(OBJECT_NAME);
 				}
 				break;
 			case 1:
 				if (!(args.length >= 1)) {
-					argsException("Jwt");
+					argsException(OBJECT_NAME);
 				}
 				break;
 			case 2:
 				if (!(args.length >= 2)) {
-					argsException("Jwt");
+					argsException(OBJECT_NAME);
 				}
 				break;
 			}
@@ -82,7 +84,7 @@ public final class JwtObject {
 	private static final RhiginFunction[] list = { new Execute(0), new Execute(1), new Execute(2) };
 
 	// シングルトン.
-	private static final RhiginObject THIS = new RhiginObject("Jwt", list);
+	private static final RhiginObject THIS = new RhiginObject(OBJECT_NAME, list);
 
 	public static final RhiginObject getInstance() {
 		return THIS;
@@ -95,6 +97,6 @@ public final class JwtObject {
 	 *            登録先のスコープを設定します.
 	 */
 	public static final void regFunctions(Scriptable scope) {
-		scope.put("Jwt", scope, JwtObject.getInstance());
+		scope.put(OBJECT_NAME, scope, JwtObject.getInstance());
 	}
 }

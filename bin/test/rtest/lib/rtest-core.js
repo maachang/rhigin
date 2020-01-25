@@ -169,8 +169,7 @@ var _checkType = function(value, check) {
                 return typeof(value) == "boolean";
             case types["date"]:
                 return typeof(value) == "object" &&
-                    (value instanceof Date || (typeof(_g["getClass"]) == "function" &&
-                        _g["getClass"](value) == "rhigin.scripts.objects.JDateObject$JDateInstanceObject"));
+                    (value instanceof Date || value instanceof JDate);
             case types["array"]:
                 return typeof(value) == "object" && value instanceof List;
             case types["object"]:
@@ -377,6 +376,52 @@ var it = function(name, func) {
     _now = before ;
 }
 
+// オブジェクトの完全一致チェック.
+var _equal = function(src, v) {
+    if(src == v) {
+        return true;
+    }
+    if(typeof(src) == "object" && typeof(v) == "object") {
+        if(src instanceof Array) {
+            if(v instanceof Array) {
+                return _eqArray(src, v);
+            }
+        } else if((src instanceof Date || src instanceof JDate) &&
+            (v instanceof Date || v instanceof JDate)) {
+            return src.getTime() == v.getTime();
+        } else {
+            return _eqObject(src, v);
+        }
+    }
+    return false;
+}
+var _eqObject = function(src, v) {
+    var cnt = 0;
+    for(var k in src) {
+        if(!_equal(src[k], v[k])) {
+            return false;
+        }
+        cnt ++;
+    }
+    var vCnt = 0;
+    for(var k in v) {
+        vCnt ++;
+    }
+    return cnt == vCnt;
+}
+var _eqArray = function(src, v) {
+    var len = src.length;
+    if(len != v.length) {
+        return false;
+    }
+    for(var i = 0; i < len; i ++) {
+        if(!_equal(src[i], v[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
 // テスト評価.
 var expect = function(value) {
     if(_nowIt == null) {
@@ -411,7 +456,7 @@ var expect = function(value) {
         }
         return o;
     };
-    // value == v であるか.
+    // value の中身と v が完全一致であるか.
     o.toEqual = function(v) {
         try {
             var typeCheck = _checkType(value, v);
@@ -422,14 +467,13 @@ var expect = function(value) {
                     _result("toEqual", o["_$not"], false, value, v);
                 }
             } else {
-                if(v == value) {
+                if(_equal(v, value)) {
                     _result("toEqual", o["_$not"], true, value, v);
                 } else {
                     _result("toEqual", o["_$not"], false, value, v);
                 }
             }
         } catch(e) {
-            console.log(e);
             _error("toEqual", o["_$not"]);
         }
         return o;

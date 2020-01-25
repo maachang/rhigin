@@ -26,6 +26,9 @@ import rhigin.util.Stats;
  * ファイル関連のオブジェクト.
  */
 public class FileObject {
+	public static final String OBJECT_NAME = "File";
+	public static final String STATS_OBJECT_NAME = "Stats";
+	
 	private static final class Execute extends RhiginFunction {
 		final int type;
 
@@ -116,7 +119,7 @@ public class FileObject {
 					case 17: // fileName
 						return FileUtil.getFileName("" + args[0]);
 					case 18: // stat
-						return new RhiginInstanceObject("Stats", FUNCTIONS, new Stats("" + args[0]));
+						return new RhiginInstanceObject(STATS_OBJECT_NAME, FUNCTIONS, new Stats("" + args[0]));
 					case 19: // inputStream
 						return new FileInputStream("" + args[0]);
 					case 20: // outputStream
@@ -183,22 +186,27 @@ public class FileObject {
 		// 引数チェック.
 		private final Object argsError(Object[] args) {
 			if (!(args.length >= 1)) {
-				argsException("File");
+				argsException(OBJECT_NAME);
 			}
 			switch (type) {
+			case 3:
+				if (!(args.length >= 2)) {
+					argsException(OBJECT_NAME);
+				}
+				break;
 			case 12:
 				if (!(args.length >= 2)) {
-					argsException("File");
+					argsException(OBJECT_NAME);
 				}
 				break;
 			case 13:
 				if (!(args.length >= 2)) {
-					argsException("File");
+					argsException(OBJECT_NAME);
 				}
 				break;
 			case 15:
 				if (!(args.length >= 2)) {
-					argsException("File");
+					argsException(OBJECT_NAME);
 				}
 				break;
 			}
@@ -327,10 +335,12 @@ public class FileObject {
 	};
 
 	// シングルトン.
-	private static final RhiginObject THIS = new RhiginObject("File", new RhiginFunction[] { new Execute(0), new Execute(1), new Execute(2), new Execute(3),
-		new Execute(4), new Execute(5), new Execute(6), new Execute(7), new Execute(8), new Execute(9),
-		new Execute(10), new Execute(11), new Execute(12), new Execute(13), new Execute(14), new Execute(15),
-		new Execute(16), new Execute(17), new Execute(18), new Execute(19), new Execute(20) });
+	private static final RhiginObject THIS = new RhiginObject(OBJECT_NAME, new RhiginFunction[] {
+		new Execute(0), new Execute(1), new Execute(2), new Execute(3), new Execute(4),
+		new Execute(5), new Execute(6), new Execute(7), new Execute(8), new Execute(9),
+		new Execute(10), new Execute(11), new Execute(12), new Execute(13), new Execute(14),
+		new Execute(15), new Execute(16), new Execute(17), new Execute(18), new Execute(19),
+		new Execute(20) });
 
 	public static final RhiginObject getInstance() {
 		return THIS;
@@ -343,6 +353,6 @@ public class FileObject {
 	 *            登録先のスコープを設定します.
 	 */
 	public static final void regFunctions(Scriptable scope) {
-		scope.put("File", scope, FileObject.getInstance());
+		scope.put(OBJECT_NAME, scope, FileObject.getInstance());
 	}
 }

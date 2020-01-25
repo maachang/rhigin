@@ -35,7 +35,7 @@ public class RhiginTest {
 			return;
 		} else if(params.isValue("-h", "--help")) {
 			System.out.println("rtest [-i] [-e] {specFileName} ...");
-			System.out.println(" Perform test execution for rhigin using 'jasmine'.");
+			System.out.println(" Perform test execution for rhigin.");
 			System.out.println("  [-i] [--init]");
 			System.out.println("    Perform test initialization.");
 			System.out.println("  [-e] [--env] {name}");

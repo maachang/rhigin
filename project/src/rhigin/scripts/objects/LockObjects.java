@@ -22,6 +22,9 @@ import rhigin.util.FixedSearchArray;
  * ロック管理オブジェクト.
  */
 public class LockObjects {
+	public static final String LOCK_OBJECT_NAME = "Lock";
+	public static final String READ_WRITE_LOCK_OBJECT_NAME = "RwLock";
+	
 
 	// WeakReference で GCで削除された情報.
 	private static final ReferenceQueue<Object> refQueue = new ReferenceQueue<Object>();
@@ -71,7 +74,7 @@ public class LockObjects {
 			}
 		}
 
-		// KeyWeakReference が GC で削除された場合の 空の valueを削除.
+		// KeyWeakReference が GC で削除された場合の 空の value を削除.
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public long execute() throws Throwable {
 			long ret = 0L;
@@ -155,7 +158,7 @@ public class LockObjects {
 
 		@Override
 		public String getName() {
-			return "Lock";
+			return LOCK_OBJECT_NAME;
 		}
 
 		// new Object() で呼ばれる.
@@ -179,7 +182,7 @@ public class LockObjects {
 			} else {
 				lock = new ReentrantLock();
 			}
-			return new RhiginInstanceObject("Lock", FUNCTIONS, lock);
+			return new RhiginInstanceObject(LOCK_OBJECT_NAME, FUNCTIONS, lock);
 		}
 		
 		@Override
@@ -236,7 +239,7 @@ public class LockObjects {
 
 		@Override
 		public String getName() {
-			return "RwLock";
+			return READ_WRITE_LOCK_OBJECT_NAME;
 		}
 		
 		// メソッド名群.
@@ -279,7 +282,7 @@ public class LockObjects {
 			} else {
 				lock = new ReentrantReadWriteLock();
 			}
-			return new RhiginInstanceObject("RwLock", FUNCTIONS, lock);
+			return new RhiginInstanceObject(READ_WRITE_LOCK_OBJECT_NAME, FUNCTIONS, lock);
 		}
 		
 		@Override
@@ -341,7 +344,7 @@ public class LockObjects {
 	 *            登録先のスコープを設定します.
 	 */
 	public static final void regFunctions(Scriptable scope) {
-		scope.put("Lock", scope, LockObject.getInstance());
-		scope.put("RwLock", scope, RwLockObject.getInstance());
+		scope.put(LOCK_OBJECT_NAME, scope, LockObject.getInstance());
+		scope.put(READ_WRITE_LOCK_OBJECT_NAME, scope, RwLockObject.getInstance());
 	}
 }

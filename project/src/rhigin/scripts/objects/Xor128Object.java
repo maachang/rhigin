@@ -20,6 +20,7 @@ import rhigin.util.Xor128;
  * var n = r.next();
  */
 public final class Xor128Object {
+	public static final String OBJECT_NAME = "Xor128";
 	
 	/**
 	 * オブジェクトを作成.
@@ -27,7 +28,7 @@ public final class Xor128Object {
 	 * @return
 	 */
 	public static final RhiginInstanceObject newObject(Xor128 x) {
-		return new RhiginInstanceObject("Xor128", FUNCTIONS, x);
+		return new RhiginInstanceObject(OBJECT_NAME, FUNCTIONS, x);
 	}
 	
 	private static final class InstanceObject extends RhiginFunction {
@@ -62,7 +63,7 @@ public final class Xor128Object {
 			switch (type) {
 			case 0:
 				if (!(len >= 1 && Converter.isNumeric(args[0]))) {
-					argsException("Xor128");
+					argsException(OBJECT_NAME);
 				}
 				break;
 			}
@@ -105,7 +106,7 @@ public final class Xor128Object {
 
 		@Override
 		public final String getName() {
-			return "Xor128";
+			return OBJECT_NAME;
 		}
 	};
 
@@ -121,6 +122,6 @@ public final class Xor128Object {
 	 *            登録先のスコープを設定します.
 	 */
 	public static final void regFunctions(Scriptable scope) {
-		scope.put("Xor128", scope, Xor128Object.getInstance());
+		scope.put(OBJECT_NAME, scope, Xor128Object.getInstance());
 	}
 }

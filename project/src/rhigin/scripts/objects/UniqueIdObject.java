@@ -14,6 +14,8 @@ import rhigin.util.UniqueId;
  * ユニークなIDを生成するオブジェクト.
  */
 public class UniqueIdObject {
+	public static final String OBJECT_NAME = "UniqueId";
+
 	// uniqueId管理.
 	private static final ThreadLocal<UniqueId> local = new ThreadLocal<UniqueId>();
 	private static final int RANDOM_COUNT = 8192 - 1;
@@ -82,7 +84,7 @@ public class UniqueIdObject {
 			case 3:
 			case 4:
 				if (!(args.length >= 1)) {
-					return argsException("UniqueId");
+					return argsException(OBJECT_NAME);
 				}
 			}
 			return Undefined.instance;
@@ -90,7 +92,7 @@ public class UniqueIdObject {
 	};
 
 	// シングルトン.
-	private static final RhiginObject THIS = new RhiginObject("UniqueId",
+	private static final RhiginObject THIS = new RhiginObject(OBJECT_NAME,
 		new Execute(0), new Execute(1), new Execute(2), new Execute(3),
 		new Execute(4));
 
@@ -105,6 +107,6 @@ public class UniqueIdObject {
 	 *            登録先のスコープを設定します.
 	 */
 	public static final void regFunctions(Scriptable scope) {
-		scope.put("UniqueId", scope, UniqueIdObject.getInstance());
+		scope.put(OBJECT_NAME, scope, UniqueIdObject.getInstance());
 	}
 }

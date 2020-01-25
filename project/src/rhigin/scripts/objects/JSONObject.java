@@ -17,6 +17,7 @@ import rhigin.scripts.RhiginObject;
  * console.log(JSON.toString(b));
  */
 public final class JSONObject {
+	public static final String OBJECT_NAME = "JSON";
 	private static final class Execute extends RhiginFunction {
 		final int type;
 
@@ -58,7 +59,7 @@ public final class JSONObject {
 			case 1:
 			case 2:
 				if (!(args.length >= 1)) {
-					argsException("JSON");
+					argsException(OBJECT_NAME);
 				}
 			}
 			return Undefined.instance;
@@ -69,7 +70,7 @@ public final class JSONObject {
 	private static final RhiginFunction[] list = { new Execute(0), new Execute(1), new Execute(2) };
 
 	// シングルトン.
-	private static final RhiginObject THIS = new RhiginObject("JSON", list);
+	private static final RhiginObject THIS = new RhiginObject(OBJECT_NAME, list);
 
 	public static final RhiginObject getInstance() {
 		return THIS;
@@ -82,6 +83,6 @@ public final class JSONObject {
 	 *            登録先のスコープを設定します.
 	 */
 	public static final void regFunctions(Scriptable scope) {
-		scope.put("JSON", scope, JSONObject.getInstance());
+		scope.put(OBJECT_NAME, scope, JSONObject.getInstance());
 	}
 }

@@ -22,19 +22,19 @@ public class ColorConsoleOut {
 	private static final String green   = "\u001b[00;32m"; // 緑.
 	private static final String yellow  = "\u001b[00;33m"; // 黄色.
 	private static final String blue    = "\u001b[00;34m"; // 青.
-	private static final String purple  = "\u001b[00;35m"; // 紫.
+	private static final String magenta = "\u001b[00;35m"; // 紫.
 	private static final String cyan    = "\u001b[00;36m"; // 水色.
 	private static final String white   = "\u001b[00;37m"; // 白.
 	private static final String endCode = "\u001b[00m";    // 元に戻す.
 	
 	// カラー要素.
 	private static final String[] colorValues = new String[] {
-		black, red, green, yellow, blue, purple, cyan, white
+		black, red, green, yellow, blue, magenta, cyan, white
 	};
 	
 	// カラーテーブル.
 	private static final FixedSearchArray<String> colorNames = new FixedSearchArray<String>(
-		"black", "red", "green", "yellow", "blue", "purple", "cyan", "white"
+		"black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"
 	);
 	
 	// OS名を取得.
@@ -181,10 +181,11 @@ public class ColorConsoleOut {
 	 * @return boolean [true]の場合、利用可能です.
 	 */
 	public boolean useColorMode() {
-		if(OS_TYPE == IsOs.OS_UNIX || OS_TYPE == IsOs.OS_MAC_OS_X) {
-			return colorMode.get();
-		}
-		return false;
+		return colorMode.get() && (OS_TYPE == IsOs.OS_UNIX || OS_TYPE == IsOs.OS_MAC_OS_X);
+		//if(OS_TYPE == IsOs.OS_UNIX || OS_TYPE == IsOs.OS_MAC_OS_X) {
+		//	return colorMode.get();
+		//}
+		//return false;
 	}
 	
 	/**

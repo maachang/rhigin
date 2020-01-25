@@ -14,6 +14,7 @@ import rhigin.util.FCompBuffer;
  * 簡易圧縮解凍処理.
  */
 public class FCompObject {
+	public static final String OBJECT_NAME = "FComp";
 	private static final class Execute extends RhiginFunction {
 		final int type;
 
@@ -75,7 +76,7 @@ public class FCompObject {
 			case 0:
 			case 1:
 				if (!(args.length >= 1 && args[0] instanceof byte[])) {
-					argsException("FComp");
+					argsException(OBJECT_NAME);
 				}
 			}
 			return Undefined.instance;
@@ -83,7 +84,7 @@ public class FCompObject {
 	};
 
 	// シングルトン.
-	private static final RhiginObject THIS = new RhiginObject("FComp", new RhiginFunction[] {
+	private static final RhiginObject THIS = new RhiginObject(OBJECT_NAME, new RhiginFunction[] {
 		new Execute(0), new Execute(1) });
 
 	public static final RhiginObject getInstance() {
@@ -97,6 +98,6 @@ public class FCompObject {
 	 *            登録先のスコープを設定します.
 	 */
 	public static final void regFunctions(Scriptable scope) {
-		scope.put("FComp", scope, FCompObject.getInstance());
+		scope.put(OBJECT_NAME, scope, FCompObject.getInstance());
 	}
 }

@@ -67,7 +67,10 @@ public abstract class AbstractRhiginFunction implements Function {
 	}
 
 	@Override
-	public boolean hasInstance(Scriptable arg0) {
+	public boolean hasInstance(Scriptable instance) {
+		if(instance != null) {
+			return this.getClassName().equals(instance.getClassName());
+		}
 		return false;
 	}
 

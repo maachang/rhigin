@@ -16,9 +16,11 @@ import rhigin.scripts.RhiginObject;
 /**
  * [js]Consoleオブジェクト.
  * 
- * console.log("hogehoge"); console.debug("mogemoge");
+ * console.log("hogehoge");
+ * console.debug("mogemoge");
  */
 public class ConsoleObject {
+	public static final String OBJECT_NAME = "console";
 	private static final Log LOG = LogFactory.create("console");
 
 	// ログ出力用.
@@ -127,7 +129,7 @@ public class ConsoleObject {
 	}
 
 	// シングルトン.
-	private static final RhiginObject THIS = new RhiginObject("console", new RhiginFunction[] {
+	private static final RhiginObject THIS = new RhiginObject(OBJECT_NAME, new RhiginFunction[] {
 			new Execute(0), new Execute(1), new Execute(2), new Execute(3),
 			new Execute(4), new Execute(5), new Execute(6) });
 
@@ -142,6 +144,6 @@ public class ConsoleObject {
 	 *            登録先のスコープを設定します.
 	 */
 	public static final void regFunctions(Scriptable scope) {
-		scope.put("console", scope, ConsoleObject.getInstance());
+		scope.put(OBJECT_NAME, scope, ConsoleObject.getInstance());
 	}
 }

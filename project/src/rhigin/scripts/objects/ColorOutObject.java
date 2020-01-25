@@ -16,6 +16,8 @@ import rhigin.util.FixedSearchArray;
  * [js]カラーコンソール出力用オブジェクト.
  */
 public class ColorOutObject {
+	public static final String OBJECT_NAME = "ColorOut";
+	
 	// カーソル情報メソッド名群.
 	private static final String[] COLOR_OUT_NAMES = new String[] {
 		"out"
@@ -29,7 +31,7 @@ public class ColorOutObject {
 	};
 	
 	// カーソル情報メソッド生成処理.
-	private static final ObjectFunction CURSOR_FUNCTIONS = new ObjectFunction() {
+	private static final ObjectFunction COLOR_OUT_FUNCTIONS = new ObjectFunction() {
 		private FixedSearchArray<String> word = new FixedSearchArray<String>(COLOR_OUT_NAMES);
 		public RhiginFunction create(int no, Object... params) {
 			return new ColorOutFunctions(no, (ColorConsoleOut)params[0]);
@@ -45,7 +47,7 @@ public class ColorOutObject {
 	 * @return
 	 */
 	public static final RhiginInstanceObject create(ColorConsoleOut c) {
-		return new RhiginInstanceObject("ColorOut", CURSOR_FUNCTIONS, c);
+		return new RhiginInstanceObject(OBJECT_NAME, COLOR_OUT_FUNCTIONS, c);
 	}
 	
 	// カーソルのメソッド群. 
@@ -146,7 +148,7 @@ public class ColorOutObject {
 
 		@Override
 		public final String getName() {
-			return "ColorOut";
+			return OBJECT_NAME;
 		}
 
 		@Override
@@ -167,7 +169,7 @@ public class ColorOutObject {
 	 *            登録先のスコープを設定します.
 	 */
 	public static final void regFunctions(Scriptable scope) {
-		scope.put("ColorOut", scope, ColorOutObject.getInstance());
+		scope.put(OBJECT_NAME, scope, ColorOutObject.getInstance());
 	}
 
 }

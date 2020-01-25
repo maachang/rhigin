@@ -12,6 +12,7 @@ import rhigin.util.FCipher;
  * [js]FCipherオブジェクト.
  */
 public class FCipherObject {
+	public static final String OBJECT_NAME = "FCipher";
 	private static final ThreadLocal<FCipher> local = new ThreadLocal<FCipher>();
 
 	private static final FCipher getFCipher() {
@@ -104,27 +105,27 @@ public class FCipherObject {
 			case 1:
 			case 2:
 				if (!(args.length >= 1)) {
-					argsException("FCipher");
+					argsException(OBJECT_NAME);
 				}
 				break;
 			case 3:
 				if (!(args.length >= 2 && args[1] instanceof byte[])) {
-					argsException("FCipher");
+					argsException(OBJECT_NAME);
 				}
 				break;
 			case 4:
 				if (!(args.length >= 2 && args[0] instanceof byte[] && args[1] instanceof byte[])) {
-					argsException("FCipher");
+					argsException(OBJECT_NAME);
 				}
 				break;
 			case 5:
 				if (!(args.length >= 2 && args[1] instanceof byte[])) {
-					argsException("FCipher");
+					argsException(OBJECT_NAME);
 				}
 				break;
 			case 6:
 				if (!(args.length >= 2 && args[1] instanceof byte[])) {
-					argsException("FCipher");
+					argsException(OBJECT_NAME);
 				}
 				break;
 			}
@@ -133,7 +134,7 @@ public class FCipherObject {
 	};
 
 	// シングルトン.
-	private static final RhiginObject THIS = new RhiginObject("FCipher", new RhiginFunction[] {
+	private static final RhiginObject THIS = new RhiginObject(OBJECT_NAME, new RhiginFunction[] {
 			new Execute(0), new Execute(1), new Execute(2), new Execute(3),
 			new Execute(4), new Execute(5), new Execute(6) });
 
@@ -148,6 +149,6 @@ public class FCipherObject {
 	 *            登録先のスコープを設定します.
 	 */
 	public static final void regFunctions(Scriptable scope) {
-		scope.put("FCipher", scope, FCipherObject.getInstance());
+		scope.put(OBJECT_NAME, scope, FCipherObject.getInstance());
 	}
 }

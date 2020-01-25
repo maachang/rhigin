@@ -146,7 +146,10 @@ public class JDateObject extends RhiginFunction {
 			return false;
 		}
 		@Override
-		public boolean hasInstance(Scriptable arg0) {
+		public boolean hasInstance(Scriptable instance) {
+			if(instance != null) {
+				return this.getClassName() == instance.getClassName();
+			}
 			return false;
 		}
 		@Override
@@ -372,10 +375,10 @@ public class JDateObject extends RhiginFunction {
 			return FUNCTION_NAMES[type];
 		}
 
-		@Override
-		public String toString() {
-			return date.toString();
-		}
+//		@Override
+//		public String toString() {
+//			return date.toString();
+//		}
 	}
 	
 	// メソッド名群.

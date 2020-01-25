@@ -60,7 +60,10 @@ public interface BlankScriptable extends Scriptable {
 	}
 
 	@Override
-	default boolean hasInstance(Scriptable arg0) {
+	default boolean hasInstance(Scriptable instance) {
+		if(instance != null) {
+			return this.getClassName() == instance.getClassName();
+		}
 		return false;
 	}
 
