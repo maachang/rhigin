@@ -9,6 +9,7 @@ import org.mozilla.javascript.Undefined;
 import rhigin.RhiginException;
 import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.RhiginFunction;
+import rhigin.util.FixedKeyValues;
 
 /**
  * eval実行.
@@ -50,4 +51,13 @@ public class EvalFunction extends RhiginFunction {
 	public static final void regFunctions(Scriptable scope) {
 		scope.put("eval", scope, EvalFunction.getInstance());
 	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put("eval", EvalFunction.getInstance());
+	}
+
 }

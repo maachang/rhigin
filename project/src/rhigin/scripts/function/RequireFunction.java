@@ -13,6 +13,7 @@ import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.compile.CompileCache;
 import rhigin.scripts.compile.ScriptElement;
 import rhigin.util.Converter;
+import rhigin.util.FixedKeyValues;
 
 /**
  * [Function]: require.
@@ -119,5 +120,13 @@ public final class RequireFunction extends RhiginFunction {
 	 */
 	public static final void regFunctions(Scriptable scope) {
 		scope.put("require", scope, RequireFunction.getInstance());
+	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put("require", RequireFunction.getInstance());
 	}
 }

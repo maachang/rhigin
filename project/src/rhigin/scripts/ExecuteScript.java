@@ -23,6 +23,7 @@ import rhigin.scripts.compile.CompileCache;
 import rhigin.scripts.function.ArgsFunction;
 import rhigin.scripts.function.Base64Functions;
 import rhigin.scripts.function.BinaryFunction;
+import rhigin.scripts.function.CheckFunctions;
 import rhigin.scripts.function.ColorOutFunction;
 import rhigin.scripts.function.EntityFunctions;
 import rhigin.scripts.function.EvalFunction;
@@ -33,7 +34,6 @@ import rhigin.scripts.function.GlobalFunction;
 import rhigin.scripts.function.HttpClientFunction;
 import rhigin.scripts.function.LogFactoryFunction;
 import rhigin.scripts.function.NanoTimeFunction;
-import rhigin.scripts.function.NumericFunctions;
 import rhigin.scripts.function.ParseIntFunction;
 import rhigin.scripts.function.RandomFunction;
 import rhigin.scripts.function.RequireFunction;
@@ -54,6 +54,7 @@ import rhigin.scripts.objects.JwtObject;
 import rhigin.scripts.objects.LockObjects;
 import rhigin.scripts.objects.UniqueIdObject;
 import rhigin.scripts.objects.Xor128Object;
+import rhigin.util.FixedKeyValues;
 import rhigin.util.ListMap;
 import rhigin.util.OList;
 
@@ -75,6 +76,11 @@ public class ExecuteScript {
 	// private static final int SCRIPT_LANGUAGE_VERSION = Context.VERSION_1_5;
 	private static final int SCRIPT_LANGUAGE_VERSION = Context.VERSION_1_8;
 	// private static final int SCRIPT_LANGUAGE_VERSION = Context.VERSION_ES6;
+	
+	// 基本Functions.
+//	private static final ThreadLocal<FixedKeyValues<String, Object>> baseFunctions =
+//		new ThreadLocal<FixedKeyValues<String, Object>>();
+	private static FixedKeyValues<String, Object> baseFunctions = null;
 
 	/** originalFunctionAndObject. **/
 	private static final ListMap originalFunctionAndObjectList = new ListMap();
@@ -123,6 +129,88 @@ public class ExecuteScript {
 				return super.doTopCall(callable, cx, scope, thisObj, args);
 			}
 		});
+		
+		// baseFunctionsを初期化.
+		initBaseFunctions();
+	}
+	
+	/**
+	 * baseFunctionsを初期化.
+	 */
+	private static final FixedKeyValues<String, Object> initBaseFunctions() {
+		// baseFunctionsを登録.
+		FixedKeyValues<String, Object> scope = new FixedKeyValues<String, Object>();
+		scope.startIndex();
+		
+		// rhiginバージョンをセット.
+		scope.put("VERSION", RhiginConstants.VERSION);
+		
+		// RHIGIN_HOMEをセット.
+		scope.put("RHIGIN_HOME", RhiginConstants.RHIGIN_HOME);
+		
+		// OS情報をセット.
+		scope.put("OS_NAME", RhiginStartup.getOsName());
+		scope.put("OS_BIT", RhiginStartup.getOsBit());
+		
+		// コンフィグ情報をセット.
+		scope.put("config", RhiginStartup.getConfig());
+
+		// オブジェクトの登録.
+		ConsoleObject.regFunctions(scope);
+		FunctionObject.regFunctions(scope);
+		Xor128Object.regFunctions(scope);
+		JSONObject.regFunctions(scope);
+		JwtObject.regFunctions(scope);
+		FileObject.regFunctions(scope);
+		JDateObject.regFunctions(scope);
+		LockObjects.regFunctions(scope);
+		UniqueIdObject.regFunctions(scope);
+		FCipherObject.regFunctions(scope);
+		FCompObject.regFunctions(scope);
+		ColorOutObject.regFunctions(scope);
+
+		// rhigin用の基本オブジェクトを設定.
+		RequireFunction.regFunctions(scope);
+		ParseIntFunction.regFunctions(scope);
+		EvalFunction.regFunctions(scope);
+		GcFunction.regFunctions(scope);
+		GlobalFunction.regFunctions(scope);
+		LogFactoryFunction.regFunctions(scope);
+		BinaryFunction.regFunctions(scope);
+		GetClassFunction.regFunctions(scope);
+		SleepFunction.regFunctions(scope);
+		GetEnvFunction.regFunctions(scope);
+		ArgsFunction.regFunctions(scope);
+		RandomFunction.regFunctions(scope);
+		Base64Functions.regFunctions(scope);
+		CheckFunctions.regFunctions(scope);
+		HttpClientFunction.regFunctions(scope);
+		NanoTimeFunction.regFunctions(scope);
+		SystemTimeFunction.regFunctions(scope);
+		ServerIdFunction.regFunctions(scope);
+		ValidateFunction.regFunctions(scope);
+		EntityFunctions.regFunctions(scope);
+		RhiginEnvFunction.regFunctions(scope);
+		ColorOutFunction.regFunctions(scope);
+		
+		// インデックスの作成.
+		scope.endIndex();
+		//baseFunctions.set(scope);
+		baseFunctions = scope;
+		return scope;
+	}
+	
+	/**
+	 * RhiginContextにBaseFunctionを登録.
+	 * @param context
+	 */
+	public static final void setBaseFunctions(RhiginContext context) {
+//		FixedKeyValues<String, Object> bf = baseFunctions.get();
+//		if(bf == null) {
+//			bf = initBaseFunctions();
+//		}
+///		context.setBaseFunctions(bf);
+		context.setBaseFunctions(baseFunctions);
 	}
 
 	// [ThreadLocal]: topLevelオブジェクトを生成・取得.
@@ -259,7 +347,7 @@ public class ExecuteScript {
 		currentRhiginContext.set(context);
 		try {
 			// 実行処理.
-			Scriptable scope = new RhiginScriptable(context);
+			RhiginScriptable scope = new RhiginScriptable(context);
 			scope.setPrototype(getTopLevel());
 			settingRhiginObject(ctx, scope);
 			final Object ret = compiled.exec(ctx, scope);
@@ -363,7 +451,7 @@ public class ExecuteScript {
 		currentRhiginContext.set(context);
 		try {
 			// 対象ソースをコンパイル.
-			Scriptable scope = new RhiginScriptable(context);
+			RhiginScriptable scope = new RhiginScriptable(context);
 			scope.setPrototype(getTopLevel());
 			settingRhiginObject(ctx, scope);
 			Script compiled = ctx.compileReader(getScript(r, headerScript, footerScript), name, lineNo, null);
@@ -394,58 +482,11 @@ public class ExecuteScript {
 	}
 
 	// 基本オブジェクトをセット.
-	private static final void settingRhiginObject(Context ctx, Scriptable scope) throws Exception {
-		// rhiginバージョンをセット.
-		scope.put("VERSION", scope, RhiginConstants.VERSION);
+	private static final void settingRhiginObject(Context ctx, RhiginScriptable scope) throws Exception {
+		// contextにbaseFunctionsを追加.
+		RhiginContext context = scope.getContext();
+		setBaseFunctions(context);
 		
-		// RHIGIN_HOMEをセット.
-		scope.put("RHIGIN_HOME", scope, RhiginConstants.RHIGIN_HOME);
-		
-		// OS情報をセット.
-		scope.put("OS_NAME", scope, RhiginStartup.getOsName());
-		scope.put("OS_BIT", scope, RhiginStartup.getOsBit());
-		
-		// コンフィグ情報をセット.
-		scope.put("config", scope, RhiginStartup.getConfig());
-
-		// オブジェクトの登録.
-		ConsoleObject.regFunctions(scope);
-		FunctionObject.regFunctions(scope);
-		Xor128Object.regFunctions(scope);
-		JSONObject.regFunctions(scope);
-		JwtObject.regFunctions(scope);
-		FileObject.regFunctions(scope);
-		JDateObject.regFunctions(scope);
-		LockObjects.regFunctions(scope);
-		UniqueIdObject.regFunctions(scope);
-		FCipherObject.regFunctions(scope);
-		FCompObject.regFunctions(scope);
-		ColorOutObject.regFunctions(scope);
-
-		// rhigin用の基本オブジェクトを設定.
-		RequireFunction.regFunctions(scope);
-		ParseIntFunction.regFunctions(scope);
-		EvalFunction.regFunctions(scope);
-		GcFunction.regFunctions(scope);
-		GlobalFunction.regFunctions(scope);
-		LogFactoryFunction.regFunctions(scope);
-		BinaryFunction.regFunctions(scope);
-		GetClassFunction.regFunctions(scope);
-		SleepFunction.regFunctions(scope);
-		GetEnvFunction.regFunctions(scope);
-		ArgsFunction.regFunctions(scope);
-		RandomFunction.regFunctions(scope);
-		Base64Functions.regFunctions(scope);
-		NumericFunctions.regFunctions(scope);
-		HttpClientFunction.regFunctions(scope);
-		NanoTimeFunction.regFunctions(scope);
-		SystemTimeFunction.regFunctions(scope);
-		ServerIdFunction.regFunctions(scope);
-		ValidateFunction.regFunctions(scope);
-		EntityFunctions.regFunctions(scope);
-		RhiginEnvFunction.regFunctions(scope);
-		ColorOutFunction.regFunctions(scope);
-
 		// オリジナルオブジェクトを設定.
 		Object[] kv;
 		final OList<Object[]> list = originalFunctionAndObjectList.rawData();

@@ -209,7 +209,10 @@ public final class Json {
 		}
 		// ISO8601の日付フォーマットかチェック.
 		if (DateConvert.isISO8601(json)) {
-			return JDateObject.newObject(stringToDate(json));
+			final java.util.Date d = stringToDate(json);
+			if(d != null) {
+				return JDateObject.newObject(d);
+			}
 		}
 		return json;
 	}
@@ -409,7 +412,11 @@ public final class Json {
 
 	/** 文字を日付変換. **/
 	protected static final java.util.Date stringToDate(String s) {
-		return DateConvert.stringToDate(s);
+		try {
+			return DateConvert.stringToDate(s);
+		} catch(Exception e) {
+			return null;
+		}
 	}
 
 	/** JSのNativeDateオブジェクトの場合は、java.util.Dateに変換. **/

@@ -8,6 +8,7 @@ import rhigin.scripts.Json;
 import rhigin.scripts.JsonOut;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginObject;
+import rhigin.util.FixedKeyValues;
 
 /**
  * [js]Jsonオブジェクト.
@@ -84,5 +85,13 @@ public final class JSONObject {
 	 */
 	public static final void regFunctions(Scriptable scope) {
 		scope.put(OBJECT_NAME, scope, JSONObject.getInstance());
+	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put(OBJECT_NAME, JSONObject.getInstance());
 	}
 }

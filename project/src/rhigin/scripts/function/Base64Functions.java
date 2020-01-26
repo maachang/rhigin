@@ -5,6 +5,7 @@ import org.mozilla.javascript.Scriptable;
 
 import rhigin.scripts.RhiginFunction;
 import rhigin.util.Base64;
+import rhigin.util.FixedKeyValues;
 
 /**
  * [js]base64ファンクション.
@@ -70,4 +71,14 @@ public class Base64Functions {
 		scope.put("atob", scope, AtobFunction.getInstance());
 		scope.put("btoa", scope, BtoaFunction.getInstance());
 	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put("atob", AtobFunction.getInstance());
+		fkv.put("btoa", BtoaFunction.getInstance());
+	}
+
 }

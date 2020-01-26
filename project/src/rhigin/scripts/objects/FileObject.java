@@ -19,6 +19,7 @@ import rhigin.scripts.RhiginObject;
 import rhigin.util.Converter;
 import rhigin.util.FileUtil;
 import rhigin.util.FixedArray;
+import rhigin.util.FixedKeyValues;
 import rhigin.util.FixedSearchArray;
 import rhigin.util.Stats;
 
@@ -354,5 +355,13 @@ public class FileObject {
 	 */
 	public static final void regFunctions(Scriptable scope) {
 		scope.put(OBJECT_NAME, scope, FileObject.getInstance());
+	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put(OBJECT_NAME, FileObject.getInstance());
 	}
 }

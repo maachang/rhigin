@@ -26,7 +26,7 @@ public interface BlankScriptable extends Scriptable {
 
 	@Override
 	default String getClassName() {
-		return null;
+		return "";
 	}
 
 	@Override

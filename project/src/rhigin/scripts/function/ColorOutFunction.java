@@ -6,9 +6,10 @@ import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.RhiginFunction;
 import rhigin.util.ColorConsoleOut;
+import rhigin.util.FixedKeyValues;
 
 /**
- * ガベージコレクション呼び出し.
+ * コンソール上の文字のカラー設定できる出力を作成.
  */
 public class ColorOutFunction extends RhiginFunction {
 	private static final ColorOutFunction THIS = new ColorOutFunction();
@@ -38,5 +39,13 @@ public class ColorOutFunction extends RhiginFunction {
 	 */
 	public static final void regFunctions(Scriptable scope) {
 		scope.put("colorOut", scope, ColorOutFunction.getInstance());
+	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put("colorOut", ColorOutFunction.getInstance());
 	}
 }

@@ -7,6 +7,7 @@ import org.mozilla.javascript.Undefined;
 import rhigin.http.Entity;
 import rhigin.scripts.RhiginFunction;
 import rhigin.util.Converter;
+import rhigin.util.FixedKeyValues;
 
 /**
  * entity管理.
@@ -84,4 +85,14 @@ public class EntityFunctions {
 		scope.put("expose", scope, ExposeFunction.getInstance());
 		scope.put("entity", scope, EntityFunction.getInstance());
 	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put("expose", ExposeFunction.getInstance());
+		fkv.put("entity", EntityFunction.getInstance());
+	}
+
 }

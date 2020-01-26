@@ -16,6 +16,7 @@ import rhigin.http.Http;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginInstanceObject;
 import rhigin.scripts.RhiginInstanceObject.ObjectFunction;
+import rhigin.util.FixedKeyValues;
 import rhigin.util.FixedSearchArray;
 
 /**
@@ -346,5 +347,14 @@ public class LockObjects {
 	public static final void regFunctions(Scriptable scope) {
 		scope.put(LOCK_OBJECT_NAME, scope, LockObject.getInstance());
 		scope.put(READ_WRITE_LOCK_OBJECT_NAME, scope, RwLockObject.getInstance());
+	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put(LOCK_OBJECT_NAME, LockObject.getInstance());
+		fkv.put(READ_WRITE_LOCK_OBJECT_NAME, RwLockObject.getInstance());
 	}
 }

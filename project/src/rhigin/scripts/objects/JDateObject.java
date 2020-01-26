@@ -12,12 +12,14 @@ import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginInstanceObject.ObjectFunction;
 import rhigin.util.Converter;
 import rhigin.util.DateConvert;
+import rhigin.util.FixedKeyValues;
 import rhigin.util.FixedSearchArray;
 
 /**
  * [js]Java用日付オブジェクト.
  */
 public class JDateObject extends RhiginFunction {
+	public static final String OBJECT_NAME = "JDate";
 	private static final JDateObject THIS = new JDateObject();
 
 	public static final JDateObject getInstance() {
@@ -26,7 +28,7 @@ public class JDateObject extends RhiginFunction {
 
 	@Override
 	public String getName() {
-		return "JDate";
+		return OBJECT_NAME;
 	}
 	
 	/**
@@ -65,7 +67,7 @@ public class JDateObject extends RhiginFunction {
 		}
 		public JDateInstanceObject(java.util.Date d) {
 			this.date = d;
-			this.name = "JDate";
+			this.name = OBJECT_NAME;
 			this.objectFunction = FUNCTIONS;
 			this.params = new Object[] {d};
 			this.list = new RhiginFunction[objectFunction.getWord().size()];
@@ -366,7 +368,7 @@ public class JDateObject extends RhiginFunction {
 				}
 			}
 			// 引数が必要な条件で、引数が無い場合はエラー.
-			argsException("JDate");
+			argsException(OBJECT_NAME);
 			return null;
 		}
 
@@ -451,15 +453,19 @@ public class JDateObject extends RhiginFunction {
 							Converter.convertInt(args[2]));
 				}
 			} else if (Converter.isNumeric(args[0])) {
-				date = new java.util.Date(Converter.convertLong(args[0]));
+				if(args[0] instanceof Number) {
+					date = new java.util.Date(Converter.convertLong(args[0]));
+				} else {
+					date = DateConvert.stringToDate("" + args[0]);
+				}
 			} else {
-				date = new java.util.Date("" + args[0]);
+				date = DateConvert.stringToDate("" + args[0]);
 			}
 		} else {
 			date = new java.util.Date();
 		}
 		if (date == null) {
-			throw new RhiginException(500, "Failed to initialize JDate object");
+			throw new RhiginException(500, "Failed to initialize " + OBJECT_NAME + " object");
 		}
 		return newObject(date);
 	}
@@ -477,6 +483,14 @@ public class JDateObject extends RhiginFunction {
 	 *            登録先のスコープを設定します.
 	 */
 	public static final void regFunctions(Scriptable scope) {
-		scope.put("JDate", scope, JDateObject.getInstance());
+		scope.put(OBJECT_NAME, scope, JDateObject.getInstance());
+	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put(OBJECT_NAME, JDateObject.getInstance());
 	}
 }

@@ -4,6 +4,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
 import rhigin.scripts.RhiginFunction;
+import rhigin.util.FixedKeyValues;
 
 /**
  * [js]ナノタイムを取得します.
@@ -35,5 +36,13 @@ public class NanoTimeFunction extends RhiginFunction {
 	 */
 	public static final void regFunctions(Scriptable scope) {
 		scope.put("nanoTime", scope, NanoTimeFunction.getInstance());
+	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put("nanoTime", NanoTimeFunction.getInstance());
 	}
 }

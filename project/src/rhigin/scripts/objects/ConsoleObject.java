@@ -12,6 +12,7 @@ import rhigin.logs.Log;
 import rhigin.logs.LogFactory;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginObject;
+import rhigin.util.FixedKeyValues;
 
 /**
  * [js]Consoleオブジェクト.
@@ -146,4 +147,13 @@ public class ConsoleObject {
 	public static final void regFunctions(Scriptable scope) {
 		scope.put(OBJECT_NAME, scope, ConsoleObject.getInstance());
 	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put(OBJECT_NAME, ConsoleObject.getInstance());
+	}
+
 }

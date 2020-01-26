@@ -10,6 +10,7 @@ import org.mozilla.javascript.Undefined;
 import rhigin.RhiginException;
 import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.RhiginFunction;
+import rhigin.util.FixedKeyValues;
 
 /**
  * Functionオブジェクト.
@@ -89,5 +90,13 @@ public final class FunctionObject {
 	 */
 	public static final void regFunctions(Scriptable scope) {
 		scope.put(OBJECT_NAME, scope, FunctionObject.getInstance());
+	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put(OBJECT_NAME, FunctionObject.getInstance());
 	}
 }

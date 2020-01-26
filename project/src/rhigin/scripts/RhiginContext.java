@@ -7,48 +7,70 @@ import java.util.Map;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
+import rhigin.util.FixedKeyValues;
+
 /**
  * rhiginContet.
  */
 public class RhiginContext implements Scriptable {
+	private FixedKeyValues<String, Object> baseFunctions = null;
 	private Map<String, Object> bindings = new HashMap<String, Object>();
 	private Scriptable prototype = null;
 	private Scriptable parentScope = null;
+	
+	public void setBaseFunctions(FixedKeyValues<String, Object> bf) {
+		baseFunctions = bf;
+	}
 
 	public boolean hasAttribute(String name) {
 		if (name == null) {
 			throw new NullPointerException();
+		} else if(bindings.containsKey(name)) {
+			return true;
 		}
-		return bindings.containsKey(name);
+		return baseFunctions != null && baseFunctions.containsKey(name);
 	}
 
 	public Object getAttribute(String name) {
 		if (name == null) {
 			throw new NullPointerException();
 		}
-		return bindings.get(name);
+		if(bindings.containsKey(name)) {
+			return bindings.get(name);
+		} else if(baseFunctions != null && baseFunctions.containsKey(name)) {
+			return baseFunctions.get(name);
+		}
+		return Undefined.instance;
 	}
 
 	public void setAttribute(String name, Object value) {
 		if (name == null) {
 			throw new NullPointerException();
 		}
-		bindings.put(name, value);
+		// baseFunctionsにある情報は上書き出来ない.
+		if(baseFunctions != null && baseFunctions.containsKey(name)) {
+			return;
+		} else {
+			bindings.put(name, value);
+		}
 	}
 
 	public void removeAttribute(String name) {
 		if (name == null) {
 			throw new NullPointerException();
 		}
-		bindings.remove(name);
+		// baseFunctionsにある情報は削除しない.
+		if(baseFunctions == null || !baseFunctions.containsKey(name)) {
+			bindings.remove(name);
+		}
 	}
 
-	public Iterator<String> keys() {
-		return bindings.keySet().iterator();
-	}
-
+//	public Iterator<String> keys() {
+//		return bindings.keySet().iterator();
+//	}
+	
 	public int size() {
-		return bindings.size();
+		return bindings.size() + (baseFunctions == null ? 0 : baseFunctions.size());
 	}
 	
 	@Override
@@ -72,7 +94,7 @@ public class RhiginContext implements Scriptable {
 
 	@Override
 	public String getClassName() {
-		return RhiginContext.class.getName();
+		return "RhiginContext";
 	}
 
 	@Override
@@ -83,18 +105,26 @@ public class RhiginContext implements Scriptable {
 	@Override
 	public Object[] getIds() {
 		String n;
+		Object[] ret;
 		int cnt = 0;
-		int len = size();
-		Object[] ret = new Object[len - 1];
-		Iterator<String> it = keys();
-		while(it.hasNext()) {
-			n = it.next();
-			if("global".equals(n)) {
-				continue;
+		int len = bindings.size();
+		Iterator<String> itr = bindings.keySet().iterator();
+		if(baseFunctions == null) {
+			ret = new String[len];
+			while(itr.hasNext()) {
+				n = itr.next();
+				ret[cnt ++] = n;
 			}
-			ret[cnt++] = n;
+			return ret;
+		} else {
+			ret = new String[len + baseFunctions.size()];
+			while(itr.hasNext()) {
+				n = itr.next();
+				ret[cnt ++] = n;
+			}
+			System.arraycopy(baseFunctions.keys(), 0, ret, cnt, baseFunctions.size());
+			return ret;
 		}
-		return ret;
 	}
 
 	@Override
@@ -119,7 +149,7 @@ public class RhiginContext implements Scriptable {
 
 	@Override
 	public boolean hasInstance(Scriptable arg0) {
-		return false;
+		return this.getClassName().equals(arg0.getClassName());
 	}
 
 	@Override

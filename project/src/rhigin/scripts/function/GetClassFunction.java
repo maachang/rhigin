@@ -4,6 +4,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
 import rhigin.scripts.RhiginFunction;
+import rhigin.util.FixedKeyValues;
 
 public class GetClassFunction extends RhiginFunction {
 	private static final GetClassFunction THIS = new GetClassFunction();
@@ -33,5 +34,13 @@ public class GetClassFunction extends RhiginFunction {
 	 */
 	public static final void regFunctions(Scriptable scope) {
 		scope.put("getClass", scope, GetClassFunction.getInstance());
+	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put("getClass", GetClassFunction.getInstance());
 	}
 }

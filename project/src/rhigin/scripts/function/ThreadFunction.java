@@ -14,6 +14,7 @@ import rhigin.RhiginConfig;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginThreadPool;
 import rhigin.util.Converter;
+import rhigin.util.FixedKeyValues;
 import rhigin.util.Time12SequenceId;
 
 /**
@@ -186,4 +187,17 @@ public class ThreadFunction {
 		scope.put("setInterval", scope, setInterval);
 		scope.put("clearInterval", scope, clearInterval);
 	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put("setImmediate", setImmediate);
+		fkv.put("setTimeout", setTimeout);
+		fkv.put("clearTimeout", clearTimeout);
+		fkv.put("setInterval", setInterval);
+		fkv.put("clearInterval", clearInterval);
+	}
+
 }

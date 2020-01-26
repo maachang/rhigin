@@ -6,6 +6,7 @@ import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.RhiginFunction;
+import rhigin.util.FixedKeyValues;
 
 /**
  * ExecuteScript.currentRhiginContextを取得.
@@ -129,5 +130,13 @@ public class GlobalFunction extends RhiginFunction {
 	 */
 	public static final void regFunctions(Scriptable scope) {
 		scope.put("global", scope, GlobalFunction.getInstance());
+	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put("global", GlobalFunction.getInstance());
 	}
 }

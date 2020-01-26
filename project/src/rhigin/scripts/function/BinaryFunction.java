@@ -6,6 +6,7 @@ import org.mozilla.javascript.Scriptable;
 import rhigin.RhiginException;
 import rhigin.scripts.RhiginFunction;
 import rhigin.util.Converter;
+import rhigin.util.FixedKeyValues;
 
 /**
  * [js]Binary生成メソッド.
@@ -50,4 +51,13 @@ public final class BinaryFunction extends RhiginFunction {
 	public static final void regFunctions(Scriptable scope) {
 		scope.put("binary", scope, BinaryFunction.getInstance());
 	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put("binary", BinaryFunction.getInstance());
+	}
+
 }

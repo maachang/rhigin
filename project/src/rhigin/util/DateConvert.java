@@ -81,8 +81,9 @@ public final class DateConvert {
 		if (type == 0) {
 			switch (len) {
 			case 0:
-				Date d = new java.util.Date();
-				return new java.sql.Date(d.getYear(), d.getMonth(), d.getDate());
+				//Date d = new java.util.Date();
+				//return new java.sql.Date(d.getYear(), d.getMonth(), d.getDate());
+				return null;
 			case 1:
 				return new java.sql.Date(getYear(list.get(0)), 0, 1);
 			case 2:
@@ -96,8 +97,9 @@ public final class DateConvert {
 		else if (type == 1) {
 			switch (len) {
 			case 0:
-				Date d = new java.util.Date();
-				return new java.sql.Time(d.getHours(), d.getMinutes(), d.getSeconds());
+				//Date d = new java.util.Date();
+				//return new java.sql.Time(d.getHours(), d.getMinutes(), d.getSeconds());
+				return null;
 			case 1:
 				return new java.sql.Time(Converter.parseInt(list.get(0)), 0, 0);
 			case 2:
@@ -111,7 +113,8 @@ public final class DateConvert {
 		else {
 			switch (len) {
 			case 0:
-				return new java.sql.Timestamp(System.currentTimeMillis());
+				//return new java.sql.Timestamp(System.currentTimeMillis());
+				return null;
 			case 1:
 				return new java.sql.Timestamp(getYear(list.get(0)), 0, 1, 0, 0, 0, 0);
 			case 2:

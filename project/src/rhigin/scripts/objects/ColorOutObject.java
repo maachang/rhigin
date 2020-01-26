@@ -10,6 +10,7 @@ import rhigin.scripts.RhiginInstanceObject;
 import rhigin.scripts.RhiginInstanceObject.ObjectFunction;
 import rhigin.util.ColorConsoleOut;
 import rhigin.util.Converter;
+import rhigin.util.FixedKeyValues;
 import rhigin.util.FixedSearchArray;
 
 /**
@@ -171,5 +172,12 @@ public class ColorOutObject {
 	public static final void regFunctions(Scriptable scope) {
 		scope.put(OBJECT_NAME, scope, ColorOutObject.getInstance());
 	}
-
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put(OBJECT_NAME, ColorOutObject.getInstance());
+	}
 }

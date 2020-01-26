@@ -6,6 +6,7 @@ import org.mozilla.javascript.Scriptable;
 import rhigin.scripts.RhiginFunction;
 import rhigin.util.Args;
 import rhigin.util.Converter;
+import rhigin.util.FixedKeyValues;
 
 /**
  * [js]rhigin実行時の引数I/Oメソッド.
@@ -43,5 +44,13 @@ public final class ArgsFunction extends RhiginFunction {
 	 */
 	public static final void regFunctions(Scriptable scope) {
 		scope.put("args", scope, ArgsFunction.getInstance());
+	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put("args", ArgsFunction.getInstance());
 	}
 }

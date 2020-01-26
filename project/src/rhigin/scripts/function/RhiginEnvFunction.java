@@ -5,6 +5,7 @@ import org.mozilla.javascript.Scriptable;
 
 import rhigin.RhiginStartup;
 import rhigin.scripts.RhiginFunction;
+import rhigin.util.FixedKeyValues;
 
 /**
  * [js]RhiginEnvを取得.
@@ -36,4 +37,13 @@ public class RhiginEnvFunction extends RhiginFunction {
 	public static final void regFunctions(Scriptable scope) {
 		scope.put("rhiginEnv", scope, RhiginEnvFunction.getInstance());
 	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put("rhiginEnv", RhiginEnvFunction.getInstance());
+	}
+
 }

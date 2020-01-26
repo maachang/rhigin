@@ -1,8 +1,6 @@
 package rhigin.scripts;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.mozilla.javascript.Context;
@@ -12,26 +10,34 @@ import org.mozilla.javascript.NativeJavaClass;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.Undefined;
 import org.mozilla.javascript.Wrapper;
 
 final class RhiginScriptable implements Scriptable {
 	private static final String RHINO_JS_PACKAGE_NAME = "org.mozilla.javascript";
+	private Map<Object, Object> _indexedProps;
 	private RhiginContext context;
-	private Map<Object, Object> indexedProps;
 	private Scriptable prototype;
 	private Scriptable parent;
 
 	RhiginScriptable(RhiginContext c) {
-		this(c, new HashMap<Object, Object>());
+		this(c, null);
 	}
 
 	RhiginScriptable(RhiginContext c, Map<Object, Object> indexedProps) {
 		this.context = (c == null) ? new RhiginContext() : c;
-		this.indexedProps = indexedProps;
+		this._indexedProps = indexedProps;
 	}
 
 	public RhiginContext getContext() {
 		return context;
+	}
+	
+	private Map<Object, Object> getIndexProps() {
+		if(_indexedProps == null) {
+			_indexedProps = new HashMap<Object, Object>();
+		}
+		return _indexedProps;
 	}
 
 	public String getClassName() {
@@ -41,16 +47,19 @@ final class RhiginScriptable implements Scriptable {
 	@SuppressWarnings("rawtypes")
 	public Object get(String name, Scriptable start) {
 		if (name.length() == 0) {
-			if (indexedProps.containsKey(name)) {
-				return indexedProps.get(name);
+			if (getIndexProps().containsKey(name)) {
+				return getIndexProps().get(name);
 			} else {
 				return NOT_FOUND;
 			}
 		} else {
 			Class c;
-			Object value = context.getAttribute(name);
-			if (value == null) {
+			if(!context.hasAttribute(name)) {
 				return NOT_FOUND;
+			}
+			final Object value = context.getAttribute(name);
+			if (value == null || value == Undefined.instance) {
+				return value;
 			} else if ((c = value.getClass()).isArray()) {
 				return value;
 			} else if (c.getPackage().getName().startsWith(RHINO_JS_PACKAGE_NAME)) {
@@ -62,8 +71,8 @@ final class RhiginScriptable implements Scriptable {
 	}
 
 	public Object get(int index, Scriptable start) {
-		if (indexedProps.containsKey(index)) {
-			return indexedProps.get(index);
+		if (getIndexProps().containsKey(index)) {
+			return getIndexProps().get(index);
 		} else {
 			return NOT_FOUND;
 		}
@@ -71,20 +80,20 @@ final class RhiginScriptable implements Scriptable {
 
 	public boolean has(String name, Scriptable start) {
 		if (name.length() == 0) {
-			return indexedProps.containsKey(name);
+			return getIndexProps().containsKey(name);
 		} else {
 			return context.hasAttribute(name);
 		}
 	}
 
 	public boolean has(int index, Scriptable start) {
-		return indexedProps.containsKey(index);
+		return getIndexProps().containsKey(index);
 	}
 
 	public void put(String name, Scriptable start, Object value) {
 		if (start == this) {
 			if (name.length() == 0) {
-				indexedProps.put(name, value);
+				getIndexProps().put(name, value);
 			} else {
 				context.setAttribute(name, jsToJava(value));
 			}
@@ -95,7 +104,7 @@ final class RhiginScriptable implements Scriptable {
 
 	public void put(int index, Scriptable start, Object value) {
 		if (start == this) {
-			indexedProps.put(index, value);
+			getIndexProps().put(index, value);
 		} else {
 			start.put(index, start, value);
 		}
@@ -103,14 +112,14 @@ final class RhiginScriptable implements Scriptable {
 
 	public void delete(String name) {
 		if (name.length() == 0) {
-			indexedProps.remove(name);
+			getIndexProps().remove(name);
 		} else {
 			context.removeAttribute(name);
 		}
 	}
 
 	public void delete(int index) {
-		indexedProps.remove(index);
+		getIndexProps().remove(index);
 	}
 
 	public Scriptable getPrototype() {
@@ -131,11 +140,11 @@ final class RhiginScriptable implements Scriptable {
 
 	public Object[] getIds() {
 		String[] keys = getAllKeys();
-		int size = keys.length + indexedProps.size();
+		int size = keys.length + getIndexProps().size();
 		Object[] res = new Object[size];
 		System.arraycopy(keys, 0, res, 0, keys.length);
 		int i = keys.length;
-		for (Object index : indexedProps.keySet()) {
+		for (Object index : getIndexProps().keySet()) {
 			res[i++] = index;
 		}
 		return res;
@@ -222,25 +231,22 @@ final class RhiginScriptable implements Scriptable {
 	}
 
 	private String[] getAllKeys() {
-		ArrayList<String> list = new ArrayList<String>();
-		list.ensureCapacity(context.size());
-		Iterator<String> it = context.keys();
-		while (it.hasNext()) {
-			list.add(it.next());
-		}
-		String[] res = new String[list.size()];
-		list.toArray(res);
-		return res;
+		Object[] keys = context.getIds();
+		String[] ret = new String[keys.length];
+		System.arraycopy(keys, 0, ret, 0, keys.length);
+		return ret;
 	}
 
-	private Object jsToJava(Object jsObj) {
+	// js用に変換されたjavaのオブジェクトをアンラップ.
+	private static final Object jsToJava(Object jsObj) {
 		if (jsObj instanceof Wrapper) {
-			Wrapper njb = (Wrapper) jsObj;
+			final Wrapper njb = (Wrapper) jsObj;
 			if (njb instanceof NativeJavaClass) {
 				return njb;
 			}
-			Object obj = njb.unwrap();
-			if (obj instanceof Number || obj instanceof String || obj instanceof Boolean || obj instanceof Character) {
+			final Object obj = njb.unwrap();
+			if (obj instanceof Number || obj instanceof String ||
+				obj instanceof Boolean || obj instanceof Character) {
 				return njb;
 			} else {
 				return obj;

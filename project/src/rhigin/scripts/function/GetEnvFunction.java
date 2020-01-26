@@ -6,6 +6,7 @@ import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.RhiginFunction;
 import rhigin.util.EnvCache;
+import rhigin.util.FixedKeyValues;
 
 /**
  * [js]環境変数を読み込む.
@@ -123,5 +124,13 @@ public class GetEnvFunction extends RhiginFunction {
 	 */
 	public static final void regFunctions(Scriptable scope) {
 		scope.put("env", scope, GetEnvFunction.getInstance());
+	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put("env", GetEnvFunction.getInstance());
 	}
 }

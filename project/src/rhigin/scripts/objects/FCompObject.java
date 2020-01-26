@@ -9,6 +9,7 @@ import rhigin.scripts.RhiginObject;
 import rhigin.util.Converter;
 import rhigin.util.FComp;
 import rhigin.util.FCompBuffer;
+import rhigin.util.FixedKeyValues;
 
 /**
  * 簡易圧縮解凍処理.
@@ -99,5 +100,13 @@ public class FCompObject {
 	 */
 	public static final void regFunctions(Scriptable scope) {
 		scope.put(OBJECT_NAME, scope, FCompObject.getInstance());
+	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put(OBJECT_NAME, FCompObject.getInstance());
 	}
 }

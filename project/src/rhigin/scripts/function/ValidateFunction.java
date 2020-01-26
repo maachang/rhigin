@@ -9,6 +9,7 @@ import rhigin.http.Validate;
 import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.RhiginContext;
 import rhigin.scripts.RhiginFunction;
+import rhigin.util.FixedKeyValues;
 
 /**
  * Validate処理.
@@ -43,5 +44,13 @@ public class ValidateFunction extends RhiginFunction {
 	 */
 	public static final void regFunctions(Scriptable scope) {
 		scope.put("validate", scope, ValidateFunction.getInstance());
+	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put("validate", ValidateFunction.getInstance());
 	}
 }

@@ -9,6 +9,7 @@ import rhigin.RhiginException;
 import rhigin.http.client.HttpClient;
 import rhigin.scripts.RhiginFunction;
 import rhigin.util.ArrayMap;
+import rhigin.util.FixedKeyValues;
 
 /**
  * [js]HttpClient.
@@ -86,5 +87,13 @@ public class HttpClientFunction extends RhiginFunction {
 	 */
 	public static final void regFunctions(Scriptable scope) {
 		scope.put("httpClient", scope, HttpClientFunction.getInstance());
+	}
+	
+	/**
+	 * FixedKeyValues に情報を追加.
+	 * @param fkv
+	 */
+	public static final void regFunctions(FixedKeyValues<String, Object> fkv) {
+		fkv.put("httpClient", HttpClientFunction.getInstance());
 	}
 }
