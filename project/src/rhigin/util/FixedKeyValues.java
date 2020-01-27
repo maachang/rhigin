@@ -23,7 +23,7 @@ public class FixedKeyValues<K, V> {
 		}
 		baseLength = len >> 1;
 		startIndex();
-		for(var i = 0; i < len; i ++) {
+		for(int i = 0; i < len; i ++) {
 			list.add(args[i]);
 			list.add(args[i+1]);
 		}
