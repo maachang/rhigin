@@ -42,6 +42,21 @@ public class RhiginContext implements Scriptable {
 		}
 		return Undefined.instance;
 	}
+	
+	public Object getHasAttribute(boolean[] has, String name) {
+		if(name == null) {
+			throw new NullPointerException();
+		}
+		if(bindings.containsKey(name)) {
+			has[0] = true;
+			return bindings.get(name);
+		} else if(baseFunctions != null && baseFunctions.containsKey(name)) {
+			has[0] = true;
+			return baseFunctions.get(name);
+		}
+		has[0] = false;
+		return Undefined.instance;
+	}
 
 	public void setAttribute(String name, Object value) {
 		if (name == null) {

@@ -1,7 +1,7 @@
 package rhigin.util;
 
 /**
- * FixedKeyValue.
+ * Mapオブジェクトライクな、固定KeyValue.
  */
 public class FixedKeyValues<K, V> {
 	private int baseLength = 32;
@@ -11,17 +11,23 @@ public class FixedKeyValues<K, V> {
 	
 	/**
 	 * コンストラクタ.
-	 */
-	public FixedKeyValues() {
-		
-	}
-	
-	/**
-	 * コンストラクタ.
 	 * @param len
 	 */
-	public FixedKeyValues(int len) {
-		baseLength = len;
+	public FixedKeyValues(Object... args) {
+		int len;
+		if(args == null || (len = args.length) == 0) {
+			return;
+		} else if(len == 1 && Converter.isNumeric(args[0])) {
+			baseLength = Converter.convertInt(args[0]);
+			return;
+		}
+		baseLength = len >> 1;
+		startIndex();
+		for(var i = 0; i < len; i ++) {
+			list.add(args[i]);
+			list.add(args[i+1]);
+		}
+		endIndex();
 	}
 	
 	/**

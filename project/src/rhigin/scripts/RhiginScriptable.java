@@ -54,11 +54,12 @@ final class RhiginScriptable implements Scriptable {
 			}
 		} else {
 			Class c;
-			if(!context.hasAttribute(name)) {
-				return NOT_FOUND;
-			}
-			final Object value = context.getAttribute(name);
+			boolean[] has = new boolean[1];
+			final Object value = context.getHasAttribute(has, name);
 			if (value == null || value == Undefined.instance) {
+				if(!has[0]) {
+					return NOT_FOUND;
+				}
 				return value;
 			} else if ((c = value.getClass()).isArray()) {
 				return value;

@@ -484,8 +484,7 @@ public class ExecuteScript {
 	// 基本オブジェクトをセット.
 	private static final void settingRhiginObject(Context ctx, RhiginScriptable scope) throws Exception {
 		// contextにbaseFunctionsを追加.
-		RhiginContext context = scope.getContext();
-		setBaseFunctions(context);
+		setBaseFunctions(scope.getContext());
 		
 		// オリジナルオブジェクトを設定.
 		Object[] kv;
