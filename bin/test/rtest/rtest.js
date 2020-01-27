@@ -18,24 +18,40 @@ if(!File.isDir(RTEST_FOLDER)) {
     return false;
 }
 
+// 出力処理.
+var out = {};
+var cOut = new ColorOut();
+
 // コンソール出力.
-var print = function(n) {
-    java.lang.System.out.print(n);
+out.print = function(n) {
+    if(n == null || n == undefined) {
+        n = "";
+    }
+    java.lang.System.out.print(cOut.out(n));
 }
 
 // コンソール出力.
-var println = function(n) {
-    java.lang.System.out.println(n);
+out.println = function(n) {
+    if(n == null || n == undefined) {
+        n = "";
+    }
+    java.lang.System.out.println(cOut.out(n));
 }
 
 // エラーコンソール出力.
-var errPrint = function(n) {
-    java.lang.System.err.print(n);
+out.errPrint = function(n) {
+    if(n == null || n == undefined) {
+        n = "";
+    }
+    java.lang.System.out.print(cOut.out(n));
 }
 
 // エラーコンソール出力.
-var errPrintln = function(n) {
-    java.lang.System.err.println(n);
+out.errPrintln = function(n) {
+    if(n == null || n == undefined) {
+        n = "";
+    }
+    java.lang.System.out.println(cOut.out(n));
 }
 
 // rtest ファイル名判別.
@@ -140,9 +156,14 @@ for(var i = 0; i < len; i ++) {
 // 終了時間を取得.
 var exitTime = Date.now() - startTime;
 
-//とりあえず表示させる.
-println("len: " + len + " time: " + exitTime + " msec");
-println(colorOut("<#blue>hoge<#/end>moge"));
-println(JSON.toString(result));
+//out.println("JSON:" + JSON.toString(result));
 
+// レポートを取得.
+var report = require(`${RTEST_LIB_DIR}/rtest-report`);
+
+// レポート表示.
+var successResult =  report(out, result, exitTime);
+
+// 処理結果を返却.
+return successResult;
 })(this);

@@ -67,8 +67,8 @@ public class ColorOutObject {
 				switch (type) {
 				case 0: // out.
 					{
-						if(args.length > 0 && args[0] instanceof String) {
-							return out.toString((String)args[0]);
+						if(args.length > 0) {
+							return out.toString("" + args[0]);
 						}
 					}
 					break;
@@ -89,15 +89,15 @@ public class ColorOutObject {
 					}
 				case 4: // print.
 					{
-						if(args.length > 0 && args[0] instanceof String) {
-							out.print((String)args[0]);
+						if(args.length > 0) {
+							out.print("" + args[0]);
 						}
 					}
 					break;
 				case 5: // println.
 					{
-						if(args.length > 0 && args[0] instanceof String) {
-							out.println((String)args[0]);
+						if(args.length > 0) {
+							out.println("" + args[0]);
 						} else {
 							System.out.println();
 						}
@@ -105,15 +105,15 @@ public class ColorOutObject {
 					break;
 				case 6: // errPrint.
 					{
-						if(args.length > 0 && args[0] instanceof String) {
-							out.errPrint((String)args[0]);
+						if(args.length > 0) {
+							out.errPrint("" + args[0]);
 						}
 					}
 					break;
 				case 7: // errPrintln.
 					{
-						if(args.length > 0 && args[0] instanceof String) {
-							out.errPrintln((String)args[0]);
+						if(args.length > 0) {
+							out.errPrintln("" + args[0]);
 						} else {
 							System.err.println();
 						}

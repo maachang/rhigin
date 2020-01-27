@@ -1,4 +1,5 @@
 .DS_Store
+.vscode
 
 rhigin-*.jar
 bin/lib/rhigin-*.jar
