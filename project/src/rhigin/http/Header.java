@@ -196,20 +196,22 @@ public class Header extends JavaScriptable.Map
 	public Object get(Object key) {
 		if (key == null) {
 			return null;
-		} else if ("url".equals(key)) {
+		}
+		final String k = key.toString();
+		if ("url".equals(k)) {
 			return getUrl();
-		} else if ("method".equals(key)) {
+		} else if ("method".equals(k)) {
 			return getMethod();
-		} else if ("version".equals(key)) {
+		} else if ("version".equals(k)) {
 			return getVersion();
-		} else if ("address".equals(key)) {
+		} else if ("address".equals(k)) {
 			return getRemoteAddress();
-		} else if ("port".equals(key)) {
+		} else if ("port".equals(k)) {
 			return getRemotePort();
-		} else if ("contentType".equals(key) || Alphabet.eq("content-type", "" + key)) {
+		} else if (Alphabet.eq("content-type", k)) {
 			if (contntType == null) {
 				try {
-					contntType = getHeader(key.toString());
+					contntType = getHeader(k);
 				} catch (Exception e) {
 					contntType = null;
 				}
@@ -217,7 +219,7 @@ public class Header extends JavaScriptable.Map
 			return contntType;
 		}
 		try {
-			return getHeader(key.toString());
+			return getHeader(k);
 		} catch (Exception e) {
 			return null;
 		}
