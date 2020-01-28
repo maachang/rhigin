@@ -83,6 +83,12 @@ public class Request extends Header {
 			} else {
 				return null;
 			}
+		} else if (key != null && Alphabet.eq("content-length", key.toString())) {
+			try {
+				return getContentLength();
+			} catch(Exception e) {
+				throw new RhiginException(e);
+			}
 		}
 		return super.get(key);
 	}

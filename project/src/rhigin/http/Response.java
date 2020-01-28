@@ -180,8 +180,12 @@ public class Response extends JavaScriptable.Map implements ConvertGet {
 		if(p == -1 || p + 1 == n.length()) {
 			return n.substring(0, 1).toUpperCase() + n.substring(1);
 		}
-		return n.substring(0, 1).toUpperCase() + n.substring(1, p + 1) +
-			n.substring(p + 1, p + 2).toUpperCase() + n.substring(p + 2);
+		return new StringBuilder(n.length())
+			.append(n.substring(0, 1).toUpperCase())
+			.append(n.substring(1, p + 1))
+			.append(n.substring(p + 1, p + 2).toUpperCase())
+			.append(n.substring(p + 2))
+			.toString();
 	}
 	
 	@Override
