@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.Undefined;
+
 import rhigin.scripts.JavaScriptable;
 import rhigin.util.Alphabet;
 import rhigin.util.AndroidMap;
@@ -59,7 +62,7 @@ public class Response extends JavaScriptable.Map implements ConvertGet {
 		if (k != null && v != null) {
 			if (Alphabet.eq("content-type", k.toString())) {
 				String ret = ContentType;
-				ContentType = "" + v.toString();
+				ContentType = v.toString();
 				return ret;
 			}
 			return header.put(k.toString(), v.toString());
@@ -136,7 +139,7 @@ public class Response extends JavaScriptable.Map implements ConvertGet {
 		}
 		return setHeader(key, value);
 	}
-
+	
 	/**
 	 * 削除.
 	 * 
@@ -158,6 +161,54 @@ public class Response extends JavaScriptable.Map implements ConvertGet {
 			return ret;
 		}
 		return removeHeader(key);
+	}
+	
+	/**
+	 * 要求ヘッダ名の変換.
+	 * js からアクセスされる場合、ヘッダ名は必ず
+	 * [Content-Type]のように、先頭大文字、ハイフン後大文字に変換する。
+	 */
+	private static final String _hname(String n) {
+		if(n == null || n.isEmpty()) {
+			return null;
+		}
+		n = n.toLowerCase();
+		if("state".equals(n) || "status".equals(n)) {
+			return n;
+		}
+		int p = n.indexOf("-");
+		if(p == -1 || p + 1 == n.length()) {
+			return n.substring(0, 1).toUpperCase() + n.substring(1);
+		}
+		return n.substring(0, 1).toUpperCase() + n.substring(1, p + 1) +
+			n.substring(p + 1, p + 2).toUpperCase() + n.substring(p + 2);
+	}
+	
+	@Override
+	public boolean has(String name, Scriptable start) {
+		if (this.containsKey(_hname(name))) {
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public Object get(String name, Scriptable start) {
+		name = _hname(name);
+		if (this.containsKey(name)) {
+			return this.get(name);
+		}
+		return Undefined.instance;
+	}
+
+	@Override
+	public void put(String name, Scriptable start, Object value) {
+		this.put(_hname(name), value);
+	}
+
+	@Override
+	public void delete(String name) {
+		this.remove(_hname(name));
 	}
 
 	/**
