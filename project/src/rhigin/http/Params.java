@@ -4,21 +4,18 @@ import java.util.Map;
 import java.util.Set;
 
 import rhigin.scripts.JavaScriptable;
-import rhigin.util.AbstractEntryIterator;
-import rhigin.util.AbstractKeyIterator;
-import rhigin.util.ArrayMap;
+import rhigin.util.AndroidMap;
 import rhigin.util.ConvertGet;
 
 /**
  * Httpパラメータ.
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class Params extends JavaScriptable.Map implements AbstractKeyIterator.Base<String>, AbstractEntryIterator.Base<String, Object>, ConvertGet<Object> {
+public class Params extends JavaScriptable.Map implements ConvertGet<Object> {
 	private Map map;
-	private Object[] keyList = null;
 
 	public Params() {
-		this(new ArrayMap());
+		this.map = new AndroidMap();
 	}
 
 	public Params(Map map) {
@@ -44,11 +41,7 @@ public class Params extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 	@Override
 	public Object put(Object name, Object value) {
 		if (name != null) {
-			keyList = null;
-			Object ret = map.put("" + name, value);
-			if (ret != null) {
-				return ret;
-			}
+			return map.put("" + name, value);
 		}
 		return null;
 	}
@@ -56,11 +49,7 @@ public class Params extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 	@Override
 	public Object remove(Object name) {
 		if (name != null) {
-			keyList = null;
-			Object ret = map.remove("" + name);
-			if (ret != null) {
-				return ret;
-			}
+			return map.remove("" + name);
 		}
 		return null;
 	}
@@ -77,24 +66,19 @@ public class Params extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 
 	@Override
 	public Object[] getIds() {
-		if (map instanceof ArrayMap) {
-			String[] names = ((ArrayMap) map).getListMap().names();
-			if (names == null) {
+		if (map instanceof AndroidMap) {
+			AndroidMap m = (AndroidMap)map;
+			int len = m.size();
+			if(len == 0) {
 				return new Object[] {};
 			}
-			Object[] ret = new Object[names.length];
-			System.arraycopy(names, 0, ret, 0, names.length);
+			Object[] ret = new Object[len];
+			for(int i = 0; i < len; i ++) {
+				ret[i] = m.keyAt(i);
+			}
 			return ret;
 		} else {
-			if (keyList == null) {
-				keyList = map.keySet().toArray();
-			}
-			if (keyList == null || keyList.length == 0) {
-				return new Object[] {};
-			}
-			Object[] ret = new Object[keyList.length];
-			System.arraycopy(keyList, 0, ret, 0, keyList.length);
-			return ret;
+			return map.keySet().toArray();
 		}
 	}
 
@@ -104,36 +88,12 @@ public class Params extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 	}
 
 	@Override
-	public String getKey(int no) {
-		if (map instanceof ArrayMap) {
-			return (String) ((ArrayMap) map).getListMap().rawData().get(no)[0];
-		} else {
-			if (keyList == null) {
-				keyList = map.keySet().toArray();
-			}
-			return (String) keyList[no];
-		}
-	}
-
-	@Override
-	public Object getValue(int no) {
-		if (map instanceof ArrayMap) {
-			return ((ArrayMap) map).getListMap().rawData().get(no)[1];
-		} else {
-			if (keyList == null) {
-				keyList = map.keySet().toArray();
-			}
-			return map.get(keyList[no]);
-		}
-	}
-
-	@Override
 	public Set keySet() {
-		return new AbstractKeyIterator.Set<>(this);
+		return map.keySet();
 	}
 
 	@Override
 	public Set<Entry<String, Object>> entrySet() {
-		return new AbstractEntryIterator.Set<>(this);
+		return map.entrySet();
 	}
 }

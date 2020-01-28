@@ -4,8 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import rhigin.util.ArrayMap;
-import rhigin.util.ListMap;
+import rhigin.util.AndroidMap;
 
 /**
  * Javascript用Map.
@@ -17,14 +16,7 @@ public class JsMap extends JavaScriptable.Map {
 	 * コンストラクタ.
 	 */
 	public JsMap() {
-		srcMap = new ArrayMap();
-	}
-
-	/**
-	 * コンストラクタ.
-	 */
-	public JsMap(ListMap list) {
-		srcMap = new ArrayMap(list);
+		srcMap = new AndroidMap();
 	}
 
 	/**
@@ -38,18 +30,13 @@ public class JsMap extends JavaScriptable.Map {
 	 * コンストラクタ.
 	 */
 	public JsMap(final Object... args) {
-		srcMap = new ArrayMap(args);
-	}
-	
-	/**
-	 * ListMapをセット.
-	 */
-	public void setRaw(ListMap list) {
-		if(srcMap instanceof ArrayMap) {
-			((ArrayMap)srcMap).setRaw(list);
+		srcMap = new AndroidMap();
+		final int len = args == null ? 0 : args.length;
+		for(int i = 0; i < len; i += 2) {
+			srcMap.put(args[i], args[i+1]);
 		}
 	}
-
+	
 	@Override
 	public void clear() {
 		srcMap.clear();
@@ -106,13 +93,6 @@ public class JsMap extends JavaScriptable.Map {
 	@Override
 	public Collection values() {
 		return srcMap.values();
-	}
-
-	public ListMap getListMap() {
-		if(srcMap instanceof ArrayMap) {
-			return ((ArrayMap)srcMap).getListMap();
-		}
-		return null;
 	}
 
 	@Override

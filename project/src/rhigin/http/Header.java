@@ -18,7 +18,10 @@ import rhigin.util.ConvertMap;
  * Httpヘッダ情報. 基本HTTPヘッダ情報のみを保持します. (bodyデータは非保持).
  */
 @SuppressWarnings("rawtypes")
-public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Base<String>, AbstractEntryIterator.Base<String, String>, ConvertMap {
+public class Header extends JavaScriptable.Map
+	implements AbstractKeyIterator.Base<String>,
+		AbstractEntryIterator.Base<String, String>,
+		ConvertMap {
 	protected NioElement element;
 	protected String method;
 	protected String url;
@@ -63,11 +66,12 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 	}
 
 	// 取得ヘッダバイナリを文字列のヘッダに変換.
-	protected final void getHeaderString() throws IOException {
-		if (headers != null) {
+	private final String _getHeaderString() throws IOException {
+		if(headers != null) {
 			headersString = new String(headers, "UTF8");
 			headers = null;
 		}
+		return headersString;
 	}
 
 	// nioElementをセット.
@@ -75,7 +79,13 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 		element = em;
 	}
 
+	@Override
 	public void clear() {
+		method = null;
+		url = null;
+		version = null;
+		headersString = null;
+		headers = null;
 		element = null;
 		headerList = null;
 		contntType = null;
@@ -114,7 +124,7 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 	 * @return
 	 */
 	public String getRemoteAddress() {
-		return element.getRemoteAddress().getHostString();
+		return element == null ? null : element.getRemoteAddress().getHostString();
 	}
 
 	/**
@@ -123,7 +133,7 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 	 * @return
 	 */
 	public int getRemotePort() {
-		return element.getRemoteAddress().getPort();
+		return element == null ? -1 : element.getRemoteAddress().getPort();
 	}
 
 	/**
@@ -134,7 +144,11 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 	 * @throws IOException
 	 */
 	protected String getHeader(String key) throws IOException {
-		getHeaderString();
+		if(headersString == null) {
+			if(_getHeaderString() == null) {
+				return null;
+			}
+		}
 		int p = Alphabet.indexOf(headersString, key + ": ");
 		if (p == -1) {
 			return null;
@@ -149,8 +163,12 @@ public class Header extends JavaScriptable.Map implements AbstractKeyIterator.Ba
 	public List<String> getHeaders() throws IOException {
 		if (headerList != null) {
 			return headerList;
+		} else if(headersString == null) {
+			if(_getHeaderString() == null) {
+				List<String> ret = new ArrayList<String>();
+				return ret;
+			}
 		}
-		getHeaderString();
 		int p;
 		int b = 0;
 		List<String> ret = new ArrayList<String>();

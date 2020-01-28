@@ -156,8 +156,6 @@ for(var i = 0; i < len; i ++) {
 // 終了時間を取得.
 var exitTime = Date.now() - startTime;
 
-//out.println("JSON:" + JSON.toString(result));
-
 // レポートを取得.
 var report = require(`${RTEST_LIB_DIR}/rtest-report`);
 

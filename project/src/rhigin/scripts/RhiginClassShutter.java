@@ -1,9 +1,10 @@
 package rhigin.scripts;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.mozilla.javascript.ClassShutter;
+
+import rhigin.util.AndroidMap;
 
 final class RhiginClassShutter implements ClassShutter {
 	private static Map<String, Boolean> protectedClasses;
@@ -15,7 +16,7 @@ final class RhiginClassShutter implements ClassShutter {
 	static synchronized ClassShutter getInstance() {
 		if (theInstance == null) {
 			theInstance = new RhiginClassShutter();
-			protectedClasses = new HashMap<String, Boolean>();
+			protectedClasses = new AndroidMap<String, Boolean>();
 			protectedClasses.put("java.security.AccessController", Boolean.TRUE);
 		}
 		return theInstance;

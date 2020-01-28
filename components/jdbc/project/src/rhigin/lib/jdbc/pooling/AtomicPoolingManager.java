@@ -2,7 +2,6 @@ package rhigin.lib.jdbc.pooling;
 
 import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +9,7 @@ import java.util.Map;
 import rhigin.lib.jdbc.runner.JDBCException;
 import rhigin.lib.jdbc.runner.JDBCKind;
 import rhigin.scripts.JsonOut;
+import rhigin.util.AndroidMap;
 import rhigin.util.Flag;
 
 /**
@@ -18,7 +18,7 @@ import rhigin.util.Flag;
 public class AtomicPoolingManager {
 
 	/** プーリングデータベース管理オブジェクト群. **/
-	private final Map<String, AtomicPooling> manager = new HashMap<String, AtomicPooling>();
+	private final Map<String, AtomicPooling> manager = new AndroidMap<String, AtomicPooling>();
 	private final List<String> managerList = new ArrayList<String>();
 
 	/** オブジェクト破棄チェック. **/

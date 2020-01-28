@@ -3,12 +3,12 @@ package rhigin.lib.jdbc.runner;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.HashMap;
 import java.util.Map;
 
 import rhigin.scripts.RhiginContext;
 import rhigin.scripts.RhiginEndScriptCall;
 import rhigin.scripts.compile.CompileCache;
+import rhigin.util.AndroidMap;
 import rhigin.util.OList;
 
 /**
@@ -56,7 +56,7 @@ public class JDBCCloseable implements RhiginEndScriptCall {
 		Entity et = lo();
 		Map<String, JDBCConnect> ret = et.useConnects;
 		if (ret == null) {
-			ret = new HashMap<String, JDBCConnect>();
+			ret = new AndroidMap<String, JDBCConnect>();
 			et.useConnects = ret;
 		}
 		return ret;

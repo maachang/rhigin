@@ -2,12 +2,12 @@ package rhigin.lib.jdbc.runner;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.HashMap;
 import java.util.Map;
 
 import rhigin.lib.jdbc.runner.JDBCConnect.Delete;
 import rhigin.lib.jdbc.runner.JDBCConnect.Insert;
 import rhigin.lib.jdbc.runner.JDBCConnect.Update;
+import rhigin.util.AndroidMap;
 import rhigin.util.OList;
 
 /**
@@ -108,7 +108,7 @@ public class JDBCBatch {
 					batchList = new OList<Statement>();
 				}
 				if(psCache == null) {
-					psCache = new HashMap<String, PreparedStatement>();
+					psCache = new AndroidMap<String, PreparedStatement>();
 				}
 				batchList.add(stmt);
 				psCache.put(sql, stmt);

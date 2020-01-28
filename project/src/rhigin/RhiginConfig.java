@@ -2,7 +2,6 @@ package rhigin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -12,6 +11,7 @@ import org.mozilla.javascript.Undefined;
 import rhigin.scripts.Json;
 import rhigin.scripts.Read;
 import rhigin.scripts.function.ToStringFunction;
+import rhigin.util.AndroidMap;
 import rhigin.util.BlankScriptable;
 import rhigin.util.ConvertGet;
 import rhigin.util.Converter;
@@ -40,7 +40,7 @@ public class RhiginConfig implements BlankScriptable {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static final Map<String, Map<String, Object>> load(String dir) throws IOException {
 		try {
-			Map<String, Map<String, Object>> ret = new HashMap<String, Map<String, Object>>();
+			Map<String, Map<String, Object>> ret = new AndroidMap<String, Map<String, Object>>();
 			if (!FileUtil.isDir(dir)) {
 				return ret;
 			}

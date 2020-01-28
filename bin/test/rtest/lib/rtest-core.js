@@ -368,9 +368,20 @@ var it = function(name, func) {
     var before = _now;
     _now = inner;
     var startTime = Date.now();
-    _beforeEach();          // 定義されているbeforeEachを実行.
-    func();
-    _afterEach();           // 定義されているafterEachを実行.
+    var errType = 0;
+    try {
+        errType = 0;
+        _beforeEach();          // 定義されているbeforeEachを実行.
+        errType = 1;
+        func();
+        errType = 2;
+        _afterEach();           // 定義されているafterEachを実行.
+    } catch(e) {
+        // エラーの結果をセット.
+        _result(
+            ["beforeEach","it","afterEach"][errType] +
+            ":exception", false, false, e);
+    }
     _nowIt.time = parseInt(Date.now() - startTime);
     _nowIt = null;
     _now = before ;

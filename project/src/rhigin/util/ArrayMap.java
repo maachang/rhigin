@@ -10,7 +10,10 @@ import java.util.Set;
  * ArrayMap.
  */
 @SuppressWarnings("rawtypes")
-public class ArrayMap implements AbstractKeyIterator.Base<String>, AbstractEntryIterator.Base<String, Object>, Map<String, Object>, ConvertGet<String> {
+public class ArrayMap implements AbstractKeyIterator.Base<String>,
+	AbstractEntryIterator.Base<String, Object>,
+	Map<String, Object>,
+	ConvertGet<String> {
 	private ListMap list;
 
 	/**
@@ -63,7 +66,7 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>, AbstractEntry
 		if (name == null || value == null) {
 			return null;
 		}
-		return list.put(name.toString(), value);
+		return list.put(name, value);
 	}
 
 	@Override
