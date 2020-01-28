@@ -10,7 +10,11 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * AndroidのAndroidMapを移植.
+ * AndroidのArrayMapを移植.
+ * 
+ * HashMapだと、速度は早いがHashの特性上配列を結構作られるので、リソース増になる。
+ * なので、比較的リソースを使わないAndroidのArrayMapを利用することで、
+ * リソース減を図る。
  */
 @SuppressWarnings("unchecked")
 public final class AndroidMap<K, V> implements Map<K, V>, ConvertGet<K> {

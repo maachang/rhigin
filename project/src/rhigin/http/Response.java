@@ -1,27 +1,25 @@
 package rhigin.http;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import rhigin.scripts.JavaScriptable;
-import rhigin.util.AbstractEntryIterator;
-import rhigin.util.AbstractKeyIterator;
-import rhigin.util.ConvertMap;
+import rhigin.util.Alphabet;
+import rhigin.util.AndroidMap;
+import rhigin.util.ConvertGet;
 import rhigin.util.Converter;
-import rhigin.util.ListMap;
-import rhigin.util.OList;
+import rhigin.util.FixedArray;
 
 /**
  * Response.
  */
-@SuppressWarnings("rawtypes")
-public class Response extends JavaScriptable.Map implements AbstractKeyIterator.Base<String>, AbstractEntryIterator.Base<String, Object>, ConvertMap {
+@SuppressWarnings({"rawtypes", "unchecked"})
+public class Response extends JavaScriptable.Map implements ConvertGet {
 	private static final String DEFAULT_CONTENT_TYPE = "application/json; charset=UTF-8";
 	protected int status = 200;
-	protected ListMap header = new ListMap();
+	protected AndroidMap header = new AndroidMap();
 	protected String ContentType = DEFAULT_CONTENT_TYPE;
 
 	public void clear() {
@@ -59,30 +57,26 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 
 	protected Object setHeader(Object k, Object v) {
 		if (k != null && v != null) {
-			Object ret = header.put(k.toString(), v.toString());
-			if (ret != null) {
+			if (Alphabet.eq("content-type", k.toString())) {
+				String ret = ContentType;
+				ContentType = "" + v.toString();
 				return ret;
 			}
+			return header.put(k.toString(), v.toString());
 		}
 		return null;
 	}
 
 	protected Object getHeader(Object k) {
 		if (k != null) {
-			Object ret = header.get(k.toString());
-			if (ret != null) {
-				return ret;
-			}
+			return header.get(k.toString());
 		}
 		return null;
 	}
 
 	protected Object removeHeader(Object k) {
 		if (k != null) {
-			Object ret = header.remove(k.toString());
-			if (ret != null) {
-				return ret;
-			}
+			return header.remove(k.toString());
 		}
 		return null;
 	}
@@ -91,14 +85,12 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 		if (h == null) {
 			return "";
 		}
-		OList<Object[]> raw = h.header.rawData();
 		StringBuilder buf = new StringBuilder();
-		int len = raw.size();
-		if (len > 0) {
-			Object[] kv = null;
-			for (int i = 0; i < len; i++) {
-				kv = (Object[]) raw.get(i);
-				buf.append(kv[0]).append(": ").append(kv[1]).append("\r\n");
+		AndroidMap hh = h.header;
+		int len = hh.size();
+		if(len > 0) {
+			for(int i = 0;i < len; i ++) {
+				buf.append(hh.keyAt(i)).append(": ").append(hh.valueAt(i)).append("\r\n");
 			}
 		}
 		buf.append("Content-Type: ").append(h.ContentType).append("\r\n");
@@ -114,9 +106,11 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 	 */
 	@Override
 	public Object get(Object key) {
-		if ("state".equals(key) || "status".equals(key)) {
+		if(key == null) {
+			return null;
+		} else if ("state".equals(key) || "status".equals(key)) {
 			return getStatus();
-		} else if ("Content-Type".equals(key)) {
+		} else if (Alphabet.eq("content-type", key.toString())) {
 			return ContentType;
 		}
 		return getHeader(key);
@@ -133,13 +127,11 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 	 */
 	@Override
 	public Object put(Object key, Object value) {
-		if ("state".equals(key) || "status".equals(key)) {
+		if(key == null || value == null) {
+			return null;
+		} else if ("state".equals(key) || "status".equals(key)) {
 			int ret = getStatus();
 			setStatus(Converter.convertInt(value));
-			return ret;
-		} else if ("Content-Type".equals(key)) {
-			String ret = ContentType;
-			ContentType = "" + value;
 			return ret;
 		}
 		return setHeader(key, value);
@@ -154,11 +146,13 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 	 */
 	@Override
 	public Object remove(Object key) {
-		if ("state".equals(key) || "status".equals(key)) {
+		if(key == null) {
+			return null;
+		} else if ("state".equals(key) || "status".equals(key)) {
 			int ret = getStatus();
 			setStatus(200);
 			return ret;
-		} else if ("Content-Type".equals(key)) {
+		} else if (Alphabet.eq("content-type", key.toString())) {
 			String ret = ContentType;
 			ContentType = DEFAULT_CONTENT_TYPE;
 			return ret;
@@ -177,7 +171,8 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 	public boolean containsKey(Object key) {
 		if (key == null) {
 			return false;
-		} else if ("state".equals(key) || "status".equals(key) || "Content-Type".equals(key)) {
+		} else if ("state".equals(key) || "status".equals(key) ||
+			Alphabet.eq("content-type", key.toString())) {
 			return true;
 		}
 		return header.containsKey(key.toString());
@@ -189,12 +184,12 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 	 * @return List<String> ヘッダ一覧が返却されます.
 	 */
 	public List<String> getHeaders() {
-		OList<Object[]> list = header.rawData();
-		int len = list.size();
-		List<String> ret = new ArrayList<String>();
-		for (int i = 0; i < len; i++) {
-			ret.add("" + list.get(i)[0]);
+		int len = header.size();
+		List<String> ret = new FixedArray<String>(len + 1);
+		for(int i = 0; i < len; i ++) {
+			ret.set(i, "" + header.keyAt(i));
 		}
+		ret.set(len, "Content-Type");
 		return ret;
 	}
 
@@ -205,24 +200,14 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 
 	@Override
 	public Object[] getIds() {
-		String[] names = header.names();
-		if (names == null) {
-			return new Object[] {};
+		int len = header.size();
+		Object[] ret = new Object[len + 1];
+		for(int i = 0; i < len; i ++) {
+			ret[i] = header.keyAt(i);
 		}
-		Object[] ret = new Object[names.length];
-		System.arraycopy(names, 0, ret, 0, names.length);
+		ret[len] = "Content-Type";
 		return ret;
 	}
-
-	@Override
-	public String getKey(int no) {
-		return (String) header.rawData().get(no)[0];
-	}
-
-	@Override
-	public Object getValue(int no) {
-		return header.rawData().get(no)[1];
-	}	
 
 	@Override
 	public int size() {
@@ -231,11 +216,16 @@ public class Response extends JavaScriptable.Map implements AbstractKeyIterator.
 
 	@Override
 	public Set keySet() {
-		return new AbstractKeyIterator.Set<>(this);
+		return header.keySet();
 	}
 
 	@Override
 	public Set<Entry<String, Object>> entrySet() {
-		return new AbstractEntryIterator.Set<>(this);
+		return header.entrySet();
+	}
+
+	@Override
+	public Object getOriginal(Object n) {
+		return get(n);
 	}
 }

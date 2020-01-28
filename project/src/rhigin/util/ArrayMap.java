@@ -8,6 +8,12 @@ import java.util.Set;
 
 /**
  * ArrayMap.
+ * 
+ * 配列でデータを保持し、検索は１つづつ探す方式なので、リソースは少ないが
+ * その分追加・検索が遅い。
+ * 
+ * 大量で高速な検索が必要なものではHashMapを利用し、それほど量が多く無いが
+ * 高速な検索が必要な場合はAndroidMapを利用してください。
  */
 @SuppressWarnings("rawtypes")
 public class ArrayMap implements AbstractKeyIterator.Base<String>,

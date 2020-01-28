@@ -78,8 +78,6 @@ public class ExecuteScript {
 	// private static final int SCRIPT_LANGUAGE_VERSION = Context.VERSION_ES6;
 	
 	// 基本Functions.
-//	private static final ThreadLocal<FixedKeyValues<String, Object>> baseFunctions =
-//		new ThreadLocal<FixedKeyValues<String, Object>>();
 	private static FixedKeyValues<String, Object> baseFunctions = null;
 
 	/** originalFunctionAndObject. **/
@@ -195,7 +193,6 @@ public class ExecuteScript {
 		
 		// インデックスの作成.
 		scope.endIndex();
-		//baseFunctions.set(scope);
 		baseFunctions = scope;
 		return scope;
 	}
@@ -205,11 +202,6 @@ public class ExecuteScript {
 	 * @param context
 	 */
 	public static final void setBaseFunctions(RhiginContext context) {
-//		FixedKeyValues<String, Object> bf = baseFunctions.get();
-//		if(bf == null) {
-//			bf = initBaseFunctions();
-//		}
-///		context.setBaseFunctions(bf);
 		context.setBaseFunctions(baseFunctions);
 	}
 
