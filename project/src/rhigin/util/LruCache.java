@@ -33,13 +33,7 @@ public class LruCache<K, V> {
 	public LruCache(int size) {
 		top = null;
 		last = null;
-		if(size > 1000) {
-			// サイズが大きい場合は、HashMapを利用.
-			list = new HashMap<K, Element>(size + 1, 1.0f);
-		} else {
-			// サイズが少ない場合は、AndroidのArrayMapを利用.
-			list = new AndroidMap<K, Element>(size + 1);
-		}
+		list = new HashMap<K, Element>(size + 1, 1.0f);
 		maxSize = size;
 	}
 
