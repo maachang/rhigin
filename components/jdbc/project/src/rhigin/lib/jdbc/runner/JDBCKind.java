@@ -10,7 +10,6 @@ import rhigin.scripts.JsMap;
 import rhigin.scripts.JsonOut;
 import rhigin.util.ArrayMap;
 import rhigin.util.Converter;
-import rhigin.util.OList;
 
 /**
  * JDBC-Kind.
@@ -25,7 +24,7 @@ public class JDBCKind {
 	private Integer busyTimeout = null;
 	private Integer transactionLevel = null;
 	private Integer fetchSize = null;
-	private ArrayMap params = null;
+	private ArrayMap<String, Object> params = null;
 	
 	private boolean urlType = true;
 	private String urlParams = "";
@@ -155,7 +154,7 @@ public class JDBCKind {
 		ret.fetchSize = fetchSize;
 		ret.poolingSize = poolingSize;
 		ret.poolingTimeout = poolingTimeout;
-		ret.params = new ArrayMap(params);
+		ret.params = new ArrayMap<String, Object>(params);
 		ret.urlType = urlType;
 		{
 			Object o = urlParams;
@@ -192,7 +191,7 @@ public class JDBCKind {
 		ret.name = "notPooling-Connection";
 		ret.driver = driver;
 		ret.url = url;
-		ret.params = new ArrayMap();
+		ret.params = new ArrayMap<String, Object>();
 		ret.notSemicolon = checkNotSemicolon(ret.url);
 
 		ret.check();
@@ -403,14 +402,9 @@ public class JDBCKind {
 		if (params == null || params.size() == 0) {
 			return;
 		}
-		Object[] n;
-		OList<Object[]> list = params.getListMap().rawData();
-		int len = list.size();
+		int len = params.size();
 		for(int i = 0; i < len; i ++) {
-			n = list.get(i);
-			if(n[0] != null) {
-				prop.put("" + n[0], n[1] == null ? null : "" + n[1]);
-			}
+			prop.put(params.getKey(i), params.getValue(i));
 		}
 	}
 	

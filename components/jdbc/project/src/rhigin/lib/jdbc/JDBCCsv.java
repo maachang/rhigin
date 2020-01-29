@@ -218,8 +218,19 @@ public class JDBCCsv {
 	// バッチ送信タイミング.
 	private static final int SEND_BATCH_COUNT = 50;
 	
-	// CSV実行.
-	private int execute(JDBCCore core, String jdbc, String table, boolean deleteFlag,
+	/**
+	 * CSVインサート実行.
+	 * @param core
+	 * @param jdbc
+	 * @param table
+	 * @param deleteFlag
+	 * @param charset
+	 * @param startNumber
+	 * @param fileName
+	 * @return
+	 * @throws Exception
+	 */
+	public int execute(JDBCCore core, String jdbc, String table, boolean deleteFlag,
 		String charset, long startNumber, String fileName)
 		throws Exception {
 		int ret = 0;

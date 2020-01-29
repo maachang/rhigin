@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.mozilla.javascript.ClassShutter;
 
-import rhigin.util.AndroidMap;
+import rhigin.util.ArrayMap;
 
 final class RhiginClassShutter implements ClassShutter {
 	private static Map<String, Boolean> protectedClasses;
@@ -16,7 +16,7 @@ final class RhiginClassShutter implements ClassShutter {
 	static synchronized ClassShutter getInstance() {
 		if (theInstance == null) {
 			theInstance = new RhiginClassShutter();
-			protectedClasses = new AndroidMap<String, Boolean>();
+			protectedClasses = new ArrayMap<String, Boolean>();
 			protectedClasses.put("java.security.AccessController", Boolean.TRUE);
 		}
 		return theInstance;

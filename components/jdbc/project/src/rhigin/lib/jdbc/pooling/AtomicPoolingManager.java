@@ -9,7 +9,7 @@ import java.util.Map;
 import rhigin.lib.jdbc.runner.JDBCException;
 import rhigin.lib.jdbc.runner.JDBCKind;
 import rhigin.scripts.JsonOut;
-import rhigin.util.AndroidMap;
+import rhigin.util.ArrayMap;
 import rhigin.util.Flag;
 
 /**
@@ -18,7 +18,7 @@ import rhigin.util.Flag;
 public class AtomicPoolingManager {
 
 	/** プーリングデータベース管理オブジェクト群. **/
-	private final Map<String, AtomicPooling> manager = new AndroidMap<String, AtomicPooling>();
+	private final Map<String, AtomicPooling> manager = new ArrayMap<String, AtomicPooling>();
 	private final List<String> managerList = new ArrayList<String>();
 
 	/** オブジェクト破棄チェック. **/

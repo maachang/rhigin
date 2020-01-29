@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import rhigin.util.AndroidMap;
+import rhigin.util.ArrayMap;
 
 /**
  * Javascript用Map.
@@ -16,7 +16,7 @@ public class JsMap extends JavaScriptable.Map {
 	 * コンストラクタ.
 	 */
 	public JsMap() {
-		srcMap = new AndroidMap();
+		srcMap = new ArrayMap();
 	}
 
 	/**
@@ -30,7 +30,7 @@ public class JsMap extends JavaScriptable.Map {
 	 * コンストラクタ.
 	 */
 	public JsMap(final Object... args) {
-		srcMap = new AndroidMap();
+		srcMap = new ArrayMap();
 		final int len = args == null ? 0 : args.length;
 		for(int i = 0; i < len; i += 2) {
 			srcMap.put(args[i], args[i+1]);

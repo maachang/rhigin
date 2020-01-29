@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import rhigin.scripts.JavaScriptable;
-import rhigin.util.AndroidMap;
+import rhigin.util.ArrayMap;
 import rhigin.util.ConvertGet;
 
 /**
@@ -15,7 +15,7 @@ public class Params extends JavaScriptable.Map implements ConvertGet<Object> {
 	private Map map;
 
 	public Params() {
-		this.map = new AndroidMap();
+		this.map = new ArrayMap();
 	}
 
 	public Params(Map map) {
@@ -66,8 +66,8 @@ public class Params extends JavaScriptable.Map implements ConvertGet<Object> {
 
 	@Override
 	public Object[] getIds() {
-		if (map instanceof AndroidMap) {
-			AndroidMap m = (AndroidMap)map;
+		if (map instanceof ArrayMap) {
+			ArrayMap m = (ArrayMap)map;
 			int len = m.size();
 			if(len == 0) {
 				return new Object[] {};

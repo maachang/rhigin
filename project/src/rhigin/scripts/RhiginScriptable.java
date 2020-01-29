@@ -12,7 +12,7 @@ import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Undefined;
 import org.mozilla.javascript.Wrapper;
 
-import rhigin.util.AndroidMap;
+import rhigin.util.ArrayMap;
 
 final class RhiginScriptable implements Scriptable {
 	private static final String RHINO_JS_PACKAGE_NAME = "org.mozilla.javascript";
@@ -37,7 +37,7 @@ final class RhiginScriptable implements Scriptable {
 	private Map<Object, Object> getIndexProps() {
 		if(_indexedProps == null) {
 			//_indexedProps = new HashMap<Object, Object>();
-			_indexedProps = new AndroidMap<Object, Object>();
+			_indexedProps = new ArrayMap<Object, Object>();
 		}
 		return _indexedProps;
 	}

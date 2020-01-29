@@ -10,7 +10,7 @@ import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.JavaScriptable;
 import rhigin.util.Alphabet;
-import rhigin.util.AndroidMap;
+import rhigin.util.ArrayMap;
 import rhigin.util.ConvertGet;
 import rhigin.util.Converter;
 import rhigin.util.FixedArray;
@@ -22,7 +22,7 @@ import rhigin.util.FixedArray;
 public class Response extends JavaScriptable.Map implements ConvertGet {
 	private static final String DEFAULT_CONTENT_TYPE = "application/json; charset=UTF-8";
 	protected int status = 200;
-	protected AndroidMap header = new AndroidMap();
+	protected ArrayMap header = new ArrayMap();
 	protected String ContentType = DEFAULT_CONTENT_TYPE;
 
 	public void clear() {
@@ -89,7 +89,7 @@ public class Response extends JavaScriptable.Map implements ConvertGet {
 			return "";
 		}
 		StringBuilder buf = new StringBuilder();
-		AndroidMap hh = h.header;
+		ArrayMap hh = h.header;
 		int len = hh.size();
 		if(len > 0) {
 			for(int i = 0;i < len; i ++) {

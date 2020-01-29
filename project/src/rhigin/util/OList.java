@@ -8,9 +8,9 @@ import java.util.Arrays;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public final class OList<T> {
 	private static final int DEF = 8;
-	private Object[] list;
-	private int length;
-	private int max;
+	protected Object[] list;
+	protected int length;
+	protected int max;
 
 	/**
 	 * 要素を指定して、オブジェクトを作成.
@@ -153,8 +153,11 @@ public final class OList<T> {
 		} else {
 			// 厳密な削除.
 			/*
-			 * length -- ; for( int i = no ; i < length ; i ++ ) { list[ i ] = list[ i + 1 ]
-			 * ; } list[ length ] = null ;
+			 * length -- ;
+			 * for(int i = no ; i < length ; i ++) {
+			 *     list[i] = list[i + 1];
+			 * }
+			 * list[length] = null;
 			 */
 
 			// 速度重視の削除.
@@ -213,18 +216,20 @@ public final class OList<T> {
 	 * @return String 文字列が返却されます.
 	 */
 	public String toString() {
-		StringBuilder buf = new StringBuilder();
+		StringBuilder buf = new StringBuilder("[");
 		for (int i = 0; i < length; i++) {
 			if (i != 0) {
-				buf.append(",");
+				buf.append(", ");
 			}
 			buf.append(list[i]);
 		}
-		return buf.toString();
+		return buf.append("]").toString();
 	}
 
 	/**
-	 * 検索処理. ※この処理を利用する場合は、sortせずとも、処理が可能です. ただし、binarySearchと比べると、速度は遅くなります.
+	 * 検索処理. 
+	 * ※この処理を利用する場合は、sortせずとも、処理が可能です.
+	 * ただし、binarySearchと比べると、速度は遅くなります.
 	 * 
 	 * @param n
 	 *            検索対象の要素を設定します.
@@ -249,7 +254,9 @@ public final class OList<T> {
 	}
 
 	/**
-	 * バイナリサーチ. ※この処理を利用する場合は、必ずsortされている必要があります. この場合はsearch処理と比べて、高速に動作します.
+	 * バイナリサーチ.
+	 * ※この処理を利用する場合は、必ずsortされている必要があります.
+	 * この場合はsearch処理と比べて、高速に動作します.
 	 * 
 	 * @param n
 	 *            対象の要素を設定します.

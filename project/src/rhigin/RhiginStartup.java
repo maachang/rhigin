@@ -29,7 +29,6 @@ import rhigin.util.ArrayMap;
 import rhigin.util.EnvCache;
 import rhigin.util.FileUtil;
 import rhigin.util.IsOs;
-import rhigin.util.OList;
 import rhigin.util.ObjectList;
 
 /**
@@ -275,7 +274,7 @@ public class RhiginStartup {
 			final RhiginContext context = new RhiginContext();
 
 			// スタートアップで、ExecuteScript実行時に利用可能にしたいオブジェクトを設定.
-			final ArrayMap originals = new ArrayMap();
+			final ArrayMap<String, Object> originals = new ArrayMap<String, Object>();
 			context.setAttribute(STARTUP_OBJECT, originals);
 			context.setAttribute(addOrigin.getName(), addOrigin);
 			
@@ -304,12 +303,9 @@ public class RhiginStartup {
 			
 			// ExecuteScript実行時に利用可能にしたいオブジェクトをExecuteScript.addOriginalsで追加.
 			{
-				OList<Object[]> list = originals.getListMap().rawData();
-				int len = list.size();
-				Object[] n;
+				int len = originals.size();
 				for(int i = 0; i < len; i ++) {
-					n = list.get(i);
-					ExecuteScript.addOriginals((String)n[0], n[1]);
+					ExecuteScript.addOriginals(originals.getKey(i), originals.getValue(i));
 				}
 			}
 			// ExecuteScriptの終了時にスタートアップで登録した終了処理系のスクリプトを追加.

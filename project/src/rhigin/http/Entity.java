@@ -9,7 +9,7 @@ import java.util.Map;
 import rhigin.RhiginException;
 import rhigin.http.Validate.ConditionsChecker;
 import rhigin.http.Validate.TypeConvert;
-import rhigin.util.AndroidMap;
+import rhigin.util.ArrayMap;
 import rhigin.util.Converter;
 
 /**
@@ -35,7 +35,7 @@ import rhigin.util.Converter;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class Entity {
 	/** 定義Entity保存先. **/
-	private Map<String, List<EntityColumn>> entityList = new AndroidMap<String, List<EntityColumn>>();
+	private Map<String, List<EntityColumn>> entityList = new ArrayMap<String, List<EntityColumn>>();
 
 	/** 1つのEntityカラム. **/
 	private static final class EntityColumn {

@@ -8,7 +8,7 @@ import org.mozilla.javascript.Scriptable;
 import rhigin.RhiginException;
 import rhigin.http.client.HttpClient;
 import rhigin.scripts.RhiginFunction;
-import rhigin.util.AndroidMap;
+import rhigin.util.ArrayMap;
 import rhigin.util.FixedKeyValues;
 
 /**
@@ -64,7 +64,7 @@ public class HttpClientFunction extends RhiginFunction {
 					option = (Map)args[2];
 				// key, value ... の場合.
 				} else if(len >= 4) {
-					option = new AndroidMap();
+					option = new ArrayMap();
 					for(int i = 2; i < len; i += 2) {
 						option.put("" + args[i], args[i+1]);
 					}

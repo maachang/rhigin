@@ -6,7 +6,7 @@ import java.util.Map;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
-import rhigin.util.AndroidMap;
+import rhigin.util.ArrayMap;
 import rhigin.util.FixedKeyValues;
 
 /**
@@ -14,7 +14,7 @@ import rhigin.util.FixedKeyValues;
  */
 public class RhiginContext implements Scriptable {
 	private FixedKeyValues<String, Object> baseFunctions = null;
-	private Map<String, Object> bindings = new AndroidMap<String, Object>();
+	private Map<String, Object> bindings = new ArrayMap<String, Object>();
 	private Scriptable prototype = null;
 	private Scriptable parentScope = null;
 	

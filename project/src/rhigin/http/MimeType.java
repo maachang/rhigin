@@ -12,7 +12,7 @@ import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.RhiginFunction;
 import rhigin.util.AbstractEntryIterator;
 import rhigin.util.AbstractKeyIterator;
-import rhigin.util.AndroidMap;
+import rhigin.util.ArrayMap;
 import rhigin.util.ConvertMap;
 
 /**
@@ -31,10 +31,10 @@ public class MimeType extends JavaScriptable.Map implements AbstractKeyIterator.
 	public static final String SCRIPT_MIMETYPE = "application/json; charset=UTF-8";
 
 	/** 拡張子に対するデフォルトMime定義. **/
-	private final Map<String, String> mimeTable = new AndroidMap<String, String>();
+	private final Map<String, String> mimeTable = new ArrayMap<String, String>();
 
 	/** charsetを付加するMimeType. **/
-	private final Map<String, Boolean> charsetMimeTable = new AndroidMap<String, Boolean>();
+	private final Map<String, Boolean> charsetMimeTable = new ArrayMap<String, Boolean>();
 
 	/** mimeTypeのキー群. **/
 	protected Object[] keys = null;

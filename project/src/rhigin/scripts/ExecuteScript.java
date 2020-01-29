@@ -81,7 +81,7 @@ public class ExecuteScript {
 	private static FixedKeyValues<String, Object> baseFunctions = null;
 
 	/** originalFunctionAndObject. **/
-	private static final ListMap originalFunctionAndObjectList = new ListMap();
+	private static final ListMap<String, Object> originalFunctionAndObjectList = new ListMap<String, Object>();
 	
 	/** スクリプト終了処理管理. **/
 	private static final OList<RhiginEndScriptCall> endScriptCallList = new OList<RhiginEndScriptCall>();
@@ -479,12 +479,10 @@ public class ExecuteScript {
 		setBaseFunctions(scope.getContext());
 		
 		// オリジナルオブジェクトを設定.
-		Object[] kv;
-		final OList<Object[]> list = originalFunctionAndObjectList.rawData();
+		final ListMap<String, Object> list = originalFunctionAndObjectList;
 		final int len = list.size();
 		for (int i = 0; i < len; i++) {
-			kv = list.get(i);
-			scope.put((String) kv[0], scope, kv[1]);
+			scope.put(list.keyAt(i), scope, list.valueAt(i));
 		}
 	}
 
@@ -495,7 +493,11 @@ public class ExecuteScript {
 	 *            [name], [value], [name], [value] .... のように設定します.
 	 */
 	public static final void addOriginals(Object... args) {
-		originalFunctionAndObjectList.set(args);
+		final int len = args == null ? 0 : args.length;
+		final ListMap<String, Object> list = originalFunctionAndObjectList;
+		for(int i = 0; i < len; i += 2) {
+			list.put((String)args[i], args[i+1]);
+		}
 	}
 
 	/**
@@ -503,7 +505,7 @@ public class ExecuteScript {
 	 * 
 	 * @return ListMap
 	 */
-	public static final ListMap getOriginal() {
+	public static final ListMap<String, Object> getOriginal() {
 		return originalFunctionAndObjectList;
 	}
 	

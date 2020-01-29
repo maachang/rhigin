@@ -9,32 +9,33 @@ import java.util.Set;
 /**
  * ArrayMap.
  * 
- * 配列でデータを保持し、検索は１つづつ探す方式なので、リソースは少ないが
- * その分追加・検索が遅い。
+ * ListMapを内部的に利用.
  * 
- * 大量で高速な検索が必要なものではHashMapを利用し、それほど量が多く無いが
- * 高速な検索が必要な場合はAndroidMapを利用してください。
+ * ListMapでは、BinarySearchを使って、データの追加、削除、取得を行います.
+ * HashMapと比べると速度は１０倍ぐらいは遅いですが、リソースは
+ * Listと同じぐらいしか食わないので、リソースを重視する場合は、
+ * こちらを利用することをおすすめします.
  */
-@SuppressWarnings("rawtypes")
-public class ArrayMap implements AbstractKeyIterator.Base<String>,
-	AbstractEntryIterator.Base<String, Object>,
-	Map<String, Object>,
-	ConvertGet<String> {
-	private ListMap list;
+@SuppressWarnings({"rawtypes", "unchecked"})
+public class ArrayMap<K, V> implements AbstractKeyIterator.Base<K>,
+	AbstractEntryIterator.Base<K, V>,
+	Map<K, V>,
+	ConvertGet<K> {
+	private ListMap<K, V> list;
 
 	/**
 	 * コンストラクタ.
 	 */
 	public ArrayMap() {
-		list = new ListMap();
+		list = new ListMap<K, V>();
 	}
 
 	/**
 	 * コンストラクタ.
 	 */
-	public ArrayMap(ListMap list) {
+	public ArrayMap(ListMap<K, V> list) {
 		if (list == null) {
-			list = new ListMap();
+			list = new ListMap<K, V>();
 		}
 		this.list = list;
 	}
@@ -43,22 +44,20 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>,
 	 * コンストラクタ.
 	 */
 	public ArrayMap(final Map<String, Object> v) {
-		list = new ListMap();
-		list.set(v);
+		list = new ListMap<K, V>(v);
 	}
 
 	/**
 	 * コンストラクタ.
 	 */
 	public ArrayMap(final Object... args) {
-		list = new ListMap();
-		list.set(args);
+		list = new ListMap<K, V>(args);
 	}
 	
 	/**
 	 * ListMapをセット.
 	 */
-	public void setRaw(ListMap list) {
+	public void setRaw(ListMap<K, V> list) {
 		this.list = list;
 	}
 
@@ -68,11 +67,16 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>,
 	}
 
 	@Override
-	public Object put(String name, Object value) {
-		if (name == null || value == null) {
+	public V put(K name, V value) {
+		if (name == null) {
 			return null;
 		}
 		return list.put(name, value);
+	}
+	
+	public ArrayMap set(Object... args) {
+		list.set(args);
+		return this;
 	}
 
 	@Override
@@ -80,23 +84,23 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>,
 		if (key == null) {
 			return false;
 		}
-		return list.containsKey(key.toString());
+		return list.containsKey((K)key);
 	}
 
 	@Override
-	public Object get(Object key) {
+	public V get(Object key) {
 		if (key == null) {
 			return null;
 		}
-		return list.get(key.toString());
+		return list.get((K)key);
 	}
 
 	@Override
-	public Object remove(Object key) {
+	public V remove(Object key) {
 		if (key == null) {
 			return null;
 		}
-		return list.remove(key.toString());
+		return list.remove((K)key);
 	}
 
 	@Override
@@ -113,26 +117,24 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>,
 		while (it.hasNext()) {
 			Object key = it.next();
 			Object value = toMerge.get(key);
-			if (key != null && value != null) {
-				put(key.toString(), value);
+			if (key != null) {
+				put((K)key, (V)value);
 			}
 		}
 	}
 
 	@Override
 	public boolean containsValue(Object value) {
-		OList<Object[]> n = list.rawData();
+		final int len = list.size();
 		if (value == null) {
-			int len = n.size();
 			for (int i = 0; i < len; i++) {
-				if (n.get(i)[1] == null) {
+				if (list.valueAt(i) == null) {
 					return true;
 				}
 			}
 		} else {
-			int len = n.size();
 			for (int i = 0; i < len; i++) {
-				if (value.equals(n.get(i)[1])) {
+				if (value.equals(list.valueAt(i))) {
 					return true;
 				}
 			}
@@ -147,28 +149,15 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>,
 
 	@Override
 	public String toString() {
-		Object[] v;
-		OList<Object[]> n = list.rawData();
-		StringBuilder buf = new StringBuilder();
-		int len = n.size();
-		buf.append("{");
-		for (int i = 0; i < len; i++) {
-			v = n.get(i);
-			if (i != 0) {
-				buf.append(",");
-			}
-			buf.append("\"").append(v[0]).append("\": \"").append(v[1]).append("\"");
-		}
-		return buf.append("}").toString();
+		return list.toString();
 	}
 
 	@Override
-	public Collection<Object> values() {
-		ArrayList<Object> ret = new ArrayList<Object>();
-		OList<Object[]> n = list.rawData();
-		int len = n.size();
+	public Collection<V> values() {
+		ArrayList<V> ret = new ArrayList<V>();
+		int len = list.size();
 		for (int i = 0; i < len; i++) {
-			ret.add(n.get(i)[1]);
+			ret.add(list.valueAt(i));
 		}
 		return ret;
 	}
@@ -178,36 +167,36 @@ public class ArrayMap implements AbstractKeyIterator.Base<String>,
 	}
 
 	@Override
-	public Set<String> keySet() {
-		return new AbstractKeyIterator.Set<String>(this);
+	public Set<K> keySet() {
+		return new AbstractKeyIterator.Set<K>(this);
 	}
 
 	@Override
-	public Set<Entry<String, Object>> entrySet() {
-		return new AbstractEntryIterator.Set<String, Object>(this);
+	public Set<Entry<K, V>> entrySet() {
+		return new AbstractEntryIterator.Set<K, V>(this);
 	}
 
 	// original 取得.
 	@Override
-	public Object getOriginal(String n) {
+	public Object getOriginal(K n) {
 		return get(n);
 	}
 
 	@Override
-	public String getKey(int no) {
-		return (String) list.rawData().get(no)[0];
+	public K getKey(int no) {
+		return list.keyAt(no);
 	}
 	
 	@Override
-	public Object getValue(int no) {
-		return list.rawData().get(no)[1];
+	public V getValue(int no) {
+		return list.valueAt(no);
 	}
-
-	public void set(final Map<String, Object> v) {
-		list.set(v);
+	
+	public K keyAt(int no) {
+		return list.keyAt(no);
 	}
-
-	public void set(final Object... args) {
-		list.set(args);
+	
+	public V valueAt(int no) {
+		return list.valueAt(no);
 	}
 }
