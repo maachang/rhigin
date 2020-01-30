@@ -1,5 +1,6 @@
 package rhigin.util;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -15,7 +16,7 @@ import java.util.Map;
  * ArrayMapを利用.
  * 
  * また、AndroidのArrayMapをAndroidMapとして移植したが、格納数が
- * １０００ぐらいならばAndroidMapの方が速いので、こちらを利用する.
+ * 1000ぐらいならばAndroidMapの方が速いので、こちらを利用する.
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class ListMap<K, V> implements ConvertGet<K> {
@@ -70,18 +71,20 @@ public class ListMap<K, V> implements ConvertGet<K> {
 	
 	// バイナリサーチ.
 	private final int _keyNo(final K n) {
-		final Object[] olst = list.toArray();
-		int low = 0;
-		int high = list.size() - 1;
-		int mid, cmp;
-		while (low <= high) {
-			mid = (low + high) >>> 1;
-			if ((cmp = ((Comparable)((IndexKeyValue<K, V>)olst[mid]).key).compareTo(n)) < 0) {
-				low = mid + 1;
-			} else if (cmp > 0) {
-				high = mid - 1;
-			} else {
-				return mid; // key found
+		if(n != null) {
+			final Object[] olst = list.toArray();
+			int low = 0;
+			int high = list.size() - 1;
+			int mid, cmp;
+			while (low <= high) {
+				mid = (low + high) >>> 1;
+				if ((cmp = ((Comparable)((IndexKeyValue<K, V>)olst[mid]).key).compareTo(n)) < 0) {
+					low = mid + 1;
+				} else if (cmp > 0) {
+					high = mid - 1;
+				} else {
+					return mid; // key found
+				}
 			}
 		}
 		return -1;
@@ -101,14 +104,16 @@ public class ListMap<K, V> implements ConvertGet<K> {
 	 * @return
 	 */
 	public final V put(final K key, final V value) {
-		if(list.size() == 0) {
+		if(key == null) {
+			return null;
+		} else if(list.size() == 0) {
 			list.add(new IndexKeyValue<K, V>(key, value));
 			return null;
 		}
-		Object[] olst = list.toArray();
+		int mid, cmp;
 		int low = 0;
 		int high = list.size() - 1;
-		int mid, cmp;
+		Object[] olst = list.toArray();
 		mid = -1;
 		while (low <= high) {
 			mid = (low + high) >>> 1;
@@ -127,7 +132,7 @@ public class ListMap<K, V> implements ConvertGet<K> {
 		// 一致条件が見つからない場合.
 		mid = (((Comparable)((IndexKeyValue<K, V>)olst[mid]).key).compareTo(key) < 0) ? mid + 1 : mid;
 		list.add(null);
-		int len = list.size();
+		final int len = list.size();
 		olst = list.toArray();
 		System.arraycopy(olst, mid, olst, mid + 1, len - (mid + 1));
 		olst[mid] = new IndexKeyValue<K, V>(key, value);
@@ -142,8 +147,7 @@ public class ListMap<K, V> implements ConvertGet<K> {
 	public final void set(final Object... args) {
 		if (args == null) {
 			return;
-		}
-		if(args.length == 1) {
+		} else if(args.length == 1) {
 			// mapの場合.
 			if(args[0] instanceof Map) {
 				Map mp = (Map)args[0];
@@ -240,9 +244,9 @@ public class ListMap<K, V> implements ConvertGet<K> {
 	 */
 	@Override
 	public String toString() {
+		IndexKeyValue<K, V> kv;
 		StringBuilder buf = new StringBuilder();
 		int len = list.size();
-		IndexKeyValue<K, V> kv;
 		buf.append("{");
 		for (int i = 0; i < len; i++) {
 			kv = list.get(i);
@@ -280,4 +284,63 @@ public class ListMap<K, V> implements ConvertGet<K> {
 	public final V getOriginal(final K n) {
 		return get(n);
 	}
+	
+	// 簡易テスト(そのうち削除).
+	/*
+	private static final String randName(Xor128 rand, int len) {
+		int n;
+		int cnt = 0;
+		byte[] ret = new byte[len * 4];
+		for(int i = 0; i < len; i ++) {
+			n = rand.nextInt();
+			ret[cnt++] = (byte)((n & 0xff000000) >> 24);
+			ret[cnt++] = (byte)((n & 0x00ff0000) >> 16);
+			ret[cnt++] = (byte)((n & 0x0000ff00) >> 8);
+			ret[cnt++] = (byte)((n & 0x000000ff) >> 0);
+		}
+		return Base64.encode(ret);
+	}
+	
+	public static final void main(String[] args) {
+		int len = 100000;
+		Xor128 rand = new Xor128(System.nanoTime());
+		String[] key, value;
+		key = new String[len];
+		value = new String[len];
+		
+		for(int i = 0; i < len; i ++) {
+			key[i] = randName(rand, 10);
+			value[i] = randName(rand, 10);
+		}
+		
+		ListMap<String, String> listMap = new ListMap<String, String>();
+		Map<String, String> hashMap = new HashMap<String, String>();
+		for(int i = 0; i < len; i ++) {
+			listMap.put(key[i], value[i]);
+			hashMap.put(key[i], value[i]);
+		}
+		
+		int cnt = 0;
+		for(int i = 0; i < len; i ++) {
+			if(listMap.get(key[i]).equals(hashMap.get(key[i]))) {
+				cnt ++;
+			}
+		}
+		System.out.println("cnt:" + cnt + " " + (cnt == len));
+		
+		for(int i = 0; i < len >> 1; i ++) {
+			listMap.remove(key[i]);
+		}
+		
+		System.out.println("size:" + listMap.size());
+		
+		cnt = 0;
+		for(int i = 0; i < len; i ++) {
+			if(hashMap.get(key[i]).equals(listMap.get(key[i]))) {
+				cnt ++;
+			}
+		}
+		System.out.println("cnt:" + cnt + " " + (cnt == len >> 1));
+	}
+	*/
 }

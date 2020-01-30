@@ -75,6 +75,9 @@ public class ArrayMap<K, V> implements AbstractKeyIterator.Base<K>,
 	}
 	
 	public ArrayMap set(Object... args) {
+		if(args == null || args.length ==0) {
+			return this;
+		}
 		list.set(args);
 		return this;
 	}
