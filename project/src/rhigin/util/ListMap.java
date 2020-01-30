@@ -1,6 +1,5 @@
 package rhigin.util;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -284,63 +283,4 @@ public class ListMap<K, V> implements ConvertGet<K> {
 	public final V getOriginal(final K n) {
 		return get(n);
 	}
-	
-	// 簡易テスト(そのうち削除).
-	/*
-	private static final String randName(Xor128 rand, int len) {
-		int n;
-		int cnt = 0;
-		byte[] ret = new byte[len * 4];
-		for(int i = 0; i < len; i ++) {
-			n = rand.nextInt();
-			ret[cnt++] = (byte)((n & 0xff000000) >> 24);
-			ret[cnt++] = (byte)((n & 0x00ff0000) >> 16);
-			ret[cnt++] = (byte)((n & 0x0000ff00) >> 8);
-			ret[cnt++] = (byte)((n & 0x000000ff) >> 0);
-		}
-		return Base64.encode(ret);
-	}
-	
-	public static final void main(String[] args) {
-		int len = 100000;
-		Xor128 rand = new Xor128(System.nanoTime());
-		String[] key, value;
-		key = new String[len];
-		value = new String[len];
-		
-		for(int i = 0; i < len; i ++) {
-			key[i] = randName(rand, 10);
-			value[i] = randName(rand, 10);
-		}
-		
-		ListMap<String, String> listMap = new ListMap<String, String>();
-		Map<String, String> hashMap = new HashMap<String, String>();
-		for(int i = 0; i < len; i ++) {
-			listMap.put(key[i], value[i]);
-			hashMap.put(key[i], value[i]);
-		}
-		
-		int cnt = 0;
-		for(int i = 0; i < len; i ++) {
-			if(listMap.get(key[i]).equals(hashMap.get(key[i]))) {
-				cnt ++;
-			}
-		}
-		System.out.println("cnt:" + cnt + " " + (cnt == len));
-		
-		for(int i = 0; i < len >> 1; i ++) {
-			listMap.remove(key[i]);
-		}
-		
-		System.out.println("size:" + listMap.size());
-		
-		cnt = 0;
-		for(int i = 0; i < len; i ++) {
-			if(hashMap.get(key[i]).equals(listMap.get(key[i]))) {
-				cnt ++;
-			}
-		}
-		System.out.println("cnt:" + cnt + " " + (cnt == len >> 1));
-	}
-	*/
 }
