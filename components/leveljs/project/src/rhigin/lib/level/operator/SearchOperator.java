@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.maachang.leveldb.LevelOption;
 import org.maachang.leveldb.operator.LevelIndex;
@@ -26,7 +25,7 @@ public abstract class SearchOperator implements Operator {
 	protected LevelJsCloseable closeable;
 	
 	// rwlock.
-	protected final ReadWriteLock rw = new ReentrantReadWriteLock();
+	protected ReadWriteLock rw = null;
 	
 	/**
 	 * LevelIndexOperatorを取得.

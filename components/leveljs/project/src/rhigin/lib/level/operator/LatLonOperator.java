@@ -31,6 +31,8 @@ public class LatLonOperator extends SearchOperator {
 	 * @param o オペレータを設定.
 	 */
 	public LatLonOperator(LevelJsCloseable c, String n, LevelLatLon o) {
+		// 元のオブジェクトからのロックオブジェクトをセット.
+		this.rw = o.getLock();
 		this.closeable = c;
 		this.base = o;
 		this.name = n;

@@ -4,6 +4,7 @@ package rhigin.lib.level.operator;
  * オペレータインターフェイス.
  */
 public interface Operator {
+	
 	/**
 	 * オペレータのクローズ.
 	 */

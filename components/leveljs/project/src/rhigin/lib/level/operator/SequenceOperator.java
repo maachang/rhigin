@@ -30,6 +30,8 @@ public class SequenceOperator extends SearchOperator {
 	 * @param o オペレータを設定.
 	 */
 	public SequenceOperator(LevelJsCloseable c, String n, LevelSequence o) {
+		// 元のオブジェクトからのロックオブジェクトをセット.
+		this.rw = o.getLock();
 		this.closeable = c;
 		this.base = o;
 		this.name = n;

@@ -61,7 +61,7 @@ public class LevelJsOperatorJs {
 	 */
 	public static final RhiginInstanceObject create(SearchOperator o) {
 		String operatorName = o.getOperatorType();
-		operatorName = operatorName.substring(0, 1).toUpperCase() + operatorName.substring(1);
+		operatorName = operatorName.substring(0, 1).toUpperCase() + operatorName.substring(1) + "Operator";
 		return new RhiginInstanceObject(operatorName, OPERATOR_FUNCTIONS, operatorName, o);
 	}
 	

@@ -2,7 +2,6 @@ package rhigin.lib.level.operator;
 
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.maachang.leveldb.LevelOption;
 import org.maachang.leveldb.operator.LevelQueue;
@@ -18,7 +17,7 @@ public class QueueOperator implements Operator {
 	private String name;
 	
 	// rwlock.
-	private final ReadWriteLock rw = new ReentrantReadWriteLock();
+	private final ReadWriteLock rw;
 	
 	/**
 	 * コンストラクタ.
@@ -27,6 +26,8 @@ public class QueueOperator implements Operator {
 	 * @param q オペレータを設定.
 	 */
 	public QueueOperator(LevelJsCloseable c, String n, LevelQueue q) {
+		// 元のオブジェクトからのロックオブジェクトをセット.
+		rw = q.getLock();
 		queue = q;
 		name = n;
 		// writeBatchモードの場合、クローズ処理に登録.
