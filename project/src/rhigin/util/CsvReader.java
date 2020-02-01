@@ -19,7 +19,7 @@ public class CsvReader implements Iterator<Map<String, Object>>, Closeable, Auto
 	private FixedSearchArray<String> header;
 	private String[] headerList;
 	private List<String> now;
-	private CsvReaderRow rowMap;
+	private RowMap rowMap;
 
 	private String cutCode;
 	private BufferedReader reader;
@@ -169,87 +169,6 @@ public class CsvReader implements Iterator<Map<String, Object>>, Closeable, Auto
 		return true;
 	}
 
-	// １行の情報.
-	private static final class CsvReaderRow implements ConvertMap {
-		private FixedSearchArray<String> header;
-		private String[] headerList;
-		private List<String> rowData;
-
-		public CsvReaderRow(FixedSearchArray<String> h, String[] lst) {
-			header = h;
-			headerList = lst;
-		}
-
-		public CsvReaderRow set(List<String> r) {
-			rowData = r;
-			return this;
-		}
-
-		private int _getParamNo(Object key) {
-			if (key == null) {
-				return -1;
-			}
-			// 数値だった場合は、番号で処理.
-			if (Converter.isNumeric(key)) {
-				int n = Converter.convertInt(key);
-				if (n >= 0 && n < rowData.size()) {
-					return n;
-				}
-				return -1;
-			}
-			int ret = header.search(key.toString());
-			if(ret == -1) {
-				return -1;
-			}
-			return ret;
-		}
-
-		@Override
-		public Object get(Object key) {
-			int n = _getParamNo(key);
-			if (n == -1) {
-				return null;
-			}
-			return rowData.get(n);
-		}
-
-		@Override
-		public boolean containsKey(Object key) {
-			return (_getParamNo(key) == -1) ? false : true;
-		}
-
-		@Override
-		public int size() {
-			return rowData.size();
-		}
-
-		@Override
-		public String toString() {
-			final int len = headerList.length;
-			StringBuilder buf = new StringBuilder("{");
-			for (int i = 0; i < len; i++) {
-				if (i != 0) {
-					buf.append(",");
-				}
-				String v = rowData.get(i);
-				buf.append("\"").append(headerList[i]).append("\":");
-				if (Converter.isNumeric(v)) {
-					buf.append(v);
-				} else if ("TRUE".equals(v)) {
-					buf.append("true");
-				} else if ("FALSE".equals(v)) {
-					buf.append("false");
-				} else if (v.length() == 0) {
-					buf.append("null");
-				} else {
-					buf.append("\"").append(v).append("\"");
-				}
-			}
-			buf.append("}");
-			return buf.toString();
-		}
-	}
-
 	// 初期処理.
 	private final void init() throws IOException {
 
@@ -263,16 +182,13 @@ public class CsvReader implements Iterator<Map<String, Object>>, Closeable, Auto
 			throw new IOException("Reading of CSV information failed.");
 		}
 		final int len = list.size();
-		final String[] lst = new String[len];
 		final FixedSearchArray<String> m = new FixedSearchArray<String>(len);
 		for (int i = 0; i < len; i++) {
-			lst[i] = list.get(i);
 			m.add(list.get(i), i);
 		}
 		header = m;
-		headerList = lst;
 		now = list;
-		rowMap = new CsvReaderRow(header, headerList);
+		rowMap = new RowMap(header);
 	}
 
 	/**
@@ -315,6 +231,13 @@ public class CsvReader implements Iterator<Map<String, Object>>, Closeable, Auto
 			throw new NoSuchElementException();
 		}
 		return rowMap.set(now);
+	}
+	
+	public List<String> nextRow() {
+		if (eof) {
+			throw new NoSuchElementException();
+		}
+		return now;
 	}
 
 	/**

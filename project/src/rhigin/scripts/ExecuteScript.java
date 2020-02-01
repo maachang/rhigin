@@ -44,6 +44,7 @@ import rhigin.scripts.function.SystemTimeFunction;
 import rhigin.scripts.function.ValidateFunction;
 import rhigin.scripts.objects.ColorOutObject;
 import rhigin.scripts.objects.ConsoleObject;
+import rhigin.scripts.objects.ExecCmdObject;
 import rhigin.scripts.objects.FCipherObject;
 import rhigin.scripts.objects.FCompObject;
 import rhigin.scripts.objects.FileObject;
@@ -166,6 +167,7 @@ public class ExecuteScript {
 		FCipherObject.regFunctions(scope);
 		FCompObject.regFunctions(scope);
 		ColorOutObject.regFunctions(scope);
+		ExecCmdObject.regFunctions(scope);
 
 		// rhigin用の基本オブジェクトを設定.
 		RequireFunction.regFunctions(scope);

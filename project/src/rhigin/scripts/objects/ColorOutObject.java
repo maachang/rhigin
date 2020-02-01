@@ -19,7 +19,7 @@ import rhigin.util.FixedSearchArray;
 public class ColorOutObject {
 	public static final String OBJECT_NAME = "ColorOut";
 	
-	// カーソル情報メソッド名群.
+	// カラーコンソール出力用メソッド名群.
 	private static final String[] COLOR_OUT_NAMES = new String[] {
 		"out"
 		,"setMode"
@@ -31,7 +31,7 @@ public class ColorOutObject {
 		,"errPrintln"
 	};
 	
-	// カーソル情報メソッド生成処理.
+	// カラーコンソール出力用メソッド生成処理.
 	private static final ObjectFunction COLOR_OUT_FUNCTIONS = new ObjectFunction() {
 		private FixedSearchArray<String> word = new FixedSearchArray<String>(COLOR_OUT_NAMES);
 		public RhiginFunction create(int no, Object... params) {
@@ -43,7 +43,7 @@ public class ColorOutObject {
 	};
 	
 	/**
-	 * カーソル情報を生成.
+	 * カラーコンソール出力用を生成.
 	 * @param c
 	 * @return
 	 */
@@ -51,7 +51,7 @@ public class ColorOutObject {
 		return new RhiginInstanceObject(OBJECT_NAME, COLOR_OUT_FUNCTIONS, c);
 	}
 	
-	// カーソルのメソッド群. 
+	// カラーコンソール出力用メソッド群. 
 	private static final class ColorOutFunctions extends RhiginFunction {
 		private final int type;
 		private final ColorConsoleOut out;

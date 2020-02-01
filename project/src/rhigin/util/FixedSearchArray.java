@@ -126,6 +126,24 @@ public final class FixedSearchArray<K> {
 	}
 	
 	/**
+	 * リスト追加途中でFixさせる.
+	 * リスト追加は指定したデータ数分データを追加するとFixするが、
+	 * この処理は途中で強制的にFixさせます.
+	 * @return
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public final boolean fix() {
+		if(count == keys.length) {
+			return false;
+		}
+		SearchKey[] nkeys = new SearchKey[count];
+		System.arraycopy(keys, 0, nkeys, 0, count);
+		keys = nkeys;
+		Arrays.sort(keys);
+		return true;
+	}
+	
+	/**
 	 * 追加したリストが全件設定されているかチェック.
 	 * この内容がtrueで無い場合は、検索出来ません.
 	 * @return
@@ -152,6 +170,14 @@ public final class FixedSearchArray<K> {
 	 */
 	public final int size() {
 		return keys.length;
+	}
+	
+	/**
+	 * 現在カウント数を取得.
+	 * @return
+	 */
+	public final int getCount() {
+		return count;
 	}
 	
 	/**

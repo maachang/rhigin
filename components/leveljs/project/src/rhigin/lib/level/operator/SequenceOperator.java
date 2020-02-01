@@ -102,6 +102,33 @@ public class SequenceOperator extends SearchOperator {
 		return new IndexIterator(lock, itr);
 	}
 	
+	@Override
+	public Object put(Object... params) {
+		int len = params == null ? 0 : params.length;
+		if(len == 0) {
+			throw new LevelJsException("Key element information is not set.");
+		}
+		rw.readLock().lock();
+		try {
+			len --;
+			final Object v = params[len];
+			if(!(v instanceof Map)) {
+				// valueがMapで無い場合はエラー.
+				throw new LevelJsException("Element information must be set in Map format.");
+			}
+			if(len > 1) {
+				final Object[] keys = new Object[len];
+				System.arraycopy(params, 0, keys, 0, len);
+				return _put((Map)v, len, keys);
+			} else {
+				return _put((Map)v, 0, null);
+			}
+		} finally {
+			rw.readLock().unlock();
+		}
+	}
+
+	
 	// 検索iterator.
 	private static final class SearchIterator implements OperateIterator {
 		private LevelIterator src;

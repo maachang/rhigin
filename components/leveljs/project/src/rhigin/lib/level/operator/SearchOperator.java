@@ -26,7 +26,7 @@ public abstract class SearchOperator implements Operator {
 	protected LevelJsCloseable closeable;
 	
 	// rwlock.
-	private final ReadWriteLock rw = new ReentrantReadWriteLock();
+	protected final ReadWriteLock rw = new ReentrantReadWriteLock();
 	
 	/**
 	 * LevelIndexOperatorを取得.
