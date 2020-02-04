@@ -1,7 +1,6 @@
 package rhigin;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -140,30 +139,14 @@ public class RhiginStartup {
 				initRhiginScriptFunctionObject();
 			}
 			
-			// rhiginEnvを取得.
-			String rhiginEnv = getRhiginEnv();
-
-			// コンフィグ読み込みディレクトリ先を、rhigin起動環境に合わせる.
-			String confDir = RhiginConstants.DIR_CONFIG;
-			if (rhiginEnv != null) {
-				confDir += rhiginEnv + "/";
-				// 対象フォルダが存在しない、対象フォルダ以下のコンフィグ情報が０件の場合は
-				// confフォルダ配下を読み込む.
-				File confStat = new File(confDir);
-				if (!confStat.isDirectory() || confStat.list() == null || confStat.list().length == 0) {
-					confDir = RhiginConstants.DIR_CONFIG;
-				}
-				confStat = null;
-			}
-			
 			// サーバモードの場合は、コンフィグフォルダは必須.
-			if(!FileUtil.isDir(confDir) && server) {
-				throw new RhiginException("Config folder does not exist: " + confDir);
+			if(!FileUtil.isDir(RhiginConstants.DIR_CONFIG) && server) {
+				throw new RhiginException("Config folder does not exist: " + RhiginConstants.DIR_CONFIG);
 			}
 			
 			// コンフィグ情報をロード.
-			config = new RhiginConfig(confDir);
-
+			config = new RhiginConfig(getRhiginEnv(), RhiginConstants.DIR_CONFIG);
+			
 			// ログファクトリの初期化.
 			if (config.has("logger")) {
 				LogFactory.setting(config.get("logger"));

@@ -159,8 +159,6 @@ public class ExecCmdObject {
 		"result"
 		,"out"
 		,"isOut"
-		,"err"
-		,"isErr"
 		,"toString"
 	};
 	
@@ -210,20 +208,11 @@ public class ExecCmdObject {
 				{
 					return cmd.isOut();
 				}
-				case 3: // err.
-				{
-					return cmd.getErr();
-				}
-				case 4: // isErr.
-				{
-					return cmd.isErr();
-				}
-				case 5: // toString.
+				case 3: // toString.
 				{
 					return JsonOut.toString(new ArrayMap<String, Object>(
 						"result", cmd.result(),
-						"out", cmd.getOut(),
-						"err", cmd.getErr()
+						"out", cmd.getOut()
 					));
 				}
 				}

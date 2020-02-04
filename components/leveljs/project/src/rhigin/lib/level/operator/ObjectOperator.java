@@ -29,8 +29,6 @@ public class ObjectOperator extends SearchOperator {
 	 * @param o オペレータを設定.
 	 */
 	public ObjectOperator(LevelJsCloseable c, String n, LevelMap o) {
-		// 元のオブジェクトからのロックオブジェクトをセット.
-		this.rw = o.getLock();
 		this.closeable = c;
 		this.base = o;
 		this.name = n;

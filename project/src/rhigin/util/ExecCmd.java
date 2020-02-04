@@ -2,13 +2,10 @@ package rhigin.util;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import rhigin.RhiginException;
 
@@ -66,18 +63,20 @@ public class ExecCmd {
 			Object k;
 			int n = 0;
 			Map m = (Map)args[0];
-			env = new String[m.size()];
+			env = new String[m.size() << 1];
 			Iterator it = m.keySet().iterator();
 			while(it.hasNext()) {
 				k = it.next();
-				env[n++] = "" + k + "=" + m.get(k);
+				env[n++] = "" + k;
+				env[n++] = "" + m.get(k);
 			}
 		} else if(args.length >= 2) {
 			int len = args.length;
 			int n = 0;
-			env = new String[len >> 1];
+			env = new String[len];
 			for(int i = 0; i < len; i += 2) {
-				env[n++] = "" + args[i] + "=" + args[i+1];
+				env[n++] = "" + args[i];
+				env[n++] = "" + args[i+1];
 			}
 		}
 		this.env = env;
@@ -111,35 +110,70 @@ public class ExecCmd {
 		return this.timeout;
 	}
 	
-	// 処理結果のコンソールを取得.
-	private static final List<String> getLine(InputStream in)
-		throws IOException {
-		try {
-			String line;
-			List<String> ret = new ObjectList<String>();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-			while((line = reader.readLine()) != null) {
-				ret.add(line);
-			}
-			return ret;
-		} finally {
-			try {
-				in.close();
-			} catch(Exception e) {}
-		}
-	}
-	
 	// コマンド内容を文字列変換します.
-	private static final String outString(String[] s) {
+	private static final String outExecCmd(String[] s) {
 		int len = s.length;
 		StringBuilder buf = new StringBuilder("[");
 		for(int i = 0; i < len; i ++) {
 			if(i != 0) {
 				buf.append(", ");
 			}
-			buf.append(s[i]);
+			buf.append("\"").append(s[i]).append("\"");
 		}
 		return buf.append("]").toString();
+	}
+	
+	// 処理結果のコンソールを取得.
+	private static final List<String> getAllLine(Process p, String[] cmd, long timeout) {
+		BufferedReader reader = null;
+		try {
+			String line;
+			List<String> ret = new ObjectList<String>();
+			reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			if(timeout <= 0L) {
+				// タイムアウトなし.
+				while((line = reader.readLine()) != null) {
+					ret.add(line);
+				}
+			} else {
+				// タイムアウトあり.
+				long time = System.currentTimeMillis();
+				while(true) {
+					if(!p.isAlive()) {
+						// プロセス終了の場合は、残りのコンソール出力を取得.
+						while((line = reader.readLine()) != null) {
+							ret.add(line);
+						}
+						break;
+					} else if(reader.ready()) {
+						// データが存在する場合は、情報を取得.
+						if((line = reader.readLine()) != null) {
+							ret.add(line);
+						} else {
+							// データの終端が見つかった場合は、終了.
+							break;
+						}
+					} else if(System.currentTimeMillis() - time > timeout) {
+						// タイムアウトを検知.
+						throw new RhiginException("Process execution timeout detected: " + outExecCmd(cmd));
+					} else {
+						// タイムアウトじゃない場合は、少しスリープ.
+						Thread.sleep(5L);
+					}
+				}
+			}
+			return ret;
+		} catch(RhiginException re) {
+			throw re;
+		} catch(Exception e) {
+			throw new RhiginException(e);
+		} finally {
+			if(reader != null) {
+				try {
+					reader.close();
+				} catch(Exception e) {}
+			}
+		}
 	}
 	
 	/**
@@ -168,24 +202,34 @@ public class ExecCmd {
 		}
 		Process p = null;
 		try {
-			p = Runtime.getRuntime().exec(cmd, env, new File(path));
-			if(timeout > 0) {
-				if(!p.waitFor(timeout, TimeUnit.MILLISECONDS)) {
-					if(p.isAlive()) {
-						p.destroyForcibly();
-					}
-					throw new RhiginException("Process execution timeout detected: " + outString(cmd));
+			List<String> out = null;
+			ProcessBuilder pb = new ProcessBuilder(cmd);
+			if(env != null && env.length > 0) {
+				Map<String, String> emap = pb.environment();
+				emap.clear();
+				int len = env.length;
+				for(int i = 0; i < len; i += 2) {
+					emap.put(env[i], env[i+1]);
 				}
 			}
-			ResultCmd ret = new ResultCmd(p.waitFor(), getLine(p.getInputStream()), getLine(p.getErrorStream()));
-			if(p.isAlive()) {
-				p.destroyForcibly();
-			}
-			return ret;
+			pb.directory(new File(path));
+			pb.redirectErrorStream(true);
+			p = pb.start();
+			pb = null;
+			out = getAllLine(p, cmd, timeout);
+			return new ResultCmd(p.exitValue(), out);
 		} catch(RhiginException re) {
 			throw re;
 		} catch(Exception e) {
 			throw new RhiginException(e);
+		} finally {
+			if(p != null) {
+				try {
+					if(p.isAlive()) {
+						p.destroyForcibly();
+					}
+				} catch(Exception e) {}
+			}
 		}
 	}
 	
@@ -195,11 +239,9 @@ public class ExecCmd {
 	public static final class ResultCmd {
 		private int resultCode;
 		private List<String> out;
-		private List<String> err;
-		protected ResultCmd(int resultCode, List<String> out, List<String> err) {
+		protected ResultCmd(int resultCode, List<String> out) {
 			this.resultCode = resultCode;
 			this.out = out;
-			this.err = err;
 		}
 		
 		/**
@@ -224,22 +266,6 @@ public class ExecCmd {
 		 */
 		public boolean isOut() {
 			return out.size() > 0;
-		}
-		
-		/**
-		 * コンソールに出力されるエラー文字列を取得.
-		 * @return
-		 */
-		public List<String> getErr() {
-			return err;
-		}
-		
-		/**
-		 * コンソールにエラー文字が出力されたかチェック.
-		 * @return
-		 */
-		public boolean isErr() {
-			return err.size() > 0;
 		}
 	}
 }

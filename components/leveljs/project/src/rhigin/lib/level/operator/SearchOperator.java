@@ -3,7 +3,6 @@ package rhigin.lib.level.operator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
 
 import org.maachang.leveldb.LevelOption;
 import org.maachang.leveldb.operator.LevelIndex;
@@ -23,9 +22,6 @@ import rhigin.util.FixedArray;
 public abstract class SearchOperator implements Operator {
 	protected String name;
 	protected LevelJsCloseable closeable;
-	
-	// rwlock.
-	protected ReadWriteLock rw = null;
 	
 	/**
 	 * LevelIndexOperatorを取得.
@@ -95,15 +91,31 @@ public abstract class SearchOperator implements Operator {
 	protected abstract OperateIterator _index(Lock lock, LevelIndexIterator itr);
 	
 	/**
+	 * Readロックオブジェクトを取得.
+	 * @return
+	 */
+	protected Lock _r() {
+		return _operator().getLock().readLock();
+	}
+	
+	/**
+	 * Writeロックオブジェクトを取得.
+	 * @return
+	 */
+	protected Lock _w() {
+		return _operator().getLock().writeLock();
+	}
+	
+	/**
 	 * オペレータのクローズ.
 	 */
 	@Override
 	public void close() {
-		rw.writeLock().lock();
+		_w().lock();
 		try {
 			_operator().close();
 		} finally {
-			rw.writeLock().unlock();
+			_w().unlock();
 		}
 	}
 	
@@ -113,11 +125,11 @@ public abstract class SearchOperator implements Operator {
 	 */
 	@Override
 	public boolean trancate() {
-		rw.writeLock().lock();
+		_w().lock();
 		try {
 			return _operator().trancate();
 		} finally {
-			rw.writeLock().unlock();
+			_w().unlock();
 		}
 	}
 	
@@ -127,11 +139,11 @@ public abstract class SearchOperator implements Operator {
 	 */
 	@Override
 	public String getName() {
-		rw.readLock().lock();
+		_r().lock();
 		try {
 			return name;
 		} finally {
-			rw.readLock().unlock();
+			_r().unlock();
 		}
 	}
 	
@@ -141,11 +153,11 @@ public abstract class SearchOperator implements Operator {
 	 */
 	@Override
 	public String getOperatorType() {
-		rw.readLock().lock();
+		_r().lock();
 		try {
 			return OperatorUtil.getOperatorType(_operator());
 		} finally {
-			rw.readLock().unlock();
+			_r().unlock();
 		}
 	}
 	
@@ -155,11 +167,11 @@ public abstract class SearchOperator implements Operator {
 	 */
 	@Override
 	public boolean isAvailable() {
-		rw.readLock().lock();
+		_r().lock();
 		try {
 			return !_operator().isClose();
 		} finally {
-			rw.readLock().unlock();
+			_r().unlock();
 		}
 	}
 	
@@ -170,11 +182,11 @@ public abstract class SearchOperator implements Operator {
 	 */
 	@Override
 	public boolean isEmpty() {
-		rw.readLock().lock();
+		_r().lock();
 		try {
 			return _operator().getLeveldb().isEmpty();
 		} finally {
-			rw.readLock().unlock();
+			_r().unlock();
 		}
 	}
 	
@@ -185,11 +197,11 @@ public abstract class SearchOperator implements Operator {
 	@Override
 	public OperatorMode getMode() {
 		LevelOption op;
-		rw.readLock().lock();
+		_r().lock();
 		try {
 			op = _operator().getOption();
 		} finally {
-			rw.readLock().unlock();
+			_r().unlock();
 		}
 		return new OperatorMode(op);
 	}
@@ -199,11 +211,11 @@ public abstract class SearchOperator implements Operator {
 	 * @return
 	 */
 	public boolean isWriteBatch() {
-		rw.readLock().lock();
+		_r().lock();
 		try {
 			return _operator().isWriteBatch();
 		} finally {
-			rw.readLock().unlock();
+			_r().unlock();
 		}
 	}
 	
@@ -212,7 +224,7 @@ public abstract class SearchOperator implements Operator {
 	 * @return boolean
 	 */
 	public boolean commit() {
-		rw.readLock().lock();
+		_r().lock();
 		try {
 			if(_operator().isWriteBatch()) {
 				_operator().commit();
@@ -220,7 +232,7 @@ public abstract class SearchOperator implements Operator {
 			}
 			return false;
 		} finally {
-			rw.readLock().unlock();
+			_r().unlock();
 		}
 	}
 	
@@ -229,7 +241,7 @@ public abstract class SearchOperator implements Operator {
 	 * @return boolean
 	 */
 	public boolean rollback() {
-		rw.readLock().lock();
+		_r().lock();
 		try {
 			if(_operator().isWriteBatch()) {
 				_operator().rollback();
@@ -237,7 +249,7 @@ public abstract class SearchOperator implements Operator {
 			}
 			return false;
 		} finally {
-			rw.readLock().unlock();
+			_r().unlock();
 		}
 	}
 	
@@ -251,7 +263,7 @@ public abstract class SearchOperator implements Operator {
 		if(columnName == null || columnName.length == 0) {
 			throw new LevelJsException("Column name is not set.");
 		}
-		rw.writeLock().lock();
+		_w().lock();
 		try {
 			int type = LevelIndex.convertStringByColumnType(columnType);
 			if(type != LevelIndex.INDEX_STRING &&
@@ -263,7 +275,7 @@ public abstract class SearchOperator implements Operator {
 			}
 			_operator().createIndex(type, columnName);
 		} finally {
-			rw.writeLock().unlock();
+			_w().unlock();
 		}
 	}
 	
@@ -276,11 +288,11 @@ public abstract class SearchOperator implements Operator {
 		if(columnName == null || columnName.length == 0) {
 			throw new LevelJsException("Column name is not set.");
 		}
-		rw.writeLock().lock();
+		_w().lock();
 		try {
 			_operator().deleteIndex(columnName);
 		} finally {
-			rw.writeLock().unlock();
+			_w().unlock();
 		}
 	}
 	
@@ -293,11 +305,11 @@ public abstract class SearchOperator implements Operator {
 		if(columnName == null || columnName.length == 0) {
 			throw new LevelJsException("Column name is not set.");
 		}
-		rw.readLock().lock();
+		_r().lock();
 		try {
 			return _operator().isIndex(columnName);
 		} finally {
-			rw.readLock().unlock();
+			_r().unlock();
 		}
 	}
 	
@@ -307,11 +319,11 @@ public abstract class SearchOperator implements Operator {
 	 * @return int インデックス数を取得します.
 	 */
 	public int indexSize() {
-		rw.readLock().lock();
+		_r().lock();
 		try {
 			return _operator().indexSize();
 		} finally {
-			rw.readLock().unlock();
+			_r().unlock();
 		}
 	}
 	
@@ -322,11 +334,11 @@ public abstract class SearchOperator implements Operator {
 	 */
 	public List<String> indexs() {
 		String[] ret;
-		rw.readLock().lock();
+		_r().lock();
 		try {
 			ret = _operator().indexColumns();
 		} finally {
-			rw.readLock().unlock();
+			_r().unlock();
 		}
 		return new FixedArray<String>(ret);
 	}
@@ -377,19 +389,19 @@ public abstract class SearchOperator implements Operator {
 			throw new LevelJsException("Column name is not set.");
 		}
 		OperateIterator ret;
-		rw.readLock().lock();
+		_r().lock();
 		try {
 			final LevelIndex idx = _operator().getLevelIndex(columnName);
 			if((key = trimIndexKey(idx, key)) == null) {
-				ret = _index(rw.readLock(), idx.getSortIndex(desc));
+				ret = _index(_r(), idx.getSortIndex(desc));
 			} else {
-				ret = _index(rw.readLock(), idx.get(desc, key));
+				ret = _index(_r(), idx.get(desc, key));
 			}
 			if(ret != null) {
 				closeable.reg(ret);
 			}
 		} finally {
-			rw.readLock().unlock();
+			_r().unlock();
 		}
 		return ret;
 	}
@@ -404,7 +416,7 @@ public abstract class SearchOperator implements Operator {
 		if(len <= 1) {
 			throw new LevelJsException("Key element information is not set.");
 		}
-		rw.readLock().lock();
+		_r().lock();
 		try {
 			len --;
 			final Object v = params[len];
@@ -416,7 +428,7 @@ public abstract class SearchOperator implements Operator {
 			System.arraycopy(params, 0, keys, 0, len);
 			return _put((Map)v, len, keys);
 		} finally {
-			rw.readLock().unlock();
+			_r().unlock();
 		}
 	}
 	
@@ -428,11 +440,11 @@ public abstract class SearchOperator implements Operator {
 		if(keys == null || keys.length == 0) {
 			throw new LevelJsException("Search key information is not set.");
 		}
-		rw.readLock().lock();
+		_r().lock();
 		try {
 			_remove(keys.length, keys);
 		} finally {
-			rw.readLock().unlock();
+			_r().unlock();
 		}
 	}
 	
@@ -446,14 +458,14 @@ public abstract class SearchOperator implements Operator {
 			throw new LevelJsException("Search key information is not set.");
 		}
 		Object ret;
-		rw.readLock().lock();
+		_r().lock();
 		try {
 			ret = _get(keys.length, keys);
 			if(ret == null) {
 				return null;
 			}
 		} finally {
-			rw.readLock().unlock();
+			_r().unlock();
 		}
 		return new JsMap((Map)ret);
 	}
@@ -467,11 +479,11 @@ public abstract class SearchOperator implements Operator {
 		if(keys == null || keys.length == 0) {
 			throw new LevelJsException("Search key information is not set.");
 		}
-		rw.readLock().lock();
+		_r().lock();
 		try {
 			return _contains(keys.length, keys);
 		} finally {
-			rw.readLock().unlock();
+			_r().unlock();
 		}
 	}
 	
@@ -481,15 +493,15 @@ public abstract class SearchOperator implements Operator {
 	 * @return OperateIterator OperateIteratorが返却されます.
 	 */
 	public OperateIterator cursor(boolean desc, Object... keys) {
-		rw.readLock().lock();
+		_r().lock();
 		try {
-			final OperateIterator ret = _iterator(rw.readLock(), desc, keys == null ? 0 : keys.length, keys);
+			final OperateIterator ret = _iterator(_r(), desc, keys == null ? 0 : keys.length, keys);
 			if(ret != null) {
 				closeable.reg(ret);
 			}
 			return ret;
 		} finally {
-			rw.readLock().unlock();
+			_r().unlock();
 		}
 	}
 	
@@ -499,15 +511,15 @@ public abstract class SearchOperator implements Operator {
 	 * @return OperateIterator OperateIteratorが返却されます.
 	 */
 	public OperateIterator range(boolean desc, Object... keys) {
-		rw.readLock().lock();
+		_r().lock();
 		try {
-			final OperateIterator ret = _range(rw.readLock(), desc, keys == null ? 0 : keys.length, keys);
+			final OperateIterator ret = _range(_r(), desc, keys == null ? 0 : keys.length, keys);
 			if(ret != null) {
 				closeable.reg(ret);
 			}
 			return ret;
 		} finally {
-			rw.readLock().unlock();
+			_r().unlock();
 		}
 	}
 }

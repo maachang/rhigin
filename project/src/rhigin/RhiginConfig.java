@@ -1,7 +1,6 @@
 package rhigin;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -24,21 +23,64 @@ import rhigin.util.OList;
 public class RhiginConfig implements BlankScriptable {
 	private static final String CONF_CHARSET = "UTF8";
 	private final ToStringFunction.Execute toStringFunction = new ToStringFunction.Execute(this);
+	
 	private String confDir = null;
+	private String rhiginEnv = null;
 	private Map<String, Map<String, Object>> config = null;
-
-	public RhiginConfig() throws IOException {
-		this(RhiginConstants.DIR_CONFIG);
+	
+	protected RhiginConfig() {
+		throw new RhiginException("Unsupported constructor.");
 	}
-
-	public RhiginConfig(String dir) throws IOException {
-		config = load(dir);
-		confDir = dir;
+	
+	/**
+	 * コンストラクタ.
+	 * @param rhiginEnv
+	 * @param dir
+	 */
+	public RhiginConfig(String rhiginEnv, String dir) {
+		load(rhiginEnv, dir);
+	}
+	
+	/**
+	 * コンフィグ情報のロード.
+	 * @param rhiginEnv
+	 * @param dir
+	 * @return [true]の場合、rhiginEnvの条件でロード出来ました.
+	 */
+	private boolean load(String rhiginEnv, String dir) {
+		boolean ret = true;
+		if(rhiginEnv == null || rhiginEnv.isEmpty()) {
+			rhiginEnv = null;
+		}
+		try {
+			dir = FileUtil.getFullPath(dir);
+			String confDir = dir + "/";
+			if (rhiginEnv != null) {
+				confDir += rhiginEnv + "/";
+				// 対象フォルダが存在しない、対象フォルダ以下のコンフィグ情報が０件の場合は
+				// confフォルダ配下を読み込む.
+				File confStat = new File(confDir);
+				if (!confStat.isDirectory() || confStat.list() == null || confStat.list().length == 0) {
+					confDir = dir + "/";
+					rhiginEnv = null;
+					ret = false;
+				}
+				confStat = null;
+			}
+			this.config = loadJSON(confDir);
+			this.rhiginEnv = rhiginEnv;
+			this.confDir = dir;
+		} catch(RhiginException re) {
+			throw re;
+		} catch(Exception e) {
+			throw new RhiginException(e);
+		}
+		return ret;
 	}
 
 	// 指定ディレクトリ以下のJSONファイルを読み込み.
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static final Map<String, Map<String, Object>> load(String dir) throws IOException {
+	private static final Map<String, Map<String, Object>> loadJSON(String dir) {
 		try {
 			Map<String, Map<String, Object>> ret = new ArrayMap<String, Map<String, Object>>();
 			if (!FileUtil.isDir(dir)) {
@@ -64,10 +106,8 @@ public class RhiginConfig implements BlankScriptable {
 				}
 			}
 			return ret;
-		} catch (IOException io) {
-			throw io;
 		} catch (Exception e) {
-			throw new IOException(e);
+			throw new RhiginException(e);
 		}
 	}
 
@@ -179,6 +219,14 @@ public class RhiginConfig implements BlankScriptable {
 	 */
 	public String getDir() {
 		return confDir;
+	}
+	
+	/**
+	 * Rhigin環境変数を取得.
+	 * @return
+	 */
+	public String getRhiginEnv() {
+		return rhiginEnv;
 	}
 
 	// ConvertGetに変換して取得.

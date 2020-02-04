@@ -48,7 +48,7 @@ public class LevelJsQueueJs {
 	 * @return
 	 */
 	public static final RhiginInstanceObject create(QueueOperator q) {
-		return new RhiginInstanceObject("Queue", QUEUE_FUNCTIONS, q);
+		return new RhiginInstanceObject("QueueOperator", QUEUE_FUNCTIONS, q);
 	}
 	
 	// Queueオペレータのメソッド群. 

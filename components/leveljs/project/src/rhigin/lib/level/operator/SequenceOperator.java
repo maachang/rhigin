@@ -30,8 +30,6 @@ public class SequenceOperator extends SearchOperator {
 	 * @param o オペレータを設定.
 	 */
 	public SequenceOperator(LevelJsCloseable c, String n, LevelSequence o) {
-		// 元のオブジェクトからのロックオブジェクトをセット.
-		this.rw = o.getLock();
 		this.closeable = c;
 		this.base = o;
 		this.name = n;
@@ -110,7 +108,7 @@ public class SequenceOperator extends SearchOperator {
 		if(len == 0) {
 			throw new LevelJsException("Key element information is not set.");
 		}
-		rw.readLock().lock();
+		_r().lock();
 		try {
 			len --;
 			final Object v = params[len];
@@ -126,7 +124,7 @@ public class SequenceOperator extends SearchOperator {
 				return _put((Map)v, 0, null);
 			}
 		} finally {
-			rw.readLock().unlock();
+			_r().unlock();
 		}
 	}
 
