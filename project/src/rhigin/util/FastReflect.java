@@ -8,6 +8,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -712,6 +713,55 @@ public class FastReflect {
 		}
 
 		/**
+		 * 対象のコンストラクタを取得します.
+		 * 
+		 * @param types 対象のパラメータタイプを設定します.
+		 * @param args  引数パラメータ型群を設定します.
+		 * @param cl    対象のクラスローダを設定します.
+		 * @return Constructor 対象のコンストラクタが返されます.
+		 */
+		public final Object newInstance(Class[] types, Object[] args, ClassLoader cl) {
+			ConstructorObject c = constructors.get();
+			if (c == null) {
+				c = new ConstructorObject(clazz);
+				while (!constructors.compareAndSet(constructors.get(), c))
+					;
+			}
+			return c.newInstance(cl, types, args);
+		}
+
+		/**
+		 * 指定フィールド名が存在するかチェック.
+		 * @param staticFlag [true]の場合、staticアクセス用として取得します.
+		 * @param name       指定クラスフィールド名を設定します.
+		 * @return boolean   [true]の場合、フィールドは存在します.
+		 */
+		public final boolean isField(boolean staticFlag, String name) {
+			FieldObject f = fileds.get();
+			if (f == null) {
+				f = new FieldObject(clazz);
+				while (!fileds.compareAndSet(fileds.get(), f))
+					;
+			}
+			return f.isField(staticFlag, name);
+		}
+		
+		/**
+		 * 指定フィールド名群を取得.
+		 * @param out 設定オブジェクトを設定します.
+		 * @param staticFlag staticメソッドでのアクセスの場合は[true]を設定します.
+		 */
+		public final void fieldNames(Set<String> out, boolean staticFlag) {
+			FieldObject f = fileds.get();
+			if (f == null) {
+				f = new FieldObject(clazz);
+				while (!fileds.compareAndSet(fileds.get(), f))
+					;
+			}
+			f.getNames(out, staticFlag);
+		}
+		
+		/**
 		 * 指定クラスフィールド名に対するフィールド要素を取得.
 		 * 
 		 * @param staticFlag [true]の場合、staticアクセス用として取得します.
@@ -729,21 +779,34 @@ public class FastReflect {
 		}
 
 		/**
-		 * 対象のコンストラクタを取得します.
-		 * 
-		 * @param types 対象のパラメータタイプを設定します.
-		 * @param args  引数パラメータ型群を設定します.
-		 * @param cl    対象のクラスローダを設定します.
-		 * @return Constructor 対象のコンストラクタが返されます.
+		 * 指定メソッド名が存在するかチェック.
+		 * @param staticFlag [true]の場合、staticアクセス用として取得します.
+		 * @param name       指定メソッド名を設定します.
+		 * @return boolean   [true]の場合、メソッドは存在します.
 		 */
-		public final Object newInstance(Class[] types, Object[] args, ClassLoader cl) {
-			ConstructorObject c = constructors.get();
-			if (c == null) {
-				c = new ConstructorObject(clazz);
-				while (!constructors.compareAndSet(constructors.get(), c))
+		public final boolean isMethod(boolean staticFlag, String name) {
+			MethodObject m = methods.get();
+			if (m == null) {
+				m = new MethodObject(clazz);
+				while (!methods.compareAndSet(methods.get(), m))
 					;
 			}
-			return c.newInstance(cl, types, args);
+			return m.isMethod(staticFlag, name);
+		}
+		
+		/**
+		 * 指定メソッド名群を取得.
+		 * @param out 設定オブジェクトを設定します.
+		 * @param staticFlag staticメソッドでのアクセスの場合は[true]を設定します.
+		 */
+		public final void methodNames(Set<String> out, boolean staticFlag) {
+			MethodObject m = methods.get();
+			if (m == null) {
+				m = new MethodObject(clazz);
+				while (!methods.compareAndSet(methods.get(), m))
+					;
+			}
+			m.getNames(out, staticFlag);
 		}
 
 		/**
@@ -831,6 +894,35 @@ public class FastReflect {
 						f.setAccessible(true);
 						map.put(f.getName(), f);
 					}
+				}
+			}
+		}
+		/**
+		 * 指定メソッド名が存在するかチェック.
+		 * @param staticFlg staticメソッドでのアクセスの場合は[true]を設定します.
+		 * @param name 対象のメソッド名を設定します.
+		 * @return boolean [true]の場合、存在します.
+		 */
+		public boolean isField(boolean staticFlg, String name) {
+			Field f = map.get(name);
+			if(f != null) {
+				return (Modifier.isStatic(f.getModifiers()) == staticFlg);
+			}
+			return false;
+		}
+
+		/**
+		 * フィールド名を取得.
+		 * @param out メソッド名を設定します.
+		 * @param staticFlg staticメソッドでのアクセスの場合は[true]を設定します.
+		 */
+		public void getNames(Set<String> out, boolean staticFlg) {
+			String name;
+			Iterator<String> it = map.keySet().iterator();
+			while(it.hasNext()) {
+				name = it.next();
+				if(Modifier.isStatic(map.get(name).getModifiers()) == staticFlg) {
+					out.add(name);
 				}
 			}
 		}
@@ -1014,7 +1106,40 @@ public class FastReflect {
 				}
 			}
 		}
-
+		
+		/**
+		 * 指定メソッド名が存在するかチェック.
+		 * @param staticFlg staticメソッドでのアクセスの場合は[true]を設定します.
+		 * @param name 対象のメソッド名を設定します.
+		 * @return boolean [true]の場合、存在します.
+		 */
+		public boolean isMethod(boolean staticFlg, String name) {
+			MethodElement emt = map.get(name);
+			while (emt != null) {
+				if(emt.isStatic == staticFlg) {
+					return true;
+				}
+				emt = emt.next;
+			}
+			return false;
+		}
+		
+		/**
+		 * メソッド名を取得.
+		 * @param out メソッド名を設定します.
+		 * @param staticFlg staticメソッドでのアクセスの場合は[true]を設定します.
+		 */
+		public void getNames(Set<String> out, boolean staticFlg) {
+			String name;
+			Iterator<String> it = map.keySet().iterator();
+			while(it.hasNext()) {
+				name = it.next();
+				if(map.get(name).isStatic == staticFlg) {
+					out.add(name);
+				}
+			}
+		}
+		
 		/**
 		 * 指定名のメソッドを実行.
 		 * 
@@ -1181,7 +1306,7 @@ public class FastReflect {
 		if (em == null) {
 			throw new FastReflectException("Specified class '" + clazzName + "' does not exist");
 		}
-		if (clazzName == OBJECT_NAME) {
+		if (OBJECT_NAME.equals(clazzName)) {
 			return new Object();
 		}
 		Object ret;
@@ -1193,7 +1318,7 @@ public class FastReflect {
 			}
 			superName = em.getSuperClassName();
 			em = null;
-			if (superName != OBJECT_NAME && superName != null) {
+			if (superName != null && !OBJECT_NAME.equals(superName)) {
 				em = FACTORY.getClass(loader, superName);
 			}
 			if (em == null) {
@@ -1216,7 +1341,7 @@ public class FastReflect {
 		if (em == null) {
 			throw new FastReflectException("Specified class '" + clazzName + "' does not exist");
 		}
-		if (clazzName == OBJECT_NAME) {
+		if (OBJECT_NAME.equals(clazzName)) {
 			return new Object();
 		}
 		Object ret;
@@ -1232,11 +1357,195 @@ public class FastReflect {
 			}
 			superName = em.getSuperClassName();
 			em = null;
-			if (superName != OBJECT_NAME && superName != null) {
+			if (superName != null && !OBJECT_NAME.equals(superName)) {
 				em = FACTORY.getClass(loader, superName);
 			}
 			if (em == null) {
 				throw new FastReflectException("Constructor of target argument does not exist for specified class '" + clazzName + "'.");
+			}
+		}
+	}
+	
+	// クラス名を取得.
+	private static final String clazzName(final Object clazzObject, final Object target) {
+		if(clazzObject == null) {
+			if(target == null) {
+				throw new FastReflectException("Class object cannot be identified.");
+			}
+			return target.getClass().getName();
+		} else if(clazzObject instanceof String) {
+			if(((String)clazzObject).isEmpty()) {
+				if(target == null) {
+					throw new FastReflectException("Class object cannot be identified.");
+				}
+				return target.getClass().getName();
+			}
+			return (String)clazzObject;
+		} else if(clazzObject instanceof Class) {
+			return ((Class)clazzObject).getName();
+		}
+		throw new FastReflectException("Class object cannot be identified.");
+	}
+	
+	/**
+	 * フィールド存在チェック.
+	 * 
+	 * @param staticFlag staticでチェックする場合は[true]を設定します.
+	 * @param loader     対象のクラスローダーを設定します.
+	 * @param clazz      対象のクラス or クラス名を設定します.
+s	 * @param name       対象のフィールド名を設定します.
+	 * @return boolean   [true]の場合、存在します.
+	 */
+	public static final boolean isField(boolean staticFlag, Object clazz, String name) {
+		return isField(staticFlag, null, clazz, name);
+	}
+
+	/**
+	 * フィールド存在チェック.
+	 * 
+	 * @param staticFlag staticでチェックする場合は[true]を設定します.
+	 * @param loader     対象のクラスローダーを設定します.
+	 * @param clazz      対象のクラス or クラス名を設定します.
+s	 * @param name       対象のフィールド名を設定します.
+	 * @return boolean   [true]の場合、存在します.
+	 */
+	public static final boolean isField(boolean staticFlag, ClassLoader loader, Object clazz, String name) {
+		ClassElement em = FACTORY.getClass(loader, clazzName(clazz, null));
+		if (em == null) {
+			throw new FastReflectException("Specified class does not exist.");
+		}
+		String superName;
+		while (true) {
+			if (!em.isField(staticFlag, name)) {
+				superName = em.getSuperClassName();
+				em = null;
+				if (superName != null) {
+					em = FACTORY.getClass(loader, superName);
+				}
+				if (em == null) {
+					return false;
+				}
+				continue;
+			}
+			return true;
+		}
+	}
+	
+	/**
+	 * メソッド存在チェック.
+	 * 
+	 * @param staticFlag staticでチェックする場合は[true]を設定します.
+	 * @param clazz      対象のクラス or クラス名を設定します.
+	 * @param name       対象のメソッド名を設定します.
+	 * @return boolean   [true]の場合、存在します.
+	 */
+	public static final boolean isMethod(boolean staticFlag, Object clazz, String name) {
+		return isMethod(staticFlag, null, clazz, name);
+	}
+	
+	/**
+	 * メソッド存在チェック.
+	 * 
+	 * @param staticFlag staticでチェックする場合は[true]を設定します.
+	 * @param loader     対象のクラスローダーを設定します.
+	 * @param clazz      対象のクラス or クラス名を設定します.
+	 * @param name       対象のメソッド名を設定します.
+	 * @return boolean   [true]の場合、存在します.
+	 */
+	public static final boolean isMethod(boolean staticFlag, ClassLoader loader, Object clazz, String name) {
+		ClassElement em = FACTORY.getClass(loader, clazzName(clazz, null));
+		if (em == null) {
+			throw new FastReflectException("Specified class does not exist.");
+		}
+		String superName;
+		while (true) {
+			if (!em.isMethod(staticFlag, name)) {
+				superName = em.getSuperClassName();
+				em = null;
+				if (superName != null) {
+					em = FACTORY.getClass(loader, superName);
+				}
+				if (em == null) {
+					return false;
+				}
+				continue;
+			}
+			return true;
+		}
+	}
+
+	/**
+	 * フィールド名群を取得.
+	 * 
+	 * @param out        フィールド名を格納するオブジェクトを設定します.
+	 * @param staticFlag staticでチェックする場合は[true]を設定します.
+	 * @param clazz      対象のクラス or クラス名を設定します.
+	 */
+	public static final void fieldNames(Set<String> out, boolean staticFlag, Object clazz) {
+		fieldNames(out, staticFlag, null, clazz);
+	}
+
+	/**
+	 * フィールド名群を取得.
+	 * 
+	 * @param out        フィールド名を格納するオブジェクトを設定します.
+	 * @param staticFlag staticでチェックする場合は[true]を設定します.
+	 * @param loader     対象のクラスローダーを設定します.
+	 * @param clazz      対象のクラス or クラス名を設定します.
+	 */
+	public static final void fieldNames(Set<String> out, boolean staticFlag, ClassLoader loader, Object clazz) {
+		ClassElement em = FACTORY.getClass(loader, clazzName(clazz, null));
+		if (em == null) {
+			throw new FastReflectException("Specified class does not exist.");
+		}
+		String superName;
+		while (true) {
+			em.fieldNames(out, staticFlag);
+			superName = em.getSuperClassName();
+			em = null;
+			if (superName != null) {
+				em = FACTORY.getClass(loader, superName);
+			}
+			if (em == null) {
+				return;
+			}
+		}
+	}
+
+	/**
+	 * メソッド名群を取得.
+	 * 
+	 * @param out        メソッド名を格納するオブジェクトを設定します.
+	 * @param staticFlag staticでチェックする場合は[true]を設定します.
+	 * @param clazz      対象のクラス or クラス名を設定します.
+	 */
+	public static final void methodNames(Set<String> out, boolean staticFlag, Object clazz) {
+		methodNames(out, staticFlag, null, clazz);
+	}
+
+	/**
+	 * メソッド名群を取得.
+	 * 
+	 * @param out        メソッド名を格納するオブジェクトを設定します.
+	 * @param staticFlag staticでチェックする場合は[true]を設定します.
+	 * @param loader     対象のクラスローダーを設定します.
+	 * @param clazz      対象のクラス or クラス名を設定します.
+	 */
+	public static final void methodNames(Set<String> out, boolean staticFlag, ClassLoader loader, Object clazz) {
+		ClassElement em = FACTORY.getClass(loader, clazzName(clazz, null));
+		if (em == null) {
+			throw new FastReflectException("Specified class does not exist.");
+		}
+		String superName;
+		while (true) {
+			em.methodNames(out, staticFlag);
+			superName = em.getSuperClassName();
+			em = null;
+			if (superName != null) {
+				em = FACTORY.getClass(loader, superName);
+			}
+			if (em == null) {
+				return;
 			}
 		}
 	}
@@ -1265,9 +1574,9 @@ public class FastReflect {
 	 * @param value     対象のパラメータ要素を設定します.
 	 */
 	public static final void setField(ClassLoader loader, String clazzName, Object target, String name, Object value) {
-		ClassElement em = FACTORY.getClass(loader, clazzName);
+		ClassElement em = FACTORY.getClass(loader, clazzName(clazzName, target));
 		if (em == null) {
-			throw new FastReflectException("Specified class '" + clazzName + "' does not exist");
+			throw new FastReflectException("Specified class does not exist.");
 		}
 		String superName;
 		while (true) {
@@ -1279,7 +1588,7 @@ public class FastReflect {
 					em = FACTORY.getClass(loader, superName);
 				}
 				if (em == null) {
-					throw new FastReflectException("Specified field '" + name + "' does not exist in class '" + clazzName + "'.");
+					throw new FastReflectException("Specified field '" + name + "' does not exist in class.");
 				}
 				continue;
 			}
@@ -1316,10 +1625,9 @@ public class FastReflect {
 	 * @param value  対象のパラメータ要素を設定します.
 	 */
 	public static final void setField(ClassLoader loader, Class clazz, Object target, String name, Object value) {
-		String clazzName = clazz.getName();
-		ClassElement em = FACTORY.getClass(loader, clazzName);
+		ClassElement em = FACTORY.getClass(loader, clazzName(clazz, target));
 		if (em == null) {
-			throw new FastReflectException("Specified class '" + clazzName + "' does not exist");
+			throw new FastReflectException("Specified class does not exist.");
 		}
 		String superName;
 		while (true) {
@@ -1331,7 +1639,7 @@ public class FastReflect {
 					em = FACTORY.getClass(loader, superName);
 				}
 				if (em == null) {
-					throw new FastReflectException("Specified field '" + name + "' does not exist in class '" + clazzName + "'.");
+					throw new FastReflectException("Specified field '" + name + "' does not exist in class.");
 				}
 				continue;
 			}
@@ -1368,9 +1676,9 @@ public class FastReflect {
 	 * @return Object フィールドオブジェクト内容が返されます.
 	 */
 	public static final Object getField(ClassLoader loader, String clazzName, Object target, String name) {
-		ClassElement em = FACTORY.getClass(loader, clazzName);
+		ClassElement em = FACTORY.getClass(loader, clazzName(clazzName, target));
 		if (em == null) {
-			throw new FastReflectException("Specified class '" + clazzName + "' does not exist");
+			throw new FastReflectException("Specified class does not exist.");
 		}
 		String superName;
 		while (true) {
@@ -1382,7 +1690,7 @@ public class FastReflect {
 					em = FACTORY.getClass(loader, superName);
 				}
 				if (em == null) {
-					throw new FastReflectException("Specified field '" + name + "' does not exist in class '" + clazzName + "'.");
+					throw new FastReflectException("Specified field '" + name + "' does not exist in class.");
 				}
 				continue;
 			}
@@ -1418,10 +1726,9 @@ public class FastReflect {
 	 * @return Object フィールドオブジェクト内容が返されます.
 	 */
 	public static final Object getField(ClassLoader loader, Class clazz, Object target, String name) {
-		String clazzName = clazz.getName();
-		ClassElement em = FACTORY.getClass(loader, clazzName);
+		ClassElement em = FACTORY.getClass(loader, clazzName(clazz, target));
 		if (em == null) {
-			throw new FastReflectException("Specified class '" + clazzName + "' does not exist");
+			throw new FastReflectException("Specified class does not exist.");
 		}
 		String superName;
 		while (true) {
@@ -1433,7 +1740,7 @@ public class FastReflect {
 					em = FACTORY.getClass(loader, superName);
 				}
 				if (em == null) {
-					throw new FastReflectException("Specified field '" + name + "' does not exist in class '" + clazzName + "'.");
+					throw new FastReflectException("Specified field '" + name + "' does not exist in class.");
 				}
 				continue;
 			}
@@ -1525,9 +1832,9 @@ public class FastReflect {
 	 * @return Object 戻り値が返されます.
 	 */
 	public static final Object invoke(ClassLoader loader, String clazzName, Object target, String name, Object... args) {
-		ClassElement em = FACTORY.getClass(loader, clazzName);
+		ClassElement em = FACTORY.getClass(loader, clazzName(clazzName, target));
 		if (em == null) {
-			throw new FastReflectException("Specified class '" + clazzName + "' does not exist");
+			throw new FastReflectException("Specified class does not exist.");
 		}
 		String spclazz;
 		Object[] ret = new Object[1];
@@ -1538,7 +1845,7 @@ public class FastReflect {
 			}
 			spclazz = em.getSuperClassName();
 			if (spclazz == null) {
-				throw new FastReflectException("Specified method '" + name + "' does not exist in class '" + clazzName + "'.");
+				throw new FastReflectException("Specified method '" + name + "' does not exist in class.");
 			}
 			em = FACTORY.getClass(loader, spclazz);
 		}
@@ -1570,10 +1877,9 @@ public class FastReflect {
 	 * @return Object 戻り値が返されます.
 	 */
 	public static final Object invoke(ClassLoader loader, Class clazz, Object target, String name, Object... args) {
-		String clazzName = clazz.getName();
-		ClassElement em = FACTORY.getClass(loader, clazzName);
+		ClassElement em = FACTORY.getClass(loader, clazzName(clazz, target));
 		if (em == null) {
-			throw new FastReflectException("Specified class '" + clazzName + "' does not exist");
+			throw new FastReflectException("Specified class does not exist.");
 		}
 		Object[] ret = new Object[1];
 		Class[] types = Util.getParamsType(args);
@@ -1584,7 +1890,7 @@ public class FastReflect {
 			}
 			spclazz = em.getSuperClassName();
 			if (spclazz == null) {
-				throw new FastReflectException("Specified method '" + name + "' does not exist in class '" + clazzName + "'.");
+				throw new FastReflectException("Specified method '" + name + "' does not exist in class.");
 			}
 			em = FACTORY.getClass(loader, spclazz);
 		}
@@ -1603,9 +1909,9 @@ public class FastReflect {
 	 * @return Object 戻り値が返されます.
 	 */
 	public static final Object invokeTo(ClassLoader loader, String clazzName, Object target, String name, Object[] args, Class[] types) {
-		ClassElement em = FACTORY.getClass(loader, clazzName);
+		ClassElement em = FACTORY.getClass(loader, clazzName(clazzName, target));
 		if (em == null) {
-			throw new FastReflectException("Specified class '" + clazzName + "' does not exist");
+			throw new FastReflectException("Specified class does not exist.");
 		}
 		if (args != null && args.length > 0 && types == null) {
 			types = Util.getParamsType(args);
@@ -1620,7 +1926,7 @@ public class FastReflect {
 			}
 			spclazz = em.getSuperClassName();
 			if (spclazz == null) {
-				throw new FastReflectException("Specified method '" + name + "' does not exist in class '" + clazzName + "'.");
+				throw new FastReflectException("Specified method '" + name + "' does not exist in class.");
 			}
 			em = FACTORY.getClass(loader, spclazz);
 		}
@@ -1639,10 +1945,9 @@ public class FastReflect {
 	 * @return Object 戻り値が返されます.
 	 */
 	public static final Object invokeTo(ClassLoader loader, Class clazz, Object target, String name, Object[] args, Class[] types) {
-		String clazzName = clazz.getName();
-		ClassElement em = FACTORY.getClass(loader, clazzName);
+		ClassElement em = FACTORY.getClass(loader, clazzName(clazz, target));
 		if (em == null) {
-			throw new FastReflectException("Specified class '" + clazzName + "' does not exist");
+			throw new FastReflectException("Specified class does not exist.");
 		}
 		if (args != null && args.length > 0 && types == null) {
 			types = Util.getParamsType(args);
@@ -1657,7 +1962,7 @@ public class FastReflect {
 			}
 			spclazz = em.getSuperClassName();
 			if (spclazz == null) {
-				throw new FastReflectException("Specified method '" + name + "' does not exist in class '" + clazzName + "'.");
+				throw new FastReflectException("Specified method '" + name + "' does not exist in class.");
 			}
 			em = FACTORY.getClass(loader, spclazz);
 		}

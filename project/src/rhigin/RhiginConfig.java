@@ -4,11 +4,13 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.Json;
 import rhigin.scripts.Read;
+import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.function.ToStringFunction;
 import rhigin.util.ArrayMap;
 import rhigin.util.BlankScriptable;
@@ -119,6 +121,23 @@ public class RhiginConfig implements BlankScriptable {
 		}
 		return name.substring(0, p);
 	}
+	
+	/**
+	 * リロード処理.
+ 	 * @return [true]の場合、rhiginEnvの条件でロード出来ました.
+	 */
+	public boolean reload() {
+		return load(rhiginEnv, confDir);
+	}
+
+	/**
+	 * リロード処理.
+	 * @param rhiginEnv
+ 	 * @return [true]の場合、rhiginEnvの条件でロード出来ました.
+	 */
+	public boolean reload(String rhiginEnv) {
+		return load(rhiginEnv, confDir);
+	}
 
 	/**
 	 * 指定コンフィグ情報を取得.
@@ -131,7 +150,13 @@ public class RhiginConfig implements BlankScriptable {
 	 */
 	@Override
 	public Object get(String name, Scriptable s) {
-		if (has(name)) {
+		if("reload".equals(name)) {
+			return new ReloadFunction(this);
+		} else if("dir".equals(name)) {
+			return confDir;
+		} else if("env".equals(name)) {
+			return rhiginEnv == null ? "" : rhiginEnv;
+		} else if (has(name)) {
 			return get(name);
 		}
 		return Undefined.instance;
@@ -148,6 +173,9 @@ public class RhiginConfig implements BlankScriptable {
 	 */
 	@Override
 	public boolean has(String name, Scriptable s) {
+		if("reload".equals(name) || "dir".equals(name) || "env".equals(name)) {
+			return true;
+		}
 		return has(name);
 	}
 
@@ -163,6 +191,9 @@ public class RhiginConfig implements BlankScriptable {
 		while (it.hasNext()) {
 			list.add(it.next());
 		}
+		list.add("reload");
+		list.add("dir");
+		list.add("env");
 		return list.getArray();
 	}
 
@@ -209,7 +240,7 @@ public class RhiginConfig implements BlankScriptable {
 	 * @return int
 	 */
 	public int size() {
-		return config.size();
+		return config.size() + 3;
 	}
 
 	/**
@@ -411,5 +442,29 @@ public class RhiginConfig implements BlankScriptable {
 			return m.getTimestamp(key);
 		}
 		return null;
+	}
+	
+	/**
+	 * リロード用処理.
+	 */
+	private static final class ReloadFunction extends RhiginFunction {
+		RhiginConfig conf;
+		protected ReloadFunction(RhiginConfig conf) {
+			this.conf = conf;
+		}
+		
+		@Override
+		public String getName() {
+			return "reload";
+		}
+
+		@Override
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			if (args.length >= 1 && args[0] != null) {
+				return conf.reload("" + args[0]);
+			} else {
+				return conf.reload();
+			}
+		}
 	}
 }

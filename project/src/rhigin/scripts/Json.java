@@ -84,7 +84,9 @@ public final class Json {
 		// rhinoのjavaオブジェクトwrapper対応.
 		if (target instanceof Wrapper) {
 			target = ((Wrapper) target).unwrap();
-		}
+		} else if (target instanceof RhiginObjectWrapper) {
+			target = ((RhiginObjectWrapper) target).unwrap();
+		}		
 		if (target instanceof Map) {
 			encodeJsonMap(buf, base, (Map) target);
 		} else if (target instanceof List) {

@@ -21,9 +21,12 @@ public class RhiginConstants {
 	
 	/** Rhigin実行環境変数名. **/
 	public static final String ENV_ENV = "RHIGIN";
+	
+	/** コンフィグフォルダ名. **/
+	public static final String CONFIG_NAME = "conf";
 
 	/** コンフィグパス. **/
-	public static final String DIR_CONFIG = "./conf/";
+	public static final String DIR_CONFIG = "./" + CONFIG_NAME + "/";
 
 	/** ログパス. **/
 	public static final String DIR_LOG = "./log/";

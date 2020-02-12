@@ -35,7 +35,7 @@ public class Rhigin {
 			return;
 		}
 		int ret = 0;
-		RhiginConfig conf = RhiginStartup.initLogFactory(true, false);
+		RhiginConfig conf = RhiginStartup.init(true, false);
 		LOG = LogFactory.create();
 		try {
 			LOG.info("start rhigin version (" + RhiginConstants.VERSION + ").");

@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
+import org.mozilla.javascript.Wrapper;
 
 import rhigin.http.Http;
 import rhigin.http.HttpInfo;
@@ -21,6 +21,7 @@ import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.RhiginContext;
 import rhigin.scripts.RhiginEndScriptCall;
 import rhigin.scripts.RhiginFunction;
+import rhigin.scripts.RhiginObjectWrapper;
 import rhigin.scripts.ScriptConstants;
 import rhigin.scripts.objects.LockObjects;
 import rhigin.util.Args;
@@ -82,31 +83,31 @@ public class RhiginStartup {
 
 	
 	/**
-	 * ログファクトリの初期化.
+	 * Rhiginの初期化.
 	 * 
 	 * @param server
 	 * @param console
 	 * @param args
 	 * @return RhiginConfig
 	 */
-	public static final RhiginConfig initLogFactory(boolean server, boolean console, String[] args) {
-		return initLogFactory(server, console, false, args);
+	public static final RhiginConfig init(boolean server, boolean console, String[] args) {
+		return init(server, console, false, args);
 	}
 	
 	/**
-	 * ログファクトリの初期化.
+	 * Rhiginの初期化.
 	 * 
 	 * @param server
 	 * @param console
 	 * @return RhiginConfig
 	 */
-	public static final RhiginConfig initLogFactory(boolean server, boolean console) {
-		return initLogFactory(server, console, false);
+	public static final RhiginConfig init(boolean server, boolean console) {
+		return init(server, console, false);
 	}
 
 	
 	/**
-	 * ログファクトリの初期化.
+	 * Rhiginの初期化.
 	 * 
 	 * @param server
 	 * @param console
@@ -114,10 +115,10 @@ public class RhiginStartup {
 	 * @param args
 	 * @return RhiginConfig
 	 */
-	public static final RhiginConfig initLogFactory(boolean server, boolean console, boolean noScript, String[] args) {
+	public static final RhiginConfig init(boolean server, boolean console, boolean noScript, String[] args) {
 		// Args管理オブジェクトにセット.
 		Args.set(args);
-		return initLogFactory(server, console, noScript);
+		return init(server, console, noScript);
 	}
 	
 	/**
@@ -128,7 +129,20 @@ public class RhiginStartup {
 	 * @param noScript
 	 * @return RhiginConfig
 	 */
-	public static final RhiginConfig initLogFactory(boolean server, boolean console, boolean noScript) {
+	public static final RhiginConfig init(boolean server, boolean console, boolean noScript) {
+		return init(null, server, console, noScript);
+	}
+	
+	/**
+	 * ログファクトリの初期化.
+	 * 
+	 * @parma confDir
+	 * @param server
+	 * @param console
+	 * @param noScript
+	 * @return RhiginConfig
+	 */
+	public static final RhiginConfig init(String confDir, boolean server, boolean console, boolean noScript) {
 		RhiginConfig config = null;
 		try {
 			// モードをセット.
@@ -138,14 +152,21 @@ public class RhiginStartup {
 			if(!noScript) {
 				initRhiginScriptFunctionObject();
 			}
+			// 基本コンフィグフォルダをチェック.
+			// 存在しないか、指定フォルダが存在しない場合は、デフォルトのコンフィグフォルダ.
+			if(confDir == null || !FileUtil.isDir(confDir)) {
+				confDir = RhiginConstants.DIR_CONFIG;
+			} else {
+				confDir = FileUtil.getFullPath(confDir);
+			}
 			
 			// サーバモードの場合は、コンフィグフォルダは必須.
-			if(!FileUtil.isDir(RhiginConstants.DIR_CONFIG) && server) {
-				throw new RhiginException("Config folder does not exist: " + RhiginConstants.DIR_CONFIG);
+			if(!FileUtil.isDir(confDir) && server) {
+				throw new RhiginException("Config folder does not exist: " + confDir);
 			}
 			
 			// コンフィグ情報をロード.
-			config = new RhiginConfig(getRhiginEnv(), RhiginConstants.DIR_CONFIG);
+			config = new RhiginConfig(getRhiginEnv(), confDir);
 			
 			// ログファクトリの初期化.
 			if (config.has("logger")) {
@@ -364,9 +385,11 @@ public class RhiginStartup {
 			if (args.length >= 1) {
 				try {
 					Object o = args[0];
-					if(o instanceof NativeJavaObject) {
-						o = ((NativeJavaObject)o).unwrap();
-					}
+					if(o instanceof Wrapper) {
+						o = ((Wrapper)o).unwrap();
+					} else if (o instanceof RhiginObjectWrapper) {
+						o = ((RhiginObjectWrapper) o).unwrap();
+					}		
 					if(o instanceof RhiginEndScriptCall) {
 						getEndScriptCall(scope).add((RhiginEndScriptCall)o);
 					} else {
@@ -392,8 +415,10 @@ public class RhiginStartup {
 			if (args.length >= 1) {
 				try {
 					Object o = args[0];
-					if(o instanceof NativeJavaObject) {
-						o = ((NativeJavaObject)o).unwrap();
+					if(o instanceof Wrapper) {
+						o = ((Wrapper)o).unwrap();
+					} else if (o instanceof RhiginObjectWrapper) {
+						o = ((RhiginObjectWrapper) o).unwrap();
 					}
 					if(o instanceof RhiginEndScriptCall) {
 						getExitSystemScriptCall(scope).add((RhiginEndScriptCall)o);
@@ -412,6 +437,4 @@ public class RhiginStartup {
 			return "exitSystemCall";
 		}
 	};
-
-
 }

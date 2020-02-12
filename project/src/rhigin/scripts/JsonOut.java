@@ -72,7 +72,9 @@ public class JsonOut {
 			m = null;
 		} else if (m instanceof Wrapper) {
 			m = ((Wrapper) m).unwrap();
-		}
+		} else if (m instanceof RhiginObjectWrapper) {
+			m = ((RhiginObjectWrapper) m).unwrap();
+		}		
 		if(m == null) {
 			toValue(indent, initSpace, buf, m);
 		} else if(m instanceof Map) {
@@ -113,7 +115,9 @@ public class JsonOut {
 				value = null;
 			} else if (value instanceof Wrapper) {
 				value = ((Wrapper) value).unwrap();
-			}
+			} else if (value instanceof RhiginObjectWrapper) {
+				value = ((RhiginObjectWrapper) value).unwrap();
+			}		
 			if(n != 0) {
 				buf.append(",\n");
 			}
@@ -156,6 +160,8 @@ public class JsonOut {
 				value = null;
 			} else if (value instanceof Wrapper) {
 				value = ((Wrapper) value).unwrap();
+			} else if (value instanceof RhiginObjectWrapper) {
+				value = ((RhiginObjectWrapper) value).unwrap();
 			}
 			if(i != 0) {
 				buf.append(",\n");
@@ -197,6 +203,8 @@ public class JsonOut {
 				value = null;
 			} else if (value instanceof Wrapper) {
 				value = ((Wrapper) value).unwrap();
+			} else if (value instanceof RhiginObjectWrapper) {
+				value = ((RhiginObjectWrapper) value).unwrap();
 			}
 			if(i != 0) {
 				buf.append(",\n");

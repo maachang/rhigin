@@ -51,6 +51,7 @@ import rhigin.scripts.objects.FileObject;
 import rhigin.scripts.objects.FunctionObject;
 import rhigin.scripts.objects.JDateObject;
 import rhigin.scripts.objects.JSONObject;
+import rhigin.scripts.objects.JavaObject;
 import rhigin.scripts.objects.JwtObject;
 import rhigin.scripts.objects.LockObjects;
 import rhigin.scripts.objects.UniqueIdObject;
@@ -63,6 +64,9 @@ import rhigin.util.OList;
  * javscriptを実行.
  */
 public class ExecuteScript {
+	
+	/** Rhino js packages. **/
+	public static final String RHINO_JS_PACKAGE_NAME = "org.mozilla.javascript";
 
 	/** 名無しスクリプト名. **/
 	protected static final String NO_SCRIPT_NAME = "<script>";
@@ -168,6 +172,7 @@ public class ExecuteScript {
 		FCompObject.regFunctions(scope);
 		ColorOutObject.regFunctions(scope);
 		ExecCmdObject.regFunctions(scope);
+		JavaObject.regFunctions(scope);
 
 		// rhigin用の基本オブジェクトを設定.
 		RequireFunction.regFunctions(scope);
@@ -348,9 +353,11 @@ public class ExecuteScript {
 			// 戻り値がWrapperの場合は、アンラップ.
 			if (ret instanceof Wrapper) {
 				return ((Wrapper) ret).unwrap();
+			} else if (ret instanceof RhiginObjectWrapper) {
+				return ((RhiginObjectWrapper) ret).unwrap();
 			}
 			return ret;
-		} catch(WrapRhiginException wre) {
+		} catch(RhiginWrapException wre) {
 			// rhino用のラップ例外の場合は、RhiginExceptionに変換して返却.
 			Throwable t = wre.getWrappedException();
 			if(t instanceof RhiginException) {
@@ -454,9 +461,11 @@ public class ExecuteScript {
 			// 戻り値がWrapperの場合は、アンラップ.
 			if (ret instanceof Wrapper) {
 				return ((Wrapper) ret).unwrap();
+			} else if (ret instanceof RhiginObjectWrapper) {
+				return ((RhiginObjectWrapper) ret).unwrap();
 			}
 			return ret;
-		} catch(WrapRhiginException wre) {
+		} catch(RhiginWrapException wre) {
 			// rhino用のラップ例外の場合は、RhiginExceptionに変換して返却.
 			Throwable t = wre.getWrappedException();
 			if(t instanceof RhiginException) {

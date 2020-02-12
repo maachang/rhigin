@@ -375,7 +375,7 @@ public class JavaScriptable {
 	}
 
 	// 読み込み専用配列取得用.
-	public static class ReadArray extends JavaScriptable.List {
+	public static class ReadArray extends JavaScriptable.List implements RhiginObjectWrapper {
 		private final Object array;
 
 		public ReadArray(Object a) {
@@ -415,6 +415,11 @@ public class JavaScriptable {
 		@Override
 		public String getClassName() {
 			return "ReadArray";
+		}
+		
+		@Override
+		public Object unwrap() {
+			return array;
 		}
 	}
 }

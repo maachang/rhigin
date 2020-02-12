@@ -64,9 +64,15 @@ public class RhiginTest {
 			return;
 		}
 		
+		// ./spec/conf フォルダがある場合は、このフォルダを読み込み対象とする.
+		String confDir = SPEC_DIR + "/" + RhiginConstants.CONFIG_NAME + "/";
+		if(!FileUtil.isDir(confDir)) {
+			confDir = null;
+		}
+		
 		int ret = 0;
 		try {
-			RhiginConfig conf = RhiginStartup.initLogFactory(false, false);
+			RhiginConfig conf = RhiginStartup.init(confDir, false, false, false);
 			if(test.executeTest(conf)) {
 				ret = 0;
 			} else {

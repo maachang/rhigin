@@ -17,7 +17,7 @@ public class RhiginDown {
 		// パラメータからのポート指定がない場合は、サーバ定義を読み込み、
 		// そこからポート番号で処理.
 		if (args == null || args.length == 0) {
-			RhiginConfig conf = RhiginStartup.initLogFactory(false, true, args);
+			RhiginConfig conf = RhiginStartup.init(false, true, args);
 
 			// シャットダウンまで待つ処理を生成.
 			if (Converter.isNumeric(conf.get("http", "shutdownPort"))) {

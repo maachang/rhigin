@@ -96,7 +96,7 @@ public abstract class AbstractRhiginFunction implements Function {
 		try {
 			return jcall(ctx, scope, thisObj, args);
 		} catch(Throwable t) {
-			throw new WrapRhiginException(t);
+			throw new RhiginWrapException(t);
 		}
 	}
 	
@@ -106,7 +106,7 @@ public abstract class AbstractRhiginFunction implements Function {
 		try {
 			return jconstruct(arg0, arg1, arg2);
 		} catch(Throwable t) {
-			throw new WrapRhiginException(t);
+			throw new RhiginWrapException(t);
 		}
 	}
 	

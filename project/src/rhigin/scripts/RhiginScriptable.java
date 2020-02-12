@@ -1,5 +1,6 @@
 package rhigin.scripts;
 
+import java.util.List;
 import java.util.Map;
 
 import org.mozilla.javascript.Context;
@@ -12,10 +13,11 @@ import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Undefined;
 import org.mozilla.javascript.Wrapper;
 
+import rhigin.scripts.objects.JDateObject;
+import rhigin.scripts.objects.JDateObject.JDateInstanceObject;
 import rhigin.util.ArrayMap;
 
 final class RhiginScriptable implements Scriptable {
-	private static final String RHINO_JS_PACKAGE_NAME = "org.mozilla.javascript";
 	private Map<Object, Object> _indexedProps;
 	private RhiginContext context;
 	private Scriptable prototype;
@@ -48,9 +50,9 @@ final class RhiginScriptable implements Scriptable {
 
 	@SuppressWarnings("rawtypes")
 	public Object get(String name, Scriptable start) {
-		if (name.length() == 0) {
-			if (getIndexProps().containsKey(name)) {
-				return getIndexProps().get(name);
+		if (name == null || name.isEmpty()) {
+			if (getIndexProps().containsKey("")) {
+				return getIndexProps().get("");
 			} else {
 				return NOT_FOUND;
 			}
@@ -64,9 +66,19 @@ final class RhiginScriptable implements Scriptable {
 				}
 				return value;
 			} else if ((c = value.getClass()).isArray()) {
+				return new JavaScriptable.ReadArray(value);
+			} else if (value instanceof Scriptable ||
+				c.getPackage().getName().startsWith(ExecuteScript.RHINO_JS_PACKAGE_NAME)) {
 				return value;
-			} else if (c.getPackage().getName().startsWith(RHINO_JS_PACKAGE_NAME)) {
-				return value;
+			} else if (value instanceof Map) {
+				return new JavaScriptable.GetMap((java.util.Map)value);
+			} else if (value instanceof List) {
+				return new JavaScriptable.GetList((java.util.List)value);
+			} else if(value instanceof java.util.Date) {
+				if(value instanceof JDateInstanceObject) {
+					return value;
+				}
+				return JDateObject.newObject((java.util.Date)value);
 			} else {
 				return Context.javaToJS(value, this);
 			}
@@ -82,7 +94,7 @@ final class RhiginScriptable implements Scriptable {
 	}
 
 	public boolean has(String name, Scriptable start) {
-		if (name.length() == 0) {
+		if (name == null || name.isEmpty()) {
 			return getIndexProps().containsKey(name);
 		} else {
 			return context.hasAttribute(name);
@@ -95,8 +107,8 @@ final class RhiginScriptable implements Scriptable {
 
 	public void put(String name, Scriptable start, Object value) {
 		if (start == this) {
-			if (name.length() == 0) {
-				getIndexProps().put(name, value);
+			if (name == null || name.isEmpty()) {
+				getIndexProps().put("", value);
 			} else {
 				context.setAttribute(name, jsToJava(value));
 			}
@@ -114,8 +126,8 @@ final class RhiginScriptable implements Scriptable {
 	}
 
 	public void delete(String name) {
-		if (name.length() == 0) {
-			getIndexProps().remove(name);
+		if (name == null || name.isEmpty()) {
+			getIndexProps().remove("");
 		} else {
 			context.removeAttribute(name);
 		}

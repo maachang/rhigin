@@ -7,10 +7,10 @@ import rhigin.RhiginException;
 /**
  * Rhino用のRhigin例外.
  */
-public class WrapRhiginException extends WrappedException {
+public class RhiginWrapException extends WrappedException {
 	private static final long serialVersionUID = 8330918787241079938L;
 	private int status = 500;
-	public WrapRhiginException(Throwable e) {
+	public RhiginWrapException(Throwable e) {
 		super(e instanceof RhiginException ? e : (e = new RhiginException(e)));
 		status = ((RhiginException) e).getStatus();
 	}
