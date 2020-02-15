@@ -94,7 +94,7 @@ public abstract class AbstractRhiginFunction implements Function {
 	@Override
 	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		try {
-			return jcall(ctx, scope, thisObj, args);
+			return jcall(ctx, scope, thisObj, RhiginWrapUtil.unwrapArgs(args));
 		} catch(Throwable t) {
 			throw new RhiginWrapException(t);
 		}
@@ -104,7 +104,7 @@ public abstract class AbstractRhiginFunction implements Function {
 	@Override
 	public final Scriptable construct(Context arg0, Scriptable arg1, Object[] arg2) {
 		try {
-			return jconstruct(arg0, arg1, arg2);
+			return jconstruct(arg0, arg1, RhiginWrapUtil.unwrapArgs(arg2));
 		} catch(Throwable t) {
 			throw new RhiginWrapException(t);
 		}
