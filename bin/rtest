@@ -53,12 +53,6 @@ LIB_DIR=${BASE_HOME}/lib
 # library directory.
 JAR_DIR=jar
 
-# my jar ++.
-MY_JAR=${MY_JAR}:`sh ${BATCH_DIR}/sub/classpath.sh ${LIB_DIR}`
-if [ -d ${JAR_DIR} ]; then
-    MY_JAR=${MY_JAR}:`sh ${BATCH_DIR}/sub/classpath.sh ${JAR_DIR}`
-fi
-
 # java option.
 OPT="${OPT} -Djava.awt.headless=true"
 OPT="${OPT} -Djava.net.preferIPv4Stack=true"
@@ -70,9 +64,25 @@ OPT="${OPT} -Djava.net.preferIPv4Stack=true"
 # execution java.
 cd ${PROJ_DIR}
 
+# my jar ++.
+if [ -d ${LIB_DIR} ]; then
+    MY_JAR=${MY_JAR}:`sh ${BATCH_DIR}/sub/classpath.sh ${LIB_DIR}`
+fi
+if [ -d ${JAR_DIR} ]; then
+    MY_JAR=${MY_JAR}:`sh ${BATCH_DIR}/sub/classpath.sh ${JAR_DIR}`
+fi
+if [ -d "./project/lib" ]; then
+    MY_JAR=${MY_JAR}:`sh ${BATCH_DIR}/sub/classpath.sh ./project/lib/`
+fi
+
+MY_CLAZZ=""
+if [ -d "./project/classes" ]; then
+    MY_CLAZZ="./project/classes"
+fi
+
 if [ ${CHANGE_MALLOC:--1} = "-1" ];
 then
-    ${JAVA_HOME}/bin/java -server -Xms${STM}m -Xmx${EXM}m ${OPT} -classpath ${MY_JAR} ${EXEC_PACKAGE} ${ARGS}
+    ${JAVA_HOME}/bin/java -server -Xms${STM}m -Xmx${EXM}m ${OPT} -classpath ${MY_JAR}:${MY_CLAZZ} ${EXEC_PACKAGE} ${ARGS}
 else
     LD_PRELOAD=${CHANGE_MALLOC} ${JAVA_HOME}/bin/java -server -Xms${STM}m -Xmx${EXM}m ${OPT} -classpath ${MY_JAR} ${EXEC_PACKAGE} ${ARGS}
 fi

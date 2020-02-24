@@ -5,6 +5,7 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.ExecuteScript;
+import rhigin.scripts.RhiginContext;
 import rhigin.scripts.RhiginFunction;
 import rhigin.util.FixedKeyValues;
 
@@ -96,10 +97,11 @@ public class GlobalFunction extends RhiginFunction {
 
 	@Override
 	public void put(String arg0, Scriptable arg1, Object arg2) {
-		if(arg2 == THIS) {
+		RhiginContext context = ExecuteScript.currentRhiginContext();
+		if(THIS == arg2 || context == arg2) {
 			return;
 		}
-		ExecuteScript.currentRhiginContext().put(arg0, arg1, arg2);
+		context.put(arg0, arg1, arg2);
 	}
 
 	@Override
@@ -109,12 +111,20 @@ public class GlobalFunction extends RhiginFunction {
 
 	@Override
 	public void setParentScope(Scriptable arg0) {
-		ExecuteScript.currentRhiginContext().setParentScope(arg0);
+		RhiginContext context = ExecuteScript.currentRhiginContext();
+		if(context == arg0) {
+			return;
+		}
+		context.setParentScope(arg0);
 	}
 
 	@Override
 	public void setPrototype(Scriptable arg0) {
-		ExecuteScript.currentRhiginContext().setPrototype(arg0);
+		RhiginContext context = ExecuteScript.currentRhiginContext();
+		if(context == arg0) {
+			return;
+		}
+		context.setPrototype(arg0);
 	}
 	
 	@Override

@@ -32,8 +32,7 @@ public class EvalFunction extends RhiginFunction {
 	public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		if(args != null && args.length > 0) {
 			try {
-				return ExecuteScript.execute(
-					ExecuteScript.currentRhiginContext(),
+				return ExecuteScript.eval(
 					new StringReader("" + args[0]), null, "", "", 1);
 			} catch(Exception e) {
 				throw new RhiginException(e);

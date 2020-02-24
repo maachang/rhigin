@@ -6,10 +6,8 @@ import java.util.Set;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
-import org.mozilla.javascript.Wrapper;
 
-import rhigin.scripts.ExecuteScript;
-import rhigin.scripts.JavaScriptable;
+import rhigin.RhiginException;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginObject;
 import rhigin.scripts.RhiginObjectWrapper;
@@ -33,6 +31,58 @@ public class JavaObject {
 		return value;
 	}
 	
+	/**
+	 * JReflectObjectのインスタンス生成.
+	 * @param clazz Classオブジェクトか、Stringでクラス名をパッケージ名を含めて設定します.
+	 * @param args コンストラクタパラメータを設定します.
+	 * @return JReflectObject javascriptから呼び出せるJavaのリフレクションオブジェクトが返却されます.
+	 */
+	@SuppressWarnings("rawtypes")
+	public static final JReflectObject newInstance(Object clazz, Object... args) {
+		if(clazz == null || !(clazz instanceof Class || clazz instanceof String)) {
+			throw new RhiginException("The specified class must be a Class or String object.");
+		}
+		Object o = null;
+		int len = args == null ? 0 : args.length;
+		if(len == 1) {
+			o = clazz instanceof Class ?
+				FastReflect.newInstance(null, (Class)clazz) :
+				FastReflect.newInstance(null, (String)clazz);
+		} else {
+			o = args[0] instanceof Class ?
+				FastReflect.newInstance(null, (Class)clazz, args) :
+				FastReflect.newInstance(null, (String)clazz, args);
+		}
+		return new JReflectObject(null, o);
+	}
+	
+	/**
+	 * JavaオブジェクトをJavascriptで利用できるオブジェクトをJReflectObject にラップします.
+	 * @param object 対象のJavaオブジェクトを設定します.
+	 * @return JReflectObject javascriptから呼び出せるJavaのリフレクションオブジェクトが返却されます.
+	 */
+	public static final JReflectObject wrapObject(Object object) {
+		if(object == null) {
+			throw new RhiginException("The object to wrap is 'null'.");
+		}
+		return new JReflectObject(null, object);
+	}
+	
+	/**
+	 * StaticなJavaオブジェクトをJavascriptで利用できるオブジェクトをJReflectObject にラップします.
+	 * @param clazz Classオブジェクトか、Stringでクラス名をパッケージ名を含めて設定します.
+	 * @return JReflectObject javascriptから呼び出せるJavaのリフレクションオブジェクトが返却されます.
+	 */
+	@SuppressWarnings("rawtypes")
+	public static final JReflectObject wrapStatic(Object clazz) {
+		if(clazz == null || !(clazz instanceof Class || clazz instanceof String)) {
+			throw new RhiginException("The specified class must be a Class or String object.");
+		} else if(clazz instanceof Class) {
+			return new JReflectObject((Class)clazz, null);
+		}
+		return new JReflectObject(FastReflect.getClass((String)clazz), null);
+	}
+	
 	// Javaリフレクション制御用オブジェクト.
 	public static final class JRefrect extends RhiginFunction {
 		private final int type;
@@ -50,44 +100,33 @@ public class JavaObject {
 				if(args == null || args.length == 0 || args[0] == null) {
 					this.argsException(OBJECT_NAME);
 				}
-				Object o = null;
 				int len = args.length;
 				if(len == 1) {
-					o = args[0] instanceof Class ?
-						FastReflect.newInstance(null, (Class)args[0]) :
-						FastReflect.newInstance("" + args[0]);
-				} else {
-					Object[] pms = RhiginWrapUtil.unwrapArgs(1, args);
-					o = args[0] instanceof Class ?
-						FastReflect.newInstance(null, (Class)args[0], pms) :
-						FastReflect.newInstance(null, "" + args[0], pms);
+					return args[0] instanceof Class ?
+						newInstance((Class)args[0]) :
+						newInstance(args[0]);
 				}
-				return new JReflectObject(null, o);
+				Object[] pms = new Object[len-1];
+				System.arraycopy(args, 1, pms, 0, len - 1);
+				return args[0] instanceof Class ?
+					newInstance((Class)args[0], pms) :
+					newInstance(args[0], pms);
 			}
 			case 1: // wrap.
 			{
 				if(args == null || args.length == 0 || args[0] == null) {
 					this.argsException(OBJECT_NAME);
 				}
-				Object o = args[0];
-				if(o instanceof Wrapper) {
-					o = ((Wrapper)o).unwrap();
-				} else if(o instanceof RhiginObjectWrapper) {
-					o = ((RhiginObjectWrapper)o).unwrap();
-				}
-				if(o == null) {
-					this.argsException(OBJECT_NAME);
-				}
-				return new JReflectObject(null, o);
+				return wrapObject(args[0]);
 			}
 			case 2: // static.
 			{
 				if(args == null || args.length == 0 || args[0] == null) {
 					this.argsException(OBJECT_NAME);
 				} else if(args[0] instanceof Class) {
-					return new JReflectObject((Class)args[0], null);
+					return wrapStatic((Class)args[0]);
 				}
-				return new JReflectObject(FastReflect.getClass("" + args[0]), null);
+				return wrapStatic(args[0]);
 			}
 			}
 			return Undefined.instance;
@@ -211,8 +250,7 @@ public class JavaObject {
 			if(len == 0) {
 				return getObject(FastReflect.invoke(clazz, target, name));
 			}
-			Object[] pms = RhiginWrapUtil.unwrapArgs(args);
-			return getObject(FastReflect.invoke(clazz, target, name, pms));
+			return getObject(FastReflect.invoke(clazz, target, name, args));
 		}
 
 		@Override

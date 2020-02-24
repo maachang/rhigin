@@ -10,6 +10,7 @@ import rhigin.RhiginConfig;
 import rhigin.RhiginException;
 import rhigin.RhiginStartup;
 import rhigin.lib.level.LevelJsCore;
+import rhigin.lib.level.LevelJsCsv;
 import rhigin.lib.level.operator.Operator;
 import rhigin.lib.level.operator.OperatorKeyType;
 import rhigin.lib.level.operator.OperatorMode;
@@ -27,8 +28,11 @@ public class LevelJsManagerJs {
 	// コアオブジェクト.
 	protected static final LevelJsCore CORE = new LevelJsCore();
 	
+	// オブジェクト名.
+	protected static final String OBJECT_NAME = "Level";
+	
 	// LevelJsマネージャインスタンス.
-	protected static final RhiginObject LEVEL_JS_INSTANCE = new RhiginObject("Level", new RhiginFunction[] {
+	protected static final RhiginObject LEVEL_JS_INSTANCE = new RhiginObject(OBJECT_NAME, new RhiginFunction[] {
 		new LevelJsManFunctions(0), new LevelJsManFunctions(1), new LevelJsManFunctions(2), new LevelJsManFunctions(3),
 		new LevelJsManFunctions(4), new LevelJsManFunctions(5), new LevelJsManFunctions(6), new LevelJsManFunctions(7),
 		new LevelJsManFunctions(8), new LevelJsManFunctions(9), new LevelJsManFunctions(10), new LevelJsManFunctions(11),
@@ -183,6 +187,16 @@ public class LevelJsManagerJs {
 				{
 					return CORE.size();
 				}
+				case 19: // csvImport.
+				{
+					if(args == null || args.length == 0) {
+						this.argsException(OBJECT_NAME);
+					}
+					if(args.length == 1) {
+						return LevelJsCsv.execute(CORE, false, null, "" + args[0]);
+					}
+					return LevelJsCsv.execute(CORE, false, "" + args[0], "" + args[1]);
+				}
 				
 				}
 			} catch (RhiginException re) {
@@ -197,7 +211,7 @@ public class LevelJsManagerJs {
 		private final String getOperatorName(int off, Object[] args) {
 			if(args == null || args.length <= off||
 				!(args[off] instanceof String)) {
-				this.argsException("Level");
+				this.argsException(OBJECT_NAME);
 			}
 			return (String)args[off];
 		}
@@ -206,13 +220,13 @@ public class LevelJsManagerJs {
 		private final OperatorMode getOperatorMode(Object[] args) {
 			int argsLen = 0;
 			if(args == null || (argsLen = args.length) <= 1) {
-				this.argsException("Level");
+				this.argsException(OBJECT_NAME);
 			}
 			if(args[1] instanceof Map) {
 				return new OperatorMode(args[1]);
 			}
 			if(argsLen <= 2) {
-				this.argsException("Level");
+				this.argsException(OBJECT_NAME);
 			}
 			Object[] params = new Object[argsLen-1];
 			System.arraycopy(args, 1, params, 0, argsLen-1);
@@ -241,6 +255,7 @@ public class LevelJsManagerJs {
 			case 16: return "mode";
 			case 17: return "names";
 			case 18: return "length";
+			case 19: return "csvImport";
 			}
 			return "unknown";
 		}

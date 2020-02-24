@@ -1,0 +1,4 @@
+{
+    "path": "./spec/lvdb",  // leveldb 保存パス.
+    "machineId": 0          // マシンID.
+}

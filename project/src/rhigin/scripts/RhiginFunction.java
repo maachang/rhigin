@@ -77,7 +77,7 @@ public abstract class RhiginFunction extends AbstractRhiginFunction {
 					params[i] = list.get(i);
 				}
 			} else {
-				params = new Object[0];
+				params = ScriptConstants.BLANK_ARGS;
 			}
 			return src.jcall(cx, scope, sc, params);
 		}
@@ -111,7 +111,7 @@ public abstract class RhiginFunction extends AbstractRhiginFunction {
 				params = new Object[len];
 				System.arraycopy(args, 1, params, 0, len);
 			} else {
-				params = new Object[0];
+				params = ScriptConstants.BLANK_ARGS;
 			}
 			return src.jcall(cx, scope, sc, params);
 		}

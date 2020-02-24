@@ -29,9 +29,10 @@ public class ExecuteJsByEndScriptCall implements RhiginEndScriptCall {
 	 * @param context スクリプトコンテキストを設定します.
 	 * @param cache スクリプトコンパイルキャッシュを設定します.
 	 */
-	public void call(RhiginContext context, CompileCache cache) {
+	@Override
+	public void call(CompileCache cache) {
 		try {
-			ExecuteScript.execute(context,
+			ExecuteScript.eval(
 				cache.get(name, ScriptConstants.HEADER, ScriptConstants.FOOTER).getScript());
 		} catch(RhiginException re) {
 			throw re;

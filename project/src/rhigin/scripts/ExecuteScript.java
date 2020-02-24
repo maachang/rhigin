@@ -12,7 +12,6 @@ import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Script;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
-import org.mozilla.javascript.Wrapper;
 
 import rhigin.RhiginConstants;
 import rhigin.RhiginException;
@@ -239,6 +238,13 @@ public class ExecuteScript {
 	public static final RhiginContext currentRhiginContext() {
 		return currentRhiginContext.get();
 	}
+	
+	/**
+	 * カレントのRhiginContextを削除.
+	 */
+	public static final void clearCurrentRhiginContext() {
+		currentRhiginContext.set(null);
+	}
 
 	/**
 	 * 指定javascriptをコンパイル.
@@ -342,21 +348,41 @@ public class ExecuteScript {
 	 *             例外.
 	 */
 	public static final Object execute(RhiginContext context, Script compiled) throws Exception {
-		Context ctx = ContextFactory.getGlobal().enterContext();
+		RhiginContext old = ExecuteScript.currentRhiginContext();
 		currentRhiginContext.set(context);
+		try {
+			return eval(compiled);
+		} finally {
+			currentRhiginContext.set(old);
+		}
+	}
+	
+	/**
+	 * コンパイル結果を実行.
+	 * JS実行中に重ねて呼び出す場合は、こちらでJSを実行します.
+	 * 
+	 * @param compiled
+	 *            コンパイル済みオブジェクトを設定します.
+	 * @return Object スクリプト実行結果を返却します.
+	 * @throws Exception
+	 *             例外.
+	 */
+	public static final Object eval(Script compiled) throws Exception {
+		boolean resetRhiginContextFlag = false;
+		Context ctx = ContextFactory.getGlobal().enterContext();
+		RhiginContext context = ExecuteScript.currentRhiginContext();
+		if(context == null) {
+			context = new RhiginContext();
+			currentRhiginContext.set(context);
+			resetRhiginContextFlag = true;
+		}
 		try {
 			// 実行処理.
 			RhiginScriptable scope = new RhiginScriptable(context);
 			scope.setPrototype(getTopLevel());
 			settingRhiginObject(ctx, scope);
 			final Object ret = compiled.exec(ctx, scope);
-			// 戻り値がWrapperの場合は、アンラップ.
-			if (ret instanceof Wrapper) {
-				return ((Wrapper) ret).unwrap();
-			} else if (ret instanceof RhiginObjectWrapper) {
-				return ((RhiginObjectWrapper) ret).unwrap();
-			}
-			return ret;
+			return RhiginWrapUtil.unwrap(ret);
 		} catch(RhiginWrapException wre) {
 			// rhino用のラップ例外の場合は、RhiginExceptionに変換して返却.
 			Throwable t = wre.getWrappedException();
@@ -370,9 +396,11 @@ public class ExecuteScript {
 		} catch(Throwable t) {
 			throw new RhiginException(t);
 		} finally {
+			if(resetRhiginContextFlag) {
+				currentRhiginContext.set(null);
+			}
 			Context.exit();
 			EntityFunctions.exit();
-			currentRhiginContext.set(null);
 		}
 	}
 
@@ -446,10 +474,45 @@ public class ExecuteScript {
 	 */
 	public static final Object execute(RhiginContext context, Reader r, String name, String headerScript,
 			String footerScript, int lineNo) throws Exception {
+		RhiginContext old = ExecuteScript.currentRhiginContext();
+		currentRhiginContext.set(context);
+		try {
+			return eval(r, name, headerScript, footerScript, lineNo);
+		} finally {
+			currentRhiginContext.set(old);
+		}
+	}
+	
+	/**
+	 * 指定javascriptを実行.
+	 * JS実行中に重ねて呼び出す場合は、こちらでJSを実行します.
+	 * 
+	 * @param r
+	 *            readerを設定します.
+	 * @param name
+	 *            スクリプトファイル名を設定します.
+	 * @param headerScript
+	 *            ヘッダに追加するスクリプトを設定します.
+	 * @param footerScript
+	 *            フッタに追加するスクリプトを設定します.
+	 * @param lineNo
+	 *            ライン開始番号を設定します.
+	 * @return Object スクリプト実行結果を返却します.
+	 * @throws Exception
+	 *             例外.
+	 */
+	public static final Object eval(Reader r, String name, String headerScript,
+			String footerScript, int lineNo) throws Exception {
+		boolean resetRhiginContextFlag = false;
 		name = (name == null || name.isEmpty()) ? NO_SCRIPT_NAME : name;
 		Context ctx = ContextFactory.getGlobal().enterContext();
 		ctx.setOptimizationLevel(SCRIPT_NOT_COMPILE_OPTIMIZE_LEVEL);
-		currentRhiginContext.set(context);
+		RhiginContext context = ExecuteScript.currentRhiginContext();
+		if(context == null) {
+			context = new RhiginContext();
+			currentRhiginContext.set(context);
+			resetRhiginContextFlag = true;
+		}
 		try {
 			// 対象ソースをコンパイル.
 			RhiginScriptable scope = new RhiginScriptable(context);
@@ -458,13 +521,7 @@ public class ExecuteScript {
 			Script compiled = ctx.compileReader(getScript(r, headerScript, footerScript), name, lineNo, null);
 			// 実行処理.
 			final Object ret = compiled.exec(ctx, scope);
-			// 戻り値がWrapperの場合は、アンラップ.
-			if (ret instanceof Wrapper) {
-				return ((Wrapper) ret).unwrap();
-			} else if (ret instanceof RhiginObjectWrapper) {
-				return ((RhiginObjectWrapper) ret).unwrap();
-			}
-			return ret;
+			return RhiginWrapUtil.unwrap(ret);
 		} catch(RhiginWrapException wre) {
 			// rhino用のラップ例外の場合は、RhiginExceptionに変換して返却.
 			Throwable t = wre.getWrappedException();
@@ -478,9 +535,11 @@ public class ExecuteScript {
 		} catch(Throwable t) {
 			throw new RhiginException(t);
 		} finally {
+			if(resetRhiginContextFlag) {
+				currentRhiginContext.set(null);
+			}
 			Context.exit();
 			EntityFunctions.exit();
-			currentRhiginContext.set(null);
 		}
 	}
 
@@ -573,12 +632,11 @@ public class ExecuteScript {
 			}
 			RhiginEndScriptCall n;
 			final Log log = LogFactory.create();
-			final RhiginContext context = new RhiginContext();
 			for(int i = 0; i < len; i ++) {
 				n = list.get(i);
 				if(n != null) {
 					try {
-						n.call(context, cache);
+						n.call(cache);
 					} catch(Exception e) {
 						// ログ出力.
 						log.error(e);

@@ -126,9 +126,14 @@ var executeRTest = function(name) {
                 ${File.readByString(name)}
                 return rtestCore.result();
             })(this);
-            """);
-    } catch(e) {
-        return "" + e;
+        """);
+    } finally {
+        // クローズ処理.
+        try {
+            Packages.rhigin.scripts.ExecuteScript.callEndScripts(false, null);
+        } catch(ee) {}
+        // グローバルのリセット.
+        global.$reset;
     }
 }
 

@@ -76,7 +76,7 @@ public class RhiginObject implements BlankScriptable {
 			// エラーの場合は、標準表示.
 			try {
 				return "" + list[no]
-					.call(null, null, null, new Object[0]);
+					.call(null, null, null, ScriptConstants.BLANK_ARGS);
 			} catch(Exception e) {}
 		}
 		return "[" + name + "]";

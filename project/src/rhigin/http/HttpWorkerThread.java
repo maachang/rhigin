@@ -420,6 +420,8 @@ public class HttpWorkerThread extends Thread {
 					}
 					errorResponse(em, rhiginException.getStatus(), rhiginException.getMessage());
 					return;
+				} finally {
+					ExecuteScript.clearCurrentRhiginContext();
 				}
 				
 				// 戻り値がInputStreamでない場合.

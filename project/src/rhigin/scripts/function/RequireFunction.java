@@ -94,7 +94,7 @@ public final class RequireFunction extends RhiginFunction {
 				throw new RhiginException(500, "compileCache has not been set.");
 			}
 			ScriptElement se = c.get(path, HEADER_SCRIPT, FOOTER_SCRIPT);
-			return ExecuteScript.execute(null, se.getScript());
+			return ExecuteScript.eval(se.getScript());
 		} catch (RhiginException re) {
 			throw re;
 		} catch (Exception e) {

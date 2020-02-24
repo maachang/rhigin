@@ -98,7 +98,7 @@ public class RhiginInstanceObject implements BlankScriptable {
 			// エラーの場合は、標準表示.
 			try {
 				return "" + ((RhiginFunction)get("toString", null))
-					.call(null, null, null, new Object[0]);
+					.call(null, null, null, ScriptConstants.BLANK_ARGS);
 			} catch(Exception e) {}
 		}
 		return "[" + name + "]";

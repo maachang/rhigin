@@ -81,6 +81,9 @@ public class RhiginTest {
 		} catch(Throwable t) {
 			t.printStackTrace();
 			ret = 1;
+		} finally {
+			ExecuteScript.callEndScripts(false, null);
+			ExecuteScript.callEndScripts(true, null);
 		}
 		System.exit(ret);
 	}
@@ -109,11 +112,15 @@ public class RhiginTest {
 		
 		// rtest 実行.
 		RhiginContext context = new RhiginContext();
-		Object ret = ExecuteScript.execute(context, FileUtil.getFileString(rtestJsFile, "UTF8"),
-			"${RHIGIN_HOME}" + scriptFile);
-		if(ret instanceof Boolean) {
-			return (Boolean)ret;
+		try {
+			Object ret = ExecuteScript.execute(context, FileUtil.getFileString(rtestJsFile, "UTF8"),
+				"${RHIGIN_HOME}" + scriptFile);
+			if(ret instanceof Boolean) {
+				return (Boolean)ret;
+			}
+			return false;
+		} finally {
+			ExecuteScript.clearCurrentRhiginContext();
 		}
-		return false;
 	}
 }

@@ -132,8 +132,12 @@ public class ExecCmd {
 			reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			if(timeout <= 0L) {
 				// タイムアウトなし.
-				while((line = reader.readLine()) != null) {
-					ret.add(line);
+				while(p.isAlive()) {
+					if((line = reader.readLine()) != null) {
+						ret.add(line);
+					} else {
+						Thread.sleep(5L);
+					}
 				}
 			} else {
 				// タイムアウトあり.

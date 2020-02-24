@@ -101,7 +101,7 @@ public class JavaScriptable {
 		@Override
 		public Object[] getIds() {
 			if(this.size() == 0) {
-				return new Object[0];
+				return ScriptConstants.BLANK_ARGS;
 			}
 			int cnt = 0;
 			final int len = this.size();

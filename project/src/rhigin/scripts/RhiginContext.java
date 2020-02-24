@@ -25,6 +25,8 @@ public class RhiginContext implements Scriptable {
 	public boolean hasAttribute(String name) {
 		if (name == null) {
 			throw new NullPointerException();
+		} else if("$reset".equals(name)) {
+			return true;
 		} else if(bindings.containsKey(name)) {
 			return true;
 		}
@@ -34,8 +36,10 @@ public class RhiginContext implements Scriptable {
 	public Object getAttribute(String name) {
 		if (name == null) {
 			throw new NullPointerException();
-		}
-		if(bindings.containsKey(name)) {
+		} else if("$reset".equals(name)) {
+			bindings.clear();
+			return true;
+		} else if(bindings.containsKey(name)) {
 			return bindings.get(name);
 		} else if(baseFunctions != null && baseFunctions.containsKey(name)) {
 			return baseFunctions.get(name);
@@ -46,8 +50,9 @@ public class RhiginContext implements Scriptable {
 	public Object getHasAttribute(boolean[] has, String name) {
 		if(name == null) {
 			throw new NullPointerException();
-		}
-		if(bindings.containsKey(name)) {
+		} else if("$reset".equals(name)) {
+			return true;
+		} else if(bindings.containsKey(name)) {
 			has[0] = true;
 			return bindings.get(name);
 		} else if(baseFunctions != null && baseFunctions.containsKey(name)) {

@@ -38,8 +38,7 @@ public final class FunctionObject {
 					buf.append(args[i]);
 				}
 				buf.append(") {\n").append(args[len]).append("\n}");
-				return new Execute(ExecuteScript.execute(
-						ExecuteScript.currentRhiginContext(),
+				return new Execute(ExecuteScript.eval(
 						new StringReader("" + buf.toString()), null, "", "", 1));
 				
 			} catch(Exception e) {

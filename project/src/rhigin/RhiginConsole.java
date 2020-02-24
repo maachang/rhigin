@@ -188,6 +188,7 @@ public class RhiginConsole {
 				} catch (Throwable e) {
 					e.printStackTrace();
 				} finally {
+					ExecuteScript.clearCurrentRhiginContext();
 					o = null;
 					cmd = null;
 				}

@@ -92,7 +92,7 @@ public abstract class AbstractRhiginFunction implements Function {
 
 	// Funtion呼び出し処理.
 	@Override
-	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+	public Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		try {
 			return jcall(ctx, scope, thisObj, RhiginWrapUtil.unwrapArgs(args));
 		} catch(Throwable t) {
@@ -102,7 +102,7 @@ public abstract class AbstractRhiginFunction implements Function {
 	
 	// new コンストラクタ呼び出し処理.
 	@Override
-	public final Scriptable construct(Context arg0, Scriptable arg1, Object[] arg2) {
+	public Scriptable construct(Context arg0, Scriptable arg1, Object[] arg2) {
 		try {
 			return jconstruct(arg0, arg1, RhiginWrapUtil.unwrapArgs(arg2));
 		} catch(Throwable t) {

@@ -17,7 +17,7 @@ var _cs = function(len) {
 // 小数点第３桁まで表示.
 var _sec = function(n) {
     var f = "";
-    n = "" + (n / 1000);
+    n = "" + (n == 0 || isNaN(n) ? 0 : (n / 1000));
     var p = n.indexOf(".");
     if(p != -1) {
         f = n.substring(p + 1);
@@ -65,7 +65,7 @@ var specElementCount = function(value) {
         // describe(0), it(1) 
         var errFlg = false;
         var list = value.inner;
-        var len = list.length;
+        var len = list == null || list == undefined ? 0 : list.length;
         var spec = 0;
         var failures = 0;
         for(var i = 0; i < len; i ++) {
@@ -130,12 +130,12 @@ var detailDetailReport = function(space, value) {
     }
     if(value.type != 2) {
         var list = value.inner;
-        var len = list.length;
+        var len = list == null || list == undefined ?  0 : list.length;
         // describe(0)
         if(value.type == 0) {
             print(_cs(space) + color + "[" + value.name + "] Finished in " + _sec(value.time) + " seconds" + endColor);
         // it(1).
-        } else {
+        } else if(len > 0) {
             noLinePrint(_cs(space) + color + "(" + value.name + ")" + endColor);
             for(var i = 0; i < len; i ++) {
                 if(list[i].type == 2) {

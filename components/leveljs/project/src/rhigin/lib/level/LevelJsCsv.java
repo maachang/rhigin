@@ -83,7 +83,6 @@ public class LevelJsCsv {
 			final String confName = params.get("-c", "--conf", "--config");
 			
 			// JDBCパラメータを取得.
-			final LevelJsCsv o = new LevelJsCsv();
 			String opName = params.get("-n", "--name");
 			boolean deleteFlag = params.isValue("-d", "--delete");
 			String charset = params.get("-s", "--charset");
@@ -120,7 +119,7 @@ public class LevelJsCsv {
 			core.startup(confName, args);
 			
 			// CSV実行.
-			int resCount = o.execute(core, opName, deleteFlag, charset, fileName);
+			int resCount = execute(core, opName, deleteFlag, charset, fileName);
 			System.out.println("success    : " + resCount);
 		} catch(Throwable e) {
 			System.out.println("error      : " + e);
@@ -184,6 +183,21 @@ public class LevelJsCsv {
 	/**
 	 * CSVインサート実行.
 	 * @param core
+	 * @param deleteFlag
+	 * @param charset
+	 * @param fileName
+	 * @return
+	 * @throws Exception
+	 */
+	public static final int execute(LevelJsCore core, boolean deleteFlag,
+		String charset, String fileName)
+		throws Exception {
+		return execute(core, null, deleteFlag, charset, fileName);
+	}
+	
+	/**
+	 * CSVインサート実行.
+	 * @param core
 	 * @param opName
 	 * @param deleteFlag
 	 * @param charset
@@ -191,9 +205,20 @@ public class LevelJsCsv {
 	 * @return
 	 * @throws Exception
 	 */
-	public int execute(LevelJsCore core, String opName, boolean deleteFlag,
+	public static final int execute(LevelJsCore core, String opName, boolean deleteFlag,
 		String charset, String fileName)
 		throws Exception {
+		if(fileName == null || fileName.isEmpty()) {
+			throw new LevelJsException("CSV file is not set.");
+		}
+		// オペレータ名が設定されていない場合は、ファイル名から取得.
+		opName = csvFileNameByOperatorDefine(opName, fileName);
+		if(opName == null || opName.isEmpty()) {
+			throw new LevelJsException("Operator name is not set.");
+		}
+		if(charset == null || charset.isEmpty()) {
+			charset = DEF_CHARSET;
+		}
 		int ret = 0;
 		CsvReader csv = null;
 		try {

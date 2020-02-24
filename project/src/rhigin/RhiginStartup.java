@@ -297,6 +297,7 @@ public class RhiginStartup {
 				r.close();
 				r = null;
 			} finally {
+				ExecuteScript.clearCurrentRhiginContext();
 				if (r != null) {
 					try {
 						r.close();

@@ -13,6 +13,7 @@ import org.mozilla.javascript.Undefined;
 import rhigin.RhiginConfig;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginThreadPool;
+import rhigin.scripts.ScriptConstants;
 import rhigin.util.Converter;
 import rhigin.util.FixedKeyValues;
 import rhigin.util.Time12SequenceId;
@@ -26,7 +27,6 @@ import rhigin.util.Time12SequenceId;
  * なので、これらの機能もあえて使う必要はない.
  */
 public class ThreadFunction {
-	protected static final Object[] BLANK_ARGS = new Object[0];
 	private static final Time12SequenceId idMan = new Time12SequenceId(0);
 	private static final Map<String, ScheduledFuture<?>> idMap = new ConcurrentHashMap<String, ScheduledFuture<?>>();
 
@@ -45,7 +45,7 @@ public class ThreadFunction {
 					@Override
 					public void run() {
 						try {
-							f.call(ctx, scope, null, BLANK_ARGS);
+							f.call(ctx, scope, null, ScriptConstants.BLANK_ARGS);
 						} catch (Throwable t) {}
 					}
 				});
@@ -71,7 +71,7 @@ public class ThreadFunction {
 					@Override
 					public void run() {
 						try {
-							f.call(ctx, scope, null, BLANK_ARGS);
+							f.call(ctx, scope, null, ScriptConstants.BLANK_ARGS);
 						} catch (Throwable t) {
 						} finally {
 							idMap.remove(id);
@@ -123,7 +123,7 @@ public class ThreadFunction {
 					@Override
 					public void run() {
 						try {
-							f.call(ctx, scope, null, BLANK_ARGS);
+							f.call(ctx, scope, null, ScriptConstants.BLANK_ARGS);
 						} catch (Throwable t) {
 						} finally {
 							idMap.remove(id);

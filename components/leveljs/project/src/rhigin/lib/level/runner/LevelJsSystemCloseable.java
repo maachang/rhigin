@@ -17,11 +17,10 @@ public class LevelJsSystemCloseable implements RhiginEndScriptCall {
 	
 	/**
 	 * 今回のスクリプト実行で利用したJDBCオブジェクト関連のクローズ処理.
-	 * @params context
 	 * @params cache
 	 */
 	@Override
-	public final void call(RhiginContext context, CompileCache cache) {
+	public final void call(CompileCache cache) {
 		core.destroy();
 	}
 }
