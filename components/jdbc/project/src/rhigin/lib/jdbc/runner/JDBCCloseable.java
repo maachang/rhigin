@@ -5,7 +5,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Map;
 
-import rhigin.scripts.RhiginContext;
 import rhigin.scripts.RhiginEndScriptCall;
 import rhigin.scripts.compile.CompileCache;
 import rhigin.util.ArrayMap;

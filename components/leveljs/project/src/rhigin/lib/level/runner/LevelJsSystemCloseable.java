@@ -1,7 +1,6 @@
 package rhigin.lib.level.runner;
 
 import rhigin.lib.level.LevelJsCore;
-import rhigin.scripts.RhiginContext;
 import rhigin.scripts.RhiginEndScriptCall;
 import rhigin.scripts.compile.CompileCache;
 

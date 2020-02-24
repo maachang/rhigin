@@ -16,6 +16,7 @@ import org.mozilla.javascript.Wrapper;
 import rhigin.scripts.objects.JDateObject;
 import rhigin.scripts.objects.JDateObject.JDateInstanceObject;
 import rhigin.util.ArrayMap;
+import rhigin.util.FixedArray;
 
 final class RhiginScriptable implements Scriptable {
 	private Map<Object, Object> _indexedProps;
@@ -65,7 +66,7 @@ final class RhiginScriptable implements Scriptable {
 					return NOT_FOUND;
 				}
 				return value;
-			} else if ((c = value.getClass()).isArray()) {
+			} else if ((c = value.getClass()).isArray() || value instanceof FixedArray) {
 				return new JavaScriptable.ReadArray(value);
 			} else if (value instanceof Scriptable ||
 				c.getPackage().getName().startsWith(ExecuteScript.RHINO_JS_PACKAGE_NAME)) {

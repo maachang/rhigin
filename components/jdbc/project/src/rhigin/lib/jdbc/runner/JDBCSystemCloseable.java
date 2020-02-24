@@ -1,7 +1,6 @@
 package rhigin.lib.jdbc.runner;
 
 import rhigin.lib.jdbc.JDBCCore;
-import rhigin.scripts.RhiginContext;
 import rhigin.scripts.RhiginEndScriptCall;
 import rhigin.scripts.compile.CompileCache;
 

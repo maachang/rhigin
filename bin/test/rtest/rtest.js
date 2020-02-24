@@ -65,6 +65,7 @@ var readFolderBySpecFiles = function(folder) {
         dir = File.fullPath(dir);
         var name;
         var list = File.list(dir);
+        list.sort();
         var len = list.length;
         for(var i = 0; i < len; i ++) {
             name = dir + "/" + list[i];
@@ -104,7 +105,7 @@ var readArgsBySpecFiles = function(folder) {
                     "Spec file set by command argument does not exist: "
                     + name);
             }
-    } else {
+        } else {
             break;
         }
     }

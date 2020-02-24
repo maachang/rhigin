@@ -3,6 +3,7 @@ package rhigin.scripts;
 import java.lang.reflect.Array;
 import java.util.AbstractList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -12,6 +13,7 @@ import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.function.ToStringFunction;
 import rhigin.util.BlankScriptable;
+import rhigin.util.FixedArray;
 
 /**
  * javaオブジェクトを rhino の Scriptableに変更するオブジェクト.
@@ -134,6 +136,7 @@ public class JavaScriptable {
 	public static abstract class List extends AbstractList implements BlankScriptable {
 		protected final ToStringFunction.Execute toStringFunction = new ToStringFunction.Execute(this);
 		private JListPushFunction pushFunc = null;
+		private JListSortFunction sortFunc = null;
 
 		public abstract int size();
 
@@ -179,7 +182,7 @@ public class JavaScriptable {
 
 		@Override
 		public boolean has(String name, Scriptable start) {
-			if ("length".equals(name) || "push".equals(name)) {
+			if ("length".equals(name) || "push".equals(name) || "sort".equals(name)) {
 				return true;
 			}
 			return false;
@@ -194,6 +197,11 @@ public class JavaScriptable {
 					pushFunc = new JListPushFunction(this);
 				}
 				return pushFunc;
+			} else if ("sort".equals(name)) {
+				if(sortFunc == null) {
+					sortFunc = new JListSortFunction(this);
+				}
+				return sortFunc;
 			}
 			return Undefined.instance;
 		}
@@ -222,6 +230,11 @@ public class JavaScriptable {
 		public String toString() {
 			return JsonOut.toString(this);
 		}
+		
+		/**
+		 * ソート処理を実装.
+		 */
+		public abstract void sort();
 	}
 
 	// List.pushファンクション用.
@@ -246,6 +259,25 @@ public class JavaScriptable {
 				}
 			}
 			return Undefined.instance;
+		}
+	}
+	
+	// List.sortファンクション用.
+	private static final class JListSortFunction extends RhiginFunction {
+		JavaScriptable.List srcList = null;
+		JListSortFunction(JavaScriptable.List l) {
+			srcList = l;
+		}
+
+		@Override
+		public String getName() {
+			return "sort";
+		}
+
+		@Override
+		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			srcList.sort();
+			return srcList;
 		}
 	}
 
@@ -372,14 +404,32 @@ public class JavaScriptable {
 		public String getClassName() {
 			return "WrapList";
 		}
+		
+		@Override
+		public void sort() {
+			if(srcList instanceof FixedArray) {
+				((FixedArray)srcList).sort();
+			} else {
+				Collections.sort(srcList);
+			}
+		}
 	}
 
 	// 読み込み専用配列取得用.
 	public static class ReadArray extends JavaScriptable.List implements RhiginObjectWrapper {
-		private final Object array;
+		private Object array;
 
+		@SuppressWarnings("rawtypes")
 		public ReadArray(Object a) {
-			array = a;
+			if(a == null) {
+				array = new Object[0];
+			} else if(a instanceof FixedArray) {
+				array = ((FixedArray)a).rawData();
+			} else if(a.getClass().isArray()) {
+				array = a;
+			} else {
+				array = new Object[] {a};
+			}
 		}
 
 		@Override
@@ -420,6 +470,15 @@ public class JavaScriptable {
 		@Override
 		public Object unwrap() {
 			return array;
+		}
+		
+		@Override
+		public void sort() {
+			int len = Array.getLength(array);
+			Object[] n = new Object[len];
+			System.arraycopy(array, 0, n, 0, len);
+			java.util.Arrays.sort(n);
+			array = n;
 		}
 	}
 }

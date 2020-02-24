@@ -2,6 +2,7 @@ package rhigin.util;
 
 import java.lang.reflect.Array;
 import java.util.AbstractList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -80,5 +81,9 @@ public class FixedArray<E> extends AbstractList<E> implements ConvertGet<Integer
 	
 	public Object[] rawData() {
 		return array;
+	}
+	
+	public void sort() {
+		Arrays.sort(array);
 	}
 }

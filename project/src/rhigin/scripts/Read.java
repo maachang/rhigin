@@ -1,11 +1,14 @@
 package rhigin.scripts;
 
+import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import rhigin.util.ConvertGet;
+import rhigin.util.FixedArray;
 
 /**
  * 読み込み専用オブジェクト.
@@ -19,14 +22,20 @@ public class Read {
 		private boolean listMode = false;
 		private Object srcList = null;
 
-		public Arrays(List<Object> srcList) {
-			this.srcList = srcList;
-			this.listMode = true;
-		}
-
-		public Arrays(Object[] srcList) {
-			this.srcList = srcList;
-			this.listMode = false;
+		public Arrays(Object o) {
+			if(o == null) {
+				this.srcList = new Object[0];
+				this.listMode = false;
+			} else if(o instanceof java.util.List) {
+				this.srcList = o;
+				this.listMode = true;
+			} else if(o.getClass().isArray()) {
+				this.srcList = o;
+				this.listMode = false;
+			} else {
+				this.srcList = new Object[] {o};
+				this.listMode = false;
+			}
 		}
 
 		@Override
@@ -66,6 +75,23 @@ public class Read {
 		@Override
 		public Object remove(int no) {
 			return null;
+		}
+		
+		@Override
+		public void sort() {
+			if(listMode) {
+				if(srcList instanceof FixedArray) {
+					((FixedArray)srcList).sort();
+				} else {
+					Collections.sort((java.util.List)srcList);
+				}
+			} else {
+				int len = Array.getLength(srcList);
+				Object[] n = new Object[len];
+				System.arraycopy(srcList, 0, n, 0, len);
+				java.util.Arrays.sort(n);
+				srcList = n;
+			}
 		}
 	}
 

@@ -10,6 +10,7 @@ import org.mozilla.javascript.Wrapper;
 import rhigin.RhiginException;
 import rhigin.scripts.objects.JDateObject;
 import rhigin.util.Converter;
+import rhigin.util.FixedArray;
 
 /**
  * javascriptからのjavaオブジェクトのラップ・アンラップ支援.
@@ -116,7 +117,7 @@ public class RhiginWrapUtil {
 			return value;
 		}
 		c = value.getClass();
-		if(c.isArray()) {
+		if(c.isArray() || value instanceof FixedArray) {
 			return new JavaScriptable.ReadArray(value);
 		} else if(c.isPrimitive() ||
 			value instanceof Exception ||

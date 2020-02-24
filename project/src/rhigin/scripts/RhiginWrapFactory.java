@@ -11,6 +11,7 @@ import org.mozilla.javascript.WrapFactory;
 
 import rhigin.scripts.objects.JDateObject;
 import rhigin.scripts.objects.JDateObject.JDateInstanceObject;
+import rhigin.util.FixedArray;
 
 @SuppressWarnings("rawtypes")
 final class RhiginWrapFactory extends WrapFactory {
@@ -31,7 +32,7 @@ final class RhiginWrapFactory extends WrapFactory {
 			return new JavaScriptable.GetMap((java.util.Map) javaObject);
 		} else if (javaObject instanceof java.util.List) {
 			return new JavaScriptable.GetList((java.util.List) javaObject);
-		} else if (javaObject.getClass().isArray()) {
+		} else if (javaObject.getClass().isArray() || javaObject instanceof FixedArray) {
 			return new JavaScriptable.ReadArray(javaObject);
 		} else if(javaObject instanceof java.util.Date) {
 			if(javaObject instanceof JDateInstanceObject) {
