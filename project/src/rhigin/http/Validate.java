@@ -1,14 +1,18 @@
 package rhigin.http;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.mozilla.javascript.Scriptable;
+
 import rhigin.RhiginException;
+import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.Json;
+import rhigin.scripts.objects.JDateObject;
 import rhigin.util.Alphabet;
 import rhigin.util.Converter;
+import rhigin.util.ObjectList;
 
 /**
  * Validate処理.
@@ -52,6 +56,7 @@ public class Validate {
 		}
 
 		// パラメータ変換.
+		@SuppressWarnings("unchecked")
 		public static final Object check(String[] renameOut, String column, String type, Object value,
 				String conditions) {
 			if (!Converter.useString(conditions)) {
@@ -59,7 +64,7 @@ public class Validate {
 			}
 
 			// 情報をカット.
-			List<String> list = new ArrayList<String>();
+			List<String> list = new JavaScriptable.GetList(new ObjectList<String>());
 			Converter.cutString(list, true, false, conditions, " 　\t_");
 			if (list.size() == 0) {
 				return value;
@@ -450,6 +455,7 @@ public class Validate {
 		}
 
 		// パラメータ変換.
+		@SuppressWarnings("rawtypes")
 		public static final Object convert(String column, int typeCode, String type, Object value) {
 			try {
 				if (value == null) {
@@ -505,6 +511,9 @@ public class Validate {
 					if(!(value instanceof java.util.Date)) {
 						try {
 							value = Converter.convertDate(value);
+							if(value != null) {
+								value = JDateObject.newObject((java.util.Date)value);
+							}
 						} catch (Exception e) {
 							value = null;
 						}
@@ -526,7 +535,10 @@ public class Validate {
 					break;
 				case ARRAY:
 					if (value instanceof List) {
-						return value;
+						if(value instanceof Scriptable) {
+							return value;
+						}
+						return new JavaScriptable.GetList((java.util.List)value);
 					}
 					value = null;
 					break;

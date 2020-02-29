@@ -17,7 +17,6 @@ import rhigin.scripts.RhiginInstanceObject;
 import rhigin.scripts.RhiginInstanceObject.ObjectFunction;
 import rhigin.scripts.RhiginObject;
 import rhigin.util.Converter;
-import rhigin.util.FixedArray;
 import rhigin.util.FixedSearchArray;
 
 /**
@@ -300,7 +299,7 @@ class JDBCOperatorJs {
 					break;
 				case 14: // executeBatch.
 					{
-						return new FixedArray<Integer>(conn.executeBatch());
+						return conn.executeBatch();
 					}
 				case 15: // addBatch.
 					{

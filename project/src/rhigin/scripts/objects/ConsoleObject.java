@@ -5,6 +5,7 @@ import java.io.StringWriter;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
+import org.mozilla.javascript.IdScriptableObject;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
@@ -12,6 +13,7 @@ import rhigin.logs.Log;
 import rhigin.logs.LogFactory;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginObject;
+import rhigin.scripts.RhiginWrapException;
 import rhigin.util.FixedKeyValues;
 
 /**
@@ -23,6 +25,14 @@ import rhigin.util.FixedKeyValues;
 public class ConsoleObject {
 	public static final String OBJECT_NAME = "console";
 	private static final Log LOG = LogFactory.create("console");
+	
+	// javascriptの例外の情報.
+	private static final class JsError extends Throwable {
+		private static final long serialVersionUID = 3478331521144824428L;
+		JsError(Object e) {
+			super(e.toString());
+		}
+	}
 
 	// ログ出力用.
 	private static final class Execute extends RhiginFunction {
@@ -37,54 +47,62 @@ public class ConsoleObject {
 			if (args.length >= 1) {
 				Object o = (args.length >= 1) ? args[0] : null;
 				Object t = (args.length >= 2) ? args[1] : null;
-				if (t != null && t instanceof Throwable) {
-					switch (type) {
-					case 0:
-						System.out.println(jsString(o) + "\r\n" + getStackTrace((Throwable) t));
-						break;
-					case 1:
-						LOG.trace(jsString(o), (Throwable) t);
-						break;
-					case 2:
-						LOG.debug(jsString(o), (Throwable) t);
-						break;
-					case 3:
-						LOG.info(jsString(o), (Throwable) t);
-						break;
-					case 4:
-						LOG.warn(jsString(o), (Throwable) t);
-						break;
-					case 5:
-						LOG.error(jsString(o), (Throwable) t);
-						break;
-					case 6:
-						LOG.fatal(jsString(o), (Throwable) t);
-						break;
+				if (t != null) {
+					try {
+						if (t instanceof IdScriptableObject &&
+							t.getClass().getName().equals("org.mozilla.javascript.NativeError")) {
+							t = new RhiginWrapException(new JsError(t));
+						}
+					} catch(Exception e) {}
+					if (t instanceof Throwable) {
+						switch (type) {
+						case 0:
+							System.out.println(jsString(o) + "\r\n" + getStackTrace((Throwable) t));
+							break;
+						case 1:
+							LOG.trace(jsString(o), (Throwable) t);
+							break;
+						case 2:
+							LOG.debug(jsString(o), (Throwable) t);
+							break;
+						case 3:
+							LOG.info(jsString(o), (Throwable) t);
+							break;
+						case 4:
+							LOG.warn(jsString(o), (Throwable) t);
+							break;
+						case 5:
+							LOG.error(jsString(o), (Throwable) t);
+							break;
+						case 6:
+							LOG.fatal(jsString(o), (Throwable) t);
+							break;
+						}
+						return Undefined.instance;
 					}
-				} else {
-					switch (type) {
-					case 0:
-						System.out.println(jsString(o));
-						break;
-					case 1:
-						LOG.trace(jsString(o));
-						break;
-					case 2:
-						LOG.debug(jsString(o));
-						break;
-					case 3:
-						LOG.info(jsString(o));
-						break;
-					case 4:
-						LOG.warn(jsString(o));
-						break;
-					case 5:
-						LOG.error(jsString(o));
-						break;
-					case 6:
-						LOG.fatal(jsString(o));
-						break;
-					}
+				}
+				switch (type) {
+				case 0:
+					System.out.println(jsString(o));
+					break;
+				case 1:
+					LOG.trace(jsString(o));
+					break;
+				case 2:
+					LOG.debug(jsString(o));
+					break;
+				case 3:
+					LOG.info(jsString(o));
+					break;
+				case 4:
+					LOG.warn(jsString(o));
+					break;
+				case 5:
+					LOG.error(jsString(o));
+					break;
+				case 6:
+					LOG.fatal(jsString(o));
+					break;
 				}
 			}
 			return Undefined.instance;

@@ -26,14 +26,12 @@ final class RhiginWrapFactory extends WrapFactory {
 	}
 
 	public Scriptable wrapAsJavaObject(Context cx, Scriptable scope, Object javaObject, Class staticType) {
-		if (javaObject instanceof Scriptable) {
-			return (Scriptable)javaObject;
+		if (javaObject instanceof FixedArray) {
+			return new JavaScriptable.ReadArray(javaObject);
 		} else if (javaObject instanceof java.util.Map) {
 			return new JavaScriptable.GetMap((java.util.Map) javaObject);
 		} else if (javaObject instanceof java.util.List) {
 			return new JavaScriptable.GetList((java.util.List) javaObject);
-		} else if (javaObject.getClass().isArray() || javaObject instanceof FixedArray) {
-			return new JavaScriptable.ReadArray(javaObject);
 		} else if(javaObject instanceof java.util.Date) {
 			if(javaObject instanceof JDateInstanceObject) {
 				return (JDateInstanceObject)javaObject;
@@ -42,6 +40,9 @@ final class RhiginWrapFactory extends WrapFactory {
 		} else if (javaObject instanceof ClassLoader) {
 			return super.wrapAsJavaObject(cx, scope, javaObject, staticType);
 		}
+//		if (javaObject instanceof ClassLoader) {
+//			return super.wrapAsJavaObject(cx, scope, javaObject, staticType);
+//		}
 		final SecurityManager sm = System.getSecurityManager();
 		final ClassShutter classShutter = RhiginClassShutter.getInstance();
 		String name = null;

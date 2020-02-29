@@ -282,7 +282,7 @@ class JDBCQueryJs {
 					}
 				case 1: // "execute";
 					{
-						return object.execute(args);
+						return JDBCOperatorJs.createRow(object.execute(args));
 					}
 				}
 			} catch (RhiginException re) {

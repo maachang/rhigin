@@ -12,6 +12,7 @@ import java.util.zip.GZIPInputStream;
 import rhigin.http.client.HttpClient.NoULCode;
 import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.Json;
+import rhigin.scripts.objects.JavaObject;
 import rhigin.util.AbstractEntryIterator;
 import rhigin.util.AbstractKeyIterator;
 import rhigin.util.ConvertMap;
@@ -405,9 +406,9 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 		} else if ("size".equals(key) || "bodySize".equals(key)) {
 			return responseBodySize();
 		} else if ("body".equals(key) || "response".equals(key)) {
-			return responseBody();
+			return new JavaScriptable.ReadArray(responseBody());
 		} else if ("inputStream".equals(key) || "bodyFile".equals(key)) {
-			return responseInputStream();
+			return JavaObject.wrapObject(responseInputStream());
 		} else if ("text".equals(key)) {
 			return responseText();
 		} else if ("type".equals(key)) {

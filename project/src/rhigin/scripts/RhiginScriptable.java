@@ -1,6 +1,5 @@
 package rhigin.scripts;
 
-import java.util.List;
 import java.util.Map;
 
 import org.mozilla.javascript.Context;
@@ -13,10 +12,7 @@ import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Undefined;
 import org.mozilla.javascript.Wrapper;
 
-import rhigin.scripts.objects.JDateObject;
-import rhigin.scripts.objects.JDateObject.JDateInstanceObject;
 import rhigin.util.ArrayMap;
-import rhigin.util.FixedArray;
 
 final class RhiginScriptable implements Scriptable {
 	private Map<Object, Object> _indexedProps;
@@ -66,23 +62,11 @@ final class RhiginScriptable implements Scriptable {
 					return NOT_FOUND;
 				}
 				return value;
-			} else if ((c = value.getClass()).isArray() || value instanceof FixedArray) {
-				return new JavaScriptable.ReadArray(value);
-			} else if (value instanceof Scriptable ||
-				c.getPackage().getName().startsWith(ExecuteScript.RHINO_JS_PACKAGE_NAME)) {
+			} else if (value instanceof Scriptable || (!(c = value.getClass()).isArray() &&
+				c.getPackage().getName().startsWith(ExecuteScript.RHINO_JS_PACKAGE_NAME))) {
 				return value;
-			} else if (value instanceof Map) {
-				return new JavaScriptable.GetMap((java.util.Map)value);
-			} else if (value instanceof List) {
-				return new JavaScriptable.GetList((java.util.List)value);
-			} else if(value instanceof java.util.Date) {
-				if(value instanceof JDateInstanceObject) {
-					return value;
-				}
-				return JDateObject.newObject((java.util.Date)value);
-			} else {
-				return Context.javaToJS(value, this);
 			}
+			return Context.javaToJS(value, this);
 		}
 	}
 

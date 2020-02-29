@@ -12,8 +12,10 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.function.ToStringFunction;
+import rhigin.util.ArrayMap;
 import rhigin.util.BlankScriptable;
 import rhigin.util.FixedArray;
+import rhigin.util.ObjectList;
 
 /**
  * javaオブジェクトを rhino の Scriptableに変更するオブジェクト.
@@ -234,7 +236,7 @@ public class JavaScriptable {
 		/**
 		 * ソート処理を実装.
 		 */
-		public abstract void sort();
+		protected abstract void _sort();
 	}
 
 	// List.pushファンクション用.
@@ -276,8 +278,8 @@ public class JavaScriptable {
 
 		@Override
 		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
-			srcList.sort();
-			return srcList;
+			srcList._sort();
+			return Undefined.instance;
 		}
 	}
 
@@ -286,6 +288,10 @@ public class JavaScriptable {
 	public static class GetMap extends JavaScriptable.Map {
 		private final java.util.Map srcMap;
 
+		public GetMap() {
+			srcMap = new ArrayMap();
+		}
+		
 		public GetMap(java.util.Map m) {
 			srcMap = m;
 		}
@@ -354,6 +360,10 @@ public class JavaScriptable {
 		public String getClassName() {
 			return "WrapMap";
 		}
+		
+		public java.util.Map rawData() {
+			return srcMap;
+		}
 	}
 
 	// List実装用.
@@ -361,8 +371,16 @@ public class JavaScriptable {
 	public static class GetList extends JavaScriptable.List {
 		private final java.util.List srcList;
 
+		public GetList() {
+			srcList = new ObjectList();
+		}
+		
 		public GetList(java.util.List l) {
-			srcList = l;
+			if(l instanceof FixedArray) {
+				srcList = new ObjectList(((FixedArray)l).rawData());
+			} else {
+				srcList = l;
+			}
 		}
 
 		@Override
@@ -406,28 +424,31 @@ public class JavaScriptable {
 		}
 		
 		@Override
-		public void sort() {
-			if(srcList instanceof FixedArray) {
-				((FixedArray)srcList).sort();
-			} else {
-				Collections.sort(srcList);
-			}
+		protected void _sort() {
+			Collections.sort(srcList);
 		}
 	}
 
 	// 読み込み専用配列取得用.
 	public static class ReadArray extends JavaScriptable.List implements RhiginObjectWrapper {
+		private boolean objeactArrayFlag = false;
 		private Object array;
 
 		@SuppressWarnings("rawtypes")
 		public ReadArray(Object a) {
 			if(a == null) {
+				objeactArrayFlag = true;
 				array = new Object[0];
 			} else if(a instanceof FixedArray) {
+				objeactArrayFlag = true;
 				array = ((FixedArray)a).rawData();
 			} else if(a.getClass().isArray()) {
+				if(a instanceof Object[]) {
+					objeactArrayFlag = true;
+				}
 				array = a;
 			} else {
+				objeactArrayFlag = true;
 				array = new Object[] {a};
 			}
 		}
@@ -449,7 +470,9 @@ public class JavaScriptable {
 
 		@Override
 		public Object set(int no, Object o) {
-			return null;
+			Object ret = Array.get(array, no);
+			Array.set(array, no, o);
+			return ret;
 		}
 
 		@Override
@@ -472,13 +495,14 @@ public class JavaScriptable {
 			return array;
 		}
 		
+		@SuppressWarnings("unchecked")
 		@Override
-		public void sort() {
-			int len = Array.getLength(array);
-			Object[] n = new Object[len];
-			System.arraycopy(array, 0, n, 0, len);
-			java.util.Arrays.sort(n);
-			array = n;
+		protected void _sort() {
+			if(!objeactArrayFlag) {
+				Collections.sort(this);
+			} else {
+				java.util.Arrays.sort((Object[])this.array);
+			}
 		}
 	}
 }

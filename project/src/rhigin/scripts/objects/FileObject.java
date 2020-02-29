@@ -12,13 +12,13 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
 import rhigin.RhiginException;
+import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginInstanceObject;
 import rhigin.scripts.RhiginInstanceObject.ObjectFunction;
 import rhigin.scripts.RhiginObject;
 import rhigin.util.Converter;
 import rhigin.util.FileUtil;
-import rhigin.util.FixedArray;
 import rhigin.util.FixedKeyValues;
 import rhigin.util.FixedSearchArray;
 import rhigin.util.Stats;
@@ -75,9 +75,9 @@ public class FileObject {
 					{
 						String[] ret = FileUtil.list("" + args[0]);
 						if(ret == null || ret.length == 0) {
-							return new FixedArray<String>(new String[] {});
+							return new JavaScriptable.ReadArray(new String[] {});
 						}
-						return new FixedArray<String>(ret);
+						return new JavaScriptable.ReadArray(ret);
 					}
 					case 8: // length
 						return FileUtil.getFileLength("" + args[0]);

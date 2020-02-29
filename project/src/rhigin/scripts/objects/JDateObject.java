@@ -179,7 +179,7 @@ public class JDateObject extends RhiginFunction {
 		}
 		@Override
 		public Object clone() {
-			return new JDateInstanceObject((java.util.Date)date.clone());
+			return JDateObject.newObject(date.getTime());
 		}
 		@Override
 		public int compareTo(Date anotherDate) {
@@ -295,7 +295,7 @@ public class JDateObject extends RhiginFunction {
 				// 引数がなしの条件.
 				switch (type) {
 				case 0:
-					return date.clone();
+					return JDateObject.newObject(date.getTime());
 				case 1:
 					return date.getDate();
 				case 2:

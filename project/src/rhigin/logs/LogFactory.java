@@ -160,7 +160,7 @@ public class LogFactory {
 			dir.mkdirs();
 		}
 
-		final String format = format(numberLogLevelByStr(logLevel), args);
+		final String format = format(numberLogLevelByStr(typeNo), args);
 		final String fileName = name + ".log";
 		final File stat = new File(logDir + fileName);
 		final Date date = new Date(stat.lastModified());

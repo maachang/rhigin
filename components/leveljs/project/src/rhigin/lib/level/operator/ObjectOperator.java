@@ -8,6 +8,7 @@ import org.maachang.leveldb.operator.LevelIndex.LevelIndexIterator;
 import org.maachang.leveldb.operator.LevelIndexOperator;
 import org.maachang.leveldb.operator.LevelIterator;
 import org.maachang.leveldb.operator.LevelMap;
+import org.mozilla.javascript.Undefined;
 
 import rhigin.lib.level.runner.LevelJsCloseable;
 import rhigin.lib.level.runner.LevelJsException;
@@ -48,7 +49,7 @@ public class ObjectOperator extends SearchOperator {
 	protected Object _put(Map value, int keyLen, Object[] keys) {
 		final Object key = OperatorKeyType.convertKeyType(keyType, keys[0]);
 		base.put(key, value);
-		return null;
+		return Undefined.instance;
 	}
 
 	@Override
@@ -257,7 +258,7 @@ public class ObjectOperator extends SearchOperator {
 		public Map next() {
 			lock.lock();
 			try {
-				return src.next();
+				return new JsMap(src.next());
 			} finally {
 				lock.unlock();
 			}

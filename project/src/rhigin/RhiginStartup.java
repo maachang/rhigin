@@ -18,6 +18,7 @@ import rhigin.http.MimeType;
 import rhigin.logs.LogFactory;
 import rhigin.scripts.ExecuteJsByEndScriptCall;
 import rhigin.scripts.ExecuteScript;
+import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.RhiginContext;
 import rhigin.scripts.RhiginEndScriptCall;
 import rhigin.scripts.RhiginFunction;
@@ -246,6 +247,7 @@ public class RhiginStartup {
 	 * @return HttpInfo
 	 * @exception Exception
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static final HttpInfo startup(RhiginConfig config) throws Exception {
 		boolean server = Http.isWebServerMode();
 		boolean console = Http.isConsoleMode();
@@ -270,15 +272,15 @@ public class RhiginStartup {
 
 		// 初期設定用のスクリプト実行.
 		if (FileUtil.isFile(STARTUP_JS)) {
-			final List<RhiginEndScriptCall> endScriptCallList = new ObjectList<RhiginEndScriptCall>();
-			final List<RhiginEndScriptCall> exitScriptCallList = new ObjectList<RhiginEndScriptCall>();
+			final List<RhiginEndScriptCall> endScriptCallList = new JavaScriptable.GetList(new ObjectList<RhiginEndScriptCall>());
+			final List<RhiginEndScriptCall> exitScriptCallList = new JavaScriptable.GetList(new ObjectList<RhiginEndScriptCall>());
 			
 			// スクリプト実行用のコンテキスト.
 			// スタートアップ専用のオブジェクトは、ここに設定する.
 			final RhiginContext context = new RhiginContext();
 
 			// スタートアップで、ExecuteScript実行時に利用可能にしたいオブジェクトを設定.
-			final ArrayMap<String, Object> originals = new ArrayMap<String, Object>();
+			final Map<String, Object> originals = new JavaScriptable.GetMap(new ArrayMap<String, Object>());
 			context.setAttribute(STARTUP_OBJECT, originals);
 			context.setAttribute(addOrigin.getName(), addOrigin);
 			
@@ -309,8 +311,9 @@ public class RhiginStartup {
 			// ExecuteScript実行時に利用可能にしたいオブジェクトをExecuteScript.addOriginalsで追加.
 			{
 				int len = originals.size();
+				ArrayMap<String, Object> ori = (ArrayMap)((JavaScriptable.GetMap)originals).rawData();
 				for(int i = 0; i < len; i ++) {
-					ExecuteScript.addOriginals(originals.getKey(i), originals.getValue(i));
+					ExecuteScript.addOriginals(ori.getKey(i), ori.getValue(i));
 				}
 			}
 			// ExecuteScriptの終了時にスタートアップで登録した終了処理系のスクリプトを追加.

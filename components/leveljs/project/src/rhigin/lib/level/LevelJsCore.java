@@ -27,6 +27,7 @@ import rhigin.lib.level.runner.LevelJsConfig;
 import rhigin.lib.level.runner.LevelJsException;
 import rhigin.lib.level.runner.LevelJsSystemCloseable;
 import rhigin.lib.level.runner.RhiginOriginCode;
+import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.RhiginEndScriptCall;
 import rhigin.util.Flag;
 
@@ -373,9 +374,10 @@ public class LevelJsCore {
 	 * 
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public List<String> names() {
 		check();
-		return manager.names();
+		return new JavaScriptable.GetList(manager.names());
 	}
 	
 	/**

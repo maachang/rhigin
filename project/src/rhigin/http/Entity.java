@@ -1,7 +1,5 @@
 package rhigin.http;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -9,8 +7,10 @@ import java.util.Map;
 import rhigin.RhiginException;
 import rhigin.http.Validate.ConditionsChecker;
 import rhigin.http.Validate.TypeConvert;
+import rhigin.scripts.JavaScriptable;
 import rhigin.util.ArrayMap;
 import rhigin.util.Converter;
+import rhigin.util.ObjectList;
 
 /**
  * Entityコンポーネント. Entityコンポーネントで整形データを生成し、そのデータにしたがって、情報を整形します.
@@ -74,7 +74,7 @@ public class Entity {
 	 */
 	public void expose(Object... params) {
 		EntityColumn n;
-		List<EntityColumn> list = new ArrayList<EntityColumn>();
+		List<EntityColumn> list = new ObjectList<EntityColumn>();
 		int len = params.length;
 		for (int i = 1; i < len; i += 3) {
 			n = new EntityColumn(Converter.convertString(params[i + 0]), Converter.convertString(params[i + 1]),
@@ -94,7 +94,7 @@ public class Entity {
 	 */
 	public void expose(String name, Object... params) {
 		EntityColumn n;
-		List<EntityColumn> list = new ArrayList<EntityColumn>();
+		List<EntityColumn> list = new ObjectList<EntityColumn>();
 		int len = params.length;
 		for (int i = 0; i < len; i += 3) {
 			n = new EntityColumn(Converter.convertString(params[i + 0]), Converter.convertString(params[i + 1]),
@@ -126,12 +126,11 @@ public class Entity {
 		if (value == null) {
 			return null;
 		}
-
 		// valueがリスト系の場合.
 		if (value instanceof List) {
 			List array = (List) value;
 			int len = array.size();
-			List<Object> ret = new ArrayList<Object>();
+			List<Object> ret = new JavaScriptable.GetList(new ObjectList<Object>());
 			for (int i = 0; i < len; i++) {
 				ret.add(make(list, array.get(i)));
 			}
@@ -139,9 +138,8 @@ public class Entity {
 		} else if (!(value instanceof Map)) {
 			throw new RhiginException(500, "Entity target information is not in Map format.");
 		}
-
 		Object v;
-		Object out = new LinkedHashMap<String, Object>();
+		Object out = new JavaScriptable.GetMap(new ArrayMap<String, Object>());
 		LinkedList<Object> buf = new LinkedList<Object>();
 		EntityColumn c;
 		int len = list.size();
@@ -157,7 +155,9 @@ public class Entity {
 				if (c.type == -10 || c.type == -20) {
 					buf.push(out);
 					Object bef = out;
-					out = (c.type == -10) ? new LinkedHashMap<String, Object>() : new ArrayList<Object>();
+					out = (c.type == -10) ?
+						new JavaScriptable.GetMap(new ArrayMap<String, Object>()) :
+						new JavaScriptable.GetList(new ObjectList<Object>());
 					if (bef instanceof Map) {
 						((Map) bef).put(c.name, out);
 					} else {

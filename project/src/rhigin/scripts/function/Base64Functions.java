@@ -3,6 +3,7 @@ package rhigin.scripts.function;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
+import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.RhiginFunction;
 import rhigin.util.Base64;
 import rhigin.util.FixedKeyValues;
@@ -30,7 +31,7 @@ public class Base64Functions {
 				if (args.length >= 2) {
 					boolean binaryFlag = (args[1] instanceof Boolean) ? (boolean) args[1] : false;
 					if (binaryFlag) {
-						return Base64.decode("" + args[0]);
+						return new JavaScriptable.ReadArray(Base64.decode("" + args[0]));
 					}
 				}
 				return Base64.atob("" + args[0]);

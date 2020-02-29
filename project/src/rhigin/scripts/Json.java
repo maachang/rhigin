@@ -11,6 +11,7 @@ import org.mozilla.javascript.Undefined;
 import org.mozilla.javascript.Wrapper;
 
 import rhigin.RhiginException;
+import rhigin.scripts.JavaScriptable.GetList;
 import rhigin.scripts.objects.JDateObject;
 import rhigin.util.Converter;
 import rhigin.util.DateConvert;
@@ -280,7 +281,7 @@ public final class Json {
 		StringBuilder before = null;
 		// List.
 		if (type == TYPE_ARRAY) {
-			List<Object> ret = new ObjectList<Object>();
+			List<Object> ret = new JavaScriptable.GetList(new ObjectList<Object>());
 			int flg = 0;
 			for (int i = no + 1; i < len; i++) {
 				value = (String) token.get(i);

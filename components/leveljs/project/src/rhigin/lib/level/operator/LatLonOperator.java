@@ -14,6 +14,7 @@ import org.maachang.leveldb.util.GeoQuadKey;
 
 import rhigin.lib.level.runner.LevelJsCloseable;
 import rhigin.lib.level.runner.LevelJsException;
+import rhigin.scripts.JavaScriptable;
 import rhigin.util.FixedArray;
 
 /**
@@ -100,7 +101,7 @@ public class LatLonOperator extends SearchOperator {
 		if(!base.isSecondKeyBySequenceId()) {
 			result[1] = OperatorKeyType.getRestoreKey(keyType, result[1]);
 		}
-		return new FixedArray(result);
+		return new JavaScriptable.ReadArray(result);
 	}
 
 	@Override

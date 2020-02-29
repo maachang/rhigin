@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import rhigin.RhiginException;
 import rhigin.net.NioReadBuffer;
+import rhigin.scripts.objects.JavaObject;
 import rhigin.util.Alphabet;
 import rhigin.util.Converter;
 
@@ -72,7 +73,7 @@ public class Request extends Header {
 		} else if ("inputStream".equals(key) || "body".equals(key) || "bodyFile".equals(key)) {
 			HttpElement em = (HttpElement) element;
 			if (em.isHttpPostBodyFile()) {
-				return em.getHttpPostBodyFile(null).getInputStream();
+				return JavaObject.wrapObject(em.getHttpPostBodyFile(null).getInputStream());
 			} else {
 				return null;
 			}

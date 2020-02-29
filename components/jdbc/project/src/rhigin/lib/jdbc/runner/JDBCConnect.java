@@ -6,11 +6,13 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.mozilla.javascript.Undefined;
 
 import rhigin.lib.jdbc.pooling.AtomicPoolConnection;
+import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.JsMap;
 import rhigin.util.BlankScriptable;
 import rhigin.util.Converter;
@@ -381,8 +383,9 @@ public class JDBCConnect {
 	 * 登録バッチを実行.
 	 * @return
 	 */
-	public int[] executeBatch() {
-		return batch.execute();
+	@SuppressWarnings("unchecked")
+	public List<Integer> executeBatch() {
+		return new JavaScriptable.ReadArray(batch.execute());
 	}
 	
 	/**

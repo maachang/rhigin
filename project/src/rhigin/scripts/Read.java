@@ -1,14 +1,13 @@
 package rhigin.scripts;
 
-import java.lang.reflect.Array;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.mozilla.javascript.Undefined;
+
 import rhigin.util.ConvertGet;
-import rhigin.util.FixedArray;
 
 /**
  * 読み込み専用オブジェクト.
@@ -23,7 +22,7 @@ public class Read {
 		private Object srcList = null;
 
 		public Arrays(Object o) {
-			if(o == null) {
+			if(o == null || Undefined.isUndefined(o)) {
 				this.srcList = new Object[0];
 				this.listMode = false;
 			} else if(o instanceof java.util.List) {
@@ -41,10 +40,12 @@ public class Read {
 		@Override
 		public Object get(int index) {
 			Object o = listMode ? ((List) srcList).get(index) : ((Object[]) srcList)[index];
-			if (o instanceof Map) {
+			if (o == null || Undefined.isUndefined(o)) {
+				return o;
+			} else if (o instanceof Map) {
 				return new Read.Maps((Map) o);
-			} else if (o instanceof List) {
-				return new Read.Arrays((List) o);
+			} else if (o instanceof List || o.getClass().isArray()) {
+				return new Read.Arrays(o);
 			}
 			return o;
 		}
@@ -78,20 +79,8 @@ public class Read {
 		}
 		
 		@Override
-		public void sort() {
-			if(listMode) {
-				if(srcList instanceof FixedArray) {
-					((FixedArray)srcList).sort();
-				} else {
-					Collections.sort((java.util.List)srcList);
-				}
-			} else {
-				int len = Array.getLength(srcList);
-				Object[] n = new Object[len];
-				System.arraycopy(srcList, 0, n, 0, len);
-				java.util.Arrays.sort(n);
-				srcList = n;
-			}
+		protected void _sort() {
+			// 読み込み専用なので、ソートしない.
 		}
 	}
 
@@ -110,10 +99,12 @@ public class Read {
 		public Object get(Object name) {
 			if (name != null) {
 				Object o = srcMap.get(name);
-				if (o instanceof Map) {
+				if (o == null || Undefined.isUndefined(o)) {
+					return o;
+				} else if (o instanceof Map) {
 					return new Read.Maps((Map) o);
-				} else if (o instanceof List) {
-					return new Read.Arrays((List) o);
+				} else if (o instanceof List || o.getClass().isArray()) {
+					return new Read.Arrays(o);
 				}
 				return o;
 			}

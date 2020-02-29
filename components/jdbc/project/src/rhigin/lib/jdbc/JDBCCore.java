@@ -19,6 +19,7 @@ import rhigin.lib.jdbc.runner.JDBCException;
 import rhigin.lib.jdbc.runner.JDBCKind;
 import rhigin.lib.jdbc.runner.JDBCSystemCloseable;
 import rhigin.scripts.ExecuteScript;
+import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.RhiginEndScriptCall;
 import rhigin.util.FixedArray;
 import rhigin.util.Flag;
@@ -246,9 +247,10 @@ public class JDBCCore {
 	 * 接続定義名一覧を取得.
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public List<String> names() {
 		check();
-		return new FixedArray<String>(man.getNames());
+		return new JavaScriptable.ReadArray(man.getNames());
 	}
 	
 	/**

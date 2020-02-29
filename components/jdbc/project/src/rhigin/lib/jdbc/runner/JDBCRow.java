@@ -18,7 +18,6 @@ import rhigin.util.AbstractEntryIterator;
 import rhigin.util.AbstractKeyIterator;
 import rhigin.util.ConvertGet;
 import rhigin.util.FixedSearchArray;
-import rhigin.util.ObjectList;
 
 /**
  * JDBC-Row.
@@ -141,7 +140,6 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 	 * @return
 	 */
 	public List<Map<String, Object>> getRows() {
-		check();
 		return getRows(0);
 	}
 	
@@ -154,7 +152,7 @@ public class JDBCRow implements Iterator<Map<String, Object>> {
 	public List<Map<String, Object>> getRows(int max) {
 		check();
 		max = max <= 0 ? 0 : max;
-		final List<Map<String, Object>> ret = new ObjectList<Map<String, Object>>();
+		final List<Map<String, Object>> ret = new JavaScriptable.GetList();
 		while(hasNext()) {
 			if(max != 0 && ret.size() >= max) {
 				break;

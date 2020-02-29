@@ -51,6 +51,8 @@ public class RhiginContext implements Scriptable {
 		if(name == null) {
 			throw new NullPointerException();
 		} else if("$reset".equals(name)) {
+			bindings.clear();
+			has[0] = true;
 			return true;
 		} else if(bindings.containsKey(name)) {
 			has[0] = true;

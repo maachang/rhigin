@@ -13,7 +13,6 @@ import rhigin.util.Alphabet;
 import rhigin.util.ArrayMap;
 import rhigin.util.ConvertGet;
 import rhigin.util.Converter;
-import rhigin.util.FixedArray;
 
 /**
  * Response.
@@ -236,11 +235,11 @@ public class Response extends JavaScriptable.Map implements ConvertGet {
 	/**
 	 * ヘッダ一覧を取得.
 	 * 
-	 * @return List<String> ヘッダ一覧が返却されます.
+	 * @return List ヘッダ一覧が返却されます.
 	 */
-	public List<String> getHeaders() {
+	public List getHeaders() {
 		int len = header.size();
-		List<String> ret = new FixedArray<String>(len + 1);
+		List ret = new JavaScriptable.ReadArray(len + 1);
 		for(int i = 0; i < len; i ++) {
 			ret.set(i, "" + header.keyAt(i));
 		}

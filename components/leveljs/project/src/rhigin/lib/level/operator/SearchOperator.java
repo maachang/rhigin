@@ -9,9 +9,11 @@ import org.maachang.leveldb.operator.LevelIndex;
 import org.maachang.leveldb.operator.LevelIndex.LevelIndexIterator;
 import org.maachang.leveldb.operator.LevelIndexOperator;
 import org.maachang.leveldb.util.Converter;
+import org.mozilla.javascript.Undefined;
 
 import rhigin.lib.level.runner.LevelJsCloseable;
 import rhigin.lib.level.runner.LevelJsException;
+import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.JsMap;
 import rhigin.util.FixedArray;
 
@@ -332,6 +334,7 @@ public abstract class SearchOperator implements Operator {
 	 * 
 	 * @return List<String> インデックスカラム名群が返却されます.
 	 */
+	@SuppressWarnings("unchecked")
 	public List<String> indexs() {
 		String[] ret;
 		_r().lock();
@@ -340,7 +343,7 @@ public abstract class SearchOperator implements Operator {
 		} finally {
 			_r().unlock();
 		}
-		return new FixedArray<String>(ret);
+		return new JavaScriptable.ReadArray(ret);
 	}
 	
 	// indexの要素変換.

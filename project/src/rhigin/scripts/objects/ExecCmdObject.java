@@ -5,6 +5,7 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
 import rhigin.RhiginException;
+import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.JsonOut;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginInstanceObject;
@@ -13,7 +14,6 @@ import rhigin.util.ArrayMap;
 import rhigin.util.Converter;
 import rhigin.util.ExecCmd;
 import rhigin.util.ExecCmd.ResultCmd;
-import rhigin.util.FixedArray;
 import rhigin.util.FixedKeyValues;
 import rhigin.util.FixedSearchArray;
 
@@ -79,7 +79,7 @@ public class ExecCmdObject {
 					if(args.length > 0) {
 						cmd.setEnv(args);
 					} else {
-						return new FixedArray<String>(cmd.getEnv());
+						return new JavaScriptable.ReadArray(cmd.getEnv());
 					}
 				}
 				return PARENT;

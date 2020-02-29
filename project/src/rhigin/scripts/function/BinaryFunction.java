@@ -4,6 +4,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
 import rhigin.RhiginException;
+import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.RhiginFunction;
 import rhigin.util.Converter;
 import rhigin.util.FixedKeyValues;
@@ -27,13 +28,13 @@ public final class BinaryFunction extends RhiginFunction {
 	public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		if (args.length >= 1) {
 			if (Converter.isNumeric(args[0])) {
-				return new byte[Converter.convertInt(args[0])];
+				return new JavaScriptable.ReadArray(new byte[Converter.convertInt(args[0])]);
 			} else if (args[0] instanceof String) {
 				try {
 					if (args.length >= 2) {
-						return ((String) args[0]).getBytes("" + args[1]);
+						return new JavaScriptable.ReadArray(((String) args[0]).getBytes("" + args[1]));
 					}
-					return ((String) args[0]).getBytes("UTF8");
+					return new JavaScriptable.ReadArray(((String) args[0]).getBytes("UTF8"));
 				} catch (Exception e) {
 					throw new RhiginException(500, e);
 				}
