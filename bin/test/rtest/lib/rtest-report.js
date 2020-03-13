@@ -2,6 +2,7 @@
 //
 module.exports = function(out, result, exitTime) {
 
+var SUCCESS_COLOR = "<#green>";
 var ERROR_COLOR = "<#red>";
 var END_COLOR = "<#/end>";
 
@@ -103,7 +104,7 @@ var detailReport = function(value) {
         }
         print(_cs(1) + color + "● " + endColor + value[i].name);
         print(_cs(3) + res[0] + " spec, " + color + res[1] + " failures" + endColor);
-        print(_cs(3) + "Finished in " + _sec(res[2]) + " seconds");
+        print(_cs(3) + " Finished in " + _sec(res[2]) + " seconds");
 
         var lenJ = value[i].result.length;
         for(var j = 0; j < lenJ; j ++) {
@@ -126,14 +127,14 @@ var detailDetailReport = function(space, value) {
         noLinePrint = out.print;
         color = "";
         endColor = "";
-        head = "<#green> ○ " + END_COLOR;
+        head = SUCCESS_COLOR + " ○ " + END_COLOR;
     }
     if(value.type != 2) {
         var list = value.inner;
         var len = list == null || list == undefined ?  0 : list.length;
         // describe(0)
         if(value.type == 0) {
-            print(_cs(space) + color + "[" + value.name + "] Finished in " + _sec(value.time) + " seconds" + endColor);
+            print(_cs(space) + color + "[" + value.name + "]\r\n" + _cs(space) + " Finished in " + _sec(value.time) + " seconds" + endColor);
         // it(1).
         } else if(len > 0) {
             noLinePrint(_cs(space) + color + "(" + value.name + ")" + endColor);
@@ -142,7 +143,7 @@ var detailDetailReport = function(space, value) {
                     if(list[i].error > 0) {
                         noLinePrint(ERROR_COLOR + " ✖" + END_COLOR);
                     } else {
-                        noLinePrint("<#green>" + " ○" + END_COLOR);
+                        noLinePrint(SUCCESS_COLOR + " ○" + END_COLOR);
                     }
                 }
             }
@@ -169,14 +170,15 @@ if(all[1] == 0) {
 
     // 正常を通知.
     return true;
+} else {
+    // エラーが存在する場合は、詳細を表示する.
+    out.errPrintln(all[0] + " spec, " + ERROR_COLOR + all[1] + " failures" + END_COLOR);
+    out.errPrintln("Finished in " + _sec(exitTime) + " seconds");
+    detailReport(result);
+    out.errPrintln("");
+
+    // エラーを通知.
+    return false;
 }
 
-// エラーが存在する場合は、詳細を表示する.
-out.errPrintln(all[0] + " spec, " + ERROR_COLOR + all[1] + " failures" + END_COLOR);
-out.errPrintln("Finished in " + _sec(exitTime) + " seconds");
-detailReport(result);
-out.errPrintln("");
-
-// エラーを通知.
-return false;
 }

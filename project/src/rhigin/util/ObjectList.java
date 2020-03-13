@@ -49,6 +49,11 @@ public class ObjectList<E> extends AbstractList<E> implements ConvertGet<Integer
 		list.add(n);
 		return true;
 	}
+	
+	@Override
+	public void add(int no, E n) {
+		list.add(no, n);
+	}
 
 	@Override
 	public E set(int index, E n) {

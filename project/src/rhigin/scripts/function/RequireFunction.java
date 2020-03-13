@@ -10,6 +10,7 @@ import rhigin.http.HttpInfo;
 import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.JavaRequire;
 import rhigin.scripts.RhiginFunction;
+import rhigin.scripts.ScriptConstants;
 import rhigin.scripts.compile.CompileCache;
 import rhigin.scripts.compile.ScriptElement;
 import rhigin.util.Converter;
@@ -57,7 +58,7 @@ public final class RequireFunction extends RhiginFunction {
 	
 	@Override
 	public Object[] getIds() {
-		return ZERO_ARRAY;
+		return ScriptConstants.BLANK_ARGS;
 	}
 
 

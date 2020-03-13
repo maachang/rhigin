@@ -85,21 +85,40 @@ public final class OList<T> {
 		list = new Object[buf];
 		length = 0;
 	}
-
-	/**
-	 * 情報追加.
-	 * 
-	 * @param T
-	 *            対象の要素を設定します.
-	 */
-	public void add(T n) {
+	
+	// 追加領域を広げる必要がある場合に広げる処理.
+	private void spread() {
 		if (length + 1 >= list.length) {
 			Object[] tmp = new Object[(length + (length >> 1)) + 4];
 			// Object[] tmp = new Object[length << 1];
 			System.arraycopy(list, 0, tmp, 0, length);
 			list = tmp;
 		}
+	}
+	
+	/**
+	 * 情報追加.
+	 * 
+	 * @param T
+	 *            対象の要素を設定します.
+	 * @return boolean
+	 */
+	public boolean add(T n) {
+		spread();
 		list[length++] = n;
+		return true;
+	}
+	
+	/**
+	 * 情報追加.
+	 * @param no 追加対象する項番を設定します.
+	 * @param n 追加対象の情報を設定します.
+	 */
+	public void add(int no, T n) {
+		spread();
+		System.arraycopy(list, no, list, no + 1, length - no);
+		list[no] = n;
+		length ++;
 	}
 
 	/**
@@ -152,19 +171,17 @@ public final class OList<T> {
 			list[0] = null;
 		} else {
 			// 厳密な削除.
-			/*
-			 * length -- ;
-			 * for(int i = no ; i < length ; i ++) {
-			 *     list[i] = list[i + 1];
-			 * }
-			 * list[length] = null;
-			 */
+			length -- ;
+			for(int i = no ; i < length ; i ++) {
+				list[i] = list[i + 1];
+			}
+			list[length] = null;
 
 			// 速度重視の削除.
-			length--;
-			ret = (T) list[no];
-			list[no] = list[length];
-			list[length] = null;
+//			length--;
+//			ret = (T) list[no];
+//			list[no] = list[length];
+//			list[length] = null;
 		}
 		return ret;
 	}

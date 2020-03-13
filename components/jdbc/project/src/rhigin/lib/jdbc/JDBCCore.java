@@ -21,7 +21,6 @@ import rhigin.lib.jdbc.runner.JDBCSystemCloseable;
 import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.RhiginEndScriptCall;
-import rhigin.util.FixedArray;
 import rhigin.util.Flag;
 import rhigin.util.Time12SequenceId;
 

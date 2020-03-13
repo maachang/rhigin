@@ -69,6 +69,10 @@ public class Read {
 		}
 
 		@Override
+		public void add(int no, Object o) {
+		}
+
+		@Override
 		public Object set(int no, Object o) {
 			return null;
 		}

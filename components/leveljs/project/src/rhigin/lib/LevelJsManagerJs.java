@@ -1,5 +1,7 @@
 package rhigin.lib;
 
+import java.io.BufferedReader;
+import java.io.StringReader;
 import java.util.Map;
 
 import org.mozilla.javascript.Context;
@@ -197,6 +199,20 @@ public class LevelJsManagerJs {
 					}
 					return LevelJsCsv.execute(CORE, false, "" + args[0], "" + args[1]);
 				}
+				case 20: // csvDirect.
+				{
+					if(args == null || args.length < 2) {
+						this.argsException(OBJECT_NAME);
+					}
+					BufferedReader br = new BufferedReader(new StringReader("" + args[1]));
+					try {
+						return LevelJsCsv.execute(CORE, "" + args[0], false, br);
+					} finally {
+						try {
+							br.close();
+						} catch(Exception e) {}
+					}
+				}
 				
 				}
 			} catch (RhiginException re) {
@@ -256,6 +272,7 @@ public class LevelJsManagerJs {
 			case 17: return "names";
 			case 18: return "length";
 			case 19: return "csvImport";
+			case 20: return "csvDirect";
 			}
 			return "unknown";
 		}

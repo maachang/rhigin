@@ -1,5 +1,6 @@
 package rhigin.scripts;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.mozilla.javascript.Context;
@@ -25,40 +26,66 @@ public abstract class RhiginFunction extends AbstractRhiginFunction {
 	
 	@Override
 	public Object get(String arg0, Scriptable arg1) {
-		if("apply".equals(arg0)) {
-			return new ApplyFunction(this);
-		} else if("call".equals(arg0)) {
-			return new CallFunction(this);
+		int n = JsBaseFunction.name(arg0);
+		if(n == -1) {
+			return Undefined.instance;
 		}
-		return Undefined.instance;
+		JsBaseFunction f = new JsBaseFunction();
+		return f.type(this, n);
 	}
 	
 	@Override
 	public boolean has(String arg0, Scriptable arg1) {
-		return "apply".equals(arg0) || "call".equals(arg0);
+		return JsBaseFunction.name(arg0) != -1;
 	}
 	
 	@Override
 	public Object[] getIds() {
-		return new Object[] {
-			"apply", "call"
-		};
+		return JsBaseFunction.NAMES;
 	}
 	
 	// xxx.apply(scope, argsArray);
-	private static final class ApplyFunction extends AbstractRhiginFunction {
-		AbstractRhiginFunction src;
-		ApplyFunction(AbstractRhiginFunction s) {
-			src = s;
+	// xxx.bind(scope, args ...);
+	// xxx.call(scope, args ...);
+	private static final class JsBaseFunction extends AbstractRhiginFunction {
+		protected int type;
+		protected AbstractRhiginFunction src;
+		
+		private static final String[] NAMES = new String[] {
+			"apply"
+			,"bind"
+			,"call"
+		};
+		
+		JsBaseFunction() {
 		}
+		
 		@Override
-		public String getName() {
-			return "apply";
+		public void clear() {
+			type = -1;
+			src = null;
+		}
+		
+		public final JsBaseFunction type(AbstractRhiginFunction s, int t) {
+			this.src = s;
+			type = t;
+			return this;
+		}
+		
+		public static final int name(String name) {
+			if(name == null || name.isEmpty()) {
+				return -1;
+			}
+			return Arrays.binarySearch(NAMES, name);
+		}
+		
+		@Override
+		public final String getName() {
+			return NAMES[type];
 		}
 		
 		@SuppressWarnings("rawtypes")
-		@Override
-		public Object jcall(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public static final Object _apply(AbstractRhiginFunction s, Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if(args == null || args.length == 0) {
 				return Undefined.instance;
 			}
@@ -79,23 +106,31 @@ public abstract class RhiginFunction extends AbstractRhiginFunction {
 			} else {
 				params = ScriptConstants.BLANK_ARGS;
 			}
-			return src.jcall(cx, scope, sc, params);
-		}
-	}
-	
-	// xxx.call(scope, args ...);
-	private static final class CallFunction extends AbstractRhiginFunction {
-		AbstractRhiginFunction src;
-		CallFunction(AbstractRhiginFunction s) {
-			src = s;
-		}
-		@Override
-		public String getName() {
-			return "call";
+			return s.jcall(cx, scope, sc, params);
 		}
 		
-		@Override
-		public Object jcall(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+		public static final Object _bind(AbstractRhiginFunction s, Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			if(args == null || args.length == 0) {
+				return Undefined.instance;
+			}
+			Scriptable sc;
+			if(args[0] == null || !(args[0] instanceof Scriptable)) {
+				sc = null;
+			} else {
+				sc = (Scriptable)args[0];
+			}
+			Object[] params = null;
+			if(args.length >= 2) {
+				int len = args.length - 1;
+				params = new Object[len];
+				System.arraycopy(args, 1, params, 0, len);
+			} else {
+				params = ScriptConstants.BLANK_ARGS;
+			}
+			return new JsBindFunction(s, sc, params);
+		}
+		
+		public static final Object _call(AbstractRhiginFunction s, Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if(args == null || args.length == 0) {
 				return Undefined.instance;
 			}
@@ -113,7 +148,55 @@ public abstract class RhiginFunction extends AbstractRhiginFunction {
 			} else {
 				params = ScriptConstants.BLANK_ARGS;
 			}
-			return src.jcall(cx, scope, sc, params);
+			return s.jcall(cx, scope, sc, params);
 		}
+
+		@Override
+		public final Object jcall(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			switch(type) {
+			case 0: // apply.
+				return _apply(src, cx, scope, thisObj, args);
+			case 1: // bind.
+				return _bind(src, cx, scope, thisObj, args);
+			case 2: // call.
+				return _call(src, cx, scope, thisObj, args);
+			}
+			return Undefined.instance;
+		}
+		
+		@Override
+		public final String toString() {
+			return super.toString();
+		}
+	}
+	
+	// [js]bindされたFunction.
+	private static final class JsBindFunction extends AbstractRhiginFunction {
+		protected AbstractRhiginFunction src;
+		protected Scriptable bindThis;
+		protected Object[] bindArgs;
+		
+		JsBindFunction(AbstractRhiginFunction s, Scriptable b, Object[] a) {
+			src = s;
+			bindThis = b;
+			bindArgs = a;
+		}
+		
+		@Override
+		public final String getName() {
+			return src.getName();
+		}
+		
+		@Override
+		public final Object jcall(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			if(bindThis != null) {
+				thisObj = bindThis;
+			}
+			if(args == null || args.length == 0) {
+				args = bindArgs;
+			}
+			return src.call(cx, scope, thisObj, args);
+		}
+		
 	}
 }

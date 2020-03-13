@@ -1,5 +1,6 @@
 package rhigin.scripts.objects;
 
+import java.lang.reflect.Array;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,43 +9,74 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
 import rhigin.RhiginException;
+import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginObject;
 import rhigin.scripts.RhiginObjectWrapper;
 import rhigin.scripts.RhiginWrapUtil;
+import rhigin.util.ArrayMap;
+import rhigin.util.Converter;
 import rhigin.util.FastReflect;
 import rhigin.util.FixedKeyValues;
+import rhigin.util.ObjectList;
 
 /**
  * Javaリフレクションオブジェクト.
  */
 public class JavaObject {
+	// オブジェクト名.
 	public static final String OBJECT_NAME = "Java";
 	
-	// 取得されたオブジェクトを変換.
-	private static final Object getObject(Object value) {
-		boolean[] res = new boolean[1];
-		value = RhiginWrapUtil.wrap(res, value);
-		if(!res[0]) {
-			return new JReflectObject(null, value);
+	/**
+	 * 配列オブジェクトを生成.
+	 * @param clazz Classオブジェクトか、Stringでクラス名をパッケージ名を含めて設定します.
+	 * @param length 配列長を設定します.
+	 * @return Object 生成された配列オブジェクトを
+	 *                JavaScriptable.ReadArray でWrapされたオブジェクトが返却されます.
+	 */
+	@SuppressWarnings("rawtypes")
+	public static final Object newArray(Object clazz, int length) {
+		if(clazz == null || !(clazz instanceof Class || clazz instanceof String)) {
+			throw new RhiginException("The specified class must be a Class or String object.");
 		}
-		return value;
+		Class c = clazz instanceof Class ? (Class)clazz : FastReflect.getClass((String)clazz);
+		return new JavaScriptable.ReadArray(Array.newInstance(c, length > 0 ? length : 0));
+	}
+	
+	/**
+	 * リストオブジェクトを生成.
+	 * @param args
+	 * @return
+	 */
+	@SuppressWarnings("rawtypes")
+	public static final Object newList(Object... args) {
+		return new JavaScriptable.GetList(new ObjectList(args));
+	}
+	
+	/**
+	 * Mapオブジェクトを生成.
+	 * @param args
+	 * @return
+	 */
+	@SuppressWarnings("rawtypes")
+	public static final Object newMap(Object... args) {
+		return new JavaScriptable.GetMap(new ArrayMap(args));
 	}
 	
 	/**
 	 * JReflectObjectのインスタンス生成.
 	 * @param clazz Classオブジェクトか、Stringでクラス名をパッケージ名を含めて設定します.
 	 * @param args コンストラクタパラメータを設定します.
-	 * @return JReflectObject javascriptから呼び出せるJavaのリフレクションオブジェクトが返却されます.
+	 * @return Object javascriptから呼び出せるJavaのリフレクションオブジェクトが返却されます.
 	 */
 	@SuppressWarnings("rawtypes")
-	public static final JReflectObject newInstance(Object clazz, Object... args) {
+	public static final Object newInstance(Object clazz, Object... args) {
 		if(clazz == null || !(clazz instanceof Class || clazz instanceof String)) {
 			throw new RhiginException("The specified class must be a Class or String object.");
 		}
 		Object o = null;
 		int len = args == null ? 0 : args.length;
-		if(len == 1) {
+		if(len == 0) {
 			o = clazz instanceof Class ?
 				FastReflect.newInstance(null, (Class)clazz) :
 				FastReflect.newInstance(null, (String)clazz);
@@ -59,9 +91,9 @@ public class JavaObject {
 	/**
 	 * JavaオブジェクトをJavascriptで利用できるオブジェクトをJReflectObject にラップします.
 	 * @param object 対象のJavaオブジェクトを設定します.
-	 * @return JReflectObject javascriptから呼び出せるJavaのリフレクションオブジェクトが返却されます.
+	 * @return Object javascriptから呼び出せるJavaのリフレクションオブジェクトが返却されます.
 	 */
-	public static final JReflectObject wrapObject(Object object) {
+	public static final Object wrapObject(Object object) {
 		if(object == null) {
 			throw new RhiginException("The object to wrap is 'null'.");
 		}
@@ -71,10 +103,10 @@ public class JavaObject {
 	/**
 	 * StaticなJavaオブジェクトをJavascriptで利用できるオブジェクトをJReflectObject にラップします.
 	 * @param clazz Classオブジェクトか、Stringでクラス名をパッケージ名を含めて設定します.
-	 * @return JReflectObject javascriptから呼び出せるJavaのリフレクションオブジェクトが返却されます.
+	 * @return Object javascriptから呼び出せるJavaのリフレクションオブジェクトが返却されます.
 	 */
 	@SuppressWarnings("rawtypes")
-	public static final JReflectObject wrapStatic(Object clazz) {
+	public static final Object wrapStatic(Object clazz) {
 		if(clazz == null || !(clazz instanceof Class || clazz instanceof String)) {
 			throw new RhiginException("The specified class must be a Class or String object.");
 		} else if(clazz instanceof Class) {
@@ -84,10 +116,10 @@ public class JavaObject {
 	}
 	
 	// Javaリフレクション制御用オブジェクト.
-	public static final class JRefrect extends RhiginFunction {
+	public static final class JReflect extends RhiginFunction {
 		private final int type;
 
-		JRefrect(int t) {
+		JReflect(int t) {
 			type = t;
 		}
 
@@ -102,15 +134,11 @@ public class JavaObject {
 				}
 				int len = args.length;
 				if(len == 1) {
-					return args[0] instanceof Class ?
-						newInstance((Class)args[0]) :
-						newInstance(args[0]);
+					return newInstance(args[0]);
 				}
 				Object[] pms = new Object[len-1];
 				System.arraycopy(args, 1, pms, 0, len - 1);
-				return args[0] instanceof Class ?
-					newInstance((Class)args[0], pms) :
-					newInstance(args[0], pms);
+				return newInstance(args[0], pms);
 			}
 			case 1: // wrap.
 			{
@@ -128,6 +156,15 @@ public class JavaObject {
 				}
 				return wrapStatic(args[0]);
 			}
+			case 3: // newArray.
+				if(args == null || args.length < 2 || args[0] == null || !Converter.isNumeric(args[1])) {
+					this.argsException(OBJECT_NAME);
+				}
+				return newArray(args[0], Converter.convertInt(args[1]));
+			case 4: // newList.
+				return newList(args);
+			case 5: // newMap.
+				return newMap(args);
 			}
 			return Undefined.instance;
 		}
@@ -141,6 +178,12 @@ public class JavaObject {
 				return "wrap";
 			case 2:
 				return "static";
+			case 3:
+				return "newArray";
+			case 4:
+				return "newList";
+			case 5:
+				return "newMap";
 			}
 			return "";
 		}
@@ -150,14 +193,12 @@ public class JavaObject {
 	// リフレクションで処理するオブジェクトが返却されます.
 	@SuppressWarnings("rawtypes")
 	public static final class JReflectObject extends RhiginFunction implements RhiginObjectWrapper {
-		private final JReflectFunction jfunc;
 		private final Class clazz;
 		private final Object target;
 		
 		JReflectObject(Class c, Object t) {
 			clazz = c == null ? t.getClass() : c;
 			target = t;
-			jfunc = new JReflectFunction(clazz, target);
 		}
 		
 		@Override
@@ -165,9 +206,10 @@ public class JavaObject {
 			if(arg0 != null) {
 				final boolean staticFlag = target == null;
 				if(FastReflect.isField(staticFlag, clazz, arg0)) {
-					return getObject(FastReflect.getField(clazz, target, arg0));
+					return RhiginWrapUtil.wrapJavaObject(FastReflect.getField(clazz, target, arg0));
 				} else if(FastReflect.isMethod(staticFlag, clazz, arg0)) {
-					return jfunc.set(arg0);
+					JReflectFunction f = new JReflectFunction();
+					return f.set(clazz, target, arg0);
 				}
 			}
 			return Undefined.instance;
@@ -228,39 +270,39 @@ public class JavaObject {
 	
 	// JavaFunctionオブジェクト.
 	@SuppressWarnings("rawtypes")
-	//public static final class JReflectFunction extends RhiginFunction implements RhiginObjectWrapper {
 	public static final class JReflectFunction extends RhiginFunction {
-		private final Class clazz;
-		private final Object target;
+		private Class clazz;
+		private Object target;
 		private String name;
 
-		JReflectFunction(Class c, Object t) {
-			clazz = c;
-			target = t;
+		JReflectFunction() {
 		}
 		
-		public JReflectFunction set(String n) {
+		public JReflectFunction set(Class c, Object t, String n) {
+			clazz = c;
+			target = t;
 			name = n;
 			return this;
+		}
+		
+		public void clear() {
+			clazz = null;
+			target = null;
+			name = null;
 		}
 
 		@Override
 		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			int len = args == null ? 0 : args.length;
 			if(len == 0) {
-				return getObject(FastReflect.invoke(clazz, target, name));
+				return RhiginWrapUtil.wrapJavaObject(FastReflect.invoke(clazz, target, name));
 			}
-			return getObject(FastReflect.invoke(clazz, target, name, args));
+			return RhiginWrapUtil.wrapJavaObject(FastReflect.invoke(clazz, target, name, args));
 		}
 
 		@Override
 		public final String getName() {
 			return clazz.getName() + "." + name;
-		}
-		
-		@Override
-		public final String toString() {
-			return clazz.getName() + "." + name + "() {\n  [native code]\n}";
 		}
 		
 		public final Object unwrap() {
@@ -270,11 +312,16 @@ public class JavaObject {
 		public final boolean isStatic() {
 			return target == null;
 		}
+		
+		@Override
+		public final String toString() {
+			return clazz.getName() + "." + name + "() {\n  [native code]\n}";
+		}
 	};
 
 	// シングルトン.
 	private static final RhiginObject THIS = new RhiginObject(OBJECT_NAME, new RhiginFunction[] {
-		new JRefrect(0), new JRefrect(1), new JRefrect(2)});
+		new JReflect(0), new JReflect(1), new JReflect(2), new JReflect(3), new JReflect(4), new JReflect(5)});
 
 	public static final RhiginObject getInstance() {
 		return THIS;

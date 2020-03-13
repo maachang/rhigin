@@ -9,13 +9,11 @@ import org.maachang.leveldb.operator.LevelIndex;
 import org.maachang.leveldb.operator.LevelIndex.LevelIndexIterator;
 import org.maachang.leveldb.operator.LevelIndexOperator;
 import org.maachang.leveldb.util.Converter;
-import org.mozilla.javascript.Undefined;
 
 import rhigin.lib.level.runner.LevelJsCloseable;
 import rhigin.lib.level.runner.LevelJsException;
 import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.JsMap;
-import rhigin.util.FixedArray;
 
 /**
  * 検索対応オペレータ.

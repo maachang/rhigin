@@ -9,6 +9,7 @@ import org.mozilla.javascript.Wrapper;
 
 import rhigin.RhiginException;
 import rhigin.scripts.objects.JDateObject;
+import rhigin.scripts.objects.JavaObject;
 import rhigin.util.Converter;
 import rhigin.util.FixedArray;
 
@@ -136,5 +137,18 @@ public class RhiginWrapUtil {
 		}
 		return value;
 	}
-
+	
+	/**
+	 * JavaObjectをWrap.
+	 * @param value
+	 * @return
+	 */
+	public static final Object wrapJavaObject(Object value) {
+		boolean[] res = new boolean[1];
+		Object ret = wrap(res, value);
+		if(!res[0]) {
+			return JavaObject.wrapObject(ret);
+		}
+		return ret;
+	}
 }

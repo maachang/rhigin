@@ -1,5 +1,9 @@
 package rhigin.lib.level;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.List;
 
 import rhigin.lib.Level;
@@ -210,6 +214,8 @@ public class LevelJsCsv {
 		throws Exception {
 		if(fileName == null || fileName.isEmpty()) {
 			throw new LevelJsException("CSV file is not set.");
+		} else if(!FileUtil.isFile(fileName)) {
+			throw new LevelJsException("CSV file is not exists: '" + fileName + "'");
 		}
 		// オペレータ名が設定されていない場合は、ファイル名から取得.
 		opName = csvFileNameByOperatorDefine(opName, fileName);
@@ -219,6 +225,38 @@ public class LevelJsCsv {
 		if(charset == null || charset.isEmpty()) {
 			charset = DEF_CHARSET;
 		}
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(
+				new InputStreamReader(
+					new FileInputStream(fileName), charset));
+			int ret = execute(core, opName, deleteFlag, br);
+			br.close();
+			br = null;
+			return ret;
+		} finally {
+			if(br != null) {
+				try {
+					br.close();
+				} catch(Exception e) {}
+			}
+		}
+	}
+	
+	/**
+	 * CSVインサート実行.
+	 * @param core
+	 * @param opName
+	 * @param deleteFlag
+	 * @param r
+	 * @return
+	 * @throws Exception
+	 */
+	public static final int execute(LevelJsCore core, String opName, boolean deleteFlag, Reader r)
+		throws Exception {
+		if(opName == null || opName.isEmpty()) {
+			throw new LevelJsException("Operator name is not set.");
+		}
 		int ret = 0;
 		CsvReader csv = null;
 		try {
@@ -226,7 +264,7 @@ public class LevelJsCsv {
 			if(operator == null) {
 				throw new LevelJsException("Information of the specified operator name does not exist: " + opName);
 			}
-			csv = new CsvReader(fileName, charset, ",");
+			csv = new CsvReader(r, ",");
 			FixedSearchArray<String> sk = null;
 			
 			// キー用Mapを生成.

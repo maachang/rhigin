@@ -3,13 +3,12 @@ package rhigin.scripts;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
-import rhigin.util.BlankScriptable;
 import rhigin.util.FixedSearchArray;
 
 /**
  * RhiginObject. Object.method処理を実装する時に利用します.
  */
-public class RhiginObject implements BlankScriptable {
+public class RhiginObject implements RhinoScriptable {
 	protected FixedSearchArray<String> searchList;
 	protected RhiginFunction[] list;
 	protected String name;
@@ -35,11 +34,16 @@ public class RhiginObject implements BlankScriptable {
 	}
 
 	@Override
-	public Object get(String k, Scriptable s) {
+	public Object _get(String k, Scriptable s) {
 		int no = searchList.search(k);
 		if(no != -1) {
 			return list[no];
 		}
+		return Undefined.instance;
+	}
+	
+	@Override
+	public Object _get(int no, Scriptable s) {
 		return Undefined.instance;
 	}
 

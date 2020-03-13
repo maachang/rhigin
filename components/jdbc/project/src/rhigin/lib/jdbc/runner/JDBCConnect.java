@@ -9,12 +9,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
 import rhigin.lib.jdbc.pooling.AtomicPoolConnection;
+import rhigin.scripts.RhinoScriptable;
 import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.JsMap;
-import rhigin.util.BlankScriptable;
 import rhigin.util.Converter;
 import rhigin.util.Time12SequenceId;
 
@@ -41,7 +42,7 @@ public class JDBCConnect {
 	 * preparedStatementの引数にこのオブジェクトをセットすると、
 	 * Time12SequenceIdのシーケンスIDを採番してくれます。
 	 */
-	public static final class Time12 implements BlankScriptable {
+	public static final class Time12 implements RhinoScriptable {
 		public Time12() {}
 		public boolean equals(Object o) {
 			if(o == null) {
@@ -49,14 +50,17 @@ public class JDBCConnect {
 			}
 			return Time12.class.equals(o.getClass());
 		}
-		public Object getDefaultValue(Class<?> clazz) {
-			return (clazz == null || String.class.equals(clazz)) ? toString() : Undefined.instance;
-		}
 		public String getClassName() {
 			return "TIME12";
 		}
 		public String toString() {
 			return "TIME12";
+		}
+		public Object _get(String name, Scriptable parent) {
+			return Undefined.instance;
+		}
+		public Object _get(int no, Scriptable parent) {
+			return Undefined.instance;
 		}
 	}
 	

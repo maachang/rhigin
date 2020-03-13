@@ -11,9 +11,8 @@ import org.mozilla.javascript.Undefined;
 import rhigin.scripts.Json;
 import rhigin.scripts.Read;
 import rhigin.scripts.RhiginFunction;
-import rhigin.scripts.function.ToStringFunction;
+import rhigin.scripts.RhinoScriptable;
 import rhigin.util.ArrayMap;
-import rhigin.util.BlankScriptable;
 import rhigin.util.ConvertGet;
 import rhigin.util.Converter;
 import rhigin.util.FileUtil;
@@ -22,13 +21,13 @@ import rhigin.util.OList;
 /**
  * Rhiginコンフィグ.
  */
-public class RhiginConfig implements BlankScriptable {
+public class RhiginConfig implements RhinoScriptable {
 	private static final String CONF_CHARSET = "UTF8";
-	private final ToStringFunction.Execute toStringFunction = new ToStringFunction.Execute(this);
 	
 	private String confDir = null;
 	private String rhiginEnv = null;
 	private Map<String, Map<String, Object>> config = null;
+	private ReloadFunction reloadFunc = null;
 	
 	protected RhiginConfig() {
 		throw new RhiginException("Unsupported constructor.");
@@ -149,9 +148,12 @@ public class RhiginConfig implements BlankScriptable {
 	 * @return Object
 	 */
 	@Override
-	public Object get(String name, Scriptable s) {
+	public Object _get(String name, Scriptable s) {
 		if("reload".equals(name)) {
-			return new ReloadFunction(this);
+			if(reloadFunc == null) {
+				reloadFunc = new ReloadFunction(this);
+			}
+			return reloadFunc;
 		} else if("dir".equals(name)) {
 			return confDir;
 		} else if("env".equals(name)) {
@@ -160,6 +162,20 @@ public class RhiginConfig implements BlankScriptable {
 			return get(name);
 		}
 		return Undefined.instance;
+	}
+	
+	/**
+	 * 指定コンフィグ情報を取得.
+	 * 
+	 * @param no
+	 *            番号を設定します.
+	 * @param s
+	 *            Scriptable が設定されます.
+	 * @return Object
+	 */
+	@Override
+	public Object _get(int no, Scriptable parent) {
+		return null;
 	}
 
 	/**
@@ -205,11 +221,6 @@ public class RhiginConfig implements BlankScriptable {
 	@Override
 	public String toString() {
 		return "[config]";
-	}
-
-	@Override
-	public Object getDefaultValue(Class<?> clazz) {
-		return toStringFunction.getDefaultValue(clazz);
 	}
 
 	/**

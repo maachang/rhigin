@@ -11,7 +11,8 @@ import rhigin.RhiginException;
  * rhigin用Abstractメソッド.
  */
 public abstract class AbstractRhiginFunction implements Function {
-	protected static final Object[] ZERO_ARRAY = new Object[] {};
+	public void clear() {
+	}
 	
 	@Override
 	public void delete(String arg0) {
@@ -43,7 +44,7 @@ public abstract class AbstractRhiginFunction implements Function {
 
 	@Override
 	public Object[] getIds() {
-		return ZERO_ARRAY;
+		return ScriptConstants.BLANK_ARGS;
 	}
 
 	@Override
@@ -94,7 +95,7 @@ public abstract class AbstractRhiginFunction implements Function {
 	@Override
 	public Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		try {
-			return jcall(ctx, scope, thisObj, RhiginWrapUtil.unwrapArgs(args));
+			return RhiginWrapUtil.wrapJavaObject(jcall(ctx, scope, thisObj, RhiginWrapUtil.unwrapArgs(args)));
 		} catch(Throwable t) {
 			throw new RhiginWrapException(t);
 		}

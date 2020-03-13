@@ -3,13 +3,12 @@ package rhigin.scripts;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
-import rhigin.util.BlankScriptable;
 import rhigin.util.FixedSearchArray;
 
 /**
  * インスタンス生成後のRhiginObjectの場合、こちらを利用します。
  */
-public class RhiginInstanceObject implements BlankScriptable {
+public class RhiginInstanceObject implements RhinoScriptable {
 	protected String name;
 	protected ObjectFunction objectFunction;
 	protected Object[] params;
@@ -61,6 +60,15 @@ public class RhiginInstanceObject implements BlankScriptable {
 			}
 			return ret;
 		}
+		return Undefined.instance;
+	}
+	
+	@Override
+	public Object _get(String k, Scriptable s) {
+		return Undefined.instance;
+	}
+	@Override
+	public Object _get(int no, Scriptable s) {
 		return Undefined.instance;
 	}
 

@@ -11,7 +11,6 @@ import org.mozilla.javascript.Undefined;
 import org.mozilla.javascript.Wrapper;
 
 import rhigin.RhiginException;
-import rhigin.scripts.JavaScriptable.GetList;
 import rhigin.scripts.objects.JDateObject;
 import rhigin.util.Converter;
 import rhigin.util.DateConvert;
@@ -87,7 +86,7 @@ public final class Json {
 			target = ((Wrapper) target).unwrap();
 		} else if (target instanceof RhiginObjectWrapper) {
 			target = ((RhiginObjectWrapper) target).unwrap();
-		}		
+		}
 		if (target instanceof Map) {
 			encodeJsonMap(buf, base, (Map) target);
 		} else if (target instanceof List) {
