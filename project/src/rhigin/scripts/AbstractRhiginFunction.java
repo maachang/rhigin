@@ -92,8 +92,9 @@ public abstract class AbstractRhiginFunction implements Function {
 	}
 
 	// Funtion呼び出し処理.
+	// 処理の実装は jcall を継承して実装してください.
 	@Override
-	public Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		try {
 			return RhiginWrapUtil.wrapJavaObject(jcall(ctx, scope, thisObj, RhiginWrapUtil.unwrapArgs(args)));
 		} catch(Throwable t) {
@@ -102,8 +103,9 @@ public abstract class AbstractRhiginFunction implements Function {
 	}
 	
 	// new コンストラクタ呼び出し処理.
+	// 処理の実装は jconstruct を継承して実装してください.
 	@Override
-	public Scriptable construct(Context arg0, Scriptable arg1, Object[] arg2) {
+	public final Scriptable construct(Context arg0, Scriptable arg1, Object[] arg2) {
 		try {
 			return jconstruct(arg0, arg1, RhiginWrapUtil.unwrapArgs(arg2));
 		} catch(Throwable t) {
@@ -117,7 +119,7 @@ public abstract class AbstractRhiginFunction implements Function {
 	public abstract Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args);
 	
 	/**
-	 * new XXX のようなオブジェクトを作成する場合には、こちらを実装します.
+	 * new (オブジェクト名) のようなオブジェクトを作成する場合には、こちらを実装します.
 	 * また、戻り値は rhigin.scripts.objects.RhiginObject を利用すると、楽に作成できると思います.
 	 */
 	public Scriptable jconstruct(Context arg0, Scriptable arg1, Object[] arg2) {
@@ -133,9 +135,7 @@ public abstract class AbstractRhiginFunction implements Function {
 	/**
 	 * function名を設定します.
 	 */
-	public String getName() {
-		return "";
-	}
+	public abstract String getName();
 	
 	/**
 	 * 引数エラーを返却.

@@ -255,7 +255,7 @@ public class FastReflect {
 								ifce = em.getInterfaseNames();
 								if (ifce != null && (lenJ = ifce.length) > 0) {
 									// インターフェース名群と、チェック元のクラス名が一致.
-									if (Arrays.binarySearch(ifce, sname) != -1) {
+									if (Arrays.binarySearch(ifce, sname) >= 0) {
 										one = true;
 										ret += wScore;
 									}

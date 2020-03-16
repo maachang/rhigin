@@ -1,5 +1,10 @@
 package rhigin.scripts;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+
 import rhigin.RhiginException;
 import rhigin.scripts.compile.CompileCache;
 import rhigin.util.FileUtil;
@@ -31,13 +36,27 @@ public class ExecuteJsByEndScriptCall implements RhiginEndScriptCall {
 	 */
 	@Override
 	public void call(CompileCache cache) {
+		Reader r = null;
 		try {
-			ExecuteScript.eval(
-				cache.get(name, ScriptConstants.HEADER, ScriptConstants.FOOTER).getScript());
+			if(cache == null) {
+				r = new BufferedReader(new InputStreamReader(new FileInputStream(name), "UTF8"));
+				ExecuteScript.eval(r, name, ScriptConstants.HEADER, ScriptConstants.FOOTER, 0);
+				r.close();
+				r = null;
+			} else {
+				ExecuteScript.eval(
+					cache.get(name, ScriptConstants.HEADER, ScriptConstants.FOOTER).getScript());
+			}
 		} catch(RhiginException re) {
 			throw re;
 		} catch(Exception e) {
 			throw new RhiginException(e);
+		} finally {
+			if(r != null) {
+				try {
+					r.close();
+				} catch(Exception e) {}
+			}
 		}
 	}
 }

@@ -76,7 +76,8 @@ public abstract class RhiginFunction extends AbstractRhiginFunction {
 			if(name == null || name.isEmpty()) {
 				return -1;
 			}
-			return Arrays.binarySearch(NAMES, name);
+			final int ret = Arrays.binarySearch(NAMES, name);
+			return ret >= 0 ? ret : -1;
 		}
 		
 		@Override
@@ -86,17 +87,14 @@ public abstract class RhiginFunction extends AbstractRhiginFunction {
 		
 		@SuppressWarnings("rawtypes")
 		public static final Object _apply(AbstractRhiginFunction s, Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
-			if(args == null || args.length == 0) {
-				return Undefined.instance;
-			}
 			Scriptable sc;
-			if(args[0] == null || !(args[0] instanceof Scriptable)) {
+			if(args == null || args.length == 0 || args[0] == null || !(args[0] instanceof Scriptable)) {
 				sc = thisObj;
 			} else {
 				sc = (Scriptable)args[0];
 			}
 			Object[] params = null;
-			if(args.length >= 2 && args[1] instanceof List) {
+			if(args != null && args.length >= 2 && args[1] instanceof List) {
 				List list = (List)args[1];
 				int len = list.size();
 				params = new Object[len];
@@ -110,17 +108,14 @@ public abstract class RhiginFunction extends AbstractRhiginFunction {
 		}
 		
 		public static final Object _bind(AbstractRhiginFunction s, Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
-			if(args == null || args.length == 0) {
-				return Undefined.instance;
-			}
 			Scriptable sc;
-			if(args[0] == null || !(args[0] instanceof Scriptable)) {
+			if(args == null || args.length == 0 || args[0] == null || !(args[0] instanceof Scriptable)) {
 				sc = null;
 			} else {
 				sc = (Scriptable)args[0];
 			}
 			Object[] params = null;
-			if(args.length >= 2) {
+			if(args != null && args.length >= 2) {
 				int len = args.length - 1;
 				params = new Object[len];
 				System.arraycopy(args, 1, params, 0, len);
@@ -131,17 +126,14 @@ public abstract class RhiginFunction extends AbstractRhiginFunction {
 		}
 		
 		public static final Object _call(AbstractRhiginFunction s, Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
-			if(args == null || args.length == 0) {
-				return Undefined.instance;
-			}
 			Scriptable sc;
-			if(args[0] == null || !(args[0] instanceof Scriptable)) {
+			if(args == null || args.length == 0 || args[0] == null || !(args[0] instanceof Scriptable)) {
 				sc = thisObj;
 			} else {
 				sc = (Scriptable)args[0];
 			}
 			Object[] params = null;
-			if(args.length >= 2) {
+			if(args != null && args.length >= 2) {
 				int len = args.length - 1;
 				params = new Object[len];
 				System.arraycopy(args, 1, params, 0, len);

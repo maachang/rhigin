@@ -542,7 +542,8 @@ public class JavaScriptable {
 			if(name == null || name.isEmpty()) {
 				return -1;
 			}
-			return Arrays.binarySearch(NAMES, name);
+			final int ret = Arrays.binarySearch(NAMES, name);
+			return ret >= 0 ? ret : -1;
 		}
 		
 		@Override
@@ -590,7 +591,8 @@ public class JavaScriptable {
 			if(name == null || name.isEmpty()) {
 				return -1;
 			}
-			return Arrays.binarySearch(NAMES, name);
+			final int ret = Arrays.binarySearch(NAMES, name);
+			return ret >= 0 ? ret : -1;
 		}
 
 		@Override
@@ -687,7 +689,8 @@ public class JavaScriptable {
 			if(name == null || name.isEmpty()) {
 				return -1;
 			}
-			return Arrays.binarySearch(NAMES, name);
+			final int ret = Arrays.binarySearch(NAMES, name);
+			return ret >= 0 ? ret : -1;
 		}
 
 		@Override

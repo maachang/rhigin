@@ -84,7 +84,7 @@ if [ ${CHANGE_MALLOC:--1} = "-1" ];
 then
     ${JAVA_HOME}/bin/java -server -Xms${STM}m -Xmx${EXM}m ${OPT} -classpath ${MY_JAR}:${MY_CLAZZ} ${EXEC_PACKAGE} ${ARGS}
 else
-    LD_PRELOAD=${CHANGE_MALLOC} ${JAVA_HOME}/bin/java -server -Xms${STM}m -Xmx${EXM}m ${OPT} -classpath ${MY_JAR} ${EXEC_PACKAGE} ${ARGS}
+    LD_PRELOAD=${CHANGE_MALLOC} ${JAVA_HOME}/bin/java -server -Xms${STM}m -Xmx${EXM}m ${OPT} -classpath ${MY_JAR}:${MY_CLAZZ} ${EXEC_PACKAGE} ${ARGS}
 fi
 
 exit ${?}
