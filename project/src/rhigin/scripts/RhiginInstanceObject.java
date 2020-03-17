@@ -136,4 +136,12 @@ public class RhiginInstanceObject implements RhinoScriptable {
 	public int paramsSize() {
 		return params == null ? 0 : params.length;
 	}
+
+	@Override
+	public void _put(String name, Scriptable obj, Object value) {
+	}
+
+	@Override
+	public void _put(int no, Scriptable obj, Object value) {
+	}
 }

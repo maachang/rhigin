@@ -109,10 +109,14 @@ public class JavaScriptable {
 		}
 
 		@Override
-		public void put(String name, Scriptable start, Object value) {
+		public void _put(String name, Scriptable start, Object value) {
 			this.put(name, value);
 		}
-
+		
+		@Override
+		public void _put(int no, Scriptable start, Object value) {
+		}
+		
 		@Override
 		public void delete(String name) {
 			this.remove(name);
@@ -182,7 +186,7 @@ public class JavaScriptable {
 		}
 
 		@Override
-		public void put(int no, Scriptable start, Object value) {
+		public void _put(int no, Scriptable start, Object value) {
 			final int len = (no - this.size()) + 1;
 			if (len > 0) {
 				for (int i = 0; i < len; i++) {
@@ -191,7 +195,11 @@ public class JavaScriptable {
 			}
 			this.set(no, value);
 		}
-
+		
+		@Override
+		public void _put(String name, Scriptable start, Object value) {
+		}
+		
 		@Override
 		public void delete(int no) {
 			this.remove(no);
@@ -423,6 +431,14 @@ public class JavaScriptable {
 		public String toString() {
 			return JsonOut.toString(this);
 		}
+
+		@Override
+		public void _put(String name, Scriptable obj, Object value) {
+		}
+
+		@Override
+		public void _put(int no, Scriptable obj, Object value) {
+		}
 	}
 	
 	// js用 Iterator value.
@@ -477,11 +493,6 @@ public class JavaScriptable {
 		}
 
 		@Override
-		public Object put(Object name, Object value) {
-			return null;
-		}
-
-		@Override
 		public Object remove(Object name) {
 			return null;
 		}
@@ -511,6 +522,19 @@ public class JavaScriptable {
 		@Override
 		public Object getValue(int no) {
 			return get(IDS[no]);
+		}
+
+		@Override
+		public void _put(String name, Scriptable obj, Object value) {
+		}
+
+		@Override
+		public void _put(int no, Scriptable obj, Object value) {
+		}
+
+		@Override
+		public Object put(Object name, Object value) {
+			return null;
 		}
 	}
 	
@@ -696,6 +720,15 @@ public class JavaScriptable {
 		@Override
 		public final String getName() {
 			return NAMES[type];
+		}
+		
+		// 指定値がマイナスの場合はlength - 指定値を返却する.
+		private static final int _position(java.util.List srcList, int p) {
+			if(p < 0) {
+				p = srcList.size() - p;
+				return p < 0 ? 0 : p;
+			}
+			return p >= srcList.size() ? 0 : p;
 		}
 		
 		// 戻り値のBoolean判定.
@@ -967,8 +1000,10 @@ public class JavaScriptable {
 				if (args != null && args.length >= 1) {
 					int len = srcList.size();
 					Object value = args[0];
-					int start = args.length >= 2 && Converter.isNumeric(args[1]) ? Converter.convertInt(args[1]) : 0;
-					int end = args.length >= 3 && Converter.isNumeric(args[2]) ? Converter.convertInt(args[2]) : len;
+					int start = args.length >= 2 && Converter.isNumeric(args[1]) ?
+						_position(srcList, Converter.convertInt(args[1])) : 0;
+					int end = args.length >= 3 && Converter.isNumeric(args[2]) ?
+						_position(srcList, Converter.convertInt(args[2])) : len;
 					for(int i = start; i < end; i ++) {
 						if(i >= 0 && i < len) {
 							srcList.set(i, value);
@@ -998,6 +1033,9 @@ public class JavaScriptable {
 				int next = 1;
 				if(args != null && args.length >= 1 && Converter.isNumeric(args[0])) {
 					next = Converter.convertInt(args[0]);
+					if(next <= 0) {
+						next = 1;
+					}
 				}
 				java.util.List ret = new ObjectList();
 				_flat(ret, 0, next, srcList);
@@ -1021,7 +1059,7 @@ public class JavaScriptable {
 					Object val = args[0];
 					int p = 0;
 					if(args.length >= 2 && Converter.isNumeric(args[1])) {
-						p = Converter.convertInt(args[1]);
+						p = _position(srcList, Converter.convertInt(args[1]));
 					}
 					int len = srcList.size();
 					if(val == null) {
@@ -1052,7 +1090,7 @@ public class JavaScriptable {
 					int p = 0;
 					Object value = args[0];
 					if(args.length >= 2 && Converter.isNumeric(args[1])) {
-						p = Converter.convertInt(args[1]);
+						p = _position(srcList, Converter.convertInt(args[1]));
 					}
 					int len = srcList.size();
 					if(value == null) {
@@ -1112,7 +1150,7 @@ public class JavaScriptable {
 					int p = srcList.size();
 					Object value = args[0];
 					if(args.length >= 2 && Converter.isNumeric(args[1])) {
-						p = Converter.convertInt(args[1]);
+						p = _position(srcList, Converter.convertInt(args[1]));
 					}
 					if(value == null) {
 						for(int i = p - 1; i >= 0; i --) {
@@ -1194,8 +1232,8 @@ public class JavaScriptable {
 				java.util.List ret = new ObjectList();
 				if(args != null && args.length >= 2 &&
 					Converter.isNumeric(args[0]) && Converter.isNumeric(args[1])) {
-					int no = Converter.convertInt(args[0]);
-					int len = Converter.convertInt(args[1]);
+					int no = _position(srcList, Converter.convertInt(args[0]));
+					int len = _position(srcList, Converter.convertInt(args[1]));
 					for(int i = 0; i < len; i ++) {
 						ret.add(srcList.remove(no));
 					}

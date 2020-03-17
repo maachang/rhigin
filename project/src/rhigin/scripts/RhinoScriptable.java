@@ -7,6 +7,39 @@ import org.mozilla.javascript.Undefined;
  * Rhino用Scriptable.
  */
 public interface RhinoScriptable extends Scriptable {
+	/**
+	 * 名前でオブジェクトを索引.
+	 * @param name
+	 * @param parent
+	 * @return
+	 */
+	Object _get(String name, Scriptable parent);
+	
+	/**
+	 * 番号でオブジェクトを索引.
+	 * @param no
+	 * @param parent
+	 * @return
+	 */
+	Object _get(int no, Scriptable parent);
+	
+	/**
+	 * 名前でオブジェクトを追加.
+	 * @param name
+	 * @param obj
+	 * @param value
+	 */
+	void _put(String name, Scriptable obj, Object value);
+
+	/**
+	 * 番号でオブジェクトを追加.
+	 * @param no
+	 * @param obj
+	 * @param value
+	 */
+	void _put(int no, Scriptable obj, Object value);
+
+	
 	@Override
 	default void delete(String name) {
 	}
@@ -25,22 +58,6 @@ public interface RhinoScriptable extends Scriptable {
 		return RhiginWrapUtil.wrapJavaObject(_get(no, obj));
 	}
 	
-	/**
-	 * 名前でオブジェクトを索引.
-	 * @param name
-	 * @param parent
-	 * @return
-	 */
-	Object _get(String name, Scriptable parent);
-	
-	/**
-	 * 番号でオブジェクトを索引.
-	 * @param no
-	 * @param parent
-	 * @return
-	 */
-	Object _get(int no, Scriptable parent);
-
 	@Override
 	default String getClassName() {
 		return "";
@@ -86,10 +103,12 @@ public interface RhinoScriptable extends Scriptable {
 
 	@Override
 	default void put(String name, Scriptable obj, Object value) {
+		_put(name, obj, RhiginWrapUtil.unwrap(value));
 	}
 
 	@Override
 	default void put(int no, Scriptable obj, Object value) {
+		_put(no, obj, RhiginWrapUtil.unwrap(value));
 	}
 
 	@Override

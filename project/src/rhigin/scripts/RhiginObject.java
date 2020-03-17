@@ -93,4 +93,12 @@ public class RhiginObject implements RhinoScriptable {
 	public String getName() {
 		return name;
 	}
+
+	@Override
+	public void _put(String name, Scriptable obj, Object value) {
+	}
+
+	@Override
+	public void _put(int no, Scriptable obj, Object value) {
+	}
 }

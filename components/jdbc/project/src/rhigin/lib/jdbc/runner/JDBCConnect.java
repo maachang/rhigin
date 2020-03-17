@@ -44,23 +44,34 @@ public class JDBCConnect {
 	 */
 	public static final class Time12 implements RhinoScriptable {
 		public Time12() {}
+		@Override
 		public boolean equals(Object o) {
 			if(o == null) {
 				return false;
 			}
 			return Time12.class.equals(o.getClass());
 		}
+		@Override
 		public String getClassName() {
 			return "TIME12";
 		}
+		@Override
 		public String toString() {
 			return "TIME12";
 		}
+		@Override
 		public Object _get(String name, Scriptable parent) {
 			return Undefined.instance;
 		}
+		@Override
 		public Object _get(int no, Scriptable parent) {
 			return Undefined.instance;
+		}
+		@Override
+		public void _put(String name, Scriptable obj, Object value) {
+		}
+		@Override
+		public void _put(int no, Scriptable obj, Object value) {
 		}
 	}
 	
