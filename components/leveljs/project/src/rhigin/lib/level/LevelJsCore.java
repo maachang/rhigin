@@ -56,7 +56,7 @@ public class LevelJsCore {
 	public void destroy() {
 		if(end.setToGetBefore(true)) {
 			if(closeable != null) {
-				closeable.call(null);
+				closeable.call();
 			}
 			closeable = null;
 			if(manager != null) {

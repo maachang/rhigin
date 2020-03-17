@@ -257,7 +257,7 @@ public class JDBCCore {
 	 */
 	public void close() {
 		check();
-		closeable.call(null);
+		closeable.call();
 	}
 	
 	/**

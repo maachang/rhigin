@@ -6,7 +6,6 @@ import java.sql.Statement;
 import java.util.Map;
 
 import rhigin.scripts.RhiginEndScriptCall;
-import rhigin.scripts.compile.CompileCache;
 import rhigin.util.ArrayMap;
 import rhigin.util.OList;
 
@@ -227,7 +226,7 @@ public class JDBCCloseable implements RhiginEndScriptCall {
 	 * @params cache
 	 */
 	@Override
-	public final void call(CompileCache cache) {
+	public final void call() {
 		clearBatch();
 		clearResultSet();
 		clearStatement();

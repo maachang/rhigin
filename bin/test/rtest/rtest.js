@@ -131,7 +131,7 @@ var executeRTest = function(name) {
     } finally {
         // クローズ処理.
         try {
-            Packages.rhigin.scripts.ExecuteScript.callEndScripts(false, null);
+            Packages.rhigin.scripts.ExecuteScript.callEndScripts(false);
         } catch(ee) {}
         // グローバルのリセット.
         global.$reset;

@@ -3,7 +3,6 @@ package rhigin.lib.level.runner;
 import rhigin.lib.level.operator.OperateIterator;
 import rhigin.lib.level.operator.Operator;
 import rhigin.scripts.RhiginEndScriptCall;
-import rhigin.scripts.compile.CompileCache;
 import rhigin.util.OList;
 
 /**
@@ -138,10 +137,9 @@ public class LevelJsCloseable implements RhiginEndScriptCall {
 	
 	/**
 	 * 今回のスクリプト実行で利用したJDBCオブジェクト関連のクローズ処理.
-	 * @params cache
 	 */
 	@Override
-	public final void call(CompileCache cache) {
+	public final void call() {
 		clearIterator();
 		clearOperator();
 		clearLo();

@@ -7,13 +7,10 @@ import java.io.Reader;
 
 import org.mozilla.javascript.Script;
 
-import rhigin.http.HttpInfo;
 import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.RhiginContext;
 import rhigin.scripts.ScriptConstants;
-import rhigin.scripts.compile.CompileCache;
 import rhigin.scripts.function.RandomFunction;
-import rhigin.scripts.function.RequireFunction;
 import rhigin.util.Args;
 import rhigin.util.FileUtil;
 
@@ -76,12 +73,7 @@ public class RhiginBatch {
 
 	public boolean batch(RhiginConfig conf, String fileName) throws Exception {
 		// 開始処理.
-		HttpInfo httpInfo = RhiginStartup.startup(conf);
-
-		// コンパイルキャッシュ生成.
-		// コンパイルキャッシュを require命令に設定.
-		final CompileCache cache = new CompileCache(httpInfo.getCompileCacheSize(), httpInfo.getCompileCacheRootDir());
-		RequireFunction.init(cache);
+		RhiginStartup.startup(conf);
 
 		// ランダムオブジェクトをセット.
 		RandomFunction.init();
@@ -95,8 +87,8 @@ public class RhiginBatch {
 			try {
 				ExecuteScript.execute(new RhiginContext(), script);
 			} finally {
-				ExecuteScript.callEndScripts(false, cache);
-				ExecuteScript.callEndScripts(true, cache);
+				ExecuteScript.callEndScripts(false);
+				ExecuteScript.callEndScripts(true);
 				ExecuteScript.clearCurrentRhiginContext();
 			}
 			return true;

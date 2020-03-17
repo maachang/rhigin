@@ -79,7 +79,7 @@ public class Rhigin {
 				http.exitCall().call();
 			}
 			// システム終了時に呼び出す処理.
-			ExecuteScript.callEndScripts(true, null);
+			ExecuteScript.callEndScripts(true);
 			
 			// 終了ログ.
 			log.info("end shutdown Rhigin version (" + RhiginConstants.VERSION + ").");

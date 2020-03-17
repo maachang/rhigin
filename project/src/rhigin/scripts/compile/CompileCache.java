@@ -3,9 +3,13 @@ package rhigin.scripts.compile;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 
 import org.mozilla.javascript.Script;
 
+import rhigin.RhiginException;
+import rhigin.http.Http;
+import rhigin.http.HttpInfo;
 import rhigin.scripts.ExecuteScript;
 import rhigin.util.FileUtil;
 import rhigin.util.LruCache;
@@ -135,18 +139,6 @@ public class CompileCache {
 		}
 	}
 
-	// ヘッダの改行数を取得.
-	private static final int getEnterCount(String s) {
-		int ret = 0;
-		int len = s.length();
-		for (int i = 0; i < len; i++) {
-			if (s.charAt(i) == '\n') {
-				ret++;
-			}
-		}
-		return ret;
-	}
-
 	/**
 	 * キャッシュ情報をロード＆取得.
 	 * 
@@ -179,7 +171,7 @@ public class CompileCache {
 			// キャッシュ情報が無いか、キャッシュ情報が更新された場合.
 			if (ret == null || time != ret.getTime()) {
 				// データロード.
-				ret = load(c, key, jsName, time, headerScript, footerScript, 1 - getEnterCount(headerScript));
+				ret = load(c, key, jsName, time, headerScript, footerScript, 1 - ExecuteScript.getEnterCount(headerScript));
 			}
 			return ret;
 		} catch (CompileException ce) {
@@ -188,4 +180,116 @@ public class CompileCache {
 			throw new CompileException(500, e);
 		}
 	}
+	
+	/**
+	 * コンパイルキャッシュオブジェクトがNULLだった場合のスクリプト実行.
+	 * @param jsName
+	 *            ロードするファイル名を設定します.
+	 * @param headerScript
+	 *            ヘッダに追加するスクリプトを設定します.
+	 * @param footerScript
+	 *            フッタに追加するスクリプトを設定します.
+	 * @return Object eval処理結果が返却されます.
+	 * @exception CompileException
+	 *                コンパイル例外.
+	 */
+	public static final Object noCacheByEval(String jsName, String headerScript, String footerScript) {
+		Reader r = null;
+		try {
+			// 対象ファイルパスをフルパスで取得.
+			jsName = FileUtil.getFullPath(jsName);
+			// 拡張子がjsでない場合は、jsを付与.
+			if (!jsName.toLowerCase().endsWith(".js")) {
+				jsName += ".js";
+			}
+			r = new BufferedReader(new InputStreamReader(new FileInputStream(jsName), CHARSET));
+			Object ret = ExecuteScript.eval(r, jsName, headerScript, footerScript,
+				1 - ExecuteScript.getEnterCount(headerScript));
+			r.close();
+			r = null;
+			return ret;
+		} catch (Exception e) {
+			throw new CompileException(500, e);
+		} finally {
+			if(r != null) {
+				try {
+					r.close();
+				} catch(Exception e) {}
+			}
+		}
+	}
+	
+	// threadローカルでCompileCacaheを管理.
+	private static final ThreadLocal<CompileCache> threadCache = new ThreadLocal<CompileCache>();
+	private static int baseCacheSize = -1;
+	private static String baseCacheDir = null;
+	
+	/**
+	 * コンパイルキャッシュ定義をセット.
+	 * @param cacheSize
+	 * @param cacheDir
+	 */
+	public static final void setBaseCache(Integer cacheSize, String cacheDir) {
+		if(cacheSize == null || cacheSize <= 0) {
+			baseCacheSize = -1;
+		} else {
+			baseCacheSize = cacheSize;
+		}
+		if(cacheDir == null || cacheDir.isEmpty()) {
+			baseCacheDir = null;
+		} else {
+			baseCacheDir = cacheDir;
+		}
+	}
+
+	/**
+	 * コンパイルキャッシュを取得.
+	 * @return
+	 */
+	public static final CompileCache getCache() {
+		// 別スレッドを作成した場合の拡張対応.
+		CompileCache ret = threadCache.get();
+		if (ret == null) {
+			if(baseCacheSize == -1 || baseCacheDir == null) {
+				HttpInfo info = Http.getHttpInfo();
+				if (info != null) {
+					ret = new CompileCache(
+						baseCacheSize == -1 ? info.getCompileCacheSize() : baseCacheSize,
+						baseCacheDir == null ? info.getCompileCacheRootDir() : baseCacheDir);
+					threadCache.set(ret);
+				}
+			} else {
+				ret = new CompileCache(baseCacheSize, baseCacheDir);
+			}
+		}
+		return ret;
+	}
+	
+	/**
+	 * スクリプト実行.
+	 * @param jsName
+	 *            ロードするファイル名を設定します.
+	 * @param headerScript
+	 *            ヘッダに追加するスクリプトを設定します.
+	 * @param footerScript
+	 *            フッタに追加するスクリプトを設定します.
+	 * @return Object eval処理結果が返却されます.
+	 * @exception CompileException
+	 *                コンパイル例外.
+	 */
+	public static final Object eval(String jsName, String headerScript, String footerScript) {
+		try {
+			final CompileCache c = getCache();
+			if (c == null) {
+				return CompileCache.noCacheByEval(jsName, headerScript, footerScript);
+			}
+			final ScriptElement se = c.get(jsName, headerScript, footerScript);
+			return ExecuteScript.eval(se.getScript());
+		} catch (RhiginException re) {
+			throw re;
+		} catch (Exception e) {
+			throw new RhiginException(500, e);
+		}
+	}
+
 }

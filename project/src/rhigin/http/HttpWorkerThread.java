@@ -26,7 +26,6 @@ import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.ScriptConstants;
 import rhigin.scripts.compile.CompileCache;
 import rhigin.scripts.function.RandomFunction;
-import rhigin.scripts.function.RequireFunction;
 import rhigin.util.Alphabet;
 import rhigin.util.Converter;
 import rhigin.util.FileUtil;
@@ -44,7 +43,6 @@ public class HttpWorkerThread extends Thread {
 	private final int no;
 	private final Queue<HttpElement> queue;
 	private final Wait wait;
-	private final CompileCache compileCache;
 	private final MimeType mime;
 	private final byte[] tmpBuffer;
 	private final Xor128 xor128;
@@ -55,8 +53,6 @@ public class HttpWorkerThread extends Thread {
 	public HttpWorkerThread(HttpInfo info, MimeType m, int n) {
 		no = n;
 		mime = m;
-		// コンパイルキャッシュは、ワーカースレッド単位で生成する.
-		compileCache = new CompileCache(info.getCompileCacheSize(), info.getCompileCacheRootDir());
 
 		// HttpElement受付用.
 		queue = new ConcurrentLinkedQueue<HttpElement>();
@@ -115,9 +111,6 @@ public class HttpWorkerThread extends Thread {
 	public void run() {
 		LOG.info(" * start rhigin workerThread(" + no + ").");
 
-		// ワーカー単位のコンパイルキャッシュを require命令に設定.
-		RequireFunction.init(compileCache);
-
 		// ワーカー単位でランダムオブジェクトをセット.
 		RandomFunction.init(xor128);
 
@@ -144,7 +137,7 @@ public class HttpWorkerThread extends Thread {
 					}
 					if (executionRequest(em, tmpBuffer, xor128)) {
 						try {
-							executeScript(em, compileCache, mime);
+							executeScript(em, mime);
 						} finally {
 							// 大容量Body受付情報が存在する場合は、後片付けをする.
 							if (em.isHttpPostBodyFile()) {
@@ -282,7 +275,7 @@ public class HttpWorkerThread extends Thread {
 
 	/** Response処理. **/
 	@SuppressWarnings("rawtypes")
-	private static final void executeScript(HttpElement em, CompileCache cache, MimeType mime) {
+	private static final void executeScript(HttpElement em, MimeType mime) {
 		// 既に送信処理が終わっている場合.
 		if (em.isEndSend()) {
 			return;
@@ -408,7 +401,7 @@ public class HttpWorkerThread extends Thread {
 				try {
 					// スクリプトの実行.
 					ret = ExecuteScript.execute(context,
-							cache.get(path, ScriptConstants.HEADER, ScriptConstants.FOOTER).getScript());
+							CompileCache.getCache().get(path, ScriptConstants.HEADER, ScriptConstants.FOOTER).getScript());
 				} catch (Redirect redirect) {
 					redirectResponse(em, redirect);
 					return;
@@ -441,7 +434,7 @@ public class HttpWorkerThread extends Thread {
 			} finally {
 				
 				// スクリプト終了処理.
-				ExecuteScript.callEndScripts(false, cache);
+				ExecuteScript.callEndScripts(false);
 			}
 			
 		} catch (RhiginException re) {

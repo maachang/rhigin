@@ -9,13 +9,10 @@ import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
-import rhigin.http.HttpInfo;
 import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.JsonOut;
 import rhigin.scripts.RhiginContext;
-import rhigin.scripts.compile.CompileCache;
 import rhigin.scripts.function.RandomFunction;
-import rhigin.scripts.function.RequireFunction;
 import rhigin.util.Args;
 import rhigin.util.ConsoleInKey;
 
@@ -93,12 +90,7 @@ public class RhiginConsole {
 	 */
 	public void console(RhiginConfig conf, ConsoleInKey console) throws Exception {
 		// 開始処理.
-		HttpInfo httpInfo = RhiginStartup.startup(conf);
-
-		// コンパイルキャッシュ生成.
-		// コンパイルキャッシュを require命令に設定.
-		CompileCache cache = new CompileCache(httpInfo.getCompileCacheSize(), httpInfo.getCompileCacheRootDir());
-		RequireFunction.init(cache);
+		RhiginStartup.startup(conf);
 
 		// ランダムオブジェクトをセット.
 		RandomFunction.init();
@@ -142,7 +134,7 @@ public class RhiginConsole {
 						System.out.println("");
 						return;
 					} else if (cmdLineCount == 0 && ("end".equals(cmd) || "close".equals(cmd))) {
-						ExecuteScript.callEndScripts(false, cache);
+						ExecuteScript.callEndScripts(false);
 						context = new RhiginContext();
 						System.out.println("");
 						continue;
@@ -194,8 +186,8 @@ public class RhiginConsole {
 				}
 			}
 		} finally {
-			ExecuteScript.callEndScripts(false, cache);
-			ExecuteScript.callEndScripts(true, cache);
+			ExecuteScript.callEndScripts(false);
+			ExecuteScript.callEndScripts(true);
 			console.close();
 		}
 	}

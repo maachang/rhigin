@@ -5,14 +5,10 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
 import rhigin.RhiginException;
-import rhigin.http.Http;
-import rhigin.http.HttpInfo;
-import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.JavaRequire;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.ScriptConstants;
 import rhigin.scripts.compile.CompileCache;
-import rhigin.scripts.compile.ScriptElement;
 import rhigin.util.Converter;
 import rhigin.util.FixedKeyValues;
 
@@ -24,26 +20,6 @@ public final class RequireFunction extends RhiginFunction {
 
 	public static final RequireFunction getInstance() {
 		return THIS;
-	}
-
-	// threadローカルでCompileCacaheを管理.
-	private final ThreadLocal<CompileCache> cache = new ThreadLocal<CompileCache>();
-
-	protected final void setCache(CompileCache c) {
-		cache.set(c);
-	}
-
-	public final CompileCache getCache() {
-		// 別スレッドを作成した場合の拡張対応.
-		CompileCache ret = cache.get();
-		if (ret == null) {
-			HttpInfo info = Http.getHttpInfo();
-			if (info != null) {
-				ret = new CompileCache(info.getCompileCacheSize(), info.getCompileCacheRootDir());
-				cache.set(ret);
-			}
-		}
-		return ret;
 	}
 	
 	@Override
@@ -71,6 +47,7 @@ public final class RequireFunction extends RhiginFunction {
 		return "require";
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		if (args == null || args.length < 1) {
@@ -79,38 +56,22 @@ public final class RequireFunction extends RhiginFunction {
 		String path = "" + args[0];
 		// パスの先頭に[@]が存在する場合は、javaのクラス[JavaRequire]でロード.
 		if(path.startsWith("@")) {
+			// パス名は/は[.]に変換.
+			path = Converter.changeString(path.substring(1), "/", ".");
+			Class c = null;
 			try {
-				// パス名は/は[.]に変換.
-				path = Converter.changeString(path.substring(1), "/", ".");
 				// コンストラクタは引数が空のものでインスタンスで作成して、JavaRequire.loadで
 				// js用のオブジェクトを生成.
-				return ((JavaRequire)Class.forName(path).getConstructor().newInstance()).load();
+				c = Class.forName(path);
+				return ((JavaRequire)c.getConstructor().newInstance()).load();
 			} catch (Exception e) {
-				throw new RhiginException(500, e);
+				if(c == null) {
+					throw new RhiginException(500, "Failed to read the specified class: " + args[0], e);
+				}
+				throw new RhiginException(500, "The specified class is not an inherited object of 'JavaRequire': " + args[0], e);
 			}
 		}
-		try {
-			CompileCache c = getCache();
-			if (c == null) {
-				throw new RhiginException(500, "compileCache has not been set.");
-			}
-			ScriptElement se = c.get(path, HEADER_SCRIPT, FOOTER_SCRIPT);
-			return ExecuteScript.eval(se.getScript());
-		} catch (RhiginException re) {
-			throw re;
-		} catch (Exception e) {
-			throw new RhiginException(500, e);
-		}
-	}
-
-	/**
-	 * 初期化処理.
-	 * 
-	 * @param cache
-	 *            スクリプトコンパイルキャッシュを設定します.
-	 */
-	public static final void init(CompileCache cache) {
-		RequireFunction.getInstance().setCache(cache);
+		return CompileCache.eval(path, HEADER_SCRIPT, FOOTER_SCRIPT);
 	}
 
 	/**

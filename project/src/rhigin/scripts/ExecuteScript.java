@@ -18,7 +18,6 @@ import rhigin.RhiginException;
 import rhigin.RhiginStartup;
 import rhigin.logs.Log;
 import rhigin.logs.LogFactory;
-import rhigin.scripts.compile.CompileCache;
 import rhigin.scripts.function.ArgsFunction;
 import rhigin.scripts.function.Base64Functions;
 import rhigin.scripts.function.BinaryFunction;
@@ -622,21 +621,17 @@ public class ExecuteScript {
 	 * @param exitSystemFlag
 	 * @param cache
 	 */
-	public static final void callEndScripts(boolean exitSystemFlag, CompileCache cache) {
+	public static final void callEndScripts(boolean exitSystemFlag) {
 		final OList<RhiginEndScriptCall> list = exitSystemFlag ? exitSystemScriptCallList : endScriptCallList;
 		final int len = list.size();
 		if(len > 0) {
-			// システム終了時の場合は、キャッシュが無い場合は作成して処理させる.
-			if(exitSystemFlag && cache == null) {
-				cache = new CompileCache();
-			}
 			RhiginEndScriptCall n;
 			final Log log = LogFactory.create();
 			for(int i = 0; i < len; i ++) {
 				n = list.get(i);
 				if(n != null) {
 					try {
-						n.call(cache);
+						n.call();
 					} catch(Exception e) {
 						// ログ出力.
 						log.error(e);
@@ -644,5 +639,21 @@ public class ExecuteScript {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * ヘッダの改行数を取得.
+	 * @param s
+	 * @return
+	 */
+	public static final int getEnterCount(String s) {
+		int ret = 0;
+		int len = s.length();
+		for (int i = 0; i < len; i++) {
+			if (s.charAt(i) == '\n') {
+				ret++;
+			}
+		}
+		return ret;
 	}
 }
