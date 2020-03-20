@@ -39,6 +39,8 @@ public class RhiginTest {
 			System.out.println("    Set the environment name for reading the configuration.");
 			System.out.println("    For example, when `-e hoge` is specified, the configuration ");
 			System.out.println("    information under `./conf/hoge/` is read.");
+			System.out.println("  [-b] [--verbose]");
+			System.out.println("    Output the detailed result of the test content.");
 			System.out.println("  {specFileName} ... ");
 			System.out.println("    If you want to run tests individually, set the Spec file name.");
 			System.exit(0);

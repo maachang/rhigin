@@ -1,9 +1,11 @@
 // rtest の レポート出力.
 //
-module.exports = function(out, result, exitTime) {
+module.exports = function(out, result, exitTime, verbose) {
 
 var SUCCESS_COLOR = "<#green>";
+var SUCCESS_END_COLOR = "<#/green>";
 var ERROR_COLOR = "<#red>";
+var ERROR_END_COLOR = "<#/red>";
 var END_COLOR = "<#/end>";
 
 // スペースをセット.
@@ -102,19 +104,20 @@ var detailReport = function(value) {
             color = "";
             endColor = "";
         }
-        print(_cs(1) + color + "● " + endColor + value[i].name);
+        print(_cs(1) + color + "● " + value[i].name + endColor);
         print(_cs(3) + res[0] + " spec, " + color + res[1] + " failures" + endColor);
         print(_cs(3) + " Finished in " + _sec(res[2]) + " seconds");
 
         var lenJ = value[i].result.length;
         for(var j = 0; j < lenJ; j ++) {
-            detailDetailReport(3 + 2, value[i].result[j]);
+            detailDetailReport(false, 3 + 2, value[i].result[j]);
         }
     }
 }
 
 // 処理内容を其々出力.
-var detailDetailReport = function(space, value) {
+var detailDetailReport = function(verboseFlag, space, value) {
+    verboseFlag = !verboseFlag ? verbose : verboseFlag;
     var print, noLinePrint, color, endColor, head;
     if(value.errFlg) {
         print = out.errPrintln;
@@ -130,6 +133,7 @@ var detailDetailReport = function(space, value) {
         head = SUCCESS_COLOR + " ○ " + END_COLOR;
     }
     if(value.type != 2) {
+        var errFlg = false;
         var list = value.inner;
         var len = list == null || list == undefined ?  0 : list.length;
         // describe(0)
@@ -137,25 +141,39 @@ var detailDetailReport = function(space, value) {
             print(_cs(space) + color + "[" + value.name + "]\r\n" + _cs(space) + " Finished in " + _sec(value.time) + " seconds" + endColor);
         // it(1).
         } else if(len > 0) {
-            noLinePrint(_cs(space) + color + "(" + value.name + ")" + endColor);
+            var successCount = 0;
+            var errorCount = 0;
             for(var i = 0; i < len; i ++) {
                 if(list[i].type == 2) {
                     if(list[i].error > 0) {
-                        noLinePrint(ERROR_COLOR + " ✖" + END_COLOR);
+                        errorCount ++;
                     } else {
-                        noLinePrint(SUCCESS_COLOR + " ○" + END_COLOR);
+                        successCount ++;
                     }
                 }
+            }
+            noLinePrint(_cs(space) + color +
+                (errorCount > 0 ? ERROR_COLOR + "✖ " + ERROR_END_COLOR : SUCCESS_COLOR + "○ " + SUCCESS_END_COLOR) +
+                "(" + value.name + ")" + endColor);
+            if(successCount > 0) {
+                noLinePrint(SUCCESS_COLOR + " ○ = " + successCount + END_COLOR);
+            }
+            if(errorCount > 0) {
+                noLinePrint(ERROR_COLOR + " ✖ = " + errorCount + END_COLOR);
+                errFlg = true;
             }
             print("");
         }
         for(var i = 0; i < len; i ++) {
-            detailDetailReport(space + 2, list[i]);
+            detailDetailReport(errFlg, space + 2, list[i]);
         }
         return;
     }
     // expect(2)
-    print(_cs(space) + color + head + value.name + endColor);
+    // verboseがONもしくはエラーがある場合は表示.
+    if(verboseFlag) {
+        print(_cs(space) + color + head + value.name + endColor);
+    }
 }
 
 // 全処理結果の件数を取得.

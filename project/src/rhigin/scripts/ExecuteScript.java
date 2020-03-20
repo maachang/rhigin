@@ -18,7 +18,7 @@ import rhigin.RhiginException;
 import rhigin.RhiginStartup;
 import rhigin.logs.Log;
 import rhigin.logs.LogFactory;
-import rhigin.scripts.function.ArgsFunction;
+import rhigin.scripts.function.ArgsFunctions;
 import rhigin.scripts.function.Base64Functions;
 import rhigin.scripts.function.BinaryFunction;
 import rhigin.scripts.function.CheckFunctions;
@@ -47,7 +47,9 @@ import rhigin.scripts.objects.FCipherObject;
 import rhigin.scripts.objects.FCompObject;
 import rhigin.scripts.objects.FileObject;
 import rhigin.scripts.objects.FunctionObject;
+import rhigin.scripts.objects.JArrayObject;
 import rhigin.scripts.objects.JDateObject;
+import rhigin.scripts.objects.JMapObject;
 import rhigin.scripts.objects.JSONObject;
 import rhigin.scripts.objects.JavaObject;
 import rhigin.scripts.objects.JwtObject;
@@ -171,6 +173,8 @@ public class ExecuteScript {
 		ColorOutObject.regFunctions(scope);
 		ExecCmdObject.regFunctions(scope);
 		JavaObject.regFunctions(scope);
+		JArrayObject.regFunctions(scope);
+		JMapObject.regFunctions(scope);
 
 		// rhigin用の基本オブジェクトを設定.
 		RequireFunction.regFunctions(scope);
@@ -183,7 +187,7 @@ public class ExecuteScript {
 		GetClassFunction.regFunctions(scope);
 		SleepFunction.regFunctions(scope);
 		GetEnvFunction.regFunctions(scope);
-		ArgsFunction.regFunctions(scope);
+		ArgsFunctions.regFunctions(scope);
 		RandomFunction.regFunctions(scope);
 		Base64Functions.regFunctions(scope);
 		CheckFunctions.regFunctions(scope);

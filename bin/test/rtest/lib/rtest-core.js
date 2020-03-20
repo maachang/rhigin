@@ -183,10 +183,11 @@ var _checkType = function(value, check) {
 var _viewParam = function(v) {
     if(v == null) {
         return "null";
-    } else if(v == undefined) {
-        return "undefined";
     }
     var t = typeof(v);
+    if(t == "undefined") {
+        return "undefined";
+    }
     if(t == "number" || t == "boolean") {
         return "" + v;
     } else if(t == "string") {
@@ -219,7 +220,7 @@ var _viewParam = function(v) {
         }
         return "'" + v + "'";
     } else if(t == "object") {
-        if(v instanceof Array) {
+        if(Array.isArray(v)) {
             if(v.length == 2 && v[0] == _any) {
                 return "types any(" + v[1] + ")";
             }
@@ -237,8 +238,8 @@ var _viewParam = function(v) {
 var _viewParams = function(v) {
     var ret = "";
     var len = v.length;
-    for(var i = 3; i < len; i ++) {
-        if(i != 3) {
+    for(var i = 4; i < len; i ++) {
+        if(i != 4) {
             ret += ", ";
         }
         ret += _viewParam(v[i]);
@@ -247,22 +248,22 @@ var _viewParams = function(v) {
 }
 
 // expectの判別結果をセット.
-var _result = function(name, notFlg, successFlg) {
+var _result = function(name, comment, notFlg, successFlg) {
     _now.push({
         // expect.
         type: 2,
-        name: (notFlg ? "not." + name : name) + "(" + _viewParams(arguments) + ")",
+        name: (notFlg ? "not." + name : name) + "(" + _viewParams(arguments) + ")" + (comment == "" ? "" : " ● " + comment),
         success: (successFlg && !notFlg) || (!successFlg && notFlg) ? 1 : 0,
         error: (!successFlg && !notFlg) || (successFlg && notFlg) ? 1 : 0
     });
 }
 
 // expectの例外結果をセット.
-var _error = function(name, notFlg) {
+var _error = function(name, comment, notFlg) {
     _now.push({
         // expect.
         type: 2,
-        name: (notFlg ? "not." + name : name),
+        name: (notFlg ? "not." + name : name) + (comment == "" ? "" : " ● " + comment),
         success: 0,
         error: 1
     });
@@ -380,7 +381,7 @@ var it = function(name, func) {
         // エラーの結果をセット.
         _result(
             ["beforeEach","it","afterEach"][errType] +
-            ":exception", false, false, e);
+            ":exception", "", false, false, e);
     }
     _nowIt.time = parseInt(Date.now() - startTime);
     _nowIt = null;
@@ -391,10 +392,9 @@ var it = function(name, func) {
 var _equal = function(src, v) {
     if(src == v) {
         return true;
-    }
-    if(typeof(src) == "object" && typeof(v) == "object") {
-        if(src instanceof Array) {
-            if(v instanceof Array) {
+    } else if(typeof(src) == "object" && typeof(v) == "object") {
+        if(Array.isArray(src)) {
+            if(Array.isArray(v)) {
                 return _eqArray(src, v);
             }
         } else if((src instanceof Date || src instanceof JDate) &&
@@ -406,6 +406,8 @@ var _equal = function(src, v) {
     }
     return false;
 }
+
+// オブジェクトのディープチェック.
 var _eqObject = function(src, v) {
     var cnt = 0;
     for(var k in src) {
@@ -420,6 +422,8 @@ var _eqObject = function(src, v) {
     }
     return cnt == vCnt;
 }
+
+// 配列のディープチェック.
 var _eqArray = function(src, v) {
     var len = src.length;
     if(len != v.length) {
@@ -440,242 +444,274 @@ var expect = function(value) {
     }
     var o = {};
     o["_$not"] = false;
-    // not.
+    o["_$comment"] = "";
+    // 判定を逆にする.
     o.not = function() {
         o["_$not"] = !o["_$not"];
         return o;
     }
+    // コメントをセット.
+    o.comment = function(c) {
+        if(c == null || c == undefined) {
+            c = "";
+        } else {
+            c = "" + c;
+        }
+        o["_$comment"] = c;
+        return o;
+    }
     // value === v であるか.
     o.toBe = function(v) {
+        var cmt = o["_$comment"]; o["_$comment"] = "";
         try {
             var typeCheck = _checkType(value, v);
             if(typeCheck != null) {
                 if(typeCheck) {
-                    _result("toEqual", o["_$not"], true, value, v);
+                    _result("toEqual", cmt, o["_$not"], true, value, v);
                 } else {
-                    _result("toEqual", o["_$not"], false, value, v);
+                    _result("toEqual", cmt, o["_$not"], false, value, v);
                 }
             } else {
                 if(v === value) {
-                    _result("toBe", o["_$not"], true, value, v);
+                    _result("toBe", cmt, o["_$not"], true, value, v);
                 } else {
-                    _result("toBe", o["_$not"], false, value, v);
+                    _result("toBe", cmt, o["_$not"], false, value, v);
                 }
             }
         } catch(e) {
-            _error("toBe", o["_$not"]);
+            _error("toBe", cmt, o["_$not"]);
         }
         return o;
     };
     // value の中身と v が完全一致であるか.
     o.toEqual = function(v) {
+        var cmt = o["_$comment"]; o["_$comment"] = "";
         try {
             var typeCheck = _checkType(value, v);
             if(typeCheck != null) {
                 if(typeCheck) {
-                    _result("toEqual", o["_$not"], true, value, v);
+                    _result("toEqual", cmt, o["_$not"], true, value, v);
                 } else {
-                    _result("toEqual", o["_$not"], false, value, v);
+                    _result("toEqual", cmt, o["_$not"], false, value, v);
                 }
             } else {
                 if(_equal(v, value)) {
-                    _result("toEqual", o["_$not"], true, value, v);
+                    _result("toEqual", cmt, o["_$not"], true, value, v);
                 } else {
-                    _result("toEqual", o["_$not"], false, value, v);
+                    _result("toEqual", cmt, o["_$not"], false, value, v);
                 }
             }
         } catch(e) {
-            _error("toEqual", o["_$not"]);
+            _error("toEqual", cmt, o["_$not"]);
         }
         return o;
     }
     o.toEquals = o.toEqual;
     // 文字列が正規表現にマッチするか.
     o.toMatch = function(v) {
+        var cmt = o["_$comment"]; o["_$comment"] = "";
         try {
             if(v.mache("" + value) != null) {
-                _result("toMatch", o["_$not"], true, value, v);
+                _result("toMatch", cmt, o["_$not"], true, value, v);
             } else {
-                _result("toMatch", o["_$not"], false, value, v);
+                _result("toMatch", cmt, o["_$not"], false, value, v);
             }
         } catch(e) {
-            _error("toMatch", o["_$not"]);
+            _error("toMatch", cmt, o["_$not"]);
         }
         return o;
     }
     // valueが存在するか.
     o.toExist = function() {
+        var cmt = o["_$comment"]; o["_$comment"] = "";
         try {
             if(value != null && typeof(value) != "undefined") {
-                _result("toExist", o["_$not"], true, value);
+                _result("toExist", cmt, o["_$not"], true, value);
             } else {
-                _result("toExist", o["_$not"], false, value);
+                _result("toExist", cmt, o["_$not"], false, value);
             }
         } catch(e) {
-            _error("toExist", o["_$not"]);
+            _error("toExist", cmt, o["_$not"]);
         }
         return o;
     }
     // valueが定義済みか.
     o.toBeDefined = function() {
+        var cmt = o["_$comment"]; o["_$comment"] = "";
         try {
             if(typeof(value) != "undefined") {
-                _result("toBeDefined", o["_$not"], true, value);
+                _result("toBeDefined", cmt, o["_$not"], true, value);
             } else {
-                _result("toBeDefined", o["_$not"], false, value);
+                _result("toBeDefined", cmt, o["_$not"], false, value);
             }
         } catch(e) {
-            _error("toBeDefined", o["_$not"]);
+            _error("toBeDefined", cmt, o["_$not"]);
         }
         return o;
     }
     // valueが未定義か.
     o.toBeUndefined = function() {
+        var cmt = o["_$comment"]; o["_$comment"] = "";
         try {
-            if(typeof(value) != "undefined") {
-                _result("toBeUndefined", o["_$not"], true, value);
+            if(typeof(value) == "undefined") {
+                _result("toBeUndefined", cmt, o["_$not"], true, value);
             } else {
-                _result("toBeUndefined", o["_$not"], false, value);
+                _result("toBeUndefined", cmt, o["_$not"], false, value);
             }
         } catch(e) {
-            _error("toBeUndefined", o["_$not"]);
+            _error("toBeUndefined", cmt, o["_$not"]);
         }
         return o;
     }
     // valueがnullか.
     o.toBeNull = function() {
+        var cmt = o["_$comment"]; o["_$comment"] = "";
         try {
             if(value == null) {
-                _result("toBeNull", o["_$not"], true, value);
+                _result("toBeNull", cmt, o["_$not"], true, value);
             } else {
-                _result("toBeNull", o["_$not"], false, value);
+                _result("toBeNull", cmt, o["_$not"], false, value);
             }
         } catch(e) {
-            _error("toBeNull", o["_$not"]);
+            _error("toBeNull", cmt, o["_$not"]);
         }
         return o;
     }
     // valueが false 相当の値か（false, 0, 空文字列など）.
     o.toBeFalsy = function() {
+        var cmt = o["_$comment"]; o["_$comment"] = "";
         try {
             if(!!!value) {
-                _result("toBeFalsy", o["_$not"], true, value);
+                _result("toBeFalsy", cmt, o["_$not"], true, value);
             } else {
-                _result("toBeFalsy", o["_$not"], false, value);
+                _result("toBeFalsy", cmt, o["_$not"], false, value);
             }
         } catch(e) {
-            _error("toBeFalsy", o["_$not"]);
+            _error("toBeFalsy", cmt, o["_$not"]);
         }
         return o;
     }
     // valueが true 相当の値か（true, 1, “a” など）.
     o.toBeTruthy = function() {
+        var cmt = o["_$comment"]; o["_$comment"] = "";
         try {
             if(!!value) {
-                _result("toBeTruthy", o["_$not"], true, value);
+                _result("toBeTruthy", cmt, o["_$not"], true, value);
             } else {
-                _result("toBeTruthy", o["_$not"], false, value);
+                _result("toBeTruthy", cmt, o["_$not"], false, value);
             }
         } catch(e) {
-            _error("toBeTruthy", o["_$not"]);
+            _error("toBeTruthy", cmt, o["_$not"]);
         }
         return o;
     }
     // valueが false か.
     o.toBeFalse = function() {
+        var cmt = o["_$comment"]; o["_$comment"] = "";
         try {
             if(value === false) {
-                _result("toBeFalsy", o["_$not"], true, value);
+                _result("toBeFalsy", cmt, o["_$not"], true, value);
             } else {
-                _result("toBeFalsy", o["_$not"], false, value);
+                _result("toBeFalsy", cmt, o["_$not"], false, value);
             }
         } catch(e) {
-            _error("toBeFalsy", o["_$not"]);
+            _error("toBeFalsy", cmt, o["_$not"]);
         }
         return o;
     }
     // valueが true か.
     o.toBeTrue = function() {
+        var cmt = o["_$comment"]; o["_$comment"] = "";
         try {
             if(value === true) {
-                _result("toBeTruthy", o["_$not"], true, value);
+                _result("toBeTruthy", cmt, o["_$not"], true, value);
             } else {
-                _result("toBeTruthy", o["_$not"], false, value);
+                _result("toBeTruthy", cmt, o["_$not"], false, value);
             }
         } catch(e) {
-            _error("toBeTruthy", o["_$not"]);
+            _error("toBeTruthy", cmt, o["_$not"]);
         }
         return o;
     }
     // valueが NaN か.
     o.toBeNaN = function() {
+        var cmt = o["_$comment"]; o["_$comment"] = "";
         try {
             if(isNaN(value)) {
-                _result("toBeFalsy", o["_$not"], true, value);
+                _result("toBeFalsy", cmt, o["_$not"], true, value);
             } else {
-                _result("toBeFalsy", o["_$not"], false, value);
+                _result("toBeFalsy", cmt, o["_$not"], false, value);
             }
         } catch(e) {
-            _error("toBeFalsy", o["_$not"]);
+            _error("toBeFalsy", cmt, o["_$not"]);
         }
         return o;
     }
     // value が配列で、指定された値を含んでいるか.
     o.toContain = function(eq) {
+        var cmt = o["_$comment"]; o["_$comment"] = "";
         try {
             var res;
             if(value == null || value == undefined) {
                 res = -1;
-            } else if(value instanceof Array) {
-                res = value.indexOf(eq);
+            } else if(vArray.isArray(value)) {
+                var len = value.length;
+                for(var i = 0; i < len; i ++) {
+                    if(eq == value.get(i)) {
+                        res = i;
+                    }
+                }
             } else {
                 res = -1;
             }
             if(res != -1) {
-                _result("toContain", o["_$not"], true, value, eq);
+                _result("toContain", cmt, o["_$not"], true, value, eq);
             } else {
-                _result("toContain", o["_$not"], false, value, eq);
+                _result("toContain", cmt, o["_$not"], false, value, eq);
             }
         } catch(e) {
-            _error("toContain", o["_$not"]);
+            _error("toContain", cmt, o["_$not"]);
         }
         return o;
     }
     // value < n であるか.
     o.toBeLessThan = function(n) {
+        var cmt = o["_$comment"]; o["_$comment"] = "";
         try {
             if(value < n) {
-                _result("toBeLessThan", o["_$not"], true, value, n);
+                _result("toBeLessThan", cmt, o["_$not"], true, value, n);
             } else {
-                _result("toBeLessThan", o["_$not"], false, value, n);
+                _result("toBeLessThan", cmt, o["_$not"], false, value, n);
             }
         } catch(e) {
-            _error("toBeLessThan", o["_$not"]);
+            _error("toBeLessThan", cmt, o["_$not"]);
         }
         return o;
     }
     // value > n であるか.
     o.toBeGreaterThan = function(n) {
+        var cmt = o["_$comment"]; o["_$comment"] = "";
         try {
             if(value > n) {
-                _result("toBeLessThan", o["_$not"], true, value, n);
+                _result("toBeLessThan", cmt, o["_$not"], true, value, n);
             } else {
-                _result("toBeLessThan", o["_$not"], false, value, n);
+                _result("toBeLessThan", cmt, o["_$not"], false, value, n);
             }
         } catch(e) {
-            _error("toBeLessThan", o["_$not"]);
+            _error("toBeLessThan", cmt, o["_$not"]);
         }
         return o;
     }
     // 小数が有効数字 c ケタで n に等しいか.
     o.toBeCloseTo = function(n, c) {
+        var cmt = o["_$comment"]; o["_$comment"] = "";
         try {
             var n0, ne, p;
             n = "" + parseInt(n);
             c = parseInt(c);
             var nn = "" + parseFloat(value);
             if(nn == "NaN") {
-                _error("toBeCloseTo", o["_$not"]);
+                _error("toBeCloseTo", cmt, o["_$not"]);
                 return;
             }
             if((p = nn.indexOf(".")) == -1) {
@@ -687,42 +723,43 @@ var expect = function(value) {
             }
             if(c == 0) {
                 if(n0 == n) {
-                    _result("toBeCloseTo", o["_$not"], true, value, n, c);
+                    _result("toBeCloseTo", cmt, o["_$not"], true, value, n, c);
                 } else {
-                    _result("toBeCloseTo", o["_$not"], false, value, n, c);
+                    _result("toBeCloseTo", cmt, o["_$not"], false, value, n, c);
                 }
             } else {
                 if(ne.substring(c-1, c) == n) {
-                    _result("toBeCloseTo", o["_$not"], true, value, n, c);
+                    _result("toBeCloseTo", cmt, o["_$not"], true, value, n, c);
                 } else {
-                    _result("toBeCloseTo", o["_$not"], false, value, n, c);
+                    _result("toBeCloseTo", cmt, o["_$not"], false, value, n, c);
                 }
             }
         } catch(e) {
-            _error("toBeCloseTo", o["_$not"]);
+            _error("toBeCloseTo", cmt, o["_$not"]);
         }
         return o;
     }
     // 関数 value が何らかの例外を投げることを期待.
     o.toThrow = function(t) {
+        var cmt = o["_$comment"]; o["_$comment"] = "";
         if(typeof(value) != "function") {
-            _error("toThrow", o["_$not"]);
+            _error("toThrow", cmt, o["_$not"]);
         } else if(typeof(t) == "undefined") {
             try {
                 value();
-                _result("toThrow", o["_$not"], false, value, t);
+                _result("toThrow", cmt, o["_$not"], false, value, t);
             } catch(e) {
-                _result("toThrow", o["_$not"], true, value, t);
+                _result("toThrow", cmt, o["_$not"], true, value, t);
             }
         } else {
             try {
                 value();
-                _result("toThrow", o["_$not"], false, value, t);
+                _result("toThrow", cmt, o["_$not"], false, value, t);
             } catch(e) {
                 if(e == t) {
-                    _result("toThrow", o["_$not"], true, value, t);
+                    _result("toThrow", cmt, o["_$not"], true, value, t);
                 } else {
-                    _result("toThrow", o["_$not"], false, value, t);
+                    _result("toThrow", cmt, o["_$not"], false, value, t);
                 }
             }
         }

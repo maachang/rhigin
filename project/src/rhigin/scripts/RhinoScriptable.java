@@ -60,7 +60,7 @@ public interface RhinoScriptable extends Scriptable {
 	
 	@Override
 	default String getClassName() {
-		return "";
+		return "Object";
 	}
 
 	@Override
@@ -96,7 +96,7 @@ public interface RhinoScriptable extends Scriptable {
 	@Override
 	default boolean hasInstance(Scriptable instance) {
 		if(instance != null) {
-			return this.getClassName() == instance.getClassName();
+			return this.getClassName().equals(instance.getClassName());
 		}
 		return false;
 	}

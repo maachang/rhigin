@@ -91,7 +91,10 @@ public class GetEnvFunction extends RhiginFunction {
 	}
 
 	@Override
-	public boolean hasInstance(Scriptable arg0) {
+	public boolean hasInstance(Scriptable instance) {
+		if(instance != null) {
+			return this.getClassName().equals(instance.getClassName());
+		}
 		return false;
 	}
 

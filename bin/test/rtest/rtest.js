@@ -162,11 +162,14 @@ for(var i = 0; i < len; i ++) {
 // 終了時間を取得.
 var exitTime = Date.now() - startTime;
 
+// 詳細表示を行うか取得.
+var verbose = argsValue("-b", "--verbose");
+
 // レポートを取得.
 var report = require(`${RTEST_LIB_DIR}/rtest-report`);
 
 // レポート表示.
-var successResult =  report(out, result, exitTime);
+var successResult = report(out, result, exitTime, verbose);
 
 // 処理結果を返却.
 return successResult;

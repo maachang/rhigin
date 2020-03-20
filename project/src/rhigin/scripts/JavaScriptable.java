@@ -139,7 +139,15 @@ public class JavaScriptable {
 
 		@Override
 		public String getClassName() {
-			return "jmap";
+			return "Map";
+		}
+		
+		@Override
+		public boolean hasInstance(Scriptable instance) {
+			if(instance != null) {
+				return "JMap".equals(instance.getClassName());
+			}
+			return false;
 		}
 
 		@Override
@@ -238,7 +246,15 @@ public class JavaScriptable {
 
 		@Override
 		public String getClassName() {
-			return "jlist";
+			return "Array";
+		}
+
+		@Override
+		public boolean hasInstance(Scriptable instance) {
+			if(instance != null) {
+				return "JArray".equals(instance.getClassName());
+			}
+			return false;
 		}
 
 		@Override
@@ -1353,11 +1369,6 @@ public class JavaScriptable {
 			srcMap.putAll(arg0);
 		}
 		
-		@Override
-		public String getClassName() {
-			return "WrapMap";
-		}
-		
 		public java.util.Map rawData() {
 			return srcMap;
 		}
@@ -1418,11 +1429,6 @@ public class JavaScriptable {
 		@Override
 		public boolean isEmpty() {
 			return srcList.isEmpty();
-		}
-
-		@Override
-		public String getClassName() {
-			return "WrapList";
 		}
 		
 		@Override
@@ -1491,11 +1497,6 @@ public class JavaScriptable {
 			return size() == 0;
 		}
 
-		@Override
-		public String getClassName() {
-			return "ReadArray";
-		}
-		
 		@Override
 		public Object unwrap() {
 			return array;

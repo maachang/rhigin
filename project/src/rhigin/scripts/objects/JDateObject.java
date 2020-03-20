@@ -106,7 +106,7 @@ public class JDateObject extends RhiginFunction {
 		}
 		@Override
 		public String getClassName() {
-			return this.name;
+			return OBJECT_NAME;
 		}
 		@Override
 		public String toString() {
@@ -150,7 +150,7 @@ public class JDateObject extends RhiginFunction {
 		@Override
 		public boolean hasInstance(Scriptable instance) {
 			if(instance != null) {
-				return this.getClassName() == instance.getClassName();
+				return this.getClassName().equals(instance.getClassName());
 			}
 			return false;
 		}
@@ -474,6 +474,16 @@ public class JDateObject extends RhiginFunction {
 	@Override
 	public Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		return Undefined.instance;
+	}
+
+	@Override
+	public boolean hasInstance(Scriptable instance) {
+		if(instance != null) {
+			return instance instanceof JDateInstanceObject ||
+				instance instanceof JDateObject ||
+				"JDate".equals(instance.getClassName());
+		}
+		return false;
 	}
 
 	/**
