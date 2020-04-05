@@ -3,8 +3,62 @@
 # rhiginとコンポーネントに関係するプロジェクトの全コンパイル.
 ################################################################################
 
+# 現在のパスを保持.
+NOW_PATH=` pwd`
+
+# projectパス.
+PROJECT_PATH="${RHIGIN_HOME}/../../"
+
+# objectpackプロジェクト を clone.
+OBJECT_PACK_PATH="${RHIGIN_HOME}/../../objectpack"
+
+# objectpackのプロジェクトフォルダが存在するかチェック.
+if [ -f ${OBJECT_PACK_PATH}/build.xml ]; then
+    # 存在する場合は何もしない.
+    echo ""
+else
+    # 存在しない場合は、gitからclone.
+    cd ${PROJECT_PATH}
+    git clone https://github.com/maachang/objectpack.git
+    if [ $? != 0 ]; then
+        cd ${NOW_PATH}
+        exit 1
+    fi
+fi
+
+# objectpackパスに移動.
+cd ${OBJECT_PACK_PATH}
+if [ $? != 0 ]; then
+    cd ${NOW_PATH}
+    echo "The specified leveldb path does not exist: ${OBJECT_PACK_PATH}"
+    exit 1
+fi
+
+# objectpackをコンパイル.
+ant clean
+ant
+if [ $? != 0 ]; then
+    cd ${NOW_PATH}
+    exit 1
+fi
+
+# 削除 or コピー.
+rm -Rf ${PROJECT_PATH}/rhigin/project/lib/objectpack-*.jar
+rm -Rf ${RHIGIN_HOME}/lib/objectpack-*.jar
+cp objectpack-*.jar ${PROJECT_PATH}/rhigin/project/lib/
+cp objectpack-*.jar ${RHIGIN_HOME}/lib/
+cd ${NOW_PATH}
+
 # rhiginのコンパイル.
+ant clean
 ant
 
 # leveljs に対するleveldbプロジェクトのコンパイル.
 sh components/leveljs/libjar
+if [ $? != 0 ]; then
+    cd ${NOW_PATH}
+    exit 1
+fi
+
+cd ${NOW_PATH}
+exit 0

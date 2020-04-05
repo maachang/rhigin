@@ -98,8 +98,14 @@ public class SequenceOperator extends SearchOperator {
 	}
 	
 	@Override
-	protected OperateIterator _index(Lock lock, LevelIndexIterator itr) {
-		return new IndexIterator(lock, itr);
+	protected OperateIterator _index(Lock lock, LevelIndexIterator itr, Comparable endKey, String[] columns) {
+		if(endKey == null) {
+			return new IndexIterator(lock, itr, null, null);
+		} else if(endKey instanceof String) {
+			return new IndexIterator(lock, itr, (String)endKey, columns);
+		} else {
+			throw new LevelJsException("Range end key specification must be a string.");
+		}
 	}
 	
 	@Override
@@ -140,9 +146,12 @@ public class SequenceOperator extends SearchOperator {
 		private Object nextValue;
 		
 		private Lock lock;
+		private boolean reverse;
+		private JsMap nextMap;
 		
 		public SearchIterator(Lock lk, LevelIterator it, String e) {
 			src = it;
+			reverse = it.isReverse();
 			end = e;
 			exitFlag = false;
 			
@@ -179,12 +188,7 @@ public class SequenceOperator extends SearchOperator {
 		 * @return
 		 */
 		public boolean isDesc() {
-			lock.lock();
-			try {
-				return src.isReverse();
-			} finally {
-				lock.unlock();
-			}
+			return reverse;
 		}
 		
 		/**
@@ -228,7 +232,12 @@ public class SequenceOperator extends SearchOperator {
 			} finally {
 				lock.unlock();
 			}
-			return new JsMap((Map)ret);
+			if(nextMap == null) {
+				nextMap = new JsMap(ret);
+			} else {
+				nextMap.set(ret);
+			}
+			return nextMap;
 		}
 		
 		private boolean _next() {
@@ -240,7 +249,10 @@ public class SequenceOperator extends SearchOperator {
 			}
 			nextValue = src.next();
 			nextKey = (String)src.getKey();
-			if(end != null && end.compareTo(nextKey) <= 0) {
+			// range検索の場合.
+			if(end != null &&
+				((!reverse && end.compareTo(nextKey) <= 0) ||
+				(reverse && end.compareTo(nextKey) >= 0))) {
 				// 終端を検出.
 				exitFlag = true;
 			}
@@ -251,31 +263,25 @@ public class SequenceOperator extends SearchOperator {
 	// indexIterator.
 	private static final class IndexIterator implements OperateIterator {
 		private LevelIndexIterator src;
-		private Lock lock;
+		private Comparable end;
+		private String[] columns;
 		
-		public IndexIterator(Lock lk, LevelIndexIterator s) {
+		private boolean exitFlag;
+		private String beforeKey;
+		private String nextKey;
+		private Object nextValue;
+		
+		private Lock lock;
+		private boolean reverse;
+		private JsMap nextMap;
+		
+		public IndexIterator(Lock lk, LevelIndexIterator s, String e, String[] c) {
 			src = s;
+			reverse = s.isReverse();
+			end = e;
+			columns = c;
 			lock = lk;
-		}
-
-		@Override
-		public boolean hasNext() {
-			lock.lock();
-			try {
-				return src.hasNext();
-			} finally {
-				lock.unlock();
-			}
-		}
-
-		@Override
-		public Map next() {
-			lock.lock();
-			try {
-				return src.next();
-			} finally {
-				lock.unlock();
-			}
+			exitFlag = false;
 		}
 
 		@Override
@@ -283,6 +289,7 @@ public class SequenceOperator extends SearchOperator {
 			lock.lock();
 			try {
 				src.close();
+				exitFlag = true;
 			} finally {
 				lock.unlock();
 			}
@@ -300,27 +307,77 @@ public class SequenceOperator extends SearchOperator {
 
 		@Override
 		public boolean isDesc() {
+			return reverse;
+		}
+
+		@Override
+		public Object key() {
+			return new FixedArray(beforeKey);
+		}
+		
+		@Override
+		public boolean hasNext() {
 			lock.lock();
 			try {
-				return src.isReverse();
+				return _next();
 			} finally {
 				lock.unlock();
 			}
 		}
 
 		@Override
-		public Object key() {
-			Object o;
+		public Map next() {
+			Object ret;
 			lock.lock();
 			try {
-				o = src.getKey();
+				if(nextKey == null && nextValue == null) {
+					if(!_next()) {
+						throw new NoSuchElementException();
+					}
+				}
+				beforeKey = nextKey;
+				ret = nextValue;
+				nextKey = null; nextValue = null;
 			} finally {
 				lock.unlock();
 			}
-			if(o == null || !(o instanceof byte[])) {
-				return new FixedArray(null);
+			if(nextMap == null) {
+				nextMap = new JsMap(ret);
+			} else {
+				nextMap.set(ret);
 			}
-			return new FixedArray(Time12SequenceId.toString((byte[])o));
+			return nextMap;
+		}
+		
+		@SuppressWarnings("unchecked")
+		private boolean _next() {
+			while(true) {
+				if(exitFlag || src.isClose() || !src.hasNext()) {
+					close();
+					return false;
+				} else if(nextKey != null && nextValue != null) {
+					return true;
+				}
+				nextValue = src.next();
+				final Object checkKey = SearchOperator._indexColumns(nextValue, columns);
+				if(checkKey == null) {
+					continue;
+				}
+				Object o = src.getKey();
+				if(o == null || !(o instanceof byte[])) {
+					nextKey = null;
+				} else {
+					nextKey = Time12SequenceId.toString((byte[])o);
+				}
+				// range検索の場合.
+				if(end != null &&
+					((!reverse && end.compareTo(checkKey) <= 0) ||
+					(reverse && end.compareTo(checkKey) >= 0))) {
+					// 終端を検出.
+					exitFlag = true;
+				}
+				return true;
+			}
 		}
 	}
 }

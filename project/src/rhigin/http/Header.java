@@ -149,7 +149,7 @@ public class Header extends JavaScriptable.Map
 				return null;
 			}
 		}
-		int p = Alphabet.indexOf(headersString, key + ": ");
+		int p = Alphabet.indexOf(headersString, key + ":");
 		if (p == -1) {
 			return null;
 		}
@@ -157,7 +157,7 @@ public class Header extends JavaScriptable.Map
 		if (end == -1) {
 			return null;
 		}
-		return headersString.substring(p + key.length() + 2, end);
+		return headersString.substring(p + key.length() + 1, end).trim();
 	}
 
 	public List<String> getHeaders() throws IOException {
@@ -172,9 +172,9 @@ public class Header extends JavaScriptable.Map
 		int p;
 		int b = 0;
 		List<String> ret = new ArrayList<String>();
-		while ((p = headersString.indexOf(": ", b)) != -1) {
+		while ((p = Alphabet.indexOf(headersString, ":", b)) != -1) {
 			ret.add(headersString.substring(b, p));
-			b = p + 2;
+			b = p + 1;
 			p = headersString.indexOf("\r\n", b);
 			if (p == -1) {
 				break;

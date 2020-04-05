@@ -197,7 +197,7 @@ public class HttpWorkerThread extends Thread {
 		if (Alphabet.eq("options", method)) {
 
 			// Optionsレスポンス.
-			sendOptions(em);
+			sendOptions(request.isMinHeader(), em);
 			return false;
 		}
 		// POSTの場合は、ContentLength分の情報を取得.
@@ -280,9 +280,10 @@ public class HttpWorkerThread extends Thread {
 		if (em.isEndSend()) {
 			return;
 		}
+		Request req = em.getRequest();
+		boolean minHeader = req.isMinHeader();
+		em.setRequest(null);
 		try {
-			Request req = em.getRequest();
-			em.setRequest(null);
 
 			// gzipに対応しているかチェック.
 			boolean gzip = isGzip(req);
@@ -354,12 +355,12 @@ public class HttpWorkerThread extends Thread {
 					}
 					if (!useFlag) {
 						// 存在しない場合.
-						errorResponse(em, 404);
+						errorResponse(minHeader, em, 404);
 					} else {
 						// 存在する場合は、ファイル転送.
 						Response res = new Response();
 						res.setStatus(200);
-						sendFile(gzip, path, em, mime, 200, res);
+						sendFile(minHeader, gzip, path, em, mime, 200, res);
 					}
 					return;
 				}
@@ -403,7 +404,7 @@ public class HttpWorkerThread extends Thread {
 					ret = ExecuteScript.execute(context,
 							CompileCache.getCache().get(path, ScriptConstants.HEADER, ScriptConstants.FOOTER).getScript());
 				} catch (Redirect redirect) {
-					redirectResponse(em, redirect);
+					redirectResponse(minHeader, em, redirect);
 					return;
 				} catch (RhiginException rhiginException) {
 					// HTTPステータスが500エラー以上の場合のみ、エラー表示.
@@ -411,7 +412,7 @@ public class HttpWorkerThread extends Thread {
 						// スクリプトエラーを表示.
 						LOG.error("scriptError:" + req.getUrl(), rhiginException);
 					}
-					errorResponse(em, rhiginException.getStatus(), rhiginException.getMessage());
+					errorResponse(minHeader, em, rhiginException.getStatus(), rhiginException.getMessage());
 					return;
 				} finally {
 					ExecuteScript.clearCurrentRhiginContext();
@@ -424,11 +425,11 @@ public class HttpWorkerThread extends Thread {
 						gzip = false;
 					}
 					// success形式で返却.
-					successResponse(gzip, em, res.getStatus(), res, ret);
+					successResponse(minHeader, gzip, em, res.getStatus(), res, ret);
 					// 戻り値がInputStreamの場合.
 				} else {
 					// バイナリ返却.
-					sendResponse(em, res.getStatus(), res, (InputStream) ret);
+					sendResponse(minHeader, em, res.getStatus(), res, (InputStream) ret);
 				}
 				
 			} finally {
@@ -440,7 +441,7 @@ public class HttpWorkerThread extends Thread {
 		} catch (RhiginException re) {
 			if (!em.isEndSend()) {
 				try {
-					errorResponse(em, re.getStatus(), re.getMessage());
+					errorResponse(minHeader, em, re.getStatus(), re.getMessage());
 				} catch (Exception ee) {
 				}
 			}
@@ -448,7 +449,7 @@ public class HttpWorkerThread extends Thread {
 		} catch (Exception e) {
 			if (!em.isEndSend()) {
 				try {
-					errorResponse(em, 500, e.getMessage());
+					errorResponse(minHeader, em, 500, e.getMessage());
 				} catch (Exception ee) {
 				}
 			}
@@ -498,7 +499,7 @@ public class HttpWorkerThread extends Thread {
 	}
 
 	/** 正常結果をJSON返却. **/
-	private static final void successResponse(boolean gzip, HttpElement em, int status, Response response, Object value)
+	private static final void successResponse(boolean minHeader, boolean gzip, HttpElement em, int status, Response response, Object value)
 			throws IOException {
 		StringBuilder buf = new StringBuilder("{\"success\":true,\"status\":").append(status).append(",");
 		if (value == null) {
@@ -507,8 +508,8 @@ public class HttpWorkerThread extends Thread {
 			buf.append("\"value\":").append(Json.encode(value));
 		}
 		buf.append("}");
-		response.setHeader("Content-Type", "application/json; charset=UTF-8");
-		sendResponse(gzip, em, status, response, buf.toString());
+		response.setHeader("Content-Type", "application/json;charset=UTF-8");
+		sendResponse(minHeader, gzip, em, status, response, buf.toString());
 	}
 
 	/** GZIP返却許可チェック. **/
@@ -521,16 +522,20 @@ public class HttpWorkerThread extends Thread {
 	}
 
 	/** Options送信. **/
-	private static final void sendOptions(HttpElement em) throws IOException {
+	private static final void sendOptions(boolean minHeader, HttpElement em) throws IOException {
 		em.setRequest(null);
 		em.destroyBuffer();
 		em.setEndReceive(true);
 		em.setEndSend(true);
-		em.setSendBinary(OPSIONS_RESPONSE);
+		if(minHeader) {
+			em.setSendBinary(OPSIONS_RESPONSE_M);
+		} else {
+			em.setSendBinary(OPSIONS_RESPONSE);
+		}
 	}
 
 	/** ファイル送信. **/
-	private static final void sendFile(boolean gzip, String fileName, HttpElement em, MimeType mime, int status,
+	private static final void sendFile(boolean minHeader, boolean gzip, String fileName, HttpElement em, MimeType mime, int status,
 			Response header) throws IOException {
 		em.setRequest(null);
 		em.destroyBuffer();
@@ -544,7 +549,7 @@ public class HttpWorkerThread extends Thread {
 		}
 		try {
 			em.setSendData(new ByteArrayInputStream(
-					stateResponse(status, header, BLANK_BINARY, FileUtil.getFileLength(fileName))));
+					stateResponse(minHeader, status, header, BLANK_BINARY, FileUtil.getFileLength(fileName))));
 			em.setSendData(new FileInputStream(fileName));
 			em.startWrite();
 		} catch (IOException io) {
@@ -555,7 +560,7 @@ public class HttpWorkerThread extends Thread {
 	}
 
 	/** [byte[]]レスポンス送信. **/
-	private static final void sendResponse(boolean gzip, HttpElement em, int status, Response header, String body)
+	private static final void sendResponse(boolean minHeader, boolean gzip, HttpElement em, int status, Response header, String body)
 			throws IOException {
 		em.setRequest(null);
 		em.destroyBuffer();
@@ -563,14 +568,14 @@ public class HttpWorkerThread extends Thread {
 		em.setEndSend(true);
 		if (gzip && body.length() > HttpConstants.NOT_GZIP_BODY_LENGTH) {
 			header.put("Content-Encoding", "gzip");
-			em.setSendBinary(stateResponse(status, header, pressGzip(body), -1L));
+			em.setSendBinary(stateResponse(minHeader, status, header, pressGzip(body), -1L));
 		} else {
-			em.setSendBinary(stateResponse(status, header, body));
+			em.setSendBinary(stateResponse(minHeader, status, header, body));
 		}
 	}
 
 	/** [inputStream]レスポンス送信. **/
-	private static final void sendResponse(HttpElement em, int status, Response header, InputStream body)
+	private static final void sendResponse(boolean minHeader, HttpElement em, int status, Response header, InputStream body)
 			throws IOException {
 		em.setRequest(null);
 		em.destroyBuffer();
@@ -586,7 +591,7 @@ public class HttpWorkerThread extends Thread {
 				len = null;
 				body = new HttpChunkedInputStream(Http.getHttpInfo().getByteBufferLength(), body);
 			}
-			em.setSendData(new ByteArrayInputStream(stateResponse(status, header, BLANK_BINARY, len)));
+			em.setSendData(new ByteArrayInputStream(stateResponse(minHeader, status, header, BLANK_BINARY, len)));
 			em.setSendData(body);
 			em.startWrite();
 		} catch (IOException io) {
@@ -597,14 +602,14 @@ public class HttpWorkerThread extends Thread {
 	}
 
 	/** リダイレクト送信. **/
-	private static final void redirectResponse(HttpElement em, Redirect redirect) throws IOException {
+	private static final void redirectResponse(boolean minHeader, HttpElement em, Redirect redirect) throws IOException {
 		em.setRequest(null);
 		em.destroyBuffer();
 		em.setEndReceive(true);
 		em.setEndSend(true);
 		Response res = new Response();
 		res.put("Location", redirect.getUrl());
-		em.setSendBinary(stateResponse(redirect.getStatus(), res, ""));
+		em.setSendBinary(stateResponse(minHeader, redirect.getStatus(), res, ""));
 	}
 
 	/** GZIP圧縮. **/
@@ -619,12 +624,12 @@ public class HttpWorkerThread extends Thread {
 	}
 
 	/** エラーレスポンスを送信. **/
-	private static final void errorResponse(HttpElement em, int status) throws IOException {
-		errorResponse(em, status, null);
+	private static final void errorResponse(boolean minHeader, HttpElement em, int status) throws IOException {
+		errorResponse(minHeader, em, status, null);
 	}
 
 	/** エラーレスポンスを送信. **/
-	private static final void errorResponse(HttpElement em, int status, String message) throws IOException {
+	private static final void errorResponse(boolean minHeader, HttpElement em, int status, String message) throws IOException {
 		StringBuilder buf = new StringBuilder("{\"success\":false,\"status\":").append(status);
 		if (message == null) {
 			message = Status.getMessage(status);
@@ -643,23 +648,23 @@ public class HttpWorkerThread extends Thread {
 		buf = null;
 
 		Response header = new Response();
-		header.put("Content-Type", "application/json; charset=UTF-8");
+		header.put("Content-Type", "application/json;charset=UTF-8");
 
 		// 処理結果を返却.
 		em.setRequest(null);
 		em.destroyBuffer();
 		em.setEndReceive(true);
 		em.setEndSend(true);
-		em.setSendBinary(stateResponse(status, header, res));
+		em.setSendBinary(stateResponse(minHeader, status, header, res));
 	}
 
 	/** ステータス指定Response返却用バイナリの生成. **/
-	private static final byte[] stateResponse(int state, Response header, String b) throws IOException {
-		return stateResponse(state, header, b.getBytes("UTF8"), -1L);
+	private static final byte[] stateResponse(boolean minHeader, int state, Response header, String b) throws IOException {
+		return stateResponse(minHeader, state, header, b.getBytes("UTF8"), -1L);
 	}
 
 	/** ステータス指定Response返却用バイナリの生成. **/
-	private static final byte[] stateResponse(int state, Response header, byte[] b, Long contentLength)
+	private static final byte[] stateResponse(boolean minHeader, int state, Response header, byte[] b, Long contentLength)
 			throws IOException {
 		if (contentLength != null && contentLength == -1L) {
 			contentLength = (long) b.length;
@@ -667,68 +672,113 @@ public class HttpWorkerThread extends Thread {
 		final byte[] stateBinary = new StringBuilder(String.valueOf(state)).append(" ").append(Status.getMessage(state))
 				.toString().getBytes("UTF8");
 
-		StringBuilder buf = new StringBuilder(String.valueOf(contentLength)).append("\r\n")
-				.append(Response.headers(header));
+		StringBuilder buf = new StringBuilder(Response.headers(header));
 		if (contentLength == null) {
 			// content-lengthが存在しない場合はchunked転送.
-			buf.append("Transfer-Encoding: chunked\r\n");
+			buf.append("Transfer-Encoding:chunked\r\n");
+		} else {
+			buf.append("Content-Length:").append(contentLength).append("\r\n");
 		}
 		buf.append("\r\n");
 		final byte[] foot = buf.toString().getBytes("UTF8");
 		buf = null;
 
-		int all = STATE_RESPONSE_1.length + stateBinary.length + STATE_RESPONSE_2.length + foot.length + b.length;
-		byte[] ret = new byte[all];
-
 		int pos = 0;
-		System.arraycopy(STATE_RESPONSE_1, 0, ret, pos, STATE_RESPONSE_1.length);
-		pos += STATE_RESPONSE_1.length;
-		System.arraycopy(stateBinary, 0, ret, pos, stateBinary.length);
-		pos += stateBinary.length;
-		System.arraycopy(STATE_RESPONSE_2, 0, ret, pos, STATE_RESPONSE_2.length);
-		pos += STATE_RESPONSE_2.length;
-		System.arraycopy(foot, 0, ret, pos, foot.length);
-		pos += foot.length;
-		System.arraycopy(b, 0, ret, pos, b.length);
-
+		byte[] ret = null;
+		if(!minHeader) {
+			int all = STATE_RESPONSE_1.length + stateBinary.length + STATE_RESPONSE_2.length + foot.length + b.length;
+			ret = new byte[all];
+			System.arraycopy(STATE_RESPONSE_1, 0, ret, pos, STATE_RESPONSE_1.length);
+			pos += STATE_RESPONSE_1.length;
+			System.arraycopy(stateBinary, 0, ret, pos, stateBinary.length);
+			pos += stateBinary.length;
+			System.arraycopy(STATE_RESPONSE_2, 0, ret, pos, STATE_RESPONSE_2.length);
+			pos += STATE_RESPONSE_2.length;
+			System.arraycopy(foot, 0, ret, pos, foot.length);
+			pos += foot.length;
+			System.arraycopy(b, 0, ret, pos, b.length);
+		} else {
+			int all = STATE_RESPONSE_1.length + stateBinary.length + STATE_RESPONSE_2_M.length + foot.length + b.length;
+			ret = new byte[all];
+			System.arraycopy(STATE_RESPONSE_1, 0, ret, pos, STATE_RESPONSE_1.length);
+			pos += STATE_RESPONSE_1.length;
+			System.arraycopy(stateBinary, 0, ret, pos, stateBinary.length);
+			pos += stateBinary.length;
+			System.arraycopy(STATE_RESPONSE_2_M, 0, ret, pos, STATE_RESPONSE_2_M.length);
+			pos += STATE_RESPONSE_2_M.length;
+			System.arraycopy(foot, 0, ret, pos, foot.length);
+			pos += foot.length;
+			System.arraycopy(b, 0, ret, pos, b.length);
+		}
 		return ret;
 	}
 
 	/** Optionsレスポンス. **/
 	private static final byte[] OPSIONS_RESPONSE;
+	private static final byte[] OPSIONS_RESPONSE_M;
 
 	/** ステータス指定レスポンス. **/
 	private static final byte[] STATE_RESPONSE_1;
 	private static final byte[] STATE_RESPONSE_2;
+	private static final byte[] STATE_RESPONSE_2_M;
 
 	static {
-		String name = RhiginConstants.NAME + "(" + RhiginConstants.VERSION + ")";
 		byte[] op;
 		byte[] s1;
 		byte[] s2;
+		byte[] op_m;
+		byte[] s2_m;
 		try {
-			op = ("HTTP/1.1 200 OK\r\n" + "Allow: GET, POST, HEAD, OPTIONS\r\n" + "Cache-Control: no-cache\r\n"
-					+ "Pragma: no-cache\r\n" + "Expire: -1\r\n" + "X-Accel-Buffering: no\r\n"
-					+ "Access-Control-Allow-Origin: *\r\n"
-					+ "Access-Control-Allow-Headers: content-type, X-Accel-Buffering, *\r\n"
-					+ "Access-Control-Allow-Methods: GET, POST, HEAD, OPTIONS\r\n" + "Server: " + name + "\r\n"
-					+ "Connection: close\r\n" + "Content-Length: 0\r\n\r\n").getBytes("UTF8");
-
+			final String serverName = RhiginConstants.NAME + "(" + RhiginConstants.VERSION + ")";
+			final String serverName_m = RhiginConstants.NAME + "_m";
+			op = ("HTTP/1.1 200 OK\r\n"
+					+ "Allow:GET,POST,HEAD,OPTIONS\r\n"
+					+ "Cache-Control:no-cache\r\n"
+					+ "Pragma:no-cache\r\n"
+					+ "Expire:-1\r\n"
+					+ "X-Accel-Buffering:no\r\n"
+					+ "Access-Control-Allow-Origin:*\r\n"
+					+ "Access-Control-Allow-Headers:content-type,X-Accel-Buffering,*\r\n"
+					+ "Access-Control-Allow-Methods:GET,POST,HEAD,OPTIONS\r\n"
+					+ "Server:" + serverName + "\r\n"
+					+ "Connection:close\r\n"
+					+ "Content-Length:0\r\n\r\n"
+			).getBytes("UTF8");
 			s1 = ("HTTP/1.1 ").getBytes("UTF8");
-			s2 = ("\r\n" + "Cache-Control: no-cache\r\n" + "Pragma: no-cache\r\n" + "Expire: -1\r\n"
-					+ "X-Accel-Buffering: no\r\n" + "Access-Control-Allow-Origin: *\r\n"
-					+ "Access-Control-Allow-Headers: content-type, X-Accel-Buffering, *\r\n"
-					+ "Access-Control-Allow-Methods: GET, POST, HEAD, OPTIONS\r\n" + "Server: " + name + "\r\n"
-					+ "Connection: close\r\n" + "Content-Length: ").getBytes("UTF8");
-
+			s2 = ("\r\n"
+					+ "Cache-Control:no-cache\r\n"
+					+ "Pragma:no-cache\r\n"
+					+ "Expire:-1\r\n"
+					+ "X-Accel-Buffering:no\r\n"
+					+ "Access-Control-Allow-Origin:*\r\n"
+					+ "Access-Control-Allow-Headers:content-type,X-Accel-Buffering,*\r\n"
+					+ "Access-Control-Allow-Methods:GET,POST,HEAD,OPTIONS\r\n"
+					+ "Server:" + serverName + "\r\n"
+					+ "Connection:close\r\n"
+			).getBytes("UTF8");
+			
+			op_m = ("HTTP/1.1 200 OK\r\n"
+					+ "Allow:GET,POST,HEAD,OPTIONS\r\n"
+					+ "Server:" + serverName_m + "\r\n"
+					+ "Connection:close\r\n"
+					+ "Content-Length:0\r\n\r\n"
+			).getBytes("UTF8");
+			s2_m = ("\r\n"
+					+ "Server:" + serverName_m + "\r\n"
+					+ "Connection:close\r\n"
+			).getBytes("UTF8");
 		} catch (Exception e) {
 			op = null;
 			s1 = null;
 			s2 = null;
+			op_m = null;
+			s2_m = null;
 		}
 		OPSIONS_RESPONSE = op;
+		OPSIONS_RESPONSE_M = op_m;
 		STATE_RESPONSE_1 = s1;
 		STATE_RESPONSE_2 = s2;
+		STATE_RESPONSE_2_M = s2_m;
 	}
 
 	// [js]リダイレクト用メソッド.

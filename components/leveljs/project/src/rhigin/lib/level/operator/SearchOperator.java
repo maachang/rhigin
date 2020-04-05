@@ -3,6 +3,7 @@ package rhigin.lib.level.operator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
+import java.util.regex.Pattern;
 
 import org.maachang.leveldb.LevelOption;
 import org.maachang.leveldb.operator.LevelIndex;
@@ -86,9 +87,13 @@ public abstract class SearchOperator implements Operator {
 	 * インデックスで検索、取得.
 	 * @param lock 読み込みロックガセットされます.
 	 * @param itr インデックスIteratorを設定します.
+	 * @param endKey 検索終了キーを設定します.
+	 *               設定しない場合はnull を設定します.
+	 * @param indexColumns インデックスカラムを設定します.
+	 *                     "hoge", "moge", "abc"のように階層設定可能.
 	 * @return
 	 */
-	protected abstract OperateIterator _index(Lock lock, LevelIndexIterator itr);
+	protected abstract OperateIterator _index(Lock lock, LevelIndexIterator itr, Comparable endKey, String[] indexColumns);
 	
 	/**
 	 * Readロックオブジェクトを取得.
@@ -104,6 +109,25 @@ public abstract class SearchOperator implements Operator {
 	 */
 	protected Lock _w() {
 		return _operator().getLock().writeLock();
+	}
+	
+	/**
+	 * 指定Valueに対するインデックスカラムの内容を取得.
+	 * @param value 対象の要素を設定します.
+	 * @param columns 対象のカラム名群を設定します.
+	 * @return Object インデックスカラム内容が返却されます.
+	 */
+	protected static final Object _indexColumns(Object value, String[] columns) {
+		Object o = value;
+		int len = columns.length;
+		for(int i = 0; i < len; i ++) {
+			if(o != null && o instanceof Map) {
+				o = ((Map)o).get(columns[i]);
+			} else {
+				return null;
+			}
+		}
+		return o;
 	}
 	
 	/**
@@ -392,11 +416,12 @@ public abstract class SearchOperator implements Operator {
 		OperateIterator ret;
 		_r().lock();
 		try {
-			final LevelIndex idx = _operator().getLevelIndex(columnName);
+			String indexColumns = LevelIndex.srcColumnNames(columnName);
+			final LevelIndex idx = _operator().getLevelIndex(indexColumns);
 			if((key = trimIndexKey(idx, key)) == null) {
-				ret = _index(_r(), idx.getSortIndex(desc));
+				ret = _index(_r(), idx.getSortIndex(desc), null, indexColumns.split(Pattern.quote(".")));
 			} else {
-				ret = _index(_r(), idx.get(desc, key));
+				ret = _index(_r(), idx.get(desc, key), null, indexColumns.split(Pattern.quote(".")));
 			}
 			if(ret != null) {
 				closeable.reg(ret);
@@ -406,6 +431,55 @@ public abstract class SearchOperator implements Operator {
 		}
 		return ret;
 	}
+	
+	/**
+	 * インデックスで範囲検索.
+	 * @param desc [true]を設定した場合、降順で検索します.
+	 * @param startKey 検査開始キーを設定します.
+	 * @param endKey 検査終了キーを設定します.
+	 * @param columnName カラム名を設定します.
+	 *                   設定方法は、hoge.moge.abc や "hoge", "moge", "abc"のように階層設定可能.
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public OperateIterator indexRange(boolean desc, Object startKey, Object endKey, String... columnName) {
+		if(columnName == null || columnName.length == 0) {
+			throw new LevelJsException("Column name is not set.");
+		}
+		OperateIterator ret;
+		_r().lock();
+		try {
+			String indexColumns = LevelIndex.srcColumnNames(columnName);
+			final LevelIndex idx = _operator().getLevelIndex(indexColumns);
+			Comparable start = (Comparable)trimIndexKey(idx, startKey);
+			Comparable end = (Comparable)trimIndexKey(idx, endKey);
+			if(start == null || end == null) {
+				throw new LevelJsException("range key is not set correctly"
+						+ "(startKey: " + startKey + " endKey: " + endKey + ")");
+			}
+			// startよりendの方が小さい場合.
+			Comparable c;
+			if(start.compareTo(end) > 0) {
+				c = start;
+				start = end;
+				end = c;
+			}
+			// 降順の場合.
+			if(desc) {
+				c = start;
+				start = end;
+				end = c;
+			}
+			ret = _index(_r(), idx.get(desc, start), end, indexColumns.split(Pattern.quote(".")));
+			if(ret != null) {
+				closeable.reg(ret);
+			}
+		} finally {
+			_r().unlock();
+		}
+		return ret;
+	}
+
 	
 	/**
 	 * データ追加・更新.

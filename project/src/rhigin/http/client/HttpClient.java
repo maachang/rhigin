@@ -13,7 +13,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
-import rhigin.RhiginConstants;
 import rhigin.scripts.Json;
 import rhigin.util.ArrayMap;
 import rhigin.util.ByteArrayIO;
@@ -27,7 +26,8 @@ public class HttpClient {
 	private static final int MAX_BINARY_BODY_LENGTH = 0x00100000 * 5; // 5Mbyte.
 	private static final int TIMEOUT = 30000;
 	private static final int MAX_RETRY = 9;
-	private static final String USER_AGENT = RhiginConstants.NAME;
+	private static final String DEF_USER_AGENT = "rhigin";
+	private static final String DEF_MIN_USER_AGENT = "rhigin_m";
 
 	protected HttpClient() {
 	}
@@ -37,9 +37,11 @@ public class HttpClient {
 	 * 
 	 * @param url
 	 *            対象のURLを設定します.
-	 * @oaram option 対象のオプションを設定します. params: パラメータを設定する場合は、この名前で設定します. header:
-	 *        追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します. bodyFile:
-	 *        HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
+	 * @oaram option 対象のオプションを設定します.
+	 *               params: パラメータを設定する場合は、この名前で設定します.
+	 *               header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
+	 *               bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
+	 *               minHeader: 最小のヘッダで通信をする場合は true を設定します.
 	 * @return HttpResult 返却データが返されます.
 	 */
 	public static final HttpResult get(String url, Map option) {
@@ -51,9 +53,11 @@ public class HttpClient {
 	 * 
 	 * @param url
 	 *            対象のURLを設定します.
-	 * @oaram option 対象のオプションを設定します. params: パラメータを設定する場合は、この名前で設定します. header:
-	 *        追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します. bodyFile:
-	 *        HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
+	 * @oaram option 対象のオプションを設定します.
+	 *               params: パラメータを設定する場合は、この名前で設定します.
+	 *               header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
+	 *               bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
+	 *               minHeader: 最小のヘッダで通信をする場合は true を設定します.
 	 * @return HttpResult 返却データが返されます.
 	 */
 	public static final HttpResult post(String url, Map option) {
@@ -65,9 +69,11 @@ public class HttpClient {
 	 * 
 	 * @param url
 	 *            対象のURLを設定します.
-	 * @oaram option 対象のオプションを設定します. params: パラメータを設定する場合は、この名前で設定します. header:
-	 *        追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します. bodyFile:
-	 *        HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
+	 * @oaram option 対象のオプションを設定します.
+	 *               params: パラメータを設定する場合は、この名前で設定します.
+	 *               header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
+	 *               bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
+	 *               minHeader: 最小のヘッダで通信をする場合は true を設定します.
 	 * @return HttpResult 返却データが返されます.
 	 */
 	public static final HttpResult json(String url, Map option) {
@@ -81,9 +87,11 @@ public class HttpClient {
 	 *            対象のMethodを設定します.
 	 * @param url
 	 *            対象のURLを設定します.
-	 * @oaram option 対象のオプションを設定します. params: パラメータを設定する場合は、この名前で設定します. header:
-	 *        追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します. bodyFile:
-	 *        HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
+	 * @oaram option 対象のオプションを設定します.
+	 *               params: パラメータを設定する場合は、この名前で設定します.
+	 *               header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
+	 *               bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
+	 *               minHeader: 最小のヘッダで通信をする場合は true を設定します.
 	 * @return HttpResult 返却データが返されます.
 	 */
 	@SuppressWarnings("unchecked")
@@ -91,26 +99,28 @@ public class HttpClient {
 		Object params = null;
 		Map header = null;
 		boolean bodyFile = false;
+		boolean minHeader = false;
 		if (option != null) {
 			params = option.get("params");
 			header = (Map) option.get("header");
 			bodyFile = Boolean.TRUE.equals(option.get("bodyFile"));
+			minHeader = Boolean.TRUE.equals(option.get("minHeader"));
 		}
 		if (header == null) {
 			header = new ArrayMap();
 		}
 		HttpResult ret = null;
 		// methodがJSONの場合は、POSTでJSON送信用の処理に変換する.
-		if (NoULCode.eq("JSON", (method = method.toUpperCase()))) {
+		if (NoULCode.eqs((method = method.toUpperCase()), "json") != -1) {
 			method = "POST";
 			params = Json.encode(params);
-			header.put("Content-Type", "application/json; charset=utf-8");
+			header.put("Content-Type", "application/json;charset=utf-8");
 		}
 		int status;
 		String location;
 		int cnt = 0;
 		while (true) {
-			ret = _connect(bodyFile, method, url, params, header);
+			ret = _connect(minHeader, bodyFile, method, url, params, header);
 			if (!((status = ret.getStatus()) == 301 || status == 302 || status == 303 || status == 307 || status == 308) ||
 				(location = ret.getHeader("location")) == null) {
 				break;
@@ -128,7 +138,7 @@ public class HttpClient {
 	}
 
 	// 接続処理.
-	private static final HttpResult _connect(boolean bodyFile, String method, String url, Object params, Map header) {
+	private static final HttpResult _connect(boolean minHeader, boolean bodyFile, String method, String url, Object params, Map header) {
 		Socket socket = null;
 		InputStream in = null;
 		OutputStream out = null;
@@ -144,7 +154,7 @@ public class HttpClient {
 			// リクエスト送信.
 			socket = createSocket(urlArray);
 			out = new BufferedOutputStream(socket.getOutputStream());
-			createHttpRequest(out, method, urlArray, params, header);
+			createHttpRequest(minHeader, out, method, urlArray, params, header);
 			out.flush();
 			// レスポンス受信.
 			in = new BufferedInputStream(socket.getInputStream());
@@ -253,11 +263,11 @@ public class HttpClient {
 	}
 
 	// HTTPリクエストを作成.
-	private static final void createHttpRequest(OutputStream out, String method, String[] urlArray, Object params,
+	private static final void createHttpRequest(boolean minHeader, OutputStream out, String method, String[] urlArray, Object params,
 			Map header) throws IOException {
 		byte[] b = null;
 		String url = urlArray[3];
-		if (NoULCode.eq("get", method) || NoULCode.eq("delete", method) || NoULCode.eq("options", method)) {
+		if (NoULCode.eqs(method, "get", "delete", "options") != -1) {
 			if (params instanceof byte[]) {
 				if (((byte[]) params).length > 0) {
 					params = new String((byte[]) params, "UTF8");
@@ -271,27 +281,36 @@ public class HttpClient {
 			}
 		}
 		StringBuilder buf = new StringBuilder();
-		buf.append(method).append(" ");
+		buf.append(method.toUpperCase()).append(" ");
 		buf.append(url).append(" HTTP/1.1\r\n");
-		buf.append("Host: ").append(urlArray[1]);
-		if (("http".equals(urlArray[0]) && !"80".equals(urlArray[2]))
-				|| ("https".equals(urlArray[0]) && !"443".equals(urlArray[2]))) {
+		// 最小限ヘッダでない場合.
+		if(!minHeader) {
+			buf.append("Host:").append(urlArray[1]);
+			if (("http".equals(urlArray[0]) && !"80".equals(urlArray[2]))
+					|| ("https".equals(urlArray[0]) && !"443".equals(urlArray[2]))) {
 
-			buf.append(":").append(urlArray[2]);
+				buf.append(":").append(urlArray[2]);
+			}
+			buf.append("\r\n");
+			if (header == null || !header.containsKey("Accept")) {
+				buf.append("Accept:text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n");
+			}
+	
+			if (header == null || !header.containsKey("Accept-Language")) {
+				buf.append("Accept-Language:ja,en-US;q=0.7,en;q=0.3\r\n");
+			}
+			if (header == null || !header.containsKey("User-Agent")) {
+				buf.append("User-Agent:").append(DEF_USER_AGENT).append("\r\n");
+			}
+			buf.append("Accept-Encoding:gzip,deflate\r\n");
+		// 最小限ヘッダの場合.
+		} else {
+			if (header == null || !header.containsKey("User-Agent")) {
+				buf.append("User-Agent:").append(DEF_MIN_USER_AGENT).append("\r\n");
+			}
+			buf.append("Accept-Encoding:gzip\r\n");
 		}
-		buf.append("\r\n");
-		if (header == null || !header.containsKey("Accept")) {
-			buf.append("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n");
-		}
-
-		if (header == null || !header.containsKey("Accept-Language")) {
-			buf.append("Accept-Language: ja,en-US;q=0.7,en;q=0.3\r\n");
-		}
-		if (header == null || !header.containsKey("User-Agent")) {
-			buf.append("User-Agent: ").append(USER_AGENT).append("\r\n");
-		}
-		buf.append("Accept-Encoding: gzip, deflate\r\n");
-		buf.append("Connection: close\r\n");
+		buf.append("Connection:close\r\n");
 
 		boolean contentTypeFlag = false;
 		// ヘッダユーザ定義.
@@ -299,49 +318,65 @@ public class HttpClient {
 			String h;
 			Object k, v;
 			Iterator it = header.keySet().iterator();
-			while (it.hasNext()) {
-				// 登録できない内容を削除.
-				if ((k = it.next()) == null ||
-					NoULCode.eq((h = "" + k), "host") || NoULCode.eq(h, "accept-encoding") ||
-					NoULCode.eq(h, "connection") || NoULCode.eq(h, "content-length") ||
-					NoULCode.eq(h, "transfer-encoding") ||
-					(v = header.get(k)) == null) {
-					continue;
+			// 最小限ヘッダでない場合.
+			if(!minHeader) {
+				while (it.hasNext()) {
+					// 登録できない内容を削除.
+					if ((k = it.next()) == null ||
+						NoULCode.eqs((h = "" + k),
+							"host", "accept-encoding", "connection", "content-length", "transfer-encoding") != -1 ||
+						(v = header.get(k)) == null) {
+						continue;
+					} else if(NoULCode.eqs(h, "content-type") != -1) {
+						contentTypeFlag = true;
+					}
+					buf.append(h).append(":").append(v).append("\r\n");
 				}
-				if(NoULCode.eq(h, "content-type")) {
-					contentTypeFlag = true;
+			// 最小限ヘッダの場合.
+			} else {
+				int no;
+				while (it.hasNext()) {
+					// 登録できない内容を削除.
+					if ((k = it.next()) == null || (v = header.get(k)) == null) {
+						continue;
+					} else if((no = NoULCode.eqs((h = "" + k),
+						"content-type", "user-agent")) != -1) {
+						if(no == 0) {
+							contentTypeFlag = true;
+						}
+						buf.append(h).append(":").append(v).append("\r\n");
+					}
 				}
-				buf.append(h).append(": ").append(v).append("\r\n");
 			}
 		}
 		// post系の場合.
 		boolean chunked = false;
-		if (NoULCode.eq("post", method) || NoULCode.eq("put", method) || NoULCode.eq("patch", method)) {
+		if (NoULCode.eqs(method, "post", "put", "patch") != -1) {
 			if (!contentTypeFlag) {
-				buf.append("Content-Type: ").append("application/x-www-form-urlencoded").append("\r\n");
+				buf.append("Content-Type:").append("application/x-www-form-urlencoded").append("\r\n");
 			}
 			if (params instanceof String) {
 				String pms = (String) params;
 				if (pms.length() > 0) {
 					b = ((String) params).getBytes("UTF8");
-					buf.append("Content-Length: ").append(b.length).append("\r\n");
+					buf.append("Content-Length:").append(b.length).append("\r\n");
 				} else {
 					b = null;
-					buf.append("Content-Length: 0\r\n");
+					buf.append("Content-Length:0\r\n");
 				}
 			} else if (params instanceof byte[]) {
 				b = (byte[]) params;
 				if (b.length > 0) {
-					buf.append("Content-Length: ").append(b.length).append("\r\n");
+					buf.append("Content-Length:").append(b.length).append("\r\n");
 				} else {
 					b = null;
-					buf.append("Content-Length: 0\r\n");
+					buf.append("Content-Length:0\r\n");
 				}
 			} else if (params instanceof InputStream) {
 				if (params instanceof FileInputStream) {
-					buf.append("Content-Length: ").append(((InputStream) params).available()).append("\r\n");
+					buf.append("Content-Length:").append(((InputStream) params).available()).append("\r\n");
 				} else {
-					buf.append("Transfer-Encoding: chunked\r\n");
+					buf.append("Transfer-Encoding:chunked\r\n");
 					chunked = true;
 				}
 			}
@@ -512,7 +547,7 @@ public class HttpClient {
 						// chunked.
 						else {
 							value = result.getHeader("transfer-encoding");
-							if (NoULCode.eq("chunked", value)) {
+							if (NoULCode.eqs("chunked", value) != -1) {
 								bodyLength = -1;
 								chunkedBuffer = new ByteArrayIO();
 							}
@@ -773,20 +808,30 @@ public class HttpClient {
 		}
 		
 		// 大文字小文字区別なしの判別.
-		protected static final boolean eq(String src, String dest) {
-			if (src == null || dest == null) {
-				return false;
+		protected static final int eqs(String src, String... dests) {
+			int len;
+			if (src == null || dests == null || (len = dests.length) == 0) {
+				return -1;
 			}
-			int len = src.length();
-			if (len == dest.length()) {
-				for (int i = 0; i < len; i++) {
-					if (_mM[src.charAt(i)] != _mM[dest.charAt(i)]) {
-						return false;
+			int j;
+			String n;
+			boolean eq;
+			int lenJ = src.length();
+			for(int i = 0; i < len; i ++) {
+				if (lenJ == (n = dests[i]).length()) {
+					eq = true;
+					for (j = 0; j < lenJ; j++) {
+						if (_mM[src.charAt(j)] != _mM[n.charAt(j)]) {
+							eq = false;
+							break;
+						}
+					}
+					if(eq) {
+						return i;
 					}
 				}
-				return true;
 			}
-			return false;
+			return -1;
 		}
 		
 		// 文字コードのチェック.
@@ -799,17 +844,19 @@ public class HttpClient {
 			final int len = chk.length();
 			// 単数文字検索.
 			if (len == 1) {
-				int i = off;
-				final char first = chk.charAt(0);
-				if (!oneEq(first, buf.charAt(i))) {
-					final int vLen = buf.length();
-					while (++i < vLen && !oneEq(first, buf.charAt(i)))
-						;
-					if (vLen != i) {
+				final int vLen = buf.length();
+				if(vLen > off) {
+					int i = off;
+					final char first = chk.charAt(0);
+					if (!oneEq(first, buf.charAt(i))) {
+						while (++i < vLen && !oneEq(first, buf.charAt(i)))
+							;
+						if (vLen != i) {
+							return i;
+						}
+					} else {
 						return i;
 					}
-				} else {
-					return i;
 				}
 			}
 			// 複数文字検索.

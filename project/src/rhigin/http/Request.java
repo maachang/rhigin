@@ -2,6 +2,7 @@ package rhigin.http;
 
 import java.io.IOException;
 
+import rhigin.RhiginConstants;
 import rhigin.RhiginException;
 import rhigin.net.NioReadBuffer;
 import rhigin.scripts.objects.JavaObject;
@@ -12,6 +13,7 @@ import rhigin.util.Converter;
  * Request.
  */
 public class Request extends Header {
+	protected static final String MIN_HEADER = RhiginConstants.NAME + "_m";
 	protected byte[] body = null;
 	protected Long contentLength = null;
 
@@ -42,9 +44,12 @@ public class Request extends Header {
 	}
 
 	private static final String charset(String contentType) {
-		int p = Alphabet.indexOf(contentType, " charset=");
+		int p = Alphabet.indexOf(contentType, ";charset=");
 		if (p == -1) {
-			return "UTF8";
+			p = Alphabet.indexOf(contentType, " charset=");
+			if (p == -1) {
+				return "UTF8";
+			}
 		}
 		int b = p + 9;
 		p = contentType.indexOf(";", b);
@@ -92,5 +97,17 @@ public class Request extends Header {
 			}
 		}
 		return super.get(key);
+	}
+	
+	/**
+	 * requestHeader が minHeader かチェック.
+	 * @return header [User-Agent: rhigin_m] の場合は、trueを返却.
+	 */
+	public boolean isMinHeader() {
+		try {
+			return MIN_HEADER.equals(getHeader("user-agent"));
+		} catch(Exception e) {
+			return false;
+		}
 	}
 }

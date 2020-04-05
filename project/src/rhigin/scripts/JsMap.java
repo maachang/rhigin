@@ -12,28 +12,22 @@ import rhigin.util.ArrayMap;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class JsMap extends JavaScriptable.Map {
 	private Map srcMap;
-	/**
-	 * コンストラクタ.
-	 */
-	public JsMap() {
-		srcMap = new ArrayMap();
-	}
 
-	/**
-	 * コンストラクタ.
-	 */
-	public JsMap(final Map v) {
-		srcMap = v;
-	}
-
-	/**
-	 * コンストラクタ.
-	 */
 	public JsMap(final Object... args) {
-		srcMap = new ArrayMap();
-		final int len = args == null ? 0 : args.length;
-		for(int i = 0; i < len; i += 2) {
-			srcMap.put(args[i], args[i+1]);
+		set(args);
+	}
+	
+	public void set(final Object... args) {
+		if(args == null || args.length == 0) {
+			srcMap = new ArrayMap();
+		} else if(args[0] instanceof Map) {
+			srcMap = (Map)args[0];
+		} else {
+			srcMap = new ArrayMap();
+			final int len = args == null ? 0 : args.length;
+			for(int i = 0; i < len; i += 2) {
+				srcMap.put(args[i], args[i+1]);
+			}
 		}
 	}
 	

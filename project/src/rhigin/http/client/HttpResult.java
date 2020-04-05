@@ -95,7 +95,7 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 			return null;
 		}
 		
-		final int p = NoULCode.indexOf(headersString, key + ": ", 0);
+		final int p = NoULCode.indexOf(headersString, key + ":", 0);
 		if (p == -1) {
 			return null;
 		}
@@ -103,7 +103,7 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 		if (end == -1) {
 			return null;
 		}
-		return headersString.substring(p + key.length() + 2, end);
+		return headersString.substring(p + key.length() + 1, end).trim();
 	}
 
 	/**
@@ -123,9 +123,9 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 		int p;
 		int b = 0;
 		final List<String> ret = new ArrayList<String>();
-		while ((p = headersString.indexOf(": ", b)) != -1) {
+		while ((p = NoULCode.indexOf(headersString, ":", b)) != -1) {
 			ret.add(headersString.substring(b, p));
-			b = p + 2;
+			b = p + 1;
 			p = headersString.indexOf("\r\n", b);
 			if (p == -1) {
 				break;
@@ -143,9 +143,12 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 	}
 
 	private static final String charset(String contentType) {
-		int p = contentType.indexOf(" charset=");
+		int p = NoULCode.indexOf(contentType, ";charset=", 0);
 		if (p == -1) {
-			return "UTF8";
+			p = NoULCode.indexOf(contentType, " charset=", 0);
+			if(p == -1) {
+				return "UTF8";
+			}
 		}
 		int b = p + 9;
 		p = contentType.indexOf(";", b);
@@ -289,7 +292,7 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 	// 受信データがGZIP圧縮されているかチェック.
 	protected final boolean isResponseGzip() {
 		final String value = getHeader("content-encoding");
-		if (NoULCode.eq("gzip", value)) {
+		if (NoULCode.eqs(value, "gzip") != -1) {
 			return true;
 		}
 		return false;
@@ -415,7 +418,7 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 			return responseType();
 		} else if ("gzip".equals(key) || "isGzip".equals(key)) {
 			return isGzip();
-		} else if ("contentType".equals(key) || NoULCode.eq("content-type", ""+key)) {
+		} else if ("contentType".equals(key) || NoULCode.eqs(""+key, "content-type") != -1) {
 			return getContentType();
 		}
 		try {

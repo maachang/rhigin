@@ -74,6 +74,41 @@ public class Alphabet {
 	}
 
 	/**
+	 * 英字の大文字小文字を区別せずにチェック.
+	 * 
+	 * @param src
+	 *            比較元文字を設定します.
+	 * @param dests
+	 *            比較先文字を設定します.
+	 * @return int [-1]の場合不一致です.
+	 */
+	public static final int eqs(String src, String... dests) {
+		int len;
+		if (src == null || dests == null || (len = dests.length) == 0) {
+			return -1;
+		}
+		int j;
+		String n;
+		boolean eq;
+		int lenJ = src.length();
+		for(int i = 0; i < len; i ++) {
+			if (lenJ == (n = dests[i]).length()) {
+				eq = true;
+				for (j = 0; j < lenJ; j++) {
+					if (_mM[src.charAt(j)] != _mM[n.charAt(j)]) {
+						eq = false;
+						break;
+					}
+				}
+				if(eq) {
+					return i;
+				}
+			}
+		}
+		return -1;
+	}
+
+	/**
 	 * 英字の大文字小文字を区別しない、バイトチェック.
 	 * 
 	 * @param s
@@ -116,17 +151,19 @@ public class Alphabet {
 		final int len = chk.length();
 		// 単数文字検索.
 		if (len == 1) {
-			int i = off;
-			final char first = chk.charAt(0);
-			if (!oneEq(first, buf.charAt(i))) {
-				final int vLen = buf.length();
-				while (++i < vLen && !oneEq(first, buf.charAt(i)))
-					;
-				if (vLen != i) {
+			final int vLen = buf.length();
+			if(vLen > off) {
+				int i = off;
+				final char first = chk.charAt(0);
+				if (!oneEq(first, buf.charAt(i))) {
+					while (++i < vLen && !oneEq(first, buf.charAt(i)))
+						;
+					if (vLen != i) {
+						return i;
+					}
+				} else {
 					return i;
 				}
-			} else {
-				return i;
 			}
 		}
 		// 複数文字検索.

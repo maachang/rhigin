@@ -41,6 +41,7 @@ public class LevelJsOperatorJs {
 		,"isWriteBatch"
 		,"commit"
 		,"rollback"
+		,"indexRange"
 	};
 	
 	// オペレータ用メソッド生成処理.
@@ -134,6 +135,7 @@ public class LevelJsOperatorJs {
 						desc = (boolean)args[0];
 						off = 1;
 					}
+					// (key, columns) or (desc, key, columns)
 					OperateIterator it = op.index(
 						desc, getObject(off, args), getParamsByString(off + 1, args));
 					return LevelJsCursorJs.create("Index", it);
@@ -172,6 +174,7 @@ public class LevelJsOperatorJs {
 					if(args == null || args.length == 0) {
 						return LevelJsCursorJs.create(opName, op.cursor(false));
 					}
+					// (desc, key) or (key).
 					int off = 0;
 					boolean desc = false;
 					Object key = null;
@@ -184,8 +187,7 @@ public class LevelJsOperatorJs {
 					if(args.length >= off + 1) {
 						key = getObject(off, args);
 					}
-					final OperateIterator it = op.cursor(desc, key);
-					return LevelJsCursorJs.create(opName, it);
+					return LevelJsCursorJs.create(opName, op.cursor(desc, key));
 				}
 				case 16: // range.
 				{
@@ -232,7 +234,23 @@ public class LevelJsOperatorJs {
 				{
 					return op.rollback();
 				}
-				
+				case 22: // indexRange.
+					if(args == null || args.length == 0) {
+						this.argsException(opName);
+					}
+					int off = 0;
+					boolean desc = false;
+					if(args[0] instanceof Boolean) {
+						desc = (boolean)args[0];
+						off = 1;
+					}
+					if(args.length <= off + 2) {
+						this.argsException(opName);
+					}
+					// (key, endKey, columns) or (desc, key, endKey, columns)
+					OperateIterator it = op.indexRange(
+						desc, getObject(off, args), getObject(off + 1, args), getParamsByString(off + 2, args));
+					return LevelJsCursorJs.create("IndexRange", it);
 				}
 			} catch (RhiginException re) {
 				throw re;

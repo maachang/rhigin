@@ -2,6 +2,6 @@
 .vscode
 
 rhigin-*.jar
-bin/lib/rhigin-*.jar
+objectpack-*.jar
 
 project/classes

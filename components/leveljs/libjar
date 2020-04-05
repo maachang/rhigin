@@ -4,6 +4,9 @@
 ################################################################################
 COMPONENT_NAME=leveljs
 
+# プロジェクトパス.
+PROJECT_PATH="${RHIGIN_HOME}/../../"
+
 # 現在のパスを保持.
 NOW_PATH=` pwd`
 
@@ -11,7 +14,21 @@ NOW_PATH=` pwd`
 COMPONENT_PATH="${RHIGIN_HOME}/../components/${COMPONENT_NAME}"
 
 # leveldbのパスを取得.
-LEVELDB_PATH="${RHIGIN_HOME}/../../leveldb"
+LEVELDB_PATH="${PROJECT_PATH}/leveldb"
+
+# leveldbのプロジェクトフォルダが存在するかチェック.
+if [ -f ${LEVELDB_PATH}/build.xml ]; then
+    # 存在する場合は何もしない.
+    echo ""
+else
+    # 存在しない場合は、gitからclone.
+    cd ${PROJECT_PATH}
+    git clone https://github.com/maachang/leveldb.git
+    if [ $? != 0 ]; then
+        cd ${NOW_PATH}
+        exit 1
+    fi
+fi
 
 # leveldbパスに移動.
 cd ${LEVELDB_PATH}
@@ -29,7 +46,9 @@ if [ $? != 0 ]; then
     exit 1
 fi
 
-# コピー.
+# 削除 or コピー.
+rm -Rf ${COMPONENT_PATH}/project/lib/leveldb-*.jar
 cp leveldb-*.jar ${COMPONENT_PATH}/project/lib/
+
 cd ${NOW_PATH}
 exit 0

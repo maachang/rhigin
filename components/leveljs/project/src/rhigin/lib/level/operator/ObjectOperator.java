@@ -83,7 +83,7 @@ public class ObjectOperator extends SearchOperator {
 	@Override
 	protected OperateIterator _range(Lock lock, boolean desc, int keyLen, Object[] keys) {
 		if(keyLen < 2) {
-			throw new LevelJsException("Two keys are required. \"0\" start key \"1\" end key");
+			throw new LevelJsException("Two keys are required: \"0\" start key \"1\" end key");
 		}
 		Comparable start = (Comparable)OperatorKeyType.convertKeyType(keyType, keys[0]);
 		Comparable end = (Comparable)OperatorKeyType.convertKeyType(keyType, keys[1]);
@@ -105,13 +105,14 @@ public class ObjectOperator extends SearchOperator {
 	}
 	
 	@Override
-	protected OperateIterator _index(Lock lock, LevelIndexIterator itr) {
-		return new IndexIterator(lock, keyType, itr);
+	protected OperateIterator _index(Lock lock, LevelIndexIterator itr, Comparable endKey, String[] columns) {
+		return new IndexIterator(lock, keyType, itr, endKey, columns);
 	}
 	
 	// 検索iterator.
 	private static final class SearchIterator implements OperateIterator {
 		private LevelIterator src;
+		private boolean reverse;
 		private int keyType;
 		private Comparable end;
 		
@@ -121,9 +122,11 @@ public class ObjectOperator extends SearchOperator {
 		private Object nextValue;
 		
 		private Lock lock;
+		private JsMap nextMap;
 		
 		public SearchIterator(Lock lk, LevelIterator it, int k, Comparable e) {
 			src = it;
+			reverse = it.isReverse();
 			keyType = k;
 			end = e;
 			exitFlag = false;
@@ -160,12 +163,7 @@ public class ObjectOperator extends SearchOperator {
 		 * @return
 		 */
 		public boolean isDesc() {
-			lock.lock();
-			try {
-				return src.isReverse();
-			} finally {
-				lock.unlock();
-			}
+			return reverse;
 		}
 		
 		/**
@@ -209,7 +207,12 @@ public class ObjectOperator extends SearchOperator {
 			} finally {
 				lock.unlock();
 			}
-			return new JsMap((Map)ret);
+			if(nextMap == null) {
+				nextMap = new JsMap(ret);
+			} else {
+				nextMap.set(ret);
+			}
+			return nextMap;
 		}
 		
 		
@@ -223,7 +226,10 @@ public class ObjectOperator extends SearchOperator {
 			}
 			nextValue = src.next();
 			nextKey = src.getKey();
-			if(end != null && end.compareTo(nextKey) <= 0) {
+			// range検索の場合.
+			if(end != null &&
+				((!reverse && end.compareTo(nextKey) <= 0) ||
+				(reverse && end.compareTo(nextKey) >= 0))) {
 				// 終端を検出.
 				exitFlag = true;
 			}
@@ -233,35 +239,28 @@ public class ObjectOperator extends SearchOperator {
 	
 	// indexIterator.
 	private static final class IndexIterator implements OperateIterator {
-		LevelIndexIterator src;
-		int keyType;
+		private LevelIndexIterator src;
+		private int keyType;
+		private Comparable end;
+		private String[] columns;
+		
+		private boolean exitFlag;
+		private Object beforeKey;
+		private Object nextKey;
+		private Object nextValue;
 		
 		private Lock lock;
+		private boolean reverse;
+		private JsMap nextMap;
 		
-		public IndexIterator(Lock lk, int type, LevelIndexIterator s) {
+		public IndexIterator(Lock lk, int type, LevelIndexIterator s, Comparable e, String[] c) {
 			src = s;
+			reverse = s.isReverse();
 			keyType = type;
+			end = e;
+			columns = c;
 			lock = lk;
-		}
-
-		@Override
-		public boolean hasNext() {
-			lock.lock();
-			try {
-				return src.hasNext();
-			} finally {
-				lock.unlock();
-			}
-		}
-
-		@Override
-		public Map next() {
-			lock.lock();
-			try {
-				return new JsMap(src.next());
-			} finally {
-				lock.unlock();
-			}
+			exitFlag = false;
 		}
 
 		@Override
@@ -269,6 +268,7 @@ public class ObjectOperator extends SearchOperator {
 			lock.lock();
 			try {
 				src.close();
+				exitFlag = true;
 			} finally {
 				lock.unlock();
 			}
@@ -286,24 +286,72 @@ public class ObjectOperator extends SearchOperator {
 
 		@Override
 		public boolean isDesc() {
+			return reverse;
+		}
+
+		@Override
+		public Object key() {
+			return new FixedArray(beforeKey);
+		}
+
+		@Override
+		public boolean hasNext() {
 			lock.lock();
 			try {
-				return src.isReverse();
+				return _next();
 			} finally {
 				lock.unlock();
 			}
 		}
 
 		@Override
-		public Object key() {
-			Object o;
+		public Map next() {
+			Object ret;
 			lock.lock();
 			try {
-				o = OperatorKeyType.getRestoreKey(keyType, src.getKey());
+				if(nextKey == null && nextValue == null) {
+					if(!_next()) {
+						throw new NoSuchElementException();
+					}
+				}
+				beforeKey = nextKey;
+				ret = nextValue;
+				nextKey = null; nextValue = null;
 			} finally {
 				lock.unlock();
 			}
-			return new FixedArray(o);
+			if(nextMap == null) {
+				nextMap = new JsMap(ret);
+			} else {
+				nextMap.set(ret);
+			}
+			return nextMap;
+		}
+		
+		@SuppressWarnings("unchecked")
+		private boolean _next() {
+			while(true) {
+				if(exitFlag || src.isClose() || !src.hasNext()) {
+					close();
+					return false;
+				} else if(nextKey != null && nextValue != null) {
+					return true;
+				}
+				nextValue = src.next();
+				final Object checkKey = SearchOperator._indexColumns(nextValue, columns);
+				if(checkKey == null) {
+					continue;
+				}
+				nextKey = OperatorKeyType.getRestoreKey(keyType, src.getKey());
+				// range検索の場合.
+				if(end != null &&
+					((!reverse && end.compareTo(checkKey) <= 0) ||
+					(reverse && end.compareTo(checkKey) >= 0))) {
+					// 終端を検出.
+					exitFlag = true;
+				}
+				return true;
+			}
 		}
 	}
 }

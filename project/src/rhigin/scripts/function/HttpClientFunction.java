@@ -47,6 +47,7 @@ public class HttpClientFunction extends RhiginFunction {
 	 *              params: パラメータを設定する場合は、この名前で設定します.
 	 *              header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
 	 *              bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
+	 *              minHeader: 最小のヘッダで通信をする場合は true を設定します.
 	 * @return HttpResult 返却データが返されます.
 	 */
 	@Override
