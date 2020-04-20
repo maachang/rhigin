@@ -11,6 +11,7 @@ import java.sql.Types;
 import java.util.List;
 
 import rhigin.lib.jdbc.runner.JDBCConnect.Time12;
+import rhigin.scripts.RhiginWrapUtil;
 import rhigin.util.ByteArrayIO;
 import rhigin.util.Converter;
 import rhigin.util.ObjectList;
@@ -24,13 +25,13 @@ public final class JDBCUtils {
 	}
 
 	/**
-	 * シーケンスIDを付与.
+	 * Time12のシーケンスIDを付与.
 	 * 
 	 * @param conns
 	 * @param args
 	 * @return
 	 */
-	public static final Object[] appendSequence(JDBCConnect conns, Object[] args) {
+	public static final Object[] appendSequenceTime12(JDBCConnect conns, Object[] args) {
 		if(conns.sequence == null) {
 			return args;
 		}
@@ -61,8 +62,10 @@ public final class JDBCUtils {
 	/**
 	 * 1つのパラメータセット.
 	 */
-	public static final void putParam(final int no, final PreparedStatement pre, final ParameterMetaData meta, final Object v)
+	public static final void putParam(final int no, final PreparedStatement pre, final ParameterMetaData meta, Object v)
 			throws Exception {
+		// rhigin向けのアンラップ処理.
+		v = RhiginWrapUtil.unwrap(v);
 
 		// ParameterMetaDataがサポートしていない場合.
 		if (meta == null) {
@@ -323,7 +326,8 @@ public final class JDBCUtils {
 			bo.close();
 			bo = null;
 		}
-		return data;
+		// rhigin向けのラップ処理.
+		return RhiginWrapUtil.wrapJavaObject(data);
 	}
 
 	/** 小文字大文字差分. **/

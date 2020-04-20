@@ -225,7 +225,7 @@ public class JDBCConnect {
 				stmt.setFetchSize(fsize);
 			}
 			JDBCUtils.preParams(stmt, stmt.getParameterMetaData(),
-				JDBCUtils.appendSequence(this, args));
+				JDBCUtils.appendSequenceTime12(this, args));
 			rs = stmt.executeQuery();
 			JDBCRow ret = JDBCRow.create(rs, this, stmt);
 			closeable.reg(stmt).reg(rs);
@@ -257,7 +257,7 @@ public class JDBCConnect {
 		try {
 			stmt = conn.prepareStatement(JDBCUtils.sql(kind, sql), Statement.NO_GENERATED_KEYS);
 			JDBCUtils.preParams(stmt, stmt.getParameterMetaData(),
-				JDBCUtils.appendSequence(this, args));
+				JDBCUtils.appendSequenceTime12(this, args));
 			int ret = stmt.executeUpdate();
 			stmt.close(); stmt = null;
 			return ret;
@@ -286,7 +286,7 @@ public class JDBCConnect {
 			stmt = conn.prepareStatement(JDBCUtils.sql(kind, sql), Statement.RETURN_GENERATED_KEYS);
 			stmt.setMaxRows(1);
 			JDBCUtils.preParams(stmt, stmt.getParameterMetaData(),
-				JDBCUtils.appendSequence(this, args));
+				JDBCUtils.appendSequenceTime12(this, args));
 			stmt.executeUpdate();
 			rs = stmt.getGeneratedKeys();
 			JDBCRow ret = JDBCRow.create(rs, this, stmt);

@@ -5,8 +5,13 @@ import java.util.Map;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
+import objectpack.ObjectPack;
+import objectpack.SerializableCore;
 import rhigin.RhiginException;
+import rhigin.http.MimeType;
 import rhigin.http.client.HttpClient;
+import rhigin.http.client.HttpResult;
+import rhigin.scripts.ObjectPackOriginCode;
 import rhigin.scripts.RhiginFunction;
 import rhigin.util.ArrayMap;
 import rhigin.util.FixedKeyValues;
@@ -23,6 +28,13 @@ import rhigin.util.FixedKeyValues;
  *     bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
  */
 public class HttpClientFunction extends RhiginFunction {
+	// ObjectPackのRhigin拡張.
+	static {
+		if(!SerializableCore.isOriginCode()) {
+			SerializableCore.setOriginCode(new ObjectPackOriginCode());
+		}
+	}
+	
 	private static final HttpClientFunction THIS = new HttpClientFunction();
 
 	public static final HttpClientFunction getInstance() {
@@ -72,7 +84,13 @@ public class HttpClientFunction extends RhiginFunction {
 				}
 			}
 			try {
-				return HttpClient.connect(method, url, option);
+				HttpResult ret = HttpClient.connect(method, url, option);
+				if(MimeType.RHIGIN_OBJECT_PACK_MIME_TYPE.equals(ret.get("Content-Type"))) {
+					byte[] b = ret.responseBody();
+					ret.setResponseJson(ObjectPack.unpackB(b));
+					b = null;
+				}
+				return ret;
 			} catch (Exception e) {
 				throw new RhiginException(500, e);
 			}

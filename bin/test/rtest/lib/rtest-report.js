@@ -32,6 +32,12 @@ var _sec = function(n) {
     return n;
 }
 
+// 番号のゼロサプレス.
+var _no = function(n) {
+    n = "" + n;
+    return "0000".substring(n.length) + n;
+}
+
 // 全Spec結果のSpec件数と失敗件数を取得.
 var allCount = function(value) {
     var res;
@@ -110,13 +116,13 @@ var detailReport = function(value) {
 
         var lenJ = value[i].result.length;
         for(var j = 0; j < lenJ; j ++) {
-            detailDetailReport(false, 3 + 2, value[i].result[j]);
+            detailDetailReport(false, 3 + 2, j + 1, value[i].result[j]);
         }
     }
 }
 
 // 処理内容を其々出力.
-var detailDetailReport = function(verboseFlag, space, value) {
+var detailDetailReport = function(verboseFlag, space, no, value) {
     verboseFlag = !verboseFlag ? verbose : verboseFlag;
     var print, noLinePrint, color, endColor, head;
     if(value.errFlg) {
@@ -165,14 +171,14 @@ var detailDetailReport = function(verboseFlag, space, value) {
             print("");
         }
         for(var i = 0; i < len; i ++) {
-            detailDetailReport(errFlg, space + 2, list[i]);
+            detailDetailReport(errFlg, space + 2, i + 1, list[i]);
         }
         return;
     }
     // expect(2)
     // verboseがONもしくはエラーがある場合は表示.
     if(verboseFlag) {
-        print(_cs(space) + color + head + value.name + endColor);
+        print(_cs(space) + color + head + "(" + _no(no) + ") " + value.name + endColor);
     }
 }
 

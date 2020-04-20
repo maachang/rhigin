@@ -820,7 +820,7 @@ public final class ByteArrayIO extends OutputStream {
 	 * 
 	 * @return boolean [true]の場合、空です.
 	 */
-	public boolean isNotEmpty() {
+	public boolean isEmpty() {
 		return useLength == 0;
 	}
 

@@ -1,7 +1,6 @@
 package rhigin.scripts;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -12,20 +11,41 @@ import org.mozilla.javascript.Wrapper;
 
 import rhigin.RhiginException;
 import rhigin.scripts.objects.JDateObject;
+import rhigin.util.Alphabet;
 import rhigin.util.Converter;
 import rhigin.util.DateConvert;
 import rhigin.util.ObjectList;
 
 /**
- * Json変換処理. Rhino専用に改造.
+ * Json変換処理.
+ * 
+ * Rhino専用に改造.
  */
 @SuppressWarnings("rawtypes")
 public final class Json {
-	protected Json() {
-	}
+	protected Json() {}
 
 	private static final int TYPE_ARRAY = 0;
 	private static final int TYPE_MAP = 1;
+	
+	private static JsonOriginCode ORIGIN_CODE = null;
+	
+	/**
+	 * 拡張変換処理を追加.
+	 * @param code
+	 */
+	public static final void setOriginCode(JsonOriginCode code) {
+		ORIGIN_CODE = code;
+	}
+	
+	/**
+	 * 拡張変換処理が既に設定されているかチェック.
+	 * @return
+	 */
+	public static final boolean isOriginCode() {
+		return ORIGIN_CODE != null;
+	}
+
 
 	/**
 	 * JSON変換.
@@ -35,12 +55,12 @@ public final class Json {
 	 */
 	public static final String encode(Object target) {
 		StringBuilder buf = new StringBuilder();
-		_encode(buf, target, target);
+		encodeObject(buf, target, target);
 		return buf.toString();
 	}
 
 	/**
-	 * JSON形式から、オブジェクト変換2.
+	 * JSON形式から、オブジェクト変換.
 	 * 
 	 * @param json 対象のJSON情報を設定します.
 	 * @return Object 変換されたJSON情報が返されます.
@@ -70,27 +90,53 @@ public final class Json {
 			}
 			break;
 		}
-		return decJsonValue(n, 0, json);
+		return decodeJsonValue(json);
 	}
 
 	/** [encodeJSON]jsonコンバート. **/
-	private static final void _encode(StringBuilder buf, Object base, Object target) {
-		// null or undefined の場合.
-		if (target == null || target instanceof Undefined) {
-			// nullで表現.
+	private static final void encodeObject(final StringBuilder buf, final Object base, Object target) {
+		if(Undefined.isUndefined(target)) {
+			target = null;
+		} else if(target != null) {
+			// rhinoのjavaオブジェクトwrapper対応.
+			if (target instanceof Wrapper) {
+				target = ((Wrapper) target).unwrap();
+			// rhiginのjavaオブジェクトwrapper対応.
+			} else if (target instanceof RhiginObjectWrapper) {
+				target = ((RhiginObjectWrapper) target).unwrap();
+			}
+		}
+		// その他変換コードが設定されている場合.
+		if(ORIGIN_CODE != null) {
+			try {
+				// オブジェクト変換.
+				target = ORIGIN_CODE.inObject(target);
+				
+				// その他変換コードが設定されている場合.
+				String json = ORIGIN_CODE.encode(target);
+				if(json != null) {
+					buf.append(json);
+				}
+			} catch(RhiginException re) {
+				throw re;
+			} catch(Exception e) {
+				throw new RhiginException(500, e);
+			}
+		}
+		if (target == null) {
 			buf.append("null");
-			return;
-		}
-		// rhinoのjavaオブジェクトwrapper対応.
-		if (target instanceof Wrapper) {
-			target = ((Wrapper) target).unwrap();
-		} else if (target instanceof RhiginObjectWrapper) {
-			target = ((RhiginObjectWrapper) target).unwrap();
-		}
-		if (target instanceof Map) {
-			encodeJsonMap(buf, base, (Map) target);
+		} else if (target instanceof Map) {
+			if(((Map)target).size() == 0) {
+				buf.append("{}");
+			} else {
+				encodeJsonMap(buf, base, (Map) target);
+			}
 		} else if (target instanceof List) {
-			encodeJsonList(buf, base, (List) target);
+			if(((List)target).size() == 0) {
+				buf.append("[]");
+			} else {
+				encodeJsonList(buf, base, (List) target);
+			}
 		} else if (target instanceof Number || target instanceof Boolean) {
 			buf.append(target);
 		} else if (target instanceof Character || target instanceof CharSequence) {
@@ -120,7 +166,7 @@ public final class Json {
 	}
 
 	/** [encodeJSON]jsonMapコンバート. **/
-	private static final void encodeJsonMap(StringBuilder buf, Object base, Map map) {
+	private static final void encodeJsonMap(final StringBuilder buf, final Object base, final Map map) {
 		boolean flg = false;
 		Map mp = (Map) map;
 		Iterator it = mp.keySet().iterator();
@@ -136,13 +182,13 @@ public final class Json {
 			}
 			flg = true;
 			buf.append("\"").append(key).append("\":");
-			_encode(buf, base, value);
+			encodeObject(buf, base, value);
 		}
 		buf.append("}");
 	}
 
 	/** [encodeJSON]jsonListコンバート. **/
-	private static final void encodeJsonList(StringBuilder buf, Object base, List list) {
+	private static final void encodeJsonList(final StringBuilder buf, final Object base, final List list) {
 		boolean flg = false;
 		List lst = (List) list;
 		buf.append("[");
@@ -156,13 +202,13 @@ public final class Json {
 				buf.append(",");
 			}
 			flg = true;
-			_encode(buf, base, value);
+			encodeObject(buf, base, value);
 		}
 		buf.append("]");
 	}
 
 	/** [encodeJSON]json配列コンバート. **/
-	private static final void encodeJsonArray(StringBuilder buf, Object base, Object list) {
+	private static final void encodeJsonArray(final StringBuilder buf, final Object base, final Object list) {
 		boolean flg = false;
 		int len = Array.getLength(list);
 		buf.append("[");
@@ -175,47 +221,72 @@ public final class Json {
 				buf.append(",");
 			}
 			flg = true;
-			_encode(buf, base, value);
+			encodeObject(buf, base, value);
 		}
 		buf.append("]");
 	}
 
 	/** [decodeJSON]１つの要素を変換. **/
-	private static final Object decJsonValue(int[] n, int no, String json) {
-		int len;
-		if ((len = json.length()) <= 0) {
-			return json;
+	private static final Object decodeJsonValue(String json) {
+		try {
+			final Object ret = _decodeJsonValue(json);
+			if(ORIGIN_CODE != null) {
+				return ORIGIN_CODE.outObject(ret);
+			}
+			return ret;
+		} catch(RhiginException re) {
+			throw re;
+		} catch(Exception e) {
+			throw new RhiginException(500, e);
 		}
+	}
+	
+	/** [decodeJSON]１つの要素を変換. **/
+	private static final Object _decodeJsonValue(String json)
+		throws Exception {
+		if(ORIGIN_CODE != null) {
+			boolean[] res = new boolean[] {false};
+			Object value = ORIGIN_CODE.decode(res, json);
+			if(res[0]) {
+				return value;
+			}
+		}
+		int len;
 		// NULL文字.
-		if ("null".equals(json)) {
+		if(json == null || eq("null", json)) {
 			return null;
 		}
+		// 空文字.
+		else if ((len = json.length()) <= 0) {
+			return "";
+		}
 		// BOOLEAN true.
-		else if ("true".equals(json)) {
+		else if (eq("true", json)) {
 			return Boolean.TRUE;
 		}
 		// BOOLEAN false.
-		else if ("false".equals(json)) {
+		else if (eq("false", json)) {
 			return Boolean.FALSE;
 		}
 		// 数値.
-		if (isNumeric(json)) {
+		else if (isNumeric(json)) {
 			if (json.indexOf(".") != -1) {
 				return Double.parseDouble(json);
 			}
 			return Long.parseLong(json);
 		}
 		// 文字列コーテーション区切り.
-		if ((json.startsWith("\"") && json.endsWith("\"")) || (json.startsWith("\'") && json.endsWith("\'"))) {
+		else if ((json.startsWith("\"") && json.endsWith("\"")) || (json.startsWith("\'") && json.endsWith("\'"))) {
 			json = json.substring(1, len - 1);
 		}
 		// ISO8601の日付フォーマットかチェック.
-		if (DateConvert.isISO8601(json)) {
+		else if (DateConvert.isISO8601(json)) {
 			final java.util.Date d = stringToDate(json);
 			if(d != null) {
 				return JDateObject.newObject(d);
 			}
 		}
+		// その他文字列.
 		return json;
 	}
 
@@ -288,7 +359,7 @@ public final class Json {
 					if ("]".equals(value)) {
 						if (flg == 1) {
 							if (before != null) {
-								ret.add(decJsonValue(n, i, before.toString()));
+								ret.add(decodeJsonValue(before.toString()));
 							}
 						}
 						n[0] = i;
@@ -298,19 +369,19 @@ public final class Json {
 							if (before == null) {
 								ret.add(null);
 							} else {
-								ret.add(decJsonValue(n, i, before.toString()));
+								ret.add(decodeJsonValue(before.toString()));
 							}
 						}
 					}
 					before = null;
 					flg = 0;
 				} else if ("[".equals(value)) {
-					ret.add(createJsonInfo(n, token, 0, i, len));
+					ret.add(createJsonInfo(n, token, TYPE_ARRAY, i, len));
 					i = n[0];
 					before = null;
 					flg = 0;
 				} else if ("{".equals(value)) {
-					ret.add(createJsonInfo(n, token, 1, i, len));
+					ret.add(createJsonInfo(n, token, TYPE_MAP, i, len));
 					i = n[0];
 					before = null;
 					flg = 0;
@@ -343,9 +414,9 @@ public final class Json {
 					if ("}".equals(value)) {
 						if (key != null) {
 							if (before == null) {
-								ret.put(key, null);
+								ret.put(key, decodeJsonValue(null));
 							} else {
-								ret.put(key, decJsonValue(n, i, before.toString()));
+								ret.put(key, decodeJsonValue(before.toString()));
 							}
 						}
 						n[0] = i;
@@ -358,9 +429,9 @@ public final class Json {
 							throw new RhiginException(500, "Map format is invalid(No:" + i + ")");
 						}
 						if (before == null) {
-							ret.put(key, null);
+							ret.put(key, decodeJsonValue(null));
 						} else {
-							ret.put(key, decJsonValue(n, i, before.toString()));
+							ret.put(key, decodeJsonValue(before.toString()));
 						}
 						before = null;
 						key = null;
@@ -369,7 +440,7 @@ public final class Json {
 					if (key == null) {
 						throw new RhiginException(500, "Map format is invalid(No:" + i + ")");
 					}
-					ret.put(key, createJsonInfo(n, token, 0, i, len));
+					ret.put(key, createJsonInfo(n, token, TYPE_ARRAY, i, len));
 					i = n[0];
 					key = null;
 					before = null;
@@ -377,7 +448,7 @@ public final class Json {
 					if (key == null) {
 						throw new RhiginException(500, "Map format is invalid(No:" + i + ")");
 					}
-					ret.put(key, createJsonInfo(n, token, 1, i, len));
+					ret.put(key, createJsonInfo(n, token, TYPE_MAP, i, len));
 					i = n[0];
 					key = null;
 					before = null;
@@ -401,7 +472,11 @@ public final class Json {
 		// その他.
 		throw new RhiginException(500, "Failed to parse JSON.");
 	}
-
+	
+	/** 大文字、小文字関係なく比較. **/
+	protected static final boolean eq(String a, String b) {
+		return Alphabet.eq(a, b);
+	}
 	/** 数値チェック. **/
 	protected static final boolean isNumeric(String o) {
 		return Converter.isNumeric(o);
@@ -422,20 +497,61 @@ public final class Json {
 	}
 
 	/** JSのNativeDateオブジェクトの場合は、java.util.Dateに変換. **/
-	protected static final java.util.Date getJSNativeDate(IdScriptableObject io) {
-		if ("Date".equals(io.getClassName())) {
-			// NativeDate.
-			try {
-				// 現状リフレクションで直接取得するようにする.
-				// 本来は ScriptRuntime.toNumber(NativeDate) で取得できるのだけど、
-				// これは rhinoのContextの範囲内でないとエラーになるので.
-				final Method md = io.getClass().getDeclaredMethod("getJSTimeValue");
-				md.setAccessible(true);
-				return JDateObject.newObject(Converter.convertLong(md.invoke(io)));
-			} catch (Exception e) {
-				// エラーの場合は処理しない.
-			}
+	protected static final java.util.Date getJSNativeDate(Object o) {
+		Long ret = RhiginWrapUtil.convertRhinoNativeDateByLong(o);
+		if(ret != null) {
+			return JDateObject.newObject(ret);
 		}
 		return null;
+	}
+	
+	/**
+	 * 拡張エンコード、デコード処理を行う場合の継承クラス.
+	 */
+	public static abstract class JsonOriginCode {
+		
+		/**
+		 * 入力オブジェクトの変換.
+		 * Json.encodeObject で処理される毎に、この処理が呼ばれます.
+		 * 
+		 * @param o オブジェクトを設定します.
+		 * @return Object 変換されたオブジェクトが返却されます.
+		 * @exception Exception 例外.
+		 */
+		public Object inObject(Object o) throws Exception {
+			return o;
+		}
+		
+		/**
+		 * 出力オブジェクトの変換.
+		 * Json.decodeObject で処理結果毎に、この処理が呼ばれます.
+		 * 
+		 * @param o オブジェクトを設定します.
+		 * @return Object 変換されたオブジェクトが返却されます.
+		 * @exception Exception 例外.
+		 */
+		public Object outObject(Object o) throws Exception {
+			return o;
+		}
+		
+		/**
+		 * オブジェクトをJSONに変換.
+		 *
+		 * @param o 対象のオブジェクトを設定します.
+		 * @return String JSON変換された情報が返却されます.
+		 *                [null]返却でこの処理で変換しません.
+		 * @exception Exception 例外.
+		 */
+		public abstract String encode(Object o) throws Exception;
+		
+		/**
+		 * JSONをオブジェクトに変換.
+		 * 
+		 * @param result result[0] = true の場合、変換処理が行われました.
+		 * @parma json 対象の文字列が設定されます.
+		 * @return Object 変換されたオブジェクトが返却されます.
+		 * @exception Exception 例外.
+		 */
+		public abstract Object decode(boolean[] result, String json) throws Exception;
 	}
 }

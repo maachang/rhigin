@@ -20,7 +20,8 @@ import rhigin.util.ConvertMap;
 /**
  * HttpClient処理結果.
  */
-public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterator.Base<String>, AbstractEntryIterator.Base<String, String>, ConvertMap {
+public class HttpResult extends JavaScriptable.Map implements
+	AbstractKeyIterator.Base<String>, AbstractEntryIterator.Base<String, String>, ConvertMap {
 	private byte[] headers = null;
 	private String headersString = null;
 
@@ -29,6 +30,7 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 	private String url = null;
 	private String contentType = null;
 	private HttpBodyFile bodyFile = null;
+	private Object json = null;
 
 	/**
 	 * コンストラクタ.
@@ -317,6 +319,26 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 	}
 
 	/**
+	 * JSONオブジェクトを設定.
+	 * @param o
+	 */
+	public void setResponseJson(Object o) {
+		json = o;
+	}
+	
+	/**
+	 * JSONオブジェクトを取得.
+	 * @return
+	 */
+	public Object responseJson() {
+		if(json != null) {
+			return json;
+		}
+		json = Json.decode(responseText());
+		return json;
+	}
+
+	/**
 	 * 文字列返却.
 	 * 
 	 * @return String 文字列が返却されます.
@@ -414,6 +436,8 @@ public class HttpResult extends JavaScriptable.Map implements AbstractKeyIterato
 			return JavaObject.wrapObject(responseInputStream());
 		} else if ("text".equals(key)) {
 			return responseText();
+		} else if ("json".equals(key)) {
+			return responseJson();
 		} else if ("type".equals(key)) {
 			return responseType();
 		} else if ("gzip".equals(key) || "isGzip".equals(key)) {

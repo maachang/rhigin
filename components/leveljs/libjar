@@ -4,14 +4,18 @@
 ################################################################################
 COMPONENT_NAME=leveljs
 
-# プロジェクトパス.
-PROJECT_PATH="${RHIGIN_HOME}/../../"
-
 # 現在のパスを保持.
 NOW_PATH=` pwd`
 
+# プロジェクトパス.
+PROJECT_PATH="${RHIGIN_HOME}/../.."
+
 # コンポーネントパスをセット.
 COMPONENT_PATH="${RHIGIN_HOME}/../components/${COMPONENT_NAME}"
+
+#############################################
+# leveldbプロジェクト を cloneしてコンパイル.
+#############################################
 
 # leveldbのパスを取得.
 LEVELDB_PATH="${PROJECT_PATH}/leveldb"
@@ -38,7 +42,7 @@ if [ $? != 0 ]; then
     exit 1
 fi
 
-# antコンパイル.
+# leveldb のコンパイル.
 ant clean
 ant
 if [ $? != 0 ]; then
@@ -46,7 +50,7 @@ if [ $? != 0 ]; then
     exit 1
 fi
 
-# 削除 or コピー.
+# コンパイル結果の jar ファイルを leveljs コンポーネント のライブラリに 削除 or コピー.
 rm -Rf ${COMPONENT_PATH}/project/lib/leveldb-*.jar
 cp leveldb-*.jar ${COMPONENT_PATH}/project/lib/
 

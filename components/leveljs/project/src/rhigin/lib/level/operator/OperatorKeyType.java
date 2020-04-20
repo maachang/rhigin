@@ -1,5 +1,7 @@
 package rhigin.lib.level.operator;
 
+import java.util.List;
+
 import org.maachang.leveldb.LevelOption;
 import org.maachang.leveldb.LeveldbException;
 import org.maachang.leveldb.util.Alphabet;
@@ -214,11 +216,12 @@ public class OperatorKeyType {
 	 * @param opt
 	 * @return
 	 */
+	@SuppressWarnings("rawtypes")
 	public static final int getKeyType(LevelOption opt) {
-		Object[] o = opt.getExpansion();
-		if(o == null || o.length == 0 || !Converter.isNumeric(o[0])) {
+		List o = opt.getExpansion();
+		if(o == null || o.size() == 0 || !Converter.isNumeric(o.get(0))) {
 			return OperatorKeyType.KEY_NONE;
 		}
-		return Converter.convertInt(o[0]);
+		return Converter.convertInt(o.get(0));
 	}
 }

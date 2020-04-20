@@ -19,7 +19,11 @@ import rhigin.util.ConvertMap;
  * MimeType.
  */
 @SuppressWarnings("rawtypes")
-public class MimeType extends JavaScriptable.Map implements AbstractKeyIterator.Base<String>, AbstractEntryIterator.Base<String, Object>, ConvertMap {
+public class MimeType extends JavaScriptable.Map implements
+	AbstractKeyIterator.Base<String>, AbstractEntryIterator.Base<String, Object>, ConvertMap {
+	
+	/** ObjectPack用 rhigin mimeType. **/
+	public static final String RHIGIN_OBJECT_PACK_MIME_TYPE = "application/rhigin-opack";
 
 	/** MimeTypeコンフィグファイル名. **/
 	public static final String MIME_CONF = "mime.conf";

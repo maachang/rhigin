@@ -102,7 +102,7 @@ public class JDBCBatch {
 			if(psCache == null || (stmt = psCache.get(sql)) == null) {
 				stmt = jcon.conn.prepareStatement(sql, Statement.NO_GENERATED_KEYS);
 				JDBCUtils.preParams(stmt, stmt.getParameterMetaData(),
-					JDBCUtils.appendSequence(jcon, args));
+					JDBCUtils.appendSequenceTime12(jcon, args));
 				stmt.addBatch();
 				if(batchList == null) {
 					batchList = new OList<Statement>();
@@ -114,7 +114,7 @@ public class JDBCBatch {
 				psCache.put(sql, stmt);
 			} else {
 				JDBCUtils.preParams(stmt, stmt.getParameterMetaData(),
-					JDBCUtils.appendSequence(jcon, args));
+					JDBCUtils.appendSequenceTime12(jcon, args));
 				stmt.addBatch();
 			}
 			batchLength ++;

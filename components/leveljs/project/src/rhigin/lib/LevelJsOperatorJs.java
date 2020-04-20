@@ -41,7 +41,7 @@ public class LevelJsOperatorJs {
 		,"isWriteBatch"
 		,"commit"
 		,"rollback"
-		,"indexRange"
+		,"irange"
 	};
 	
 	// オペレータ用メソッド生成処理.
@@ -234,7 +234,7 @@ public class LevelJsOperatorJs {
 				{
 					return op.rollback();
 				}
-				case 22: // indexRange.
+				case 22: // irange.
 					if(args == null || args.length == 0) {
 						this.argsException(opName);
 					}

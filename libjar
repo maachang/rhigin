@@ -7,10 +7,14 @@
 NOW_PATH=` pwd`
 
 # projectパス.
-PROJECT_PATH="${RHIGIN_HOME}/../../"
+PROJECT_PATH="${RHIGIN_HOME}/../.."
 
-# objectpackプロジェクト を clone.
-OBJECT_PACK_PATH="${RHIGIN_HOME}/../../objectpack"
+################################################
+# objectpackプロジェクト を cloneしてコンパイル.
+################################################
+
+# objectpackプロジェクトパス.
+OBJECT_PACK_PATH="${PROJECT_PATH}/objectpack"
 
 # objectpackのプロジェクトフォルダが存在するかチェック.
 if [ -f ${OBJECT_PACK_PATH}/build.xml ]; then
@@ -42,18 +46,22 @@ if [ $? != 0 ]; then
     exit 1
 fi
 
-# 削除 or コピー.
+# コンパイル結果の jar ファイルを rhigin のプロジェクトライブラリ or rhiginHomeのライブラリ に 削除 or コピー.
 rm -Rf ${PROJECT_PATH}/rhigin/project/lib/objectpack-*.jar
 rm -Rf ${RHIGIN_HOME}/lib/objectpack-*.jar
 cp objectpack-*.jar ${PROJECT_PATH}/rhigin/project/lib/
 cp objectpack-*.jar ${RHIGIN_HOME}/lib/
-cd ${NOW_PATH}
 
+######################
 # rhiginのコンパイル.
+######################
+cd ${NOW_PATH}
 ant clean
 ant
 
+##################################################
 # leveljs に対するleveldbプロジェクトのコンパイル.
+##################################################
 sh components/leveljs/libjar
 if [ $? != 0 ]; then
     cd ${NOW_PATH}

@@ -7,7 +7,6 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 import org.mozilla.javascript.Wrapper;
 
-import rhigin.RhiginException;
 import rhigin.scripts.objects.JDateObject;
 import rhigin.scripts.objects.JavaObject;
 import rhigin.util.Converter;
@@ -72,21 +71,36 @@ public class RhiginWrapUtil {
 			return ((Wrapper)value).unwrap();
 		} else if(value instanceof RhiginObjectWrapper) {
 			return ((RhiginObjectWrapper)value).unwrap();
-		} else if (value instanceof IdScriptableObject &&
-			"Date".equals(((IdScriptableObject)value).getClassName())) {
+		} else {
+			Long ret = convertRhinoNativeDateByLong(value);
+			if(ret != null) {
+				return JDateObject.newObject(ret);
+			}
+		}
+		return value;
+	}
+
+	/**
+	 * rhinoのNativeDateオブジェクトの場合は、java.util.Dateに変換.
+	 * @param o 対象のオブジェクトを設定します.
+	 * @return Long 
+	 */
+	public static final Long convertRhinoNativeDateByLong(Object o) {
+		if (o instanceof IdScriptableObject &&
+			"Date".equals(((IdScriptableObject)o).getClassName())) {
 			// NativeDate.
 			try {
 				// 現状リフレクションで直接取得するようにする.
 				// 本来は ScriptRuntime.toNumber(NativeDate) で取得できるのだけど、
 				// これは rhinoのContextの範囲内でないとエラーになるので.
-				final Method md = value.getClass().getDeclaredMethod("getJSTimeValue");
+				final Method md = o.getClass().getDeclaredMethod("getJSTimeValue");
 				md.setAccessible(true);
-				return JDateObject.newObject(Converter.convertLong(md.invoke(value)));
+				return Converter.convertLong(md.invoke(o));
 			} catch (Exception e) {
-				throw new RhiginException(e);
+				// エラーの場合は処理しない.
 			}
 		}
-		return value;
+		return null;
 	}
 	
 	/**

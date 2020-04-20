@@ -14,6 +14,8 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
+import objectpack.ObjectPack;
+import objectpack.SerializableCore;
 import rhigin.RhiginConstants;
 import rhigin.RhiginException;
 import rhigin.logs.Log;
@@ -21,12 +23,14 @@ import rhigin.logs.LogFactory;
 import rhigin.net.NioReadBuffer;
 import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.Json;
+import rhigin.scripts.ObjectPackOriginCode;
 import rhigin.scripts.RhiginContext;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.ScriptConstants;
 import rhigin.scripts.compile.CompileCache;
 import rhigin.scripts.function.RandomFunction;
 import rhigin.util.Alphabet;
+import rhigin.util.ArrayMap;
 import rhigin.util.Converter;
 import rhigin.util.FileUtil;
 import rhigin.util.Wait;
@@ -36,6 +40,13 @@ import rhigin.util.Xor128;
  * ワーカースレッド.
  */
 public class HttpWorkerThread extends Thread {
+	// ObjectPackのRhigin拡張.
+	static {
+		if(!SerializableCore.isOriginCode()) {
+			SerializableCore.setOriginCode(new ObjectPackOriginCode());
+		}
+	}
+	
 	private static final Log LOG = LogFactory.create();
 	private static final int TIMEOUT = 1000;
 	private static final byte[] BLANK_BINARY = new byte[0];
@@ -418,18 +429,28 @@ public class HttpWorkerThread extends Thread {
 					ExecuteScript.clearCurrentRhiginContext();
 				}
 				
-				// 戻り値がInputStreamでない場合.
-				if (!(ret instanceof InputStream)) {
-					if (ret == null || (ret instanceof String && ((String) ret).length() == 0)) {
-						ret = "";
-						gzip = false;
-					}
-					// success形式で返却.
-					successResponse(minHeader, gzip, em, res.getStatus(), res, ret);
-					// 戻り値がInputStreamの場合.
-				} else {
+				// 戻り値がInputStreamの場合.
+				if (ret instanceof InputStream) {
 					// バイナリ返却.
 					sendResponse(minHeader, em, res.getStatus(), res, (InputStream) ret);
+				// 戻り値がInputStreamでない場合.
+				} else {
+					// 戻り値が無い場合.
+					if (ret == null || (ret instanceof String && ((String) ret).isEmpty())) {
+						ret = "";
+						// success形式で返却.
+						successResponse(minHeader, false, em, res.getStatus(), res, ret);
+					// minHeader で ContentTypeが設定されていない場合.
+					} else if(minHeader && res.get("Content-Type") == Response.DEFAULT_CONTENT_TYPE) {
+						// rhiginの名前でコンテンツタイプをセット.
+						res.put("Content-Type", MimeType.RHIGIN_OBJECT_PACK_MIME_TYPE);
+						// ObjectPackでjsnappy圧縮でバイナリ変換.
+						ret = ObjectPack.packB(ret);
+						successResponseObjectPack(minHeader, em, res.getStatus(), res, (byte[])ret);
+					} else {
+						// success形式で返却.
+						successResponse(minHeader, gzip, em, res.getStatus(), res, ret);
+					}
 				}
 				
 			} finally {
@@ -497,19 +518,25 @@ public class HttpWorkerThread extends Thread {
 			return Analysis.paramsAnalysis(v, 0);
 		}
 	}
+	
+	/** 正常結果をObjectPackで返却. **/
+	private static final void successResponseObjectPack(boolean minHeader, HttpElement em, int status, Response response, byte[] value)
+		throws IOException {
+		em.setRequest(null);
+		em.destroyBuffer();
+		em.setEndReceive(true);
+		em.setEndSend(true);
+		em.setSendBinary(stateResponse(minHeader, status, response, value, (long)value.length));
+	}
 
 	/** 正常結果をJSON返却. **/
 	private static final void successResponse(boolean minHeader, boolean gzip, HttpElement em, int status, Response response, Object value)
 			throws IOException {
-		StringBuilder buf = new StringBuilder("{\"success\":true,\"status\":").append(status).append(",");
 		if (value == null) {
-			buf.append("\"value\":null");
+			sendResponse(minHeader, gzip, em, status, response, "{}");
 		} else {
-			buf.append("\"value\":").append(Json.encode(value));
+			sendResponse(minHeader, gzip, em, status, response, Json.encode(value));
 		}
-		buf.append("}");
-		response.setHeader("Content-Type", "application/json;charset=UTF-8");
-		sendResponse(minHeader, gzip, em, status, response, buf.toString());
 	}
 
 	/** GZIP返却許可チェック. **/
@@ -629,8 +656,8 @@ public class HttpWorkerThread extends Thread {
 	}
 
 	/** エラーレスポンスを送信. **/
+	@SuppressWarnings("rawtypes")
 	private static final void errorResponse(boolean minHeader, HttpElement em, int status, String message) throws IOException {
-		StringBuilder buf = new StringBuilder("{\"success\":false,\"status\":").append(status);
 		if (message == null) {
 			message = Status.getMessage(status);
 		}
@@ -643,19 +670,29 @@ public class HttpWorkerThread extends Thread {
 		message = Converter.changeString(message, "]", "］");
 		message = Converter.changeString(message, "{", "｛");
 		message = Converter.changeString(message, "}", "｝");
+		
+		final Map ret = new ArrayMap("message", message);
 
-		String res = buf.append(",\"value\":{\"message\":\"").append(message).append("\"}}").toString();
-		buf = null;
-
-		Response header = new Response();
-		header.put("Content-Type", "application/json;charset=UTF-8");
+		Response res = new Response();
 
 		// 処理結果を返却.
 		em.setRequest(null);
 		em.destroyBuffer();
 		em.setEndReceive(true);
 		em.setEndSend(true);
-		em.setSendBinary(stateResponse(minHeader, status, header, res));
+		if(minHeader) {
+			try {
+				// ObjectPackでバイナリ変換.
+				res.put("Content-Type", MimeType.RHIGIN_OBJECT_PACK_MIME_TYPE);
+				successResponseObjectPack(minHeader, em, res.getStatus(), res, (byte[])ObjectPack.packB(ret));
+			} catch(Exception e) {
+				// 何らかで失敗したら、返却はJSON形式で.
+				res.remove("Content-Length");
+				em.setSendBinary(stateResponse(minHeader, status, res, Json.encode(ret)));
+			}
+			return;
+		}
+		em.setSendBinary(stateResponse(minHeader, status, res, Json.encode(ret)));
 	}
 
 	/** ステータス指定Response返却用バイナリの生成. **/
@@ -730,7 +767,7 @@ public class HttpWorkerThread extends Thread {
 		byte[] s2_m;
 		try {
 			final String serverName = RhiginConstants.NAME + "(" + RhiginConstants.VERSION + ")";
-			final String serverName_m = RhiginConstants.NAME + "_m";
+			final String serverName_m = RhiginConstants.NAME + "_m(" + RhiginConstants.VERSION + ")";
 			op = ("HTTP/1.1 200 OK\r\n"
 					+ "Allow:GET,POST,HEAD,OPTIONS\r\n"
 					+ "Cache-Control:no-cache\r\n"

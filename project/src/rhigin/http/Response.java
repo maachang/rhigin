@@ -19,7 +19,7 @@ import rhigin.util.Converter;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class Response extends JavaScriptable.Map implements ConvertGet {
-	private static final String DEFAULT_CONTENT_TYPE = "application/json;charset=UTF-8";
+	public static final String DEFAULT_CONTENT_TYPE = "application/json;charset=UTF-8";
 	protected int status = 200;
 	protected ArrayMap header = new ArrayMap();
 	protected String ContentType = DEFAULT_CONTENT_TYPE;
@@ -249,7 +249,7 @@ public class Response extends JavaScriptable.Map implements ConvertGet {
 
 	@Override
 	public String toString() {
-		return super.toString();
+		return Response.headers(this);
 	}
 
 	@Override

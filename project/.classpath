@@ -8,5 +8,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/rhino-1.7.11.jar"/>
 	<classpathentry kind="lib" path="lib/jline-2.14.2.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/objectpack"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
