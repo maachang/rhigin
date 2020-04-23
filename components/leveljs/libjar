@@ -52,7 +52,7 @@ fi
 
 # コンパイル結果の jar ファイルを leveljs コンポーネント のライブラリに 削除 or コピー.
 rm -Rf ${COMPONENT_PATH}/project/lib/leveldb-*.jar
-mkdir ${COMPONENT_PATH}/project/lib/
+mkdir -p ${COMPONENT_PATH}/project/lib/
 cp leveldb-*.jar ${COMPONENT_PATH}/project/lib/
 
 cd ${NOW_PATH}

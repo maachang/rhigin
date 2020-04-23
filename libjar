@@ -47,8 +47,8 @@ if [ $? != 0 ]; then
 fi
 
 # コンパイル結果の jar ファイルを rhigin のプロジェクトライブラリ or rhiginHomeのライブラリ に 削除 or コピー.
-mkdir ${PROJECT_PATH}/rhigin/project/lib/
-mkdir ${RHIGIN_HOME}/lib/
+mkdir -p ${PROJECT_PATH}/rhigin/project/lib/
+mkdir -p ${RHIGIN_HOME}/lib/
 rm -Rf ${PROJECT_PATH}/rhigin/project/lib/objectpack-*.jar
 rm -Rf ${RHIGIN_HOME}/lib/objectpack-*.jar
 cp objectpack-*.jar ${PROJECT_PATH}/rhigin/project/lib/
