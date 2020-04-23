@@ -11,7 +11,7 @@ describe("LevelJs オブジェクト テスト " + TEST_INFO + " の I/Oテス�
 
     // テストリスト.
     var TEST_LIST = [
-        "鈴木", {name: "鈴木", kana: "スズキ", age: 22, sex: "男", details: {height: -168.5, weight: -61.5}}
+        "鈴木", {name: "鈴木", kana: "スズキ", age: -22, sex: "男", details: {height: -168.5, weight: -61.5}}
         , "田中", {name: "田中", kana: "タナカ", age: 21, sex: "女", details: {height: 182.3, weight: 64.8}}
         , "佐藤", {name: "佐藤", kana: "サトウ", age: 43, sex: "他", details: {height: 156.2, weight: 83.2}}
         , "守", {name: "守", kana: "モリ", age: 55, sex: "女", details: {height: 160.7, weight: 60.3}}
@@ -77,17 +77,6 @@ describe("LevelJs オブジェクト テスト " + TEST_INFO + " の I/Oテス�
         }
     }
 
-    // データの削除.
-    var _removeListByNo = function(list, no) {
-        var len = list.length;
-        for(var i = 0; i < len; i += 2) {
-            if(i == no << 1) {
-                list.splice(i, 2);
-                return;
-            }
-        }
-    }
-
     // 指定されたカラム名の要素を取得.
     var _getValueByColumns = function(res, value, columns) {
         res[0] = true;
@@ -143,11 +132,6 @@ describe("LevelJs オブジェクト テスト " + TEST_INFO + " の I/Oテス�
             }
         }
         return keyList;
-    }
-
-    // インデックスキー項番を取得.
-    var _indexKeyNo = function(indexKeyList, value) {
-        return indexKeyList[value];
     }
 
     // インデックスの昇順、降順の件数を取得.

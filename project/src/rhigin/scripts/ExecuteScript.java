@@ -32,6 +32,7 @@ import rhigin.scripts.function.GlobalFunction;
 import rhigin.scripts.function.HttpClientFunction;
 import rhigin.scripts.function.LogFactoryFunction;
 import rhigin.scripts.function.NanoTimeFunction;
+import rhigin.scripts.function.ParseInt32Function;
 import rhigin.scripts.function.ParseIntFunction;
 import rhigin.scripts.function.RandomFunction;
 import rhigin.scripts.function.RequireFunction;
@@ -199,6 +200,7 @@ public class ExecuteScript {
 		EntityFunctions.regFunctions(scope);
 		RhiginEnvFunction.regFunctions(scope);
 		ColorOutFunction.regFunctions(scope);
+		ParseInt32Function.regFunctions(scope);
 		
 		// インデックスの作成.
 		scope.endIndex();
