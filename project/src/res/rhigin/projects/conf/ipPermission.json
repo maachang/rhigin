@@ -1,0 +1,24 @@
+/**
+ * Define access restrictions by ip address or domain name.
+ *
+ * Definable definitions are the following 3 methods.
+ *
+ * [ipV4 address] / [mask value]
+ *   <example> "192.168.0.0/24"
+ *
+ * [Domain name]
+ *   <example> "yahoo.co.jp"
+ *
+ * [ipV4 start address] - [ipV4 end address]
+ *   <example> "192.168.0.100 - 192.168.0.120"
+ */
+
+{
+    /* base Permission conditions. */
+    "*": [
+        "127.0.0.1/32"
+        ,"192.168.0.0/16"
+        ,"172.16.0.0/16"
+        ,"10.0.0.0/8"
+    ]
+}

@@ -320,7 +320,7 @@ public abstract class SearchOperator implements Operator {
 		}
 	}
 	
-	/*
+	/**
 	 * インデックスの存在チェック.
 	 * @param columnName カラム名を設定します.
 	 *                   設定方法は、hoge.moge.abc や "hoge", "moge", "abc"のように階層設定可能.
@@ -332,6 +332,23 @@ public abstract class SearchOperator implements Operator {
 		_r().lock();
 		try {
 			return _operator().isIndex(columnName);
+		} finally {
+			_r().unlock();
+		}
+	}
+	
+	/**
+	 * インデックスタイプとインデックスカラム名を取得.
+	 * @param columnName インデックスカラム名を設定します.
+	 * @return Object[] [0]インデックスタイプ, [1]インデックスカラム名が返却されます.
+	 */
+	public Object[] getIndexConfig(String... columnName) {
+		if(columnName == null || columnName.length == 0) {
+			throw new LevelJsException("Column name is not set.");
+		}
+		_r().lock();
+		try {
+			return _operator().getIndexConfig(columnName);
 		} finally {
 			_r().unlock();
 		}
@@ -494,19 +511,52 @@ public abstract class SearchOperator implements Operator {
 		_r().lock();
 		try {
 			len --;
+			final Object[] keyArray;
 			final Object v = params[len];
 			if(!(v instanceof Map)) {
 				// valueがMapで無い場合はエラー.
 				throw new LevelJsException("Element information must be set in Map format.");
+			} else if(len == 1 && params[0] instanceof List) {
+				// Listで設定された場合は、オブジェクト配列に変換.
+				List lst = (List)params[0];
+				len = lst.size();
+				if(len == 0) {
+					throw new LevelJsException("Key element information is not set.");
+				}
+				keyArray = new Object[len];
+				for(int i = 0; i < len; i ++) {
+					keyArray[i] = lst.get(i);
+				}
+			} else {
+				// オブジェクト配列としてキーを切り出す.
+				keyArray = new Object[len];
+				System.arraycopy(params, 0, keyArray, 0, len);
 			}
-			final Object[] keys = new Object[len];
-			System.arraycopy(params, 0, keys, 0, len);
-			return _put((Map)v, len, keys);
+			return _put((Map)v, len, keyArray);
 		} finally {
 			_r().unlock();
 		}
 	}
 	
+	// 検索キー配列を取得.
+	private static final Object[] searchKeyArray(Object... keys) {
+		final Object[] keyArray;
+		if(keys.length == 1 && keys[0] instanceof List) {
+			// Listで設定された場合は、オブジェクト配列に変換.
+			List lst = (List)keys[0];
+			int len = lst.size();
+			if(len == 0) {
+				throw new LevelJsException("Search key information is not set.");
+			}
+			keyArray = new Object[len];
+			for(int i = 0; i < len; i ++) {
+				keyArray[i] = lst.get(i);
+			}
+		} else {
+			keyArray = keys;
+		}
+		return keyArray;
+	}
 	/**
 	 * データ削除.
 	 * @params keys キーを設定します.
@@ -515,9 +565,10 @@ public abstract class SearchOperator implements Operator {
 		if(keys == null || keys.length == 0) {
 			throw new LevelJsException("Search key information is not set.");
 		}
+		final Object[] keyArray = searchKeyArray(keys);
 		_r().lock();
 		try {
-			_remove(keys.length, keys);
+			_remove(keyArray.length, keyArray);
 		} finally {
 			_r().unlock();
 		}
@@ -533,9 +584,10 @@ public abstract class SearchOperator implements Operator {
 			throw new LevelJsException("Search key information is not set.");
 		}
 		Object ret;
+		final Object[] keyArray = searchKeyArray(keys);
 		_r().lock();
 		try {
-			ret = _get(keys.length, keys);
+			ret = _get(keyArray.length, keyArray);
 			if(ret == null) {
 				return null;
 			}
@@ -554,9 +606,10 @@ public abstract class SearchOperator implements Operator {
 		if(keys == null || keys.length == 0) {
 			throw new LevelJsException("Search key information is not set.");
 		}
+		final Object[] keyArray = searchKeyArray(keys);
 		_r().lock();
 		try {
-			return _contains(keys.length, keys);
+			return _contains(keyArray.length, keyArray);
 		} finally {
 			_r().unlock();
 		}
@@ -568,9 +621,15 @@ public abstract class SearchOperator implements Operator {
 	 * @return OperateIterator OperateIteratorが返却されます.
 	 */
 	public OperateIterator cursor(boolean desc, Object... keys) {
+		final Object[] keyArray;
+		if(keys != null && keys.length > 0) {
+			keyArray = searchKeyArray(keys);
+		} else {
+			keyArray = null;
+		}
 		_r().lock();
 		try {
-			final OperateIterator ret = _iterator(_r(), desc, keys == null ? 0 : keys.length, keys);
+			final OperateIterator ret = _iterator(_r(), desc, keyArray == null ? 0 : keyArray.length, keyArray);
 			if(ret != null) {
 				closeable.reg(ret);
 			}
@@ -586,9 +645,15 @@ public abstract class SearchOperator implements Operator {
 	 * @return OperateIterator OperateIteratorが返却されます.
 	 */
 	public OperateIterator range(boolean desc, Object... keys) {
+		final Object[] keyArray;
+		if(keys != null && keys.length > 0) {
+			keyArray = searchKeyArray(keys);
+		} else {
+			keyArray = null;
+		}
 		_r().lock();
 		try {
-			final OperateIterator ret = _range(_r(), desc, keys == null ? 0 : keys.length, keys);
+			final OperateIterator ret = _range(_r(), desc, keyArray == null ? 0 : keyArray.length, keyArray);
 			if(ret != null) {
 				closeable.reg(ret);
 			}

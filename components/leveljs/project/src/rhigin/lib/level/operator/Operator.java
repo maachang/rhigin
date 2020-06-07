@@ -4,6 +4,10 @@ package rhigin.lib.level.operator;
  * オペレータインターフェイス.
  */
 public interface Operator {
+	public static final String OBJECT = "object";
+	public static final String LAT_LON = "latLon";
+	public static final String SEQUENCE = "sequence";
+	public static final String QUEUE = "queue";
 	
 	/**
 	 * オペレータのクローズ.

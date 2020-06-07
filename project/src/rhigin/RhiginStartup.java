@@ -16,6 +16,7 @@ import rhigin.http.Http;
 import rhigin.http.HttpInfo;
 import rhigin.http.MimeType;
 import rhigin.logs.LogFactory;
+import rhigin.net.IpPermission;
 import rhigin.scripts.ExecuteJsByEndScriptCall;
 import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.JavaScriptable;
@@ -50,9 +51,6 @@ public class RhiginStartup {
 
 	/** システム終了時の処理を一時格納先. **/
 	private static final String STARTUP_EXIT_SYSTEM_CALL_SCRIPT = "_$exitSystemCallScripts";
-	
-	// コンフィグ情報.
-	private static RhiginConfig config = null;
 	
 	// OS名.
 	private static final String osName;
@@ -174,30 +172,18 @@ public class RhiginStartup {
 				LogFactory.setting(config.get("logger"));
 			}
 			// コンフィグ情報をセット.
-			setConfig(config);
+			RhiginConfig.setMainConfig(config);
+			
+			// ipPermissionをロード.
+			IpPermission ip = new IpPermission();
+			ip.load();
+			IpPermission.setMainIpPermission(ip);
+			
 		} catch (Exception e) {
 			// エラーが出る場合は、処理終了.
 			e.printStackTrace();
 			System.exit(1);
 		}
-		return config;
-	}
-	
-	/**
-	 * RhiginConfigを設定.
-	 * 
-	 * @param conf
-	 */
-	public static final void setConfig(RhiginConfig conf) {
-		config = conf;
-	}
-	
-	/**
-	 * ロード済みのRhiginConfigを取得.
-	 * 
-	 * @return RhiginConfig
-	 */
-	public static final RhiginConfig getConfig() {
 		return config;
 	}
 	
@@ -256,8 +242,13 @@ public class RhiginStartup {
 		// ThreadFunction.init(config);
 
 		// コンフィグ情報をセット.
-		if(getConfig() != config) {
-			setConfig(config);
+		if(RhiginConfig.getMainConfig() != config) {
+			RhiginConfig.setMainConfig(config);
+
+			// ipPermissionをロード.
+			IpPermission ip = new IpPermission();
+			ip.load();
+			IpPermission.setMainIpPermission(ip);
 		}
 		
 		// サーバモード及び、コンソールモードの場合.

@@ -28,13 +28,14 @@ public class OperatorMode {
 				option = ((OperatorMode)args[0]).getOption().copyObject();
 			} else {
 				option = new LevelOption();
-				// 初期タイプをセット.
 				option.setType(LevelOption.TYPE_NONE);
 				option.setExpansion(OperatorKeyType.KEY_NONE);
 				set(args);
 			}
 		} else {
 			option = new LevelOption();
+			option.setType(LevelOption.TYPE_NONE);
+			option.setExpansion(OperatorKeyType.KEY_NONE);
 		}
 	}
 	

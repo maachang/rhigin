@@ -219,4 +219,12 @@ public class QueueOperator implements Operator {
 			rw.readLock().unlock();
 		}
 	}
+	
+	/**
+	 * LevelQueueを取得.
+	 * @return
+	 */
+	public LevelQueue getOrigin() {
+		return queue;
+	}
 }

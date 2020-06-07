@@ -1,0 +1,16 @@
+/**
+ * Access key definition for the URL to connect to.
+ *
+ * <exsample>.
+ * {
+ *   // Group by access URL for access key.
+ *   // key = [url] + [port].
+ *   // value = {accessKey, authCode}
+ *   "http://exsamble.com:3120" : {
+ *     "accessKey": "i7AVhofx3@oN870v0KwdreQefLV203iCGhqLgqci00@og",
+ *     "authCode": "6WDFJBF3wU77L@Z4eYxCAFsMxitJicMThdgSMsOQBPMfhoYjZXMO@"
+ *   }
+ */
+
+{}
+

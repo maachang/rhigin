@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import rhigin.RhiginConfig;
-import rhigin.RhiginStartup;
 import rhigin.lib.jdbc.pooling.AtomicPooling;
 import rhigin.lib.jdbc.pooling.AtomicPoolingManager;
 import rhigin.lib.jdbc.pooling.AtomicPoolingMonitor;
@@ -100,7 +99,7 @@ public class JDBCCore {
 	public RhiginEndScriptCall[] startup(String configName, String[] args) {
 		checkDestroy();
 		if(!startup.get()) {
-			final RhiginConfig conf = RhiginStartup.getConfig();
+			final RhiginConfig conf = RhiginConfig.getMainConfig();
 			return startup(conf, configName);
 		}
 		return new RhiginEndScriptCall[] { closeable, new JDBCSystemCloseable(this) };

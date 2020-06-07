@@ -7,7 +7,8 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="/rhigin/lib/rhino-1.7.11.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/rhigin"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/leveldb"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/rhigin"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/objectpack"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

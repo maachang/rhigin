@@ -5,13 +5,8 @@ import java.util.Map;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
-import objectpack.ObjectPack;
-import objectpack.SerializableCore;
 import rhigin.RhiginException;
-import rhigin.http.MimeType;
 import rhigin.http.client.HttpClient;
-import rhigin.http.client.HttpResult;
-import rhigin.scripts.ObjectPackOriginCode;
 import rhigin.scripts.RhiginFunction;
 import rhigin.util.ArrayMap;
 import rhigin.util.FixedKeyValues;
@@ -23,18 +18,16 @@ import rhigin.util.FixedKeyValues;
  *   method: Httpメソッド [GET, POST, DELETE, PUT, PATCH, OPTION]
  *   url: 接続先URL (http://yahoo.co.jp).
  *   option: Map or [key, value... ] で設定.
- *     params: パラメータを設定する場合は、この名前で設定します.
- *     header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
- *     bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
+ *               params: パラメータを設定する場合は、この名前で設定します.
+ *               header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
+ *               bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
+ *               minHeader: rhiginサーバに最小のヘッダで通信をする場合は true を設定します.
+ *               blowser: rhiginサーバにアクセスする場合、falseをセットすることで、HTTPレスポンスヘッダ
+ *                        の量を少し減らせます.
+ *               accessKey: アクセスキーを用いたHttp or Https通信を行う場合に利用します.
+ *               authCode: アクセスキーを用いたHttp or Https通信を行う場合に利用します.
  */
 public class HttpClientFunction extends RhiginFunction {
-	// ObjectPackのRhigin拡張.
-	static {
-		if(!SerializableCore.isOriginCode()) {
-			SerializableCore.setOriginCode(new ObjectPackOriginCode());
-		}
-	}
-	
 	private static final HttpClientFunction THIS = new HttpClientFunction();
 
 	public static final HttpClientFunction getInstance() {
@@ -59,7 +52,9 @@ public class HttpClientFunction extends RhiginFunction {
 	 *              params: パラメータを設定する場合は、この名前で設定します.
 	 *              header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
 	 *              bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
-	 *              minHeader: 最小のヘッダで通信をする場合は true を設定します.
+	 *              minHeader: rhiginサーバに最小のヘッダで通信をする場合は true を設定します.
+	 *              blowser: rhiginサーバにアクセスする場合、falseをセットすることで、HTTPレスポンスヘッダ
+	 *                       の量を少し減らせます.
 	 * @return HttpResult 返却データが返されます.
 	 */
 	@Override
@@ -84,13 +79,7 @@ public class HttpClientFunction extends RhiginFunction {
 				}
 			}
 			try {
-				HttpResult ret = HttpClient.connect(method, url, option);
-				if(MimeType.RHIGIN_OBJECT_PACK_MIME_TYPE.equals(ret.get("Content-Type"))) {
-					byte[] b = ret.responseBody();
-					ret.setResponseJson(ObjectPack.unpackB(b));
-					b = null;
-				}
-				return ret;
+				return HttpClient.connect(method, url, option);
 			} catch (Exception e) {
 				throw new RhiginException(500, e);
 			}

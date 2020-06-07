@@ -6,32 +6,15 @@ import org.mozilla.javascript.Undefined;
 
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginObject;
+import rhigin.scripts.UniqueIdManager;
 import rhigin.util.Converter;
 import rhigin.util.FixedKeyValues;
-import rhigin.util.RandomUUID;
-import rhigin.util.UniqueId;
 
 /**
  * ユニークなIDを生成するオブジェクト.
  */
 public class UniqueIdObject {
 	public static final String OBJECT_NAME = "UniqueId";
-
-	// uniqueId管理.
-	private static final ThreadLocal<UniqueId> local = new ThreadLocal<UniqueId>();
-	private static final int RANDOM_COUNT = 8192 - 1;
-
-	// スレッド別に作成 - unuqieId.
-	private static final UniqueId get() {
-		UniqueId ret = local.get();
-		if (ret == null) {
-			RandomUUID uuid = new RandomUUID();
-			uuid.getId((int) (System.nanoTime() & RANDOM_COUNT));
-			ret = new UniqueId(uuid);
-			local.set(ret);
-		}
-		return ret;
-	}
 
 	// uniqueId用メソッド群.
 	private static final class Execute extends RhiginFunction {
@@ -44,18 +27,18 @@ public class UniqueIdObject {
 		@Override
 		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			if (type == 0) {
-				return UniqueIdObject.get().getUUID();
+				return UniqueIdManager.get().getUUID();
 			}
 			if (args.length >= 1) {
 				switch (type) {
 				case 1:
-					return UniqueIdObject.get().get(Converter.convertInt(args[0]));
+					return UniqueIdManager.get().get(Converter.convertInt(args[0]));
 				case 2:
-					return UniqueIdObject.get().get64(Converter.convertInt(args[0]));
+					return UniqueIdManager.get().get64(Converter.convertInt(args[0]));
 				case 3:
-					return UniqueIdObject.get().code64(Converter.convertString(args[0]));
+					return UniqueIdManager.get().code64(Converter.convertString(args[0]));
 				case 4:
-					return UniqueIdObject.get().decode64(Converter.convertString(args[0]));
+					return UniqueIdManager.get().decode64(Converter.convertString(args[0]));
 				}
 			}
 			return argsError(args);

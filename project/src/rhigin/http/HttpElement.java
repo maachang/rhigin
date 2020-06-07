@@ -69,6 +69,10 @@ public final class HttpElement extends NioElement {
 		super.setSendData(new ByteArrayInputStream(binary));
 		super.startWrite();
 	}
+	
+	public HttpPostBodyFile getHttpPostBodyFile() {
+		return getHttpPostBodyFile(null);
+	}
 
 	public HttpPostBodyFile getHttpPostBodyFile(Xor128 rand) {
 		if (httpPostBodyFile == null) {

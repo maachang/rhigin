@@ -6,7 +6,6 @@ import org.mozilla.javascript.Undefined;
 
 import rhigin.RhiginConfig;
 import rhigin.RhiginException;
-import rhigin.RhiginStartup;
 import rhigin.lib.jdbc.JDBCCore;
 import rhigin.lib.jdbc.runner.JDBCConnect;
 import rhigin.lib.jdbc.runner.JDBCRow;
@@ -61,7 +60,7 @@ class JDBCOperatorJs {
 						// スタートアップ登録されていない場合のみ実行.
 						if(!CORE.isStartup()) {
 							RhiginEndScriptCall[] es = null;
-							final RhiginConfig conf = RhiginStartup.getConfig();
+							final RhiginConfig conf = RhiginConfig.getMainConfig();
 							if(args.length > 0) {
 								es = CORE.startup(conf, "" + args[0]);
 							} else {

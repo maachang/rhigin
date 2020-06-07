@@ -13,10 +13,10 @@ public class HttpInfo {
 	private int backlog = Integer.MAX_VALUE;
 
 	/** Nioバッファ長. **/
-	private int byteBufferLength = 1024;
+	private int byteBufferLength = 512;
 
 	/** ソケット送信バッファ長. **/
-	private int socketSendBuffer = 1024;
+	private int socketSendBuffer = 2048;
 
 	/** ソケット受信バッファ長. **/
 	private int socketReceiveBuffer = 2048;
@@ -35,6 +35,9 @@ public class HttpInfo {
 
 	/** コンパイルキャッシュルートディレクトリ. **/
 	private String compileCacheRootDir = HttpConstants.COMPILE_ROOT_DIR;
+	
+	/** 固定ファイル送信の場合の、キャッシュモード. **/
+	private boolean sendFileCacheMode = true;
 
 	public int getBacklog() {
 		return backlog;
@@ -107,7 +110,15 @@ public class HttpInfo {
 	public void setCompileCacheRootDir(String compileCacheRootDir) {
 		this.compileCacheRootDir = compileCacheRootDir;
 	}
-
+	
+	public boolean isSendFileCacheMode() {
+		return sendFileCacheMode;
+	}
+	
+	public void setSendFileCacheMode(boolean sendFileCacheMode) {
+		this.sendFileCacheMode = sendFileCacheMode;
+	}
+	
 	/**
 	 * Http設定データを取得.
 	 * 
@@ -171,6 +182,10 @@ public class HttpInfo {
 		o = conf.get("compileCacheRootDir");
 		if (o != null) {
 			info.setCompileCacheRootDir("" + o);
+		}
+		o = conf.get("sendFileCacheMode");
+		if (o != null && Converter.isBool(o)) {
+			info.setSendFileCacheMode(Converter.convertBool(o));
 		}
 	}
 }

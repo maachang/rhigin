@@ -1,11 +1,25 @@
+/**
+ * http server settings.
+ */
 {
-  "backlog": null
-  ,"byteBufferLength": null
-  ,"socketSendBuffer": null
-  ,"socketReceiveBuffer": null
-  ,"localAddress": null
-  ,"localPort": null
-  ,"workerThread": null
-  ,"compileCacheSize": null
-  ,"compileCacheRootDir": null
+   /* HTTP concurrent connections. */
+   "backlog": null
+   /* Nio buffer length. */
+   ,"byteBufferLength": null
+   /* Socket send buffer length. */
+   ,"socketSendBuffer": null
+   /* Socket receive buffer length. */
+   ,"socketReceiveBuffer": null
+   /* Server bind address. */
+   ,"localAddress": null
+   /* Server bind port. */
+   ,"localPort": null
+   /* number of worker threads. */
+   ,"workerThread": null
+   /* Compile cache size. */
+   ,"compileCacheSize": null
+   /* Compile cache root directory. */
+   ,"compileCacheRootDir": null
+   /* Enables/disables the cache mode for static file requests. */
+   ,"sendFileCacheMode": null
 }

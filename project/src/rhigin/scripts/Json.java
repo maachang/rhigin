@@ -58,6 +58,18 @@ public final class Json {
 		encodeObject(buf, target, target);
 		return buf.toString();
 	}
+	
+	/**
+	 * JSON形式から、オブジェクト変換.
+	 * ファイルなどから読み込まれたJSONなど、コメント入りのものを
+	 * decodeする場合は、この処理で呼び出します.
+	 * 
+	 * @param json 対象のJSON情報を設定します.
+	 * @return Object 変換されたJSON情報が返されます.
+	 */
+	public static final Object decodeByComment(String json) {
+		return decode(Converter.cutComment(json));
+	}
 
 	/**
 	 * JSON形式から、オブジェクト変換.
@@ -69,10 +81,13 @@ public final class Json {
 		if (json == null) {
 			return null;
 		}
+		// 前後の無駄なスペース、タブ、改行などを除く.
+		json = json.trim();
 		List<Object> list;
 		int[] n = new int[1];
 		while (true) {
 			// token解析が必要な場合.
+			// [ ... ] or { .... }
 			if (json.startsWith("[") || json.startsWith("{")) {
 				// JSON形式をToken化.
 				list = analysisJsonToken(json);
@@ -84,10 +99,12 @@ public final class Json {
 					// Map解析.
 					return createJsonInfo(n, list, TYPE_MAP, 0, list.size());
 				}
+			// (...) のような形式の場合は、このカッコを無視して再処理.
 			} else if (json.startsWith("(") && json.endsWith(")")) {
 				json = json.substring(1, json.length() - 1).trim();
 				continue;
 			}
+			// それ以外の場合.
 			break;
 		}
 		return decodeJsonValue(json);

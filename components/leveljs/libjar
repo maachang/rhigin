@@ -22,8 +22,9 @@ LEVELDB_PATH="${PROJECT_PATH}/leveldb"
 
 # leveldbのプロジェクトフォルダが存在するかチェック.
 if [ -f ${LEVELDB_PATH}/build.xml ]; then
-    # 存在する場合は何もしない.
-    echo ""
+    # 更新チェック.
+    cd ${LEVELDB_PATH}
+    git pull origin master;
 else
     # 存在しない場合は、gitからclone.
     cd ${PROJECT_PATH}

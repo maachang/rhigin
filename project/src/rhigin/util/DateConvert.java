@@ -332,7 +332,7 @@ public final class DateConvert {
 	 * @param date 出力対象の日付オブジェクトを設定します.
 	 * @return String タイムスタンプ値が返却されます.
 	 */
-	public static final String createTimestamp(boolean mode, java.util.Date date) {
+	public static final String toRfc822(boolean mode, java.util.Date date) {
 		StringBuilder buf = new StringBuilder();
 		try {
 			String tmp;
@@ -371,7 +371,7 @@ public final class DateConvert {
 	 * @param mode [true]の場合、ハイフン区切りの条件で出力します.
 	 * @param date 出力対象の日付オブジェクトを設定します.
 	 */
-	public static final void createTimestamp(StringBuilder buf, boolean mode, java.util.Date date) {
+	public static final void toRfc822(StringBuilder buf, boolean mode, java.util.Date date) {
 		try {
 			String tmp;
 			Calendar cal = new GregorianCalendar(DateConvert.GMT_TIMEZONE);
@@ -409,7 +409,7 @@ public final class DateConvert {
 	 *            変換対象のHTMLタイムスタンプを設定します.
 	 * @return Date 変換された時間が返されます.
 	 */
-	public static final java.sql.Timestamp getWebTimestamp(String value) {
+	public static final java.sql.Timestamp toRfc822(String value) {
 		if (value == null || (value = value.trim()).length() <= 0) {
 			return null;
 		}
@@ -563,7 +563,7 @@ public final class DateConvert {
 			}
 		} catch(Exception e) {}
 		try {
-			if((value = DateConvert.getWebTimestamp(s)) != null) {
+			if((value = DateConvert.toRfc822(s)) != null) {
 				return value;
 			}
 		} catch(Exception e) {}

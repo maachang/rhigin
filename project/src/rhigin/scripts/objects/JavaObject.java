@@ -127,7 +127,7 @@ public class JavaObject {
 		@Override
 		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 			switch(type) {
-			case 0: // create.
+			case 0: // newInstance.
 			{
 				if(args == null || args.length == 0 || args[0] == null) {
 					this.argsException(OBJECT_NAME);
@@ -173,7 +173,7 @@ public class JavaObject {
 		public final String getName() {
 			switch (type) {
 			case 0:
-				return "create";
+				return "newInstance";
 			case 1:
 				return "wrap";
 			case 2:

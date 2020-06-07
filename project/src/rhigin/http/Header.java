@@ -1,6 +1,7 @@
 package rhigin.http;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -125,6 +126,15 @@ public class Header extends JavaScriptable.Map
 	 */
 	public String getRemoteAddress() {
 		return element == null ? null : element.getRemoteAddress().getHostString();
+	}
+	
+	/**
+	 * リモートアドレスを取得.
+	 * 
+	 * @return
+	 */
+	public InetAddress getRemoteInetAddress() {
+		return element == null ? null : element.getRemoteAddress().getAddress();
 	}
 
 	/**

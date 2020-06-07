@@ -31,4 +31,10 @@ public final class NetConstants {
 	 * NioElement ByteArrayIOバッファサイズ.
 	 */
 	public static final int NIO_ELEMENT_BUFFER_SIZE = 512;
+	
+	/** ipPermission.json名. **/
+	public static final String IP_PERMISSION_JSON = "ipPermission";
+	
+	/** 共通定義URL名. **/
+	public static final String IP_PERMISSION_DEFAULT_NAME = "*";
 }

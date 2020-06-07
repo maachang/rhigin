@@ -23,6 +23,15 @@ public class RandomFunction extends RhiginFunction {
 	protected final void setXor128(Xor128 x) {
 		xor128.set(x);
 	}
+	
+	protected final Xor128 getXor128() {
+		Xor128 ret;
+		if((ret = xor128.get()) == null) {
+			ret = new Xor128(System.nanoTime());
+			xor128.set(ret);
+		}
+		return ret;
+	}
 
 	@Override
 	public String getName() {
@@ -31,12 +40,7 @@ public class RandomFunction extends RhiginFunction {
 
 	@Override
 	public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
-		Xor128 r = xor128.get();
-		if (r == null) {
-			r = new Xor128(System.nanoTime());
-			xor128.set(r);
-		}
-		return r.nextInt();
+		return xor128.get().nextInt();
 	}
 
 	/**
@@ -55,7 +59,10 @@ public class RandomFunction extends RhiginFunction {
 	public static final void init(Xor128 xor128) {
 		RandomFunction.getInstance().setXor128(xor128);
 	}
-
+	
+	public static final Xor128 get() {
+		return RandomFunction.getInstance().getXor128();
+	}
 	/**
 	 * スコープにライブラリを登録.
 	 * 

@@ -22,15 +22,15 @@ import rhigin.util.ConvertMap;
  */
 public class HttpResult extends JavaScriptable.Map implements
 	AbstractKeyIterator.Base<String>, AbstractEntryIterator.Base<String, String>, ConvertMap {
-	private byte[] headers = null;
-	private String headersString = null;
+	protected byte[] headers = null;
+	protected String headersString = null;
 
-	private byte[] body = null;
-	private int status = -1;
-	private String url = null;
-	private String contentType = null;
-	private HttpBodyFile bodyFile = null;
-	private Object json = null;
+	protected byte[] body = null;
+	protected int status = -1;
+	protected String url = null;
+	protected String contentType = null;
+	protected HttpBodyFile bodyFile = null;
+	protected Object json = null;
 
 	/**
 	 * コンストラクタ.
@@ -171,6 +171,15 @@ public class HttpResult extends JavaScriptable.Map implements
 		return contentType;
 	}
 
+	/**
+	 * jsonボディーをセット.
+	 * 
+	 * @param json
+	 */
+	protected void setResponseBodyJson(Object json) {
+		this.json = json;
+	}
+	
 	/**
 	 * binaryレスポンスボディをセット.
 	 * 
@@ -318,14 +327,6 @@ public class HttpResult extends JavaScriptable.Map implements
 		return null;
 	}
 
-	/**
-	 * JSONオブジェクトを設定.
-	 * @param o
-	 */
-	public void setResponseJson(Object o) {
-		json = o;
-	}
-	
 	/**
 	 * JSONオブジェクトを取得.
 	 * @return

@@ -592,4 +592,10 @@ describe("LevelJs オブジェクト テスト " + TEST_INFO + " の I/Oテス�
             expect(obj.contains(list[i])).comment("情報なし確認: " + list[i]).not().toBe(true);
         }
     });
+
+    // オブジェクトオペレータの削除.
+    it("オブジェクトオペレータの削除 " + TEST_INFO, function() {
+        level.delete(_DB_NAME);
+        expect(level.contains(_DB_NAME)).comment("オブジェクトオペレータ削除の確認: " + _DB_NAME).toBe(false);
+    });
 });

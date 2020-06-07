@@ -3,6 +3,8 @@ package rhigin;
 import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
@@ -14,7 +16,6 @@ import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhinoScriptable;
 import rhigin.util.ArrayMap;
 import rhigin.util.ConvertGet;
-import rhigin.util.Converter;
 import rhigin.util.FileUtil;
 import rhigin.util.OList;
 
@@ -24,10 +25,32 @@ import rhigin.util.OList;
 public class RhiginConfig implements RhinoScriptable {
 	private static final String CONF_CHARSET = "UTF8";
 	
-	private String confDir = null;
-	private String rhiginEnv = null;
-	private Map<String, Map<String, Object>> config = null;
-	private ReloadFunction reloadFunc = null;
+	private String _confDir = null;
+	private String _rhiginEnv = null;
+	private ReloadFunction _reloadFunc = null;
+	private Map<String, Map<String, Object>> _config = null;
+	private ReadWriteLock rwLock = new ReentrantReadWriteLock();
+	
+	// メイン情報.
+	private static RhiginConfig mainConfig = null;
+	
+	/**
+	 * 管理対象のRhiginConfigを設定.
+	 * 
+	 * @param conf
+	 */
+	public static final void setMainConfig(RhiginConfig conf) {
+		mainConfig = conf;
+	}
+	
+	/**
+	 * 管理対象のRhiginConfigを取得.
+	 * 
+	 * @return RhiginConfig
+	 */
+	public static final RhiginConfig getMainConfig() {
+		return mainConfig;
+	}
 	
 	protected RhiginConfig() {
 		throw new RhiginException("Unsupported constructor.");
@@ -48,40 +71,31 @@ public class RhiginConfig implements RhinoScriptable {
 	 * @param dir
 	 * @return [true]の場合、rhiginEnvの条件でロード出来ました.
 	 */
-	private boolean load(String rhiginEnv, String dir) {
-		boolean ret = true;
-		if(rhiginEnv == null || rhiginEnv.isEmpty()) {
-			rhiginEnv = null;
-		}
+	public boolean load(String rhiginEnv, String dir) {
+		String[] confDir = _getToCheckConfDir(rhiginEnv, dir);
 		try {
-			dir = FileUtil.getFullPath(dir);
-			String confDir = dir + "/";
-			if (rhiginEnv != null) {
-				confDir += rhiginEnv + "/";
-				// 対象フォルダが存在しない、対象フォルダ以下のコンフィグ情報が０件の場合は
-				// confフォルダ配下を読み込む.
-				File confStat = new File(confDir);
-				if (!confStat.isDirectory() || confStat.list() == null || confStat.list().length == 0) {
-					confDir = dir + "/";
-					rhiginEnv = null;
-					ret = false;
-				}
-				confStat = null;
+			rwLock.writeLock().lock();
+			try {
+				this._config = loadJSONByDir(confDir[1]);
+				this._rhiginEnv = confDir[0];
+				this._confDir = dir;
+			} finally {
+				rwLock.writeLock().unlock();
 			}
-			this.config = loadJSON(confDir);
-			this.rhiginEnv = rhiginEnv;
-			this.confDir = dir;
 		} catch(RhiginException re) {
 			throw re;
 		} catch(Exception e) {
 			throw new RhiginException(e);
 		}
-		return ret;
+		return confDir[0] != null;
 	}
-
-	// 指定ディレクトリ以下のJSONファイルを読み込み.
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static final Map<String, Map<String, Object>> loadJSON(String dir) {
+	
+	/**
+	 * 指定ディレクトリ以下のJSONファイルを読み込み.
+	 * @param dir
+	 * @return
+	 */
+	public static final Map<String, Map<String, Object>> loadJSONByDir(String dir) {
 		try {
 			Map<String, Map<String, Object>> ret = new ArrayMap<String, Map<String, Object>>();
 			if (!FileUtil.isDir(dir)) {
@@ -93,20 +107,41 @@ public class RhiginConfig implements RhinoScriptable {
 			}
 			String[] list = new File(dir).list();
 			if (list != null && list.length > 0) {
-				String name;
 				Map<String, Object> v;
 				int len = list.length;
 				for (int i = 0; i < len; i++) {
-					name = dir + list[i];
-					if (FileUtil.isFile(name)) {
-						v = (Map) Json.decode(Converter.cutComment(
-							FileUtil.getFileString(name, CONF_CHARSET)));
-						ret.put(cutExtention(list[i]), new Read.Maps(v));
-						v = null;
+					v = loadJSONByFile(dir + list[i]);
+					if(v != null) {
+						ret.put(cutExtention(list[i]), v);
 					}
 				}
 			}
 			return ret;
+		} catch (RhiginException re) {
+			throw re;
+		} catch (Exception e) {
+			throw new RhiginException(e);
+		}
+	}
+	
+	/**
+	 * 指定ファイルのJSONファイルを読み込み
+	 * @param name
+	 * @return
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static final Map<String, Object> loadJSONByFile(String name) {
+		try {
+			if (FileUtil.isFile(name)) {
+				Object o = Json.decodeByComment(
+					FileUtil.getFileString(name, CONF_CHARSET));
+				if(o instanceof Map) {
+					return new Read.Maps((Map) o);
+				}
+			}
+			return null;
+		} catch (RhiginException re) {
+			throw re;
 		} catch (Exception e) {
 			throw new RhiginException(e);
 		}
@@ -126,6 +161,14 @@ public class RhiginConfig implements RhinoScriptable {
  	 * @return [true]の場合、rhiginEnvの条件でロード出来ました.
 	 */
 	public boolean reload() {
+		String rhiginEnv, confDir;
+		rwLock.readLock().lock();
+		try {
+			rhiginEnv = _rhiginEnv;
+			confDir = _confDir;
+		} finally {
+			rwLock.readLock().unlock();
+		}
 		return load(rhiginEnv, confDir);
 	}
 
@@ -135,9 +178,95 @@ public class RhiginConfig implements RhinoScriptable {
  	 * @return [true]の場合、rhiginEnvの条件でロード出来ました.
 	 */
 	public boolean reload(String rhiginEnv) {
-		return load(rhiginEnv, confDir);
+		return load(rhiginEnv, _getConfDir());
 	}
-
+	
+	/**
+	 * コンフィグフォルダを取得.
+	 * @return String コンフィグフォルダが返却されます.
+	 */
+	public String getConfigDir() {
+		String rhiginEnv, confDir;
+		rwLock.readLock().lock();
+		try {
+			rhiginEnv = _rhiginEnv;
+			confDir = _confDir;
+		} finally {
+			rwLock.readLock().unlock();
+		}
+		return _getToCheckConfDir(rhiginEnv, confDir)[1];
+	}
+	
+	// configフォルダをRhiginEnv名が存在するかチェックして取得.
+	private static final String[] _getToCheckConfDir(String rhiginEnv, String confDir) {
+		if(rhiginEnv == null || rhiginEnv.isEmpty()) {
+			rhiginEnv = null;
+		}
+		try {
+			String dir = FileUtil.getFullPath(confDir);
+			confDir = dir + "/";
+			if (rhiginEnv != null) {
+				confDir += rhiginEnv + "/";
+				// 対象フォルダが存在しない、対象フォルダ以下のコンフィグ情報が０件の場合は
+				// confフォルダ配下を読み込む.
+				File confStat = new File(confDir);
+				if (!confStat.isDirectory() || confStat.list() == null || confStat.list().length == 0) {
+					confDir = dir + "/";
+					rhiginEnv = null;
+				}
+				confStat = null;
+			}
+			return new String[] {rhiginEnv, confDir};
+		} catch(RhiginException re) {
+			throw re;
+		} catch(Exception e) {
+			throw new RhiginException(e);
+		}
+	}
+	
+	// コンフィグ情報の取得.
+	private Map<String, Map<String, Object>> _getConfig() {
+		rwLock.readLock().lock();
+		try {
+			return _config;
+		} finally {
+			rwLock.readLock().unlock();
+		}
+	}
+	
+	// reload用のメソッドオブジェクトを取得.
+	private ReloadFunction _getReloadFunction() {
+		rwLock.readLock().lock();
+		try {
+			if(_reloadFunc == null) {
+				_reloadFunc = new ReloadFunction(this);
+			}
+			return _reloadFunc;
+		} finally {
+			rwLock.readLock().unlock();
+		}
+	}
+	
+	// configフォルダ名を取得.
+	private String _getConfDir() {
+		rwLock.readLock().lock();
+		try {
+			return _confDir;
+		} finally {
+			rwLock.readLock().unlock();
+		}
+	}
+	
+	// RhiginEnvを取得.
+	private String _getRhiginEnv() {
+		rwLock.readLock().lock();
+		try {
+			return _rhiginEnv;
+		} finally {
+			rwLock.readLock().unlock();
+		}
+	}
+	
 	/**
 	 * 指定コンフィグ情報を取得.
 	 * 
@@ -150,14 +279,15 @@ public class RhiginConfig implements RhinoScriptable {
 	@Override
 	public Object _get(String name, Scriptable s) {
 		if("reload".equals(name)) {
-			if(reloadFunc == null) {
-				reloadFunc = new ReloadFunction(this);
-			}
-			return reloadFunc;
+			return _getReloadFunction();
 		} else if("dir".equals(name)) {
-			return confDir;
+			return _getConfDir();
 		} else if("env".equals(name)) {
-			return rhiginEnv == null ? "" : rhiginEnv;
+			String rhiginEnv = _getRhiginEnv();
+			if(rhiginEnv == null) {
+				return "";
+			}
+			return rhiginEnv;
 		} else if (has(name)) {
 			return get(name);
 		}
@@ -203,7 +333,7 @@ public class RhiginConfig implements RhinoScriptable {
 	@Override
 	public Object[] getIds() {
 		OList<Object> list = new OList<Object>();
-		Iterator<String> it = config.keySet().iterator();
+		Iterator<String> it = _getConfig().keySet().iterator();
 		while (it.hasNext()) {
 			list.add(it.next());
 		}
@@ -231,7 +361,7 @@ public class RhiginConfig implements RhinoScriptable {
 	 * @return Map<String,Object>
 	 */
 	public Map<String, Object> get(String name) {
-		return config.get(name);
+		return _getConfig().get(name);
 	}
 
 	/**
@@ -242,7 +372,7 @@ public class RhiginConfig implements RhinoScriptable {
 	 * @return boolean
 	 */
 	public boolean has(String name) {
-		return config.containsKey(name);
+		return _getConfig().containsKey(name);
 	}
 
 	/**
@@ -251,7 +381,7 @@ public class RhiginConfig implements RhinoScriptable {
 	 * @return int
 	 */
 	public int size() {
-		return config.size() + 3;
+		return _getConfig().size() + 3;
 	}
 
 	/**
@@ -260,7 +390,7 @@ public class RhiginConfig implements RhinoScriptable {
 	 * @return
 	 */
 	public String getDir() {
-		return confDir;
+		return _getConfDir();
 	}
 	
 	/**
@@ -268,13 +398,21 @@ public class RhiginConfig implements RhinoScriptable {
 	 * @return
 	 */
 	public String getRhiginEnv() {
-		return rhiginEnv;
+		return _getRhiginEnv();
+	}
+	
+	/**
+	 * ReadWriteLockを取得.
+	 * @return
+	 */
+	public ReadWriteLock getRwLock() {
+		return rwLock;
 	}
 
 	// ConvertGetに変換して取得.
 	@SuppressWarnings("unchecked")
 	private ConvertGet<String> _get(String name) {
-		Map<String, Object> ret = config.get(name);
+		Map<String, Object> ret = _getConfig().get(name);
 		if (ret != null) {
 			return (ConvertGet<String>) ret;
 		}
@@ -291,7 +429,7 @@ public class RhiginConfig implements RhinoScriptable {
 	 */
 	public boolean has(String name, String key) {
 		if (has(name)) {
-			return config.get(name).containsKey(key);
+			return _getConfig().get(name).containsKey(key);
 		}
 		return false;
 	}
@@ -306,7 +444,7 @@ public class RhiginConfig implements RhinoScriptable {
 	 */
 	public Object get(String name, String key) {
 		if (has(name)) {
-			return config.get(name).get(key);
+			return _getConfig().get(name).get(key);
 		}
 		return null;
 	}

@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 
 import rhigin.RhiginException;
+import rhigin.scripts.function.RandomFunction;
 import rhigin.util.FileUtil;
 import rhigin.util.Xor128;
 
@@ -68,6 +69,9 @@ public class HttpPostBodyFile {
 
 	// ファイル名を取得.
 	private static final String getFileName(int workerId, String baseDir, Xor128 rand) {
+		if(rand == null) {
+			rand = RandomFunction.get();
+		}
 		StringBuilder buf = new StringBuilder(baseDir).append(NAME_HEAD).append(workerId).append("_");
 		int code = rand.nextInt();
 		int cnt = 0;
@@ -75,7 +79,7 @@ public class HttpPostBodyFile {
 			buf.append(NAME_CODE[code & 0x003f]);
 			code = code >> 6;
 			if (code == 0) {
-				cnt++;
+				cnt ++;
 				if (cnt >= 5) {
 					break;
 				}

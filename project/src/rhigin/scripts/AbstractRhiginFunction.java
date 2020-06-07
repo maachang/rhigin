@@ -6,6 +6,7 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
 import rhigin.RhiginException;
+import rhigin.util.Converter;
 
 /**
  * rhigin用Abstractメソッド.
@@ -152,5 +153,95 @@ public abstract class AbstractRhiginFunction implements Function {
 			throw new RhiginException(500, "Insufficient arguments for " + getName() + ".");
 		}
 		throw new RhiginException(500, "Insufficient arguments for " + objName + "." + getName() + ".");
+	}
+	
+	/**
+	 * boolean情報を取得.
+	 * 
+	 * @parma n 対象の条件を設定します.
+	 * @return Boolean 情報が返却されます.
+	 */
+	protected Boolean getBoolean(Object n) {
+		return Converter.convertBool(n);
+	}
+
+	/**
+	 * int情報を取得.
+	 * 
+	 * @parma n 対象の条件を設定します.
+	 * @return Integer 情報が返却されます.
+	 */
+	protected Integer getInt(Object n) {
+		return Converter.convertInt(n);
+	}
+
+	/**
+	 * long情報を取得.
+	 * 
+	 * @parma n 対象の条件を設定します.
+	 * @return Long 情報が返却されます.
+	 */
+	protected Long getLong(Object n) {
+		return Converter.convertLong(n);
+	}
+
+	/**
+	 * float情報を取得.
+	 * 
+	 * @parma n 対象の条件を設定します.
+	 * @return Float 情報が返却されます.
+	 */
+	protected Float getFloat(Object n) {
+		return Converter.convertFloat(n);
+	}
+
+	/**
+	 * double情報を取得.
+	 * 
+	 * @parma n 対象の条件を設定します.
+	 * @return Double 情報が返却されます.
+	 */
+	protected Double getDouble(Object n) {
+		return Converter.convertDouble(n);
+	}
+
+	/**
+	 * String情報を取得.
+	 * 
+	 * @parma n 対象の条件を設定します.
+	 * @return String 情報が返却されます.
+	 */
+	protected String getString(Object n) {
+		return Converter.convertString(n);
+	}
+
+	/**
+	 * Date情報を取得.
+	 * 
+	 * @parma n 対象の条件を設定します.
+	 * @return Date 情報が返却されます.
+	 */
+	protected java.sql.Date getDate(Object n) {
+		return Converter.convertSqlDate(n);
+	}
+
+	/**
+	 * Time情報を取得.
+	 * 
+	 * @parma n 対象の条件を設定します.
+	 * @return Time 情報が返却されます.
+	 */
+	protected java.sql.Time getTime(Object n) {
+		return Converter.convertSqlTime(n);
+	}
+
+	/**
+	 * Timestamp情報を取得.
+	 * 
+	 * @parma n 対象の条件を設定します.
+	 * @return Timestamp 情報が返却されます.
+	 */
+	protected java.sql.Timestamp getTimestamp(Object n) {
+		return Converter.convertSqlTimestamp(n);
 	}
 }

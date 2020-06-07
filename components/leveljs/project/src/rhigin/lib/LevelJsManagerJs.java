@@ -1,6 +1,10 @@
 package rhigin.lib;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.StringReader;
 import java.util.Map;
 
@@ -10,7 +14,7 @@ import org.mozilla.javascript.Undefined;
 
 import rhigin.RhiginConfig;
 import rhigin.RhiginException;
-import rhigin.RhiginStartup;
+import rhigin.lib.level.LevelJsBackup;
 import rhigin.lib.level.LevelJsCore;
 import rhigin.lib.level.LevelJsCsv;
 import rhigin.lib.level.operator.Operator;
@@ -69,7 +73,7 @@ public class LevelJsManagerJs {
 					// スタートアップ登録されていない場合のみ実行.
 					if(!CORE.isStartup()) {
 						RhiginEndScriptCall[] es = null;
-						final RhiginConfig conf = RhiginStartup.getConfig();
+						final RhiginConfig conf = RhiginConfig.getMainConfig();
 						if(args.length > 0) {
 							es = CORE.startup(conf, "" + args[0]);
 						} else {
@@ -213,7 +217,43 @@ public class LevelJsManagerJs {
 						} catch(Exception e) {}
 					}
 				}
-				
+				case 21: // backup.
+				{
+					if(args == null || args.length < 2) {
+						this.argsException(OBJECT_NAME);
+					}
+					String fileName = "" + args[0];
+					String operatorName = "" + args[1];
+					if(!CORE.contains(operatorName)) {
+						throw new RhiginException("The backup operator '"
+								+ operatorName + "' does not exist.");
+					}
+					BufferedOutputStream bo = null;
+					try {
+						bo = new BufferedOutputStream(new FileOutputStream(fileName));
+						return LevelJsBackup.backup(bo, CORE, operatorName);
+					} finally {
+						try {
+							bo.close();
+						} catch(Exception e) {}
+					}
+				}
+				case 22: // restore.
+				{
+					if(args == null || args.length < 1) {
+						this.argsException(OBJECT_NAME);
+					}
+					String fileName = "" + args[0];
+					BufferedInputStream bi = null;
+					try {
+						bi = new BufferedInputStream(new FileInputStream(fileName));
+						return LevelJsBackup.restore(CORE, bi);
+					} finally {
+						try {
+							bi.close();
+						} catch(Exception e) {}
+						}
+					}
 				}
 			} catch (RhiginException re) {
 				throw re;
@@ -273,6 +313,8 @@ public class LevelJsManagerJs {
 			case 18: return "length";
 			case 19: return "csvImport";
 			case 20: return "csvDirect";
+			case 21: return "backup";
+			case 22: return "restore";
 			}
 			return "unknown";
 		}

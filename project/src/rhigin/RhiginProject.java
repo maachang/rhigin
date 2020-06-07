@@ -62,6 +62,8 @@ public class RhiginProject {
 
 		// 必要なファイルを転送.
 		FileUtil.rcpy("res/rhigin/projects/index.js", "./index.js");
+		FileUtil.rcpy("res/rhigin/projects/conf/accessKey.json", "./conf/accessKey.json");
+		FileUtil.rcpy("res/rhigin/projects/conf/ipPermission.json", "./conf/ipPermission.json");
 		FileUtil.rcpy("res/rhigin/projects/conf/http.json", "./conf/http.json");
 		FileUtil.rcpy("res/rhigin/projects/conf/log.json", "./conf/log.json");
 		FileUtil.rcpy("res/rhigin/projects/conf/rhigin.json", "./conf/rhigin.json");

@@ -78,14 +78,14 @@ public class Request extends Header {
 		} else if ("inputStream".equals(key) || "body".equals(key) || "bodyFile".equals(key)) {
 			HttpElement em = (HttpElement) element;
 			if (em.isHttpPostBodyFile()) {
-				return JavaObject.wrapObject(em.getHttpPostBodyFile(null).getInputStream());
+				return JavaObject.wrapObject(em.getHttpPostBodyFile().getInputStream());
 			} else {
 				return null;
 			}
 		} else if ("bodyName".equals(key) || "bodyFileName".equals(key)) {
 			HttpElement em = (HttpElement) element;
 			if (em.isHttpPostBodyFile()) {
-				return em.getHttpPostBodyFile(null).getFileName();
+				return em.getHttpPostBodyFile().getFileName();
 			} else {
 				return null;
 			}
@@ -106,6 +106,22 @@ public class Request extends Header {
 	public boolean isMinHeader() {
 		try {
 			return MIN_HEADER.equals(getHeader("user-agent"));
+		} catch(Exception e) {
+			return false;
+		}
+	}
+	
+	/**
+	 * ブラウザアクセスヘッダの内容を取得.
+	 * @return boolean trueの場合はブラウザアクセスです.
+	 */
+	public boolean isBlowserHeader() {
+		try {
+			String header = getHeader(HttpConstants.BLOWSER_ACCESS_HEADER);
+			if(header == null) {
+				return true;
+			}
+			return Converter.convertBool(header);
 		} catch(Exception e) {
 			return false;
 		}

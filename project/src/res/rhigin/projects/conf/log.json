@@ -1,13 +1,25 @@
+/**
+ * Definition of log output.
+ */
 {
-  "level": "INFO"
-  ,"maxFileSize": 5242880
-  ,"logDir": "./log"
-  ,"system": {
-    "level": "INFO"
-    ,"maxFileSize": 5242880
-  }
-  ,"console": {
-    "level": "DEBUG"
-    ,"maxFileSize": 1048576
-  }
+   /* Basic log level. */
+   "level": "INFO"
+   /* Basic binary length of one log file (byte). */
+   , "maxFileSize": 5242880
+   /* Log output destination. */
+   , "logDir": "./log"
+   /* Log for [system]. */
+   , "system": {
+     /* Log level. */
+     "level": "INFO"
+     /* Binary length of one log file (byte). */
+     , "maxFileSize": 5242880
+   }
+   /* Log for [console]. */
+   , "console": {
+     /* Log level. */
+     "level": "DEBUG"
+     /* Binary length of one log file (byte). */
+     , "maxFileSize": 1048576
+   }
 }

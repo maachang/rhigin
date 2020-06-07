@@ -13,7 +13,6 @@ import org.maachang.leveldb.operator.LevelQueue;
 import org.maachang.leveldb.operator.LevelSequence;
 
 import rhigin.RhiginConfig;
-import rhigin.RhiginStartup;
 import rhigin.lib.level.operator.LatLonOperator;
 import rhigin.lib.level.operator.ObjectOperator;
 import rhigin.lib.level.operator.Operator;
@@ -103,7 +102,7 @@ public class LevelJsCore {
 	public RhiginEndScriptCall[] startup(String configName, String[] args) {
 		checkDestroy();
 		if(!startup.get()) {
-			final RhiginConfig conf = RhiginStartup.getConfig();
+			final RhiginConfig conf = RhiginConfig.getMainConfig();
 			return startup(conf, configName);
 		}
 		return new RhiginEndScriptCall[] {
@@ -388,5 +387,15 @@ public class LevelJsCore {
 	public int size() {
 		check();
 		return manager.size();
+	}
+	
+	/**
+	 * LevelOperatorManagerを取得.
+	 * 
+	 * @return
+	 */
+	public LevelOperatorManager getManager() {
+		check();
+		return manager;
 	}
 }

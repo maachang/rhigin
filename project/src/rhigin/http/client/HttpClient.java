@@ -13,21 +13,37 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
+import objectpack.ObjectPack;
+import objectpack.SerializableCore;
+import rhigin.http.MimeType;
+import rhigin.keys.RhiginAccessKeyByFCipher;
+import rhigin.keys.RhiginAccessKeyClient;
+import rhigin.keys.RhiginAccessKeyConstants;
+import rhigin.keys.RhiginAccessKeyUtil;
 import rhigin.scripts.Json;
+import rhigin.scripts.ObjectPackOriginCode;
 import rhigin.util.ArrayMap;
 import rhigin.util.ByteArrayIO;
 import rhigin.util.Converter;
+import rhigin.util.FCipher;
 
 /**
  * HttpClient.
  */
 @SuppressWarnings("rawtypes")
 public class HttpClient {
+	// ObjectPackのRhigin拡張.
+	static {
+		if(!SerializableCore.isOriginCode()) {
+			SerializableCore.setOriginCode(new ObjectPackOriginCode());
+		}
+	}
 	private static final int MAX_BINARY_BODY_LENGTH = 0x00100000 * 5; // 5Mbyte.
 	private static final int TIMEOUT = 30000;
 	private static final int MAX_RETRY = 9;
 	private static final String DEF_USER_AGENT = "rhigin";
 	private static final String DEF_MIN_USER_AGENT = "rhigin_m";
+	private static final String BLOWSER_ACCESS_HEADER = "X-Blowser";
 
 	protected HttpClient() {
 	}
@@ -41,7 +57,11 @@ public class HttpClient {
 	 *               params: パラメータを設定する場合は、この名前で設定します.
 	 *               header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
 	 *               bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
-	 *               minHeader: 最小のヘッダで通信をする場合は true を設定します.
+	 *               minHeader: rhiginサーバに最小のヘッダで通信をする場合は true を設定します.
+	 *               blowser: rhiginサーバにアクセスする場合、falseをセットすることで、HTTPレスポンスヘッダ
+	 *                        の量を少し減らせます.
+	 *               accessKey: アクセスキーを用いたHttp or Https通信を行う場合に利用します.
+	 *               authCode: アクセスキーを用いたHttp or Https通信を行う場合に利用します.
 	 * @return HttpResult 返却データが返されます.
 	 */
 	public static final HttpResult get(String url, Map option) {
@@ -57,7 +77,11 @@ public class HttpClient {
 	 *               params: パラメータを設定する場合は、この名前で設定します.
 	 *               header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
 	 *               bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
-	 *               minHeader: 最小のヘッダで通信をする場合は true を設定します.
+	 *               minHeader: rhiginサーバに最小のヘッダで通信をする場合は true を設定します.
+	 *               blowser: rhiginサーバにアクセスする場合、falseをセットすることで、HTTPレスポンスヘッダ
+	 *                        の量を少し減らせます.
+	 *               accessKey: アクセスキーを用いたHttp or Https通信を行う場合に利用します.
+	 *               authCode: アクセスキーを用いたHttp or Https通信を行う場合に利用します.
 	 * @return HttpResult 返却データが返されます.
 	 */
 	public static final HttpResult post(String url, Map option) {
@@ -73,7 +97,11 @@ public class HttpClient {
 	 *               params: パラメータを設定する場合は、この名前で設定します.
 	 *               header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
 	 *               bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
-	 *               minHeader: 最小のヘッダで通信をする場合は true を設定します.
+	 *               minHeader: rhiginサーバに最小のヘッダで通信をする場合は true を設定します.
+	 *               blowser: rhiginサーバにアクセスする場合、falseをセットすることで、HTTPレスポンスヘッダ
+	 *                        の量を少し減らせます.
+	 *               accessKey: アクセスキーを用いたHttp or Https通信を行う場合に利用します.
+	 *               authCode: アクセスキーを用いたHttp or Https通信を行う場合に利用します.
 	 * @return HttpResult 返却データが返されます.
 	 */
 	public static final HttpResult json(String url, Map option) {
@@ -90,8 +118,13 @@ public class HttpClient {
 	 * @oaram option 対象のオプションを設定します.
 	 *               params: パラメータを設定する場合は、この名前で設定します.
 	 *               header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
-	 *               bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
-	 *               minHeader: 最小のヘッダで通信をする場合は true を設定します.
+	 *               bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は true を設定します.
+	 *               minHeader: rhiginサーバに最小のヘッダで通信をする場合は true を設定します.
+	 *               blowser: rhiginサーバにアクセスする場合、falseをセットすることで、HTTPレスポンスヘッダ
+	 *                        のAjaxドメイン超え関連のHttpヘッダを減らせます.
+	 *               accessKey: アクセスキーを用いたHttp or Https通信を行う場合に利用します.
+	 *               authCode: アクセスキーを用いたHttp or Https通信を行う場合に利用します.
+	 *               accessKeyClient: RhiginAccessKeyClientで管理されているAccessKeyを利用する場合は true を設定します.
 	 * @return HttpResult 返却データが返されます.
 	 */
 	@SuppressWarnings("unchecked")
@@ -100,18 +133,82 @@ public class HttpClient {
 		Map header = null;
 		boolean bodyFile = false;
 		boolean minHeader = false;
+		boolean blowser = true;
+		String accessKey = null;
+		String authCode = null;
 		if (option != null) {
+			// パラメータ定義.
 			params = option.get("params");
-			header = (Map) option.get("header");
+			if(params == null) {
+				params = option.get("param");
+			}
+			// header定義.
+			Object h = option.get("header");
+			if(h == null) {
+				h = option.get("headers");
+			}
+			if(h != null && h instanceof Map) {
+				header = (Map)h;
+			}
+			h = null;
+			// 外部ファイルにResponse情報を保持.
 			bodyFile = Boolean.TRUE.equals(option.get("bodyFile"));
+			if(!bodyFile) {
+				bodyFile = Boolean.TRUE.equals(option.get("body"));
+			}
+			// 最小ヘッダ、ObjectPackageを使って送受信(rhiginサーバのみ)
 			minHeader = Boolean.TRUE.equals(option.get("minHeader"));
+			if(!minHeader) {
+				minHeader = Boolean.TRUE.equals(option.get("min"));
+			}
+			// ブラウザじゃないアクセス定義(rhiginサーバのみ)
+			blowser = Boolean.TRUE.equals(option.get("blowser"));
+			// accessKey, authCode での通信(rhiginサーバのみ)
+			Object akey = null;
+			Object acode = null;
+			akey = option.get("accessKey");
+			if(akey == null) {
+				akey = option.get("akey");
+			}
+			acode = (String) option.get("authCode");
+			if(acode == null) {
+				acode = option.get("acode");
+			}
+			// アクセスキーが存在する場合.
+			if(akey != null && acode != null && akey instanceof String && acode instanceof String) {
+				accessKey = (String)akey;
+				authCode = (String)acode;
+				akey = null; acode = null;
+				if(!RhiginAccessKeyUtil.isAccessKey(accessKey)
+					|| !RhiginAccessKeyUtil.isAuthCode(authCode)) {
+					throw new HttpClientException("The specified accessKey or authCode are invalid codes.");
+				}
+			// RhiginAccessKeyClientで管理されている定義を利用する場合.
+			} else if(Boolean.TRUE.equals(option.get("accessKeyClient")) || Boolean.TRUE.equals(option.get("akClient"))) {
+				RhiginAccessKeyClient ac = RhiginAccessKeyClient.getInstance();
+				String[] keys = ac.get(url);
+				if(keys == null) {
+					throw new HttpClientException("The specified accessKey or authCode are invalid codes.");
+				}
+				accessKey = keys[0];
+				authCode = keys[1];
+			}
 		}
+		// bodyファイル要求に対して組み合わせの設定ができないものをエラー判別
+		if(bodyFile) {
+			if(minHeader) {
+				throw new HttpClientException("Minimum header mode cannot be used when receiving Body file.");
+			} else if(accessKey != null) {
+				throw new HttpClientException("If you receive a body file, you cannot access it with accessKey.");
+			}
+		}
+		// headerが存在しない場合は空の情報を生成.
 		if (header == null) {
 			header = new ArrayMap();
 		}
 		HttpResult ret = null;
 		// methodがJSONの場合は、POSTでJSON送信用の処理に変換する.
-		if (NoULCode.eqs((method = method.toUpperCase()), "json") != -1) {
+		if ("JSON".equals(method = method.toUpperCase())) {
 			method = "POST";
 			params = Json.encode(params);
 			header.put("Content-Type", "application/json;charset=utf-8");
@@ -120,7 +217,7 @@ public class HttpClient {
 		String location;
 		int cnt = 0;
 		while (true) {
-			ret = _connect(minHeader, bodyFile, method, url, params, header);
+			ret = _connect(minHeader, blowser, bodyFile, accessKey, authCode, method, url, params, header);
 			if (!((status = ret.getStatus()) == 301 || status == 302 || status == 303 || status == 307 || status == 308) ||
 				(location = ret.getHeader("location")) == null) {
 				break;
@@ -138,7 +235,8 @@ public class HttpClient {
 	}
 
 	// 接続処理.
-	private static final HttpResult _connect(boolean minHeader, boolean bodyFile, String method, String url, Object params, Map header) {
+	private static final HttpResult _connect(boolean minHeader, boolean blowser, boolean bodyFile, String akey, String acode,
+			String method, String url, Object params, Map header) {
 		Socket socket = null;
 		InputStream in = null;
 		OutputStream out = null;
@@ -154,11 +252,11 @@ public class HttpClient {
 			// リクエスト送信.
 			socket = createSocket(urlArray);
 			out = new BufferedOutputStream(socket.getOutputStream());
-			createHttpRequest(minHeader, out, method, urlArray, params, header);
+			createHttpRequest(minHeader, blowser, akey, acode, out, method, urlArray, params, header);
 			out.flush();
 			// レスポンス受信.
 			in = new BufferedInputStream(socket.getInputStream());
-			HttpResult ret = receive(bodyFile, url, in);
+			HttpResult ret = receive(bodyFile, url, akey, acode, in);
 			in.close();
 			in = null;
 			out.close();
@@ -263,9 +361,12 @@ public class HttpClient {
 	}
 
 	// HTTPリクエストを作成.
-	private static final void createHttpRequest(boolean minHeader, OutputStream out, String method, String[] urlArray, Object params,
-			Map header) throws IOException {
+	private static final void createHttpRequest(boolean minHeader, boolean blowser,
+			String akey, String acode, OutputStream out, String method,
+			String[] urlArray, Object params, Map header)
+		throws IOException {
 		byte[] b = null;
+		boolean contentTypeFlag = false;
 		String url = urlArray[3];
 		if (NoULCode.eqs(method, "get", "delete", "options") != -1) {
 			if (params instanceof byte[]) {
@@ -276,15 +377,40 @@ public class HttpClient {
 				}
 			}
 			if (params instanceof String && ((String) params).length() != 0) {
+				// アクセスキーが設定されている場合は、アクセスキーと認証コードで文字列エンコード.
+				if(akey != null) {
+					params = RhiginAccessKeyByFCipher.decode(akey, acode, ((String)params).getBytes("UTF8"));
+					params = "params=" + FCipher.cb64_enc((byte[])params);
+				}
 				url += ((url.indexOf("?") != -1) ? "&" : "?") + params;
 				params = "";
+			}
+		} else if(NoULCode.eqs(method, "post") != -1) {
+			// アクセスキーが設定されている場合は、アクセスキーと認証コードでバイナリエンコード.
+			if(akey != null) {
+				// 文字列の場合.
+				if (params instanceof String) {
+					params = RhiginAccessKeyByFCipher.decode(akey, acode, ((String)params).getBytes("UTF8"));
+				// バイナリの場合.
+				} else if (params instanceof byte[]) {
+					params = RhiginAccessKeyByFCipher.decode(akey, acode, (byte[])params);
+				// InputStreamの場合は処理出来ない.
+				} else if (params instanceof InputStream) {
+					throw new HttpClientException("InputStream transmission with AccessKey cannot be performed for POST transmission.");
+				}
 			}
 		}
 		StringBuilder buf = new StringBuilder();
 		buf.append(method.toUpperCase()).append(" ");
 		buf.append(url).append(" HTTP/1.1\r\n");
+		// 最小限ヘッダの場合.
+		if(minHeader) {
+			if (header == null || !header.containsKey("User-Agent")) {
+				buf.append("User-Agent:").append(DEF_MIN_USER_AGENT).append("\r\n");
+			}
+			buf.append("Accept-Encoding:gzip\r\n");
 		// 最小限ヘッダでない場合.
-		if(!minHeader) {
+		} else {
 			buf.append("Host:").append(urlArray[1]);
 			if (("http".equals(urlArray[0]) && !"80".equals(urlArray[2]))
 					|| ("https".equals(urlArray[0]) && !"443".equals(urlArray[2]))) {
@@ -292,29 +418,39 @@ public class HttpClient {
 				buf.append(":").append(urlArray[2]);
 			}
 			buf.append("\r\n");
-			if (header == null || !header.containsKey("Accept")) {
-				buf.append("Accept:text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n");
-			}
-	
-			if (header == null || !header.containsKey("Accept-Language")) {
-				buf.append("Accept-Language:ja,en-US;q=0.7,en;q=0.3\r\n");
+			// ブラウザでのアクセスヘッダのI/Oを除外したい場合.
+			if(!blowser) {
+				buf.append(BLOWSER_ACCESS_HEADER).append(":false\r\n");
+			// ブラウザでのアクセスヘッダと同等の条件をセット.
+			} else {
+				if (header == null || !header.containsKey("Accept")) {
+					buf.append("Accept:text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n");
+				}
+		
+				if (header == null || !header.containsKey("Accept-Language")) {
+					buf.append("Accept-Language:ja,en-US;q=0.7,en;q=0.3\r\n");
+				}
 			}
 			if (header == null || !header.containsKey("User-Agent")) {
 				buf.append("User-Agent:").append(DEF_USER_AGENT).append("\r\n");
 			}
 			buf.append("Accept-Encoding:gzip,deflate\r\n");
-		// 最小限ヘッダの場合.
-		} else {
-			if (header == null || !header.containsKey("User-Agent")) {
-				buf.append("User-Agent:").append(DEF_MIN_USER_AGENT).append("\r\n");
-			}
-			buf.append("Accept-Encoding:gzip\r\n");
 		}
 		buf.append("Connection:close\r\n");
-
-		boolean contentTypeFlag = false;
+		
+		// accessKeyが設定されている場合.
+		if(akey != null) {
+			// アクセスキーをセット.
+			buf.append(RhiginAccessKeyConstants.RHIGIN_ACCESSKEY_HTTP_HEADER)
+				.append(":").append(akey).append("\r\n");
+		}
+		
 		// ヘッダユーザ定義.
 		if (header != null && header.size() > 0) {
+			// ヘッダにアクセスキーが設定されている場合は削除.
+			if(header.containsKey(RhiginAccessKeyConstants.RHIGIN_ACCESSKEY_HTTP_HEADER)) {
+				header.remove(RhiginAccessKeyConstants.RHIGIN_ACCESSKEY_HTTP_HEADER);
+			}
 			String h;
 			Object k, v;
 			Iterator it = header.keySet().iterator();
@@ -495,7 +631,8 @@ public class HttpClient {
 	private static final byte[] END_HEADER = ("\r\n\r\n").getBytes();
 
 	// データ受信.
-	private static final HttpResult receive(boolean bodyFileFlg, String url, InputStream in) throws IOException {
+	private static final HttpResult receive(boolean bodyFileFlg, String url, String akey, String acode, InputStream in)
+		throws IOException {
 		int len;
 		final byte[] binary = new byte[4096];
 		ByteArrayIO buffer = new ByteArrayIO();
@@ -600,10 +737,9 @@ public class HttpClient {
 						b = new byte[bodyLength];
 						buffer.read(b);
 						if (gzip) {
-							result.setResponseBody(ungzip(b, binary, buffer));
-						} else {
-							result.setResponseBody(b);
+							b = ungzip(b, binary, buffer);
 						}
+						resultBinarySet(result, akey, acode, b);
 						b = null;
 						return result;
 					}
@@ -633,10 +769,9 @@ public class HttpClient {
 								} else {
 									b = chunkedBuffer.toByteArray();
 									if (gzip) {
-										result.setResponseBody(ungzip(b, binary, buffer));
-									} else {
-										result.setResponseBody(b);
+										b = ungzip(b, binary, buffer);
 									}
+									resultBinarySet(result, akey, acode, b);
 									b = null;
 								}
 								return result;
@@ -683,6 +818,24 @@ public class HttpClient {
 				bodyFile.close();
 			}
 		}
+	}
+	
+	// resultBinaryをセット.
+	private static final void resultBinarySet(HttpResult result, String akey, String acode, byte[] b) {
+		// accessKeyがレスポンスヘッダに存在する場合.
+		String resultAkey = result.getHeader(RhiginAccessKeyConstants.RHIGIN_ACCESSKEY_HTTP_HEADER);
+		if(resultAkey != null && akey != null && akey.equals(resultAkey)) {
+			b = RhiginAccessKeyByFCipher.decode(akey, acode, b);
+		}
+		// ObjectPackの受信の場合.
+		if(MimeType.RHIGIN_OBJECT_PACK_MIME_TYPE.equals(result.getHeader("Content-Type"))) {
+			try {
+				result.setResponseBodyJson(ObjectPack.unpackB(b));
+			} catch(Exception e) {
+				throw new HttpClientException(e);
+			}
+		}
+		result.setResponseBody(b);
 	}
 
 	// gzip解凍.
@@ -870,7 +1023,8 @@ public class HttpClient {
 							;
 					}
 					if (i < vLen) {
-						for (next = i + len, j = i + 1, k = 1; j < next && oneEq(buf.charAt(j), chk.charAt(k)); j++, k++)
+						for (next = i + len, j = i + 1, k = 1; j < next &&
+								oneEq(buf.charAt(j), chk.charAt(k)); j++, k++)
 							;
 						if (j == next) {
 							return i;

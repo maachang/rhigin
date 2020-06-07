@@ -11,7 +11,7 @@ public class HttpConstants {
 	public static final int MAX_CONTENT_LENGTH = 5 * 0x00100000;
 
 	/** 送信Body情報をGZIP圧縮させないサイズ. **/
-	public static final int NOT_GZIP_BODY_LENGTH = 512;
+	public static final int NOT_GZIP_BODY_LENGTH = 128;
 
 	/** POST受信時のBody情報ファイル出力を行うための、Content-Type. **/
 	public static final String POST_FILE_OUT_CONTENT_TYPE = "application/rhigin";
@@ -33,4 +33,8 @@ public class HttpConstants {
 
 	/** デフォルトのコンパイルルートフォルダ. **/
 	public static final String COMPILE_ROOT_DIR = ".";
+	
+	/** ブラウザアクセスの有無を示す、HTTPリクエストヘッダ. **/
+	public static final String BLOWSER_ACCESS_HEADER = "X-Blowser";
+	
 }

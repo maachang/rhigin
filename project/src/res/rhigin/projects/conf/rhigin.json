@@ -1,3 +1,6 @@
+/**
+ * rhigin project definition.
+ */
 {
   "projectName": "{{projectName}}"
   ,"version": "{{version}}"

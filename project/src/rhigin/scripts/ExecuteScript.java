@@ -13,12 +13,14 @@ import org.mozilla.javascript.Script;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
+import rhigin.RhiginConfig;
 import rhigin.RhiginConstants;
 import rhigin.RhiginException;
 import rhigin.RhiginStartup;
 import rhigin.logs.Log;
 import rhigin.logs.LogFactory;
 import rhigin.scripts.function.ArgsFunctions;
+import rhigin.scripts.function.AuthAccessKeyFunction;
 import rhigin.scripts.function.Base64Functions;
 import rhigin.scripts.function.BinaryFunction;
 import rhigin.scripts.function.CheckFunctions;
@@ -30,6 +32,7 @@ import rhigin.scripts.function.GetClassFunction;
 import rhigin.scripts.function.GetEnvFunction;
 import rhigin.scripts.function.GlobalFunction;
 import rhigin.scripts.function.HttpClientFunction;
+import rhigin.scripts.function.IpPermissionFunction;
 import rhigin.scripts.function.LogFactoryFunction;
 import rhigin.scripts.function.NanoTimeFunction;
 import rhigin.scripts.function.ParseInt32Function;
@@ -37,10 +40,12 @@ import rhigin.scripts.function.ParseIntFunction;
 import rhigin.scripts.function.RandomFunction;
 import rhigin.scripts.function.RequireFunction;
 import rhigin.scripts.function.RhiginEnvFunction;
+import rhigin.scripts.function.SendJsFunction;
 import rhigin.scripts.function.ServerIdFunction;
 import rhigin.scripts.function.SleepFunction;
 import rhigin.scripts.function.SystemTimeFunction;
 import rhigin.scripts.function.ValidateFunction;
+import rhigin.scripts.objects.AccessKeyObject;
 import rhigin.scripts.objects.ColorOutObject;
 import rhigin.scripts.objects.ConsoleObject;
 import rhigin.scripts.objects.ExecCmdObject;
@@ -48,6 +53,7 @@ import rhigin.scripts.objects.FCipherObject;
 import rhigin.scripts.objects.FCompObject;
 import rhigin.scripts.objects.FileObject;
 import rhigin.scripts.objects.FunctionObject;
+import rhigin.scripts.objects.IpPermissionObject;
 import rhigin.scripts.objects.JArrayObject;
 import rhigin.scripts.objects.JDateObject;
 import rhigin.scripts.objects.JMapObject;
@@ -157,7 +163,7 @@ public class ExecuteScript {
 		scope.put("OS_BIT", RhiginStartup.getOsBit());
 		
 		// コンフィグ情報をセット.
-		scope.put("config", RhiginStartup.getConfig());
+		scope.put("config", RhiginConfig.getMainConfig());
 
 		// オブジェクトの登録.
 		ConsoleObject.regFunctions(scope);
@@ -176,6 +182,9 @@ public class ExecuteScript {
 		JavaObject.regFunctions(scope);
 		JArrayObject.regFunctions(scope);
 		JMapObject.regFunctions(scope);
+		IpPermissionFunction.regFunctions(scope);
+		AuthAccessKeyFunction.regFunctions(scope);
+		SendJsFunction.regFunctions(scope);
 
 		// rhigin用の基本オブジェクトを設定.
 		RequireFunction.regFunctions(scope);
@@ -201,6 +210,8 @@ public class ExecuteScript {
 		RhiginEnvFunction.regFunctions(scope);
 		ColorOutFunction.regFunctions(scope);
 		ParseInt32Function.regFunctions(scope);
+		AccessKeyObject.regFunctions(scope);
+		IpPermissionObject.regFunctions(scope);
 		
 		// インデックスの作成.
 		scope.endIndex();

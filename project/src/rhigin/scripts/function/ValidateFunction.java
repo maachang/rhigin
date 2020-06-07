@@ -3,6 +3,7 @@ package rhigin.scripts.function;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
+import rhigin.RhiginException;
 import rhigin.http.Params;
 import rhigin.http.Request;
 import rhigin.http.Validate;
@@ -29,8 +30,16 @@ public class ValidateFunction extends RhiginFunction {
 	@Override
 	public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		final RhiginContext context = ExecuteScript.currentRhiginContext();
-		final Request req = (Request) context.getAttribute("request");
-		final Params pms = (Params) context.getAttribute("params");
+		Object o = context.getAttribute("request");
+		if(!(o instanceof Request)) {
+			throw new RhiginException(401, "invalid access.");
+		}
+		final Request req = (Request)o;
+		o = context.getAttribute("params");
+		if(!(o instanceof Params)) {
+			throw new RhiginException(401, "invalid access.");
+		}
+		final Params pms = (Params)o;
 		final Params newParams = Validate.execute(req, pms, args);
 		context.setAttribute("params", newParams);
 		return newParams;

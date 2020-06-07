@@ -18,8 +18,9 @@ OBJECT_PACK_PATH="${PROJECT_PATH}/objectpack"
 
 # objectpackのプロジェクトフォルダが存在するかチェック.
 if [ -f ${OBJECT_PACK_PATH}/build.xml ]; then
-    # 存在する場合は何もしない.
-    echo ""
+    # 更新チェック.
+    cd ${OBJECT_PACK_PATH}
+    git pull origin master;
 else
     # 存在しない場合は、gitからclone.
     cd ${PROJECT_PATH}

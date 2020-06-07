@@ -199,7 +199,25 @@ public class FCipher {
 		}
 		return n;
 	}
-
+	
+	/**
+	 * cb64でバイナリ変換.
+	 * @param b バイナリを設定します.
+	 * @return String cb64が返却されます.
+	 */
+	public static final String cb64_enc(byte[] b) {
+		return CBase64.encode(b);
+	}
+	
+	/**
+	 * cb64の文字列を復元.
+	 * @param s cb64で変換された文字列を設定します.
+	 * @return byte[] バイナリが返却されます.
+	 */
+	public static final byte[] cb64_dec(String s) {
+		return CBase64.decode(s);
+	}
+	
 	/**
 	 * ハッシュ計算.
 	 * 
@@ -211,13 +229,22 @@ public class FCipher {
 		final int[] n = hash_raw(bin);
 
 		// バイナリで返却.
-		return new byte[] { (byte) (n[0] & 0x000000ff), (byte) ((n[0] & 0x0000ff00) >> 8),
-				(byte) ((n[0] & 0x00ff0000) >> 16), (byte) (((n[0] & 0xff000000) >> 24) & 0x00ff),
-				(byte) (n[1] & 0x000000ff), (byte) ((n[1] & 0x0000ff00) >> 8), (byte) ((n[1] & 0x00ff0000) >> 16),
-				(byte) (((n[1] & 0xff000000) >> 24) & 0x00ff), (byte) (n[2] & 0x000000ff),
-				(byte) ((n[2] & 0x0000ff00) >> 8), (byte) ((n[2] & 0x00ff0000) >> 16),
-				(byte) (((n[2] & 0xff000000) >> 24) & 0x00ff), (byte) (n[3] & 0x000000ff),
-				(byte) ((n[3] & 0x0000ff00) >> 8), (byte) ((n[3] & 0x00ff0000) >> 16),
+		return new byte[] { 
+				(byte) (n[0] & 0x000000ff),
+				(byte) ((n[0] & 0x0000ff00) >> 8),
+				(byte) ((n[0] & 0x00ff0000) >> 16),
+				(byte) (((n[0] & 0xff000000) >> 24) & 0x00ff),
+				(byte) (n[1] & 0x000000ff),
+				(byte) ((n[1] & 0x0000ff00) >> 8),
+				(byte) ((n[1] & 0x00ff0000) >> 16),
+				(byte) (((n[1] & 0xff000000) >> 24) & 0x00ff),
+				(byte) (n[2] & 0x000000ff),
+				(byte) ((n[2] & 0x0000ff00) >> 8),
+				(byte) ((n[2] & 0x00ff0000) >> 16),
+				(byte) (((n[2] & 0xff000000) >> 24) & 0x00ff),
+				(byte) (n[3] & 0x000000ff),
+				(byte) ((n[3] & 0x0000ff00) >> 8),
+				(byte) ((n[3] & 0x00ff0000) >> 16),
 				(byte) (((n[3] & 0xff000000) >> 24) & 0x00ff) };
 	}
 
@@ -430,6 +457,27 @@ public class FCipher {
 	public String benc(byte[] bin, byte[] pKey) {
 		return benc(bin, pKey, null);
 	}
+	
+	/**
+	 * バイナリエンコード.
+	 * 
+	 * @param bin
+	 * @param pKey
+	 * @return
+	 */
+	public byte[] benc_b(byte[] bin, byte[] pKey) {
+		byte[] pubKey = _randKey();
+		byte[] key256 = _key256(_convertKey(pKey, pubKey));
+		int stepNo = _getStepNo(pKey, bin) & 0x0000007f;
+		int nowStep = _convert256To(key256, pubKey, stepNo);
+		_ed(true, bin, key256, nowStep);
+		byte[] eb = new byte[34 + bin.length];
+		eb[0] = (byte) (_rand.nextInt() & 0x000000ff);
+		eb[1] = (byte) (~(stepNo ^ eb[0]));
+		System.arraycopy(pubKey, 0, eb, 2, 32);
+		System.arraycopy(bin, 0, eb, 34, bin.length);
+		return eb;
+	}
 
 	/**
 	 * バイナリエンコード.
@@ -441,16 +489,7 @@ public class FCipher {
 	 */
 	public String benc(byte[] bin, byte[] pKey, String head) {
 		head = head == null ? ((_head == null) ? "" : _head) : head;
-		byte[] pubKey = _randKey();
-		byte[] key256 = _key256(_convertKey(pKey, pubKey));
-		int stepNo = _getStepNo(pKey, bin) & 0x0000007f;
-		int nowStep = _convert256To(key256, pubKey, stepNo);
-		_ed(true, bin, key256, nowStep);
-		byte[] eb = new byte[34 + bin.length];
-		eb[0] = (byte) (_rand.nextInt() & 0x000000ff);
-		eb[1] = (byte) (~(stepNo ^ eb[0]));
-		System.arraycopy(pubKey, 0, eb, 2, 32);
-		System.arraycopy(bin, 0, eb, 34, bin.length);
+		byte[] eb = benc_b(bin, pKey);
 		return head + CBase64.encode(eb);
 	}
 
@@ -505,17 +544,27 @@ public class FCipher {
 	 */
 	public byte[] bdec(String value, byte[] pKey, String head) {
 		head = head == null ? ((_head == null) ? "" : _head) : head;
-		byte[] bin = CBase64.decode(value.substring(head.length()));
-		if (bin.length <= 34) {
+		return bdec_b(CBase64.decode(value.substring(head.length())), pKey);
+	}
+	
+	/**
+	 * バイナリデコード.
+	 * 
+	 * @param value
+	 * @param pKey
+	 * @return
+	 */
+	public byte[] bdec_b(byte[] value, byte[] pKey) {
+		if (value.length <= 34) {
 			throw new FCipherException("decode:Invalid binary length.");
 		}
-		int stepNo = ((~(bin[1] ^ bin[0])) & 0x0000007f);
+		int stepNo = ((~(value[1] ^ value[0])) & 0x0000007f);
 		byte[] pubKey = new byte[32];
-		System.arraycopy(bin, 2, pubKey, 0, 32);
-		int bodyLen = bin.length - 34;
+		System.arraycopy(value, 2, pubKey, 0, 32);
+		int bodyLen = value.length - 34;
 		byte[] body = new byte[bodyLen];
-		System.arraycopy(bin, 34, body, 0, bodyLen);
-		bin = null;
+		System.arraycopy(value, 34, body, 0, bodyLen);
+		value = null;
 		byte[] key256 = _key256(_convertKey(pKey, pubKey));
 		int nowStep = _convert256To(key256, pubKey, stepNo);
 		_ed(false, body, key256, nowStep);

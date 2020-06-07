@@ -129,6 +129,29 @@ public final class Converter {
 	}
 
 	/**
+	 * 対象のオブジェクトがBooleanとして解釈できるかチェック.
+	 * 
+	 * @param n 変換対象の条件を設定します.
+	 * @return boolean [true]の場合、Booleanで解釈が可能です.
+	 */
+	public static final Boolean isBool(Object o) {
+		if (o == null) {
+			return false;
+		} else if (o instanceof Boolean) {
+			return true;
+		} else if (o instanceof Number) {
+			return true;
+		} else if (o instanceof String) {
+			String s = (String)o;
+			if (isNumeric(s) || eqEng(s, "true") || eqEng(s, "t") || eqEng(s, "on")
+				|| eqEng(s, "false") || eqEng(s, "f") || eqEng(s, "off")) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Boolean変換.
 	 * 
 	 * @param n 変換対象の条件を設定します.
@@ -137,14 +160,11 @@ public final class Converter {
 	public static final Boolean convertBool(Object o) {
 		if (o == null) {
 			return null;
-		}
-		if (o instanceof Boolean) {
+		} else if (o instanceof Boolean) {
 			return (Boolean) o;
-		}
-		if (o instanceof Number) {
+		} else if (o instanceof Number) {
 			return (((Number) o).intValue() == 0) ? false : true;
-		}
-		if (o instanceof String) {
+		} else if (o instanceof String) {
 			return Converter.parseBoolean((String) o);
 		}
 		throw new ConvertException("BOOL conversion failed: " + o);
@@ -159,8 +179,7 @@ public final class Converter {
 	public static final Integer convertInt(Object o) {
 		if (o == null) {
 			return null;
-		}
-		if (o instanceof Integer) {
+		} else if (o instanceof Integer) {
 			return (Integer) o;
 		} else if (o instanceof Number) {
 			return ((Number) o).intValue();
@@ -181,8 +200,7 @@ public final class Converter {
 	public static final Long convertLong(Object o) {
 		if (o == null) {
 			return null;
-		}
-		if (o instanceof Long) {
+		} else if (o instanceof Long) {
 			return (Long) o;
 		} else if (o instanceof Number) {
 			return ((Number) o).longValue();
@@ -224,8 +242,7 @@ public final class Converter {
 	public static final Double convertDouble(Object o) {
 		if (o == null) {
 			return null;
-		}
-		if (o instanceof Double) {
+		} else if (o instanceof Double) {
 			return (Double) o;
 		} else if (o instanceof Number) {
 			return ((Number) o).doubleValue();
@@ -246,8 +263,7 @@ public final class Converter {
 	public static final String convertString(Object o) {
 		if (o == null) {
 			return null;
-		}
-		if (o instanceof String) {
+		} else if (o instanceof String) {
 			return (String) o;
 		}
 		return o.toString();
@@ -272,8 +288,7 @@ public final class Converter {
 	public static final java.sql.Date convertSqlDate(Object o) {
 		if (o == null) {
 			return null;
-		}
-		if (o instanceof java.util.Date) {
+		} else if (o instanceof java.util.Date) {
 			return _cDate(((java.util.Date) o));
 		} else if (o instanceof Long) {
 			return _cDate((Long) o);
@@ -307,8 +322,7 @@ public final class Converter {
 	public static final java.sql.Time convertSqlTime(Object o) {
 		if (o == null) {
 			return null;
-		}
-		if (o instanceof java.util.Date) {
+		} else if (o instanceof java.util.Date) {
 			return _cTime((java.util.Date) o);
 		} else if (o instanceof Long) {
 			return _cTime((Long) o);
@@ -332,8 +346,7 @@ public final class Converter {
 	public static final java.sql.Timestamp convertSqlTimestamp(Object o) {
 		if (o == null) {
 			return null;
-		}
-		if (o instanceof java.util.Date) {
+		} else if (o instanceof java.util.Date) {
 			if (o instanceof java.sql.Timestamp) {
 				return (java.sql.Timestamp) o;
 			}
@@ -364,8 +377,7 @@ public final class Converter {
 	public static final java.util.Date convertDate(Object o) {
 		if (o == null) {
 			return null;
-		}
-		if (o instanceof java.util.Date) {
+		} else if (o instanceof java.util.Date) {
 			return (java.util.Date) o;
 		} else if (o instanceof Long) {
 			return new java.util.Date((Long) o);
