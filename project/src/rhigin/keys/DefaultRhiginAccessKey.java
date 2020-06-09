@@ -18,14 +18,15 @@ import rhigin.util.Flag;
  * 標準のRhiginAccessKey管理.
  */
 public class DefaultRhiginAccessKey implements RhiginAccessKey {
-	private static final String FILE_NAME = "./.rhiginAccessKey";
+	private static final String DEF_FILE_NAME = "./.rhiginAccessKey";
+	
 	private static final int BODY_LENGTH = RhiginAccessKeyConstants.ACCESS_KEY_LENGTH_64
 		+ RhiginAccessKeyConstants.SAVE_CODE_LENGTH;
 	
 	private static final byte CREATE_CODE = (byte)1;
 	private static final byte DELETE_CODE = (byte)2;
 	
-	private String name = FILE_NAME;
+	private String name = DEF_FILE_NAME;
 	private final Flag loadFlag = new Flag(false);
 	private Map<String, String> memoryMan;
 	private ReadWriteLock rwLock = new ReentrantReadWriteLock();

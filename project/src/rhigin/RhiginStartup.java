@@ -13,6 +13,7 @@ import org.mozilla.javascript.Undefined;
 import org.mozilla.javascript.Wrapper;
 
 import rhigin.http.Http;
+import rhigin.http.HttpConstants;
 import rhigin.http.HttpInfo;
 import rhigin.http.MimeType;
 import rhigin.logs.LogFactory;
@@ -32,6 +33,7 @@ import rhigin.util.EnvCache;
 import rhigin.util.FileUtil;
 import rhigin.util.IsOs;
 import rhigin.util.ObjectList;
+import rhigin.util.WatchPath;
 
 /**
  * Rhigin初期処理.
@@ -179,10 +181,20 @@ public class RhiginStartup {
 			ip.load();
 			IpPermission.setMainIpPermission(ip);
 			
+			// Rhiginで利用するパスの管理.
+			WatchPath wp = null;
+			if(!FileUtil.isDir(RhiginConstants.DIR_LIB)) {
+				wp = new WatchPath(HttpConstants.ACCESS_PATH);
+			} else {
+				wp = new WatchPath(HttpConstants.ACCESS_PATH, RhiginConstants.DIR_LIB);
+			}
+			WatchPath.setStaticWatchPath(wp);
+			
 		} catch (Exception e) {
 			// エラーが出る場合は、処理終了.
 			e.printStackTrace();
 			System.exit(1);
+			return null;
 		}
 		return config;
 	}

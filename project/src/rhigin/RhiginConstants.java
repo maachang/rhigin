@@ -42,6 +42,12 @@ public class RhiginConstants {
 
 	/** ログパス. **/
 	public static final String DIR_LOG = "./log/";
+	
+	/** ライブラリ用パス. **/
+	public static final String DIR_LIB = "./lib/";
+	
+	/** jar用パス. **/
+	public static final String DIR_JAR = "./jar/";
 
 	/** main.js **/
 	public static final String MAIN_JS = "main.js";

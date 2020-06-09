@@ -26,6 +26,16 @@ public class Stats {
 	public Stats(String name) {
 		path = Paths.get(name);
 	}
+	
+	/**
+	 * コンストラクタ.
+	 * 
+	 * @param path
+	 *            Pathオブジェクトを設定します.
+	 */
+	public Stats(Path path) {
+		this.path = path;
+	}
 
 	/**
 	 * ディレクトリ存在チェック.

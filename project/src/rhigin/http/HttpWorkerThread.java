@@ -45,6 +45,7 @@ import rhigin.util.DateConvert;
 import rhigin.util.FCipher;
 import rhigin.util.FileUtil;
 import rhigin.util.Wait;
+import rhigin.util.WatchPath;
 import rhigin.util.Xor128;
 
 /**
@@ -323,6 +324,7 @@ public class HttpWorkerThread extends Thread {
 		if (em.isEndSend()) {
 			return;
 		}
+		final WatchPath wp = WatchPath.getInstance();
 		final Request req = em.getRequest();
 		final boolean minHeader = req.isMinHeader();
 		em.setRequest(null);
@@ -423,10 +425,10 @@ public class HttpWorkerThread extends Thread {
 			}
 
 			// アクセス対象のパスを取得.
-			String path = HttpConstants.ACCESS_PATH + urlPath;
+			String path = FileUtil.getFullPath(HttpConstants.ACCESS_PATH + urlPath);
 
 			// main.jsが存在する場合は、urlに関係なくmain.jsを実行.
-			if (!(path.endsWith("/") && FileUtil.isFile(path + RhiginConstants.MAIN_JS))) {
+			if (!(path.endsWith("/") && wp.isFile(path + RhiginConstants.MAIN_JS))) {
 				// 最後が / で終わっている場合.
 				if (path.endsWith("/")) {
 					path += "index";
@@ -436,16 +438,16 @@ public class HttpWorkerThread extends Thread {
 				if (gzip) {
 					// gzip対応.
 					if (path.endsWith("/index")) {
-						if (FileUtil.isFile(path + ".html.gz")) {
+						if (wp.isFile(path + ".html.gz")) {
 							path += ".html.gz";
 							useFlag = true;
-						} else if (FileUtil.isFile(path + ".htm.gz")) {
+						} else if (wp.isFile(path + ".htm.gz")) {
 							path += ".htm.gz";
 							useFlag = true;
-						} else if (FileUtil.isFile(path + ".html")) {
+						} else if (wp.isFile(path + ".html")) {
 							path += ".html";
 							useFlag = true;
-						} else if (FileUtil.isFile(path + ".htm")) {
+						} else if (wp.isFile(path + ".htm")) {
 							path += ".htm";
 							useFlag = true;
 						}
@@ -454,36 +456,36 @@ public class HttpWorkerThread extends Thread {
 						// 例外としてブラウザのJSとしてアクセス許可されているパスの場合はファイル返却として処理する.
 						if (path.endsWith(".js")) {
 							if(browserJsPath(path)) {
-								if (FileUtil.isFile(path + ".gz")) {
+								if (wp.isFile(path + ".gz")) {
 									path += ".gz";
 									useFlag = true;
-								} else if(FileUtil.isFile(path)) {
+								} else if(wp.isFile(path)) {
 									useFlag = true;
 								}
 							}
 						// その他ファイルが存在する場合.
-						} else if(FileUtil.isFile(path) || FileUtil.isFile(".gz")) {
+						} else if(wp.isFile(path) || wp.isFile(".gz")) {
 							useFlag = true;
 						}
 					}
 				} else {
 					// gzip非対応.
 					if (path.endsWith("/index")) {
-						if (FileUtil.isFile(path + ".html")) {
+						if (wp.isFile(path + ".html")) {
 							path += ".html";
 							useFlag = true;
-						} else if (FileUtil.isFile(path + ".htm")) {
+						} else if (wp.isFile(path + ".htm")) {
 							path += ".htm";
 							useFlag = true;
 						}
 					} else if(path.endsWith(".js")) {
 						// ただし[.js]に対しては、サーバ実行なので、中身が見れないようにする.
 						// 例外としてブラウザのJSとしてアクセス許可されているパスの場合はファイル返却として処理する.
-						if (browserJsPath(path) && FileUtil.isFile(path)) {
+						if (browserJsPath(path) && wp.isFile(path)) {
 							useFlag = true;
 						}
 					// その他ファイルが存在する場合.
-					} else if(FileUtil.isFile(path)) {
+					} else if(wp.isFile(path)) {
 						useFlag = true;
 					}
 				}
@@ -493,7 +495,7 @@ public class HttpWorkerThread extends Thread {
 					// キャッシュ通信が許可されている場合.
 					if(Http.getHttpInfo().isSendFileCacheMode()) {
 						// rfc822形式用にミリ秒を０で丸める.
-						long localFileTime = FileUtil.atime(path);
+						long localFileTime = wp.getMtime(path);
 						localFileTime = (localFileTime / 1000L) * 1000L;
 						Date localFileDate = new Date(localFileTime);
 						// RequesのtHeaderに「if-modified-since」が存在する場合は、キャッシュ扱いで返却.
@@ -522,7 +524,7 @@ public class HttpWorkerThread extends Thread {
 				}
 				// 実行スクリプトで処理する.
 				path += ".js";
-				if(!FileUtil.isFile(path)) {
+				if(!wp.isFile(path)) {
 					// 存在しない場合.
 					errorResponse(req, em, 404);
 					return;
@@ -743,7 +745,7 @@ public class HttpWorkerThread extends Thread {
 		}
 		try {
 			em.setSendData(new ByteArrayInputStream(
-					stateResponse(req, status, header, BLANK_BINARY, FileUtil.getFileLength(fileName))));
+					stateResponse(req, status, header, BLANK_BINARY, WatchPath.getInstance().getLength(fileName))));
 			em.setSendData(new FileInputStream(fileName));
 			em.startWrite();
 		} catch (IOException io) {

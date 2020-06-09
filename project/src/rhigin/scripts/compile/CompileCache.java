@@ -13,6 +13,7 @@ import rhigin.http.HttpInfo;
 import rhigin.scripts.ExecuteScript;
 import rhigin.util.FileUtil;
 import rhigin.util.LruCache;
+import rhigin.util.WatchPath;
 
 /**
  * Rhiginコンパイルキャッシュ コンパイルされた、キャッシュ情報は、全体で管理するのではなく、スレッド単位で作成します.
@@ -127,7 +128,6 @@ public class CompileCache {
 			r = null;
 			ScriptElement em = new ScriptElement(sc, jsName, time);
 			c.put(key, em);
-
 			return em;
 		} finally {
 			if (r != null) {
@@ -160,8 +160,11 @@ public class CompileCache {
 			if (!jsName.toLowerCase().endsWith(".js")) {
 				jsName += ".js";
 			}
-			// 現在のファイル時間（存在しない場合は-1)を取得.
-			final long time = FileUtil.mtime(jsName);
+			// 現在のファイル時間を取得.
+			long time = WatchPath.getInstance().getMtime(jsName);
+			if(time == -1) {
+				time = FileUtil.getFileLength(jsName);
+			}
 			// ベースパス内の場合は、ベースパス名を除外.
 			final String key = jsName.startsWith(baseDir) ?
 				jsName.substring(baseDir.length()) : jsName;

@@ -55,7 +55,7 @@ public final class RequireFunction extends RhiginFunction {
 		}
 		String path = "" + args[0];
 		// パスの先頭に[@]が存在する場合は、javaのクラス[JavaRequire]でロード.
-		if(path.startsWith("@")) {
+		if(path.startsWith("@") || path.startsWith("$")) {
 			// パス名は/は[.]に変換.
 			path = Converter.changeString(path.substring(1), "/", ".");
 			Class c = null;

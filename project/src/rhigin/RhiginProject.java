@@ -58,15 +58,16 @@ public class RhiginProject {
 		FileUtil.mkdirs(HttpConstants.ACCESS_PATH);
 		FileUtil.mkdirs(RhiginConstants.DIR_CONFIG);
 		FileUtil.mkdirs(RhiginConstants.DIR_LOG);
-		FileUtil.mkdirs("./jar");
+		FileUtil.mkdirs(RhiginConstants.DIR_LIB);
+		FileUtil.mkdirs(RhiginConstants.DIR_JAR);
 
 		// 必要なファイルを転送.
 		FileUtil.rcpy("res/rhigin/projects/index.js", "./index.js");
-		FileUtil.rcpy("res/rhigin/projects/conf/accessKey.json", "./conf/accessKey.json");
-		FileUtil.rcpy("res/rhigin/projects/conf/ipPermission.json", "./conf/ipPermission.json");
-		FileUtil.rcpy("res/rhigin/projects/conf/http.json", "./conf/http.json");
-		FileUtil.rcpy("res/rhigin/projects/conf/log.json", "./conf/log.json");
-		FileUtil.rcpy("res/rhigin/projects/conf/rhigin.json", "./conf/rhigin.json");
+		FileUtil.rcpy("res/rhigin/projects/conf/accessKey.json", RhiginConstants.DIR_CONFIG + "accessKey.json");
+		FileUtil.rcpy("res/rhigin/projects/conf/ipPermission.json", RhiginConstants.DIR_CONFIG + "ipPermission.json");
+		FileUtil.rcpy("res/rhigin/projects/conf/http.json", RhiginConstants.DIR_CONFIG + "http.json");
+		FileUtil.rcpy("res/rhigin/projects/conf/log.json", RhiginConstants.DIR_CONFIG + "log.json");
+		FileUtil.rcpy("res/rhigin/projects/conf/rhigin.json", RhiginConstants.DIR_CONFIG + "rhigin.json");
 
 		// rhigin.jsonのファイルを書き換える.
 		change("./conf/rhigin.json", "{{projectName}}", name);
