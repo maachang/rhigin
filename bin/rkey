@@ -1,0 +1,65 @@
+#!/bin/bash
+################################################################################
+# startup rhigin accessKey command.
+################################################################################
+ARGS=${*}
+
+################################################################################
+# Please set up environment.
+################################################################################
+
+# java home.
+export JAVA_HOME=${JAVA_HOME}
+
+# project directory.
+PROJ_DIR=.
+
+# java option.
+OPT=
+
+# firstMemory.
+STM=128
+
+# maxMemory.
+EXM=128
+
+################################################################################
+# Please define execution conditions.
+################################################################################
+
+# execution package.
+EXEC_PACKAGE=rhigin.RhiginKey
+
+# my jar.
+MY_JAR=
+
+# logconf name.
+# default(log4j.xml).
+LOGCONF=
+
+
+
+################################################################################
+# The point does not change from here.
+################################################################################
+BASE_HOME=${RHIGIN_HOME}
+
+# batch dir.
+BATCH_DIR=${BASE_HOME}
+
+# library directory.
+LIB_DIR=${BASE_HOME}/lib
+
+# my jar ++.
+MY_JAR=${MY_JAR}:`sh ${BATCH_DIR}/sub/classpath.sh ${LIB_DIR}`
+
+# java option.
+OPT="${OPT} -Djava.awt.headless=true"
+OPT="${OPT} -Djava.net.preferIPv4Stack=true"
+
+# execution java.
+cd ${PROJ_DIR}
+
+${JAVA_HOME}/bin/java -Xms${STM}m -Xmx${EXM}m ${OPT} -classpath ${MY_JAR} ${EXEC_PACKAGE} ${ARGS}
+
+exit ${?}

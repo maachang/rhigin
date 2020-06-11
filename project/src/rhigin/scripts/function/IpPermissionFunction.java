@@ -61,7 +61,6 @@ public class IpPermissionFunction extends RhiginFunction {
 		// Requestを取得して取得出来ない場合はエラー.
 		RhiginContext context = ExecuteScript.currentRhiginContext();
 		Object o = context.getAttribute("request");
-		System.out.println(o);
 		if(!(o instanceof Request)) {
 			throw new RhiginException(401, "invalid access.");
 		}

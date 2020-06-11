@@ -192,8 +192,9 @@ public class RhiginExecuteClientByAccessKey extends RhiginExecuteClient {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	protected HttpResult _send(String url, Object value, Map<String, Object> option) {
-		boolean toFile = true;
+		boolean toHome = true;
 		String accessKey = null;
+		RhiginAccessKeyClient ac = RhiginAccessKeyClient.getInstance();
 		// valueの存在チェック.
 		if(value == null || !(value instanceof String) || ((String)value).isEmpty()) {
 			throw new RhiginException("Access Key processing conditions are not set.");
@@ -207,7 +208,7 @@ public class RhiginExecuteClientByAccessKey extends RhiginExecuteClient {
 				// create / createFile以外の場合はコンフィグ定義に生成条件をセットする.
 				if(!("createhome".equals(value) || "createfile".equals(value))) {
 					// conf/accessKey.jsonに保存.
-					toFile = false;
+					toHome = false;
 				}
 				value = "create";
 			}
@@ -216,10 +217,10 @@ public class RhiginExecuteClientByAccessKey extends RhiginExecuteClient {
 				// optionにaccessKeyが存在しない場合は、
 				// URL先のサーバに登録されているAccessKeyを取得する.
 				if(getAccessKey(false, option) == null) {
-					keys = RhiginAccessKeyClient.getInstance().get(url);
+					keys = ac.get(url);
 				// optionにaccessKeyが存在する場合は、そちらから取得.
 				} else {
-					keys = new String[] {getAccessKey(true, option)};
+					keys = new String[] { getAccessKey(true, option) };
 					option.remove("akey");
 					option.remove("accessKey");
 				}
@@ -228,6 +229,14 @@ public class RhiginExecuteClientByAccessKey extends RhiginExecuteClient {
 					throw new RhiginException("Access Key is not set.");
 				}
 				accessKey = keys[0];
+			}
+			if("create".equals(value)) {
+				// 生成系の処理の場合.
+				// 指定URLに対して、情報が存在するかチェックして、存在する場合は、エラーを返却.
+				if((toHome && ac.getByHome(url) != null) ||
+					(!toHome && ac.getByConfig(url) != null)) {
+					throw new RhiginException("The access key already exists.");
+				}
 			}
 		} else {
 			throw new RhiginException("Unknown execution instruction: " + value);
@@ -247,15 +256,15 @@ public class RhiginExecuteClientByAccessKey extends RhiginExecuteClient {
 			HttpResult ret = HttpClient.get(url, option);
 			// 処理結果に応じてRhiginAccessClientの情報を操作.
 			if(ret.getStatus() < 300) {
-				RhiginAccessKeyClient ac = RhiginAccessKeyClient.getInstance();
 				Object json = ret.responseJson();
 				// 生成操作.
 				if("create".equals(value)) {
+					// 生成処理結果をClient管理ファイルに反映.
 					if(json instanceof Map) {
 						Map<String, String> res = (Map)json;
-						if(toFile) {
+						if(toHome) {
 							// Homeファイルに追加.
-							ac.setByHomeFile(url, res.get("accessKey"), res.get("authCode"));
+							ac.setByHome(url, res.get("accessKey"), res.get("authCode"));
 						} else {
 							// conf/accessKey.jsonに追加.
 							ac.setByConfig(url, res.get("accessKey"), res.get("authCode"));
@@ -265,15 +274,16 @@ public class RhiginExecuteClientByAccessKey extends RhiginExecuteClient {
 					throw new RhiginException(
 						"Unknown return value for create operation: " + Json.encode(json));
 				} else if("delete".equals(value)) {
+					// 削除処理結果をClient管理ファイルに反映.
 					if(json instanceof Map) {
 						Map<String, Object> res = (Map)json;
 						// 戻り値とセットしたAccessKeyが一致する場合は削除処理.
 						if(Converter.convertBool(res.get("result")) &&
 							accessKey != null && accessKey.equals(res.get("accessKey"))) {
 							// 削除処理の場合はそれぞれを削除する.
-							String[] keys = ac.getByHomeFile(url);
+							String[] keys = ac.getByHome(url);
 							if(keys != null && accessKey.equals(keys[0])) {
-								ac.removeByHomeFile(url);
+								ac.removeByHome(url);
 							}
 							keys = ac.getByConfig(url);
 							if(keys != null && accessKey.equals(keys[0])) {
@@ -282,7 +292,7 @@ public class RhiginExecuteClientByAccessKey extends RhiginExecuteClient {
 							return ret;
 						}
 					}
-					throw new RhiginException("The delete process has failed.");
+					throw new RhiginException("The delete process has failed: " + Json.encode(json));
 				}
 			}
 			return ret;

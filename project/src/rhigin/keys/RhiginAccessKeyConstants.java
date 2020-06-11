@@ -10,7 +10,7 @@ public class RhiginAccessKeyConstants {
 	public static final int ACCESS_KEY_LENGTH = 81;
 	
 	/** 認証コードの生成データ長. **/
-	public static final int AUTH_CODE_LENGTH = 96;
+	public static final int AUTH_CODE_LENGTH = 95;
 	
 	/** アクセスキーの６４進数変換後の文字数. **/
 	public static final int ACCESS_KEY_LENGTH_64 = 45;
