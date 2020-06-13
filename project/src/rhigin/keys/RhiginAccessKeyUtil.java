@@ -44,7 +44,7 @@ public class RhiginAccessKeyUtil {
 	 */
 	public static final boolean isAuthCode(Object authCode) {
 		if(authCode == null || !(authCode instanceof String)
-				|| ((String)authCode).length() != RhiginAccessKeyConstants.ACCESS_KEY_LENGTH_64) {
+				|| ((String)authCode).length() != RhiginAccessKeyConstants.AUTH_CODE_LENGTH_64) {
 				return false;
 			}
 			return true;

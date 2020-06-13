@@ -122,7 +122,7 @@ public final class RhiginAccessKeyByFCipher {
 			body = fc.bdec_b(body, pkey);
 		} catch(Exception e) {
 			// 暗号の解析に失敗した場合は「エラー」は不正アクセスとして扱う.
-			throw new RhiginException(401, "invalid access.");
+			throw new RhiginException(401, "invalid access.", e);
 		}
 		return unzip(body);
 	}
@@ -174,7 +174,7 @@ public final class RhiginAccessKeyByFCipher {
 			body = fc.bdec_b(body, pkey);
 		} catch(Exception e) {
 			// 暗号の解析に失敗した場合は「エラー」は不正アクセスとして扱う.
-			throw new RhiginException(401, "invalid access.");
+			throw new RhiginException(401, "invalid access.", e);
 		}
 		// 暗号解析して、GZIP解凍して変薬.
 		return unzip(body);

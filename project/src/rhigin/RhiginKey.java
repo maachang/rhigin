@@ -8,6 +8,7 @@ import rhigin.scripts.JsonOut;
 import rhigin.util.Alphabet;
 import rhigin.util.Args;
 import rhigin.util.Converter;
+import rhigin.util.FileUtil;
 
 /**
  * RhiginAccessKeyClientのコマンド実行.
@@ -29,7 +30,7 @@ public class RhiginKey {
 		if(params.isValue("-v", "--version")) {
 			System.out.println(RhiginConstants.VERSION);
 			return true;
-		} else if(params.isValue("-h", "--help")) {
+		} else if(params.isValue("?", "--help")) {
 			help();
 			return true;
 		}
@@ -38,34 +39,39 @@ public class RhiginKey {
 	
 	// ヘルプ情報を表示.
 	private static final void help() {
-		System.out.println("rkey [-c] [-u] [-k]");
+		System.out.println("rkey [-c] [-u] [-k] [-h]");
 		System.out.println(" Configure key management for rhigin access key client.");
 		System.out.println("  [-c] [--cmd] {name}");
 		System.out.println("    In {name}, specify the execution command with the following command.");
 		System.out.println("     home or create");
 		System.out.println("      Generate a new access key for the specified URL.");
-		System.out.println("       rkeys -c create -u 192.168.0.100:3120");
-		System.out.println("       rkeys -c home -u 192.168.0.100:3120");
+		System.out.println("       $ rkey -c create -u 192.168.0.100:3120");
+		System.out.println("       $ rkey -c home -u 192.168.0.100:3120");
 		System.out.println("     config");
 		System.out.println("      Generate a new access key for the specified URL.");
 		System.out.println("      Generate it under '/conf/accessKey.json'.");
-		System.out.println("       rkeys -c config -u 192.168.0.100:3120");
+		System.out.println("       $ rkey -c config -u 192.168.0.100:3120");
 		System.out.println("     delete");
 		System.out.println("      Delete the access key of the specified URL.");
-		System.out.println("       rkeys -c delete -u 192.168.0.100:3120 -k xxxxxx....");
+		System.out.println("       $ rkey -c delete -u 192.168.0.100:3120 -k xxxxxx....");
 		System.out.println("     use");
 		System.out.println("      Check if the access key of the specified URL matches.");
-		System.out.println("       rkeys -c use -u 192.168.0.100:3120 -k xxxxxx....");
+		System.out.println("       $ rkey -c use -u 192.168.0.100:3120 -k xxxxxx....");
 		System.out.println("     urls");
 		System.out.println("      Display a list of registered URLs.");
-		System.out.println("       rkeys -c urls");
+		System.out.println("       $ rkey -c urls");
 		System.out.println("     keys");
 		System.out.println("      Get the AccessKey list of the specified URL.");
-		System.out.println("       rkeys -c keys -u 192.168.0.100:3120");
+		System.out.println("       $ rkey -c keys -u 192.168.0.100:3120");
 		System.out.println("  [-u] [--url] {url}");
 		System.out.println("    Set Rhigin server URL of AccessKey management.");
+		System.out.println("     $ rkey -c create -u 127.0.0.1:3120");
 		System.out.println("  [-k] [--key] {accessKey}");
 		System.out.println("    Set the target AccessKey.");
+		System.out.println("     $ rkey -c use -k @u8UO2RQmiBC5SaddhLzqGnIrab7tLjZ_TgMUD38Jyg_e");
+		System.out.println("  [-h] [--home] {homeFile}");
+		System.out.println("    Set the target home file.");
+		System.out.println("     $ rjs -h ~/.rhiginAccessKey2.json");
 	}
 	
 	// 処理結果のJSONを取得.
@@ -93,6 +99,18 @@ public class RhiginKey {
 			}
 			// 初期化処理.
 			RhiginStartup.init(false, false);
+			// RhiginAccessKeyClientを初期化.
+			String homeFile = params.get("-h", "--home");
+			if(homeFile == null || homeFile.isEmpty()) {
+				RhiginAccessKeyClient.getInstance().init();
+			} else {
+				if(FileUtil.isDir(homeFile)) {
+					System.out.println("The specified home file \"" + homeFile + "\" is a directory.");
+					return 1;
+				}
+				RhiginAccessKeyClient.getInstance().init(homeFile);
+			}
+			// パラメータを取得.
 			String url = params.get("-u", "--url");
 			String key = params.get("-k", "--key");
 			RhiginExecuteClientByAccessKey cl = RhiginExecuteClientByAccessKey.getInstance();
@@ -101,12 +119,12 @@ public class RhiginKey {
 				Object o = cl.createByHome(url);
 				System.out.println(JsonOut.toString(o));
 				return 0;
-			} else if(Alphabet.eq("config", cmd)) {
+			} else if(Alphabet.eq("config", cmd) || Alphabet.eq("conf", cmd)) {
 				// ConfigファイルのAccessKey.jsonに生成アクセスキー情報の登録.
 				Object o = cl.createByConf(url);
 				System.out.println(JsonOut.toString(o));
 				return 0;
-			} else if(Alphabet.eq("delete", cmd)) {
+			} else if(Alphabet.eq("delete", cmd) || Alphabet.eq("remove", cmd)) {
 				// 
 				Object o;
 				if(key == null || key.isEmpty()) {
@@ -128,7 +146,11 @@ public class RhiginKey {
 					o = cl.isAccessKey(url, key);
 				}
 				System.out.println(JsonOut.toString(o));
-				return 0;
+				if(Converter.convertBool(getResult(o, "result"))) {
+					return 0;
+				} else {
+					return 1;
+				}
 			} else if(Alphabet.eq("urls", cmd)) {
 				Object o = RhiginAccessKeyClient.getInstance().getUrls();
 				System.out.println(JsonOut.toString(o));
@@ -153,5 +175,4 @@ public class RhiginKey {
 			return 1;
 		}
 	}
-
 }

@@ -1,8 +1,11 @@
 #!/bin/bash
 ################################################################################
-# rhigin shutdown.
+# Send Javascript to Rhigin server and execute it.
 ################################################################################
 ARGS=${*}
+
+# jline support.
+export TERM="${TERM/256color/color}"
 
 ################################################################################
 # Please set up environment.
@@ -18,17 +21,17 @@ PROJ_DIR=.
 OPT=
 
 # firstMemory.
-STM=64
+STM=128
 
 # maxMemory.
-EXM=64
+EXM=128
 
 ################################################################################
 # Please define execution conditions.
 ################################################################################
 
 # execution package.
-EXEC_PACKAGE=rhigin.RhiginDown
+EXEC_PACKAGE=rhigin.RhiginRjs
 
 # my jar.
 MY_JAR=

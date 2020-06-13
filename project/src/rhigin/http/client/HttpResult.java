@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
@@ -15,6 +16,7 @@ import rhigin.scripts.Json;
 import rhigin.scripts.objects.JavaObject;
 import rhigin.util.AbstractEntryIterator;
 import rhigin.util.AbstractKeyIterator;
+import rhigin.util.ArrayMap;
 import rhigin.util.ConvertMap;
 
 /**
@@ -27,6 +29,7 @@ public class HttpResult extends JavaScriptable.Map implements
 
 	protected byte[] body = null;
 	protected int status = -1;
+	protected String message = null;
 	protected String url = null;
 	protected String contentType = null;
 	protected HttpBodyFile bodyFile = null;
@@ -39,9 +42,10 @@ public class HttpResult extends JavaScriptable.Map implements
 	 * @param status
 	 * @param header
 	 */
-	protected HttpResult(String url, int status, byte[] header) {
+	protected HttpResult(String url, int status, String message, byte[] header) {
 		this.url = url;
 		this.status = status;
+		this.message = message;
 		this.headers = header;
 	}
 
@@ -60,6 +64,7 @@ public class HttpResult extends JavaScriptable.Map implements
 		headersString = null;
 		body = null;
 		status = -1;
+		message = null;
 	}
 
 	/**
@@ -78,6 +83,14 @@ public class HttpResult extends JavaScriptable.Map implements
 	 */
 	public int getStatus() {
 		return status;
+	}
+
+	/**
+	 * メッセージを取得.
+	 * @return String HTTPメッセージが返却サれます.
+	 */
+	public String getMessage() {
+		return message;
 	}
 
 	/**
@@ -414,6 +427,20 @@ public class HttpResult extends JavaScriptable.Map implements
 		return new AbstractEntryIterator.Set<>(this);
 	}
 
+	// commonKeyList.
+	private static final Map<String, Integer> COMMON_KEY_LIST = new ArrayMap<String, Integer>(
+			"url", 0,
+			"status", 1, "state", 1,
+			"message", 2, "msg", 2,
+			"size", 3, "bodySize", 3,
+			"body", 4, "response", 4, "res", 4,
+			"inputStream", 5, "bodyFile", 5, "file", 5,
+			"text", 6, "txt", 6,
+			"json", 7,
+			"type", 8,
+			"gzip", 9, "isGzip", 9,
+			"contentType", 10
+			);
 	/**
 	 * 情報を取得.
 	 * 
@@ -423,27 +450,39 @@ public class HttpResult extends JavaScriptable.Map implements
 	 */
 	@Override
 	public Object get(Object key) {
+		Integer type;
 		if (key == null) {
 			return null;
-		} else if ("url".equals(key)) {
+		} else if(NoULCode.eqs(""+key, "content-type") != -1) {
+			type = 10;
+		} else {
+			type = COMMON_KEY_LIST.get(key);
+			if(type == null) {
+				type = -1;
+			}
+		}
+		switch(type) {
+		case 0:
 			return getUrl();
-		} else if ("status".equals(key)) {
+		case 1:
 			return getStatus();
-		} else if ("size".equals(key) || "bodySize".equals(key)) {
+		case 2:
+			return getMessage();
+		case 3:
 			return responseBodySize();
-		} else if ("body".equals(key) || "response".equals(key)) {
+		case 4:
 			return new JavaScriptable.ReadArray(responseBody());
-		} else if ("inputStream".equals(key) || "bodyFile".equals(key)) {
+		case 5:
 			return JavaObject.wrapObject(responseInputStream());
-		} else if ("text".equals(key)) {
+		case 6:
 			return responseText();
-		} else if ("json".equals(key)) {
+		case 7:
 			return responseJson();
-		} else if ("type".equals(key)) {
+		case 8:
 			return responseType();
-		} else if ("gzip".equals(key) || "isGzip".equals(key)) {
+		case 9:
 			return isGzip();
-		} else if ("contentType".equals(key) || NoULCode.eqs(""+key, "content-type") != -1) {
+		case 10:
 			return getContentType();
 		}
 		try {
@@ -461,8 +500,19 @@ public class HttpResult extends JavaScriptable.Map implements
 	 * @return boolean [true]の場合、キーの情報は存在します.
 	 */
 	@Override
-	public boolean containsKey(Object name) {
-		return get(name) != null;
+	public boolean containsKey(Object key) {
+		Integer type;
+		if (key == null) {
+			return false;
+		} else if(NoULCode.eqs(""+key, "content-type") != -1) {
+			type = 10;
+		} else {
+			type = COMMON_KEY_LIST.get(key);
+		}
+		if(type == null) {
+			return getHeader(key.toString()) != null;
+		}
+		return true;
 	}
 
 	@Override

@@ -13,6 +13,7 @@ import rhigin.scripts.ExecuteScript;
 import rhigin.scripts.JsonOut;
 import rhigin.scripts.RhiginContext;
 import rhigin.scripts.function.RandomFunction;
+import rhigin.util.Alphabet;
 import rhigin.util.Args;
 import rhigin.util.ConsoleInKey;
 
@@ -125,15 +126,15 @@ public class RhiginConsole {
 						if(cmdLineCount == 0) {
 							continue;
 						}
-					} else if (cmdLineCount == 0 && ("?".equals(cmd) || "help".equals(cmd))) {
+					} else if (cmdLineCount == 0 && ("?".equals(cmd) || Alphabet.eq("help", cmd))) {
 						System.out.println("exit [quit]   Exit the console.");
 						System.out.println("end  [close]  Terminate javascript processing.");
 						System.out.println("");
 						continue;
-					} else if (cmdLineCount == 0 && ("exit".equals(cmd) || "quit".equals(cmd))) {
+					} else if (cmdLineCount == 0 && (Alphabet.eq("exit", cmd) || Alphabet.eq("quit", cmd))) {
 						System.out.println("");
 						return;
-					} else if (cmdLineCount == 0 && ("end".equals(cmd) || "close".equals(cmd))) {
+					} else if (cmdLineCount == 0 && (Alphabet.eq("end", cmd) || Alphabet.eq("close", cmd))) {
 						ExecuteScript.callEndScripts(false);
 						context = new RhiginContext();
 						System.out.println("");

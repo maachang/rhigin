@@ -857,7 +857,7 @@ public class HttpWorkerThread extends Thread {
 			try {
 				// ObjectPackでバイナリ変換.
 				res.put("Content-Type", MimeType.RHIGIN_OBJECT_PACK_MIME_TYPE);
-				successResponseByBinary(req, em, res.getStatus(), res, (byte[])ObjectPack.packB(ret));
+				successResponseByBinary(req, em, status, res, (byte[])ObjectPack.packB(ret));
 			} catch(Exception e) {
 				// 何らかで失敗したら、返却はJSON形式で.
 				res.remove("Content-Length");

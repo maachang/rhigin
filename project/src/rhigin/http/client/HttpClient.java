@@ -379,7 +379,7 @@ public class HttpClient {
 			if (params instanceof String && ((String) params).length() != 0) {
 				// アクセスキーが設定されている場合は、アクセスキーと認証コードで文字列エンコード.
 				if(akey != null) {
-					params = RhiginAccessKeyByFCipher.decode(akey, acode, ((String)params).getBytes("UTF8"));
+					params = RhiginAccessKeyByFCipher.encode(akey, acode, ((String)params).getBytes("UTF8"));
 					params = "params=" + FCipher.cb64_enc((byte[])params);
 				}
 				url += ((url.indexOf("?") != -1) ? "&" : "?") + params;
@@ -390,10 +390,10 @@ public class HttpClient {
 			if(akey != null) {
 				// 文字列の場合.
 				if (params instanceof String) {
-					params = RhiginAccessKeyByFCipher.decode(akey, acode, ((String)params).getBytes("UTF8"));
+					params = RhiginAccessKeyByFCipher.encode(akey, acode, ((String)params).getBytes("UTF8"));
 				// バイナリの場合.
 				} else if (params instanceof byte[]) {
-					params = RhiginAccessKeyByFCipher.decode(akey, acode, (byte[])params);
+					params = RhiginAccessKeyByFCipher.encode(akey, acode, (byte[])params);
 				// InputStreamの場合は処理出来ない.
 				} else if (params instanceof InputStream) {
 					throw new HttpClientException("InputStream transmission with AccessKey cannot be performed for POST transmission.");
@@ -641,6 +641,7 @@ public class HttpClient {
 		boolean gzip = false;
 		byte[] b = null;
 		int status = -1;
+		String message = "";
 		HttpBodyFile bodyFile = null;
 		HttpResult result = null;
 		// chunked用.
@@ -660,11 +661,25 @@ public class HttpClient {
 					if (status == -1) {
 						// ステータスが格納されている１行目の情報を取得.
 						if ((p = buffer.indexOf(CFLF)) != -1) {
+							// HTTP/1.1 {Status} {MESSAGE}\r\n
+							int pp, ppp;
 							b = new byte[p + 2];
 							buffer.read(b);
 							String top = new String(b, "UTF8");
 							b = null;
-							status = Integer.parseInt("" + top.substring(9, 12));
+							pp = top.indexOf(" ");
+							if(pp == -1) {
+								ppp = -1;
+							} else {
+								ppp = top.indexOf(" ", pp + 1);
+							}
+							if(pp == -1|| ppp == -1) {
+								status = 200;
+								message = "OK";
+							} else {
+								status = Integer.parseInt(top.substring(pp + 1, ppp));
+								message = top.substring(ppp + 1).trim();
+							}
 						} else {
 							continue;
 						}
@@ -674,7 +689,7 @@ public class HttpClient {
 						b = new byte[p + 2];
 						buffer.read(b);
 						buffer.skip(2);
-						result = new HttpResult(url, status, b);
+						result = new HttpResult(url, status, message, b);
 						b = null;
 						// content-length.
 						String value = result.getHeader("content-length");

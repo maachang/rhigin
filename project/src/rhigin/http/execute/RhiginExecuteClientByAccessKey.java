@@ -189,8 +189,8 @@ public class RhiginExecuteClientByAccessKey extends RhiginExecuteClient {
 		return send(url, "use", option);
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected HttpResult _send(String url, Object value, Map<String, Object> option) {
 		boolean toHome = true;
 		String accessKey = null;

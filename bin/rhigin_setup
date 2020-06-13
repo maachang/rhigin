@@ -21,6 +21,7 @@ chmod 755 rdown
 chmod 755 rhigin
 chmod 755 rid
 chmod 755 rkey
+chmod 755 rjs
 chmod 755 rlib
 chmod 755 rproj
 chmod 755 rtest
