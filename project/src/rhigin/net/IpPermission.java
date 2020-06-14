@@ -76,48 +76,52 @@ public class IpPermission {
 		Map<String, Map<Integer, List<IpRange>>> pm;
 		try {
 			pm = new ArrayMap<String, Map<Integer, List<IpRange>>>();
-			Iterator<Entry<String, Object>> it = conf.entrySet().iterator();
-			int i, len;
-			Integer headNo;
-			IpRange range;
-			Entry<String, Object> entry;
-			List<String> list;
-			Map<Integer, List<IpRange>> headList = null;
-			List<IpRange> rangeList = null;
-			while(it.hasNext()) {
-				entry = it.next();
-				if(!(entry.getValue() instanceof List)) {
-					continue;
-				}
-				list = (List)entry.getValue();
-				len = list.size();
-				for(i = 0; i < len; i ++) {
-					range = new IpRange(list.get(i));
-					// mask付きの条件[192.168.0.0/24]のような形式でない場合.
-					if((headNo = range.getHead()) == null) {
-						// その他の番号で処理.
-						headNo = ATHER_HEAD;
+			if(conf == null) {
+				pm = new ArrayMap<>();
+			} else {
+				Iterator<Entry<String, Object>> it = conf.entrySet().iterator();
+				int i, len;
+				Integer headNo;
+				IpRange range;
+				Entry<String, Object> entry;
+				List<String> list;
+				Map<Integer, List<IpRange>> headList = null;
+				List<IpRange> rangeList = null;
+				while(it.hasNext()) {
+					entry = it.next();
+					if(!(entry.getValue() instanceof List)) {
+						continue;
 					}
-					// 定義名からIpRangeのHeadリストを取得.
-					headList = pm.get(entry.getKey());
-					if(headList == null) {
-						// 定義名が存在しない場合は新規で追加.
-						headList = new ArrayMap<Integer, List<IpRange>>();
-						pm.put(entry.getKey(), headList);
-					} else {
-						// 存在する場合はそのheadNoに対するIpRangeのリストを取得.
-						rangeList = headList.get(headNo);
+					list = (List)entry.getValue();
+					len = list.size();
+					for(i = 0; i < len; i ++) {
+						range = new IpRange(list.get(i));
+						// mask付きの条件[192.168.0.0/24]のような形式でない場合.
+						if((headNo = range.getHead()) == null) {
+							// その他の番号で処理.
+							headNo = ATHER_HEAD;
+						}
+						// 定義名からIpRangeのHeadリストを取得.
+						headList = pm.get(entry.getKey());
+						if(headList == null) {
+							// 定義名が存在しない場合は新規で追加.
+							headList = new ArrayMap<Integer, List<IpRange>>();
+							pm.put(entry.getKey(), headList);
+						} else {
+							// 存在する場合はそのheadNoに対するIpRangeのリストを取得.
+							rangeList = headList.get(headNo);
+						}
+						// ipRangeのリストが存在しない場合は新規で追加.
+						if(rangeList == null) {
+							rangeList = new ObjectList<IpRange>();
+							headList.put(headNo, rangeList);
+						}
+						// ipRangeのリストに今回のipRangeオブジェクトを追加.
+						rangeList.add(range);
+						headList = null;
+						rangeList = null;
+						range = null;
 					}
-					// ipRangeのリストが存在しない場合は新規で追加.
-					if(rangeList == null) {
-						rangeList = new ObjectList<IpRange>();
-						headList.put(headNo, rangeList);
-					}
-					// ipRangeのリストに今回のipRangeオブジェクトを追加.
-					rangeList.add(range);
-					headList = null;
-					rangeList = null;
-					range = null;
 				}
 			}
 		} catch(RhiginException re) {
