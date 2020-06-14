@@ -182,13 +182,15 @@ public class RhiginStartup {
 			IpPermission.setMainIpPermission(ip);
 			
 			// Rhiginで利用するパスの管理.
-			WatchPath wp = null;
-			if(!FileUtil.isDir(RhiginConstants.DIR_LIB)) {
-				wp = new WatchPath(HttpConstants.ACCESS_PATH);
-			} else {
-				wp = new WatchPath(HttpConstants.ACCESS_PATH, RhiginConstants.DIR_LIB);
+			if(FileUtil.isDir(HttpConstants.ACCESS_PATH)) {
+				WatchPath wp = null;
+				if(!FileUtil.isDir(RhiginConstants.DIR_LIB)) {
+					wp = new WatchPath(HttpConstants.ACCESS_PATH);
+				} else {
+					wp = new WatchPath(HttpConstants.ACCESS_PATH, RhiginConstants.DIR_LIB);
+				}
+				WatchPath.setStaticWatchPath(wp);
 			}
-			WatchPath.setStaticWatchPath(wp);
 			
 		} catch (Exception e) {
 			// エラーが出る場合は、処理終了.
