@@ -71,7 +71,7 @@ public class RhiginServerId {
 		System.out.println("$ rid [cmd]");
 		System.out.println(" [cmd] The following commands are available.");
 		System.out.println("   create : Generate and update with new ID.");
-		System.out.println("   is     : Check if the ID already exists.");
+		System.out.println("   use    : Check if the ID already exists.");
 		System.out.println("   get    : Get the ID, if it does not exist, create a new one.");
 		System.out.println("   help   : Display help information.");
 		System.out.println();
@@ -87,7 +87,7 @@ public class RhiginServerId {
 			if ("create".equals(cmd)) {
 				System.out.println(serverId.createId());
 				System.exit(0);
-			} else if ("is".equals(cmd)) {
+			} else if ("use".equals(cmd)) {
 				System.out.println(serverId.isId());
 				System.exit(0);
 			} else if ("get".equals(cmd)) {
