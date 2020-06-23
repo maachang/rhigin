@@ -44,29 +44,6 @@ describe("LevelJs 緯度経度 テスト " + TEST_INFO + " の I/Oテスト.", f
         }
         // 比較.
         expect(res).comment("処理結果").toBe(cnt);
-
-// 緯度: 35.779676 経度: 139.843849
-// 〒792-0026 愛媛県新居浜市久保田町１丁目８−６ 緯度: 33.956335 経度: 133.28376
-        var itr = op.range(false, 33.956335, 133.28376, 15000, true);
-//        var itr = op.range(false, 35.779676, 139.843849, 3000, false);
-        try {
-            var cnt = 1;
-            while(itr.hasNext()) {
-                var o = itr.next();
-                var k = itr.key();
-                console.log("(" + cnt + ") key: " + k);
-                console.log("(" + cnt + ") value: " + o);
-                cnt ++;
-            }
-            console.log("count: " + cnt);
-        } catch(e) {
-            console.log(e, e);
-            throw e;
-        } finally {
-            itr.close();
-        }
-    });
-
     // オブジェクトオペレータの削除.
     it("オペレータの削除 " + TEST_INFO, function() {
         level.delete(_DB_NAME);
