@@ -53,6 +53,9 @@
     <delete dir="${dest.dir}" />
     <delete file="${jar.name}" />
     <mkdir dir="${dest.dir}" />
+    <mkdir dir="${dest.dir}/META-INF/services" />
+    <copy file="${src.dir}/META-INF/services/rhigin.http.execute.RhiginExecute"
+        tofile="${dest.dir}/META-INF/services/rhigin.http.execute.RhiginExecute"/>
     <javac includeantruntime="false"
            srcdir="${src.dir}"
            destdir="${dest.dir}"

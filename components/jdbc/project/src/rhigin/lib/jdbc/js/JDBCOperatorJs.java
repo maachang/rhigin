@@ -1,4 +1,4 @@
-package rhigin.lib;
+package rhigin.lib.jdbc.js;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
@@ -6,6 +6,7 @@ import org.mozilla.javascript.Undefined;
 
 import rhigin.RhiginConfig;
 import rhigin.RhiginException;
+import rhigin.lib.JDBC;
 import rhigin.lib.jdbc.JDBCCore;
 import rhigin.lib.jdbc.runner.JDBCConnect;
 import rhigin.lib.jdbc.runner.JDBCRow;
@@ -21,17 +22,21 @@ import rhigin.util.FixedSearchArray;
 /**
  * [js]jdbc 操作系.
  */
-class JDBCOperatorJs {
-	
-	// コアオブジェクト.
-	protected static final JDBCCore CORE = new JDBCCore();
-	
+public class JDBCOperatorJs {
 	// JDBCオブジェクトインスタンス.
 	protected static final RhiginObject JDBC_INSTANCE = new RhiginObject("JDBC", new RhiginFunction[] {
 		new JDBCFunctions(0), new JDBCFunctions(1), new JDBCFunctions(2), new JDBCFunctions(3),
 		new JDBCFunctions(4), new JDBCFunctions(5), new JDBCFunctions(6), new JDBCFunctions(7),
 		new JDBCFunctions(8), new JDBCFunctions(9)
 	});
+	
+	/**
+	 * JDBCOperatorJs用のRhiginObjectを取得.
+	 * @return
+	 */
+	public static final RhiginObject getJDBCOperatorJs() {
+		return JDBC_INSTANCE;
+	}
 	
 	/**
 	 * jdbcオブジェクトのメソッド群. 
@@ -45,6 +50,7 @@ class JDBCOperatorJs {
 		
 		@Override
 		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			JDBCCore core = JDBCCore.getInstance();
 			try {
 				switch (type) {
 				case 0: // version.
@@ -58,13 +64,13 @@ class JDBCOperatorJs {
 				case 2: // startup.
 					{
 						// スタートアップ登録されていない場合のみ実行.
-						if(!CORE.isStartup()) {
+						if(!core.isStartup()) {
 							RhiginEndScriptCall[] es = null;
 							final RhiginConfig conf = RhiginConfig.getMainConfig();
 							if(args.length > 0) {
-								es = CORE.startup(conf, "" + args[0]);
+								es = core.startup(conf, "" + args[0]);
 							} else {
-								es = CORE.startup(conf, null);
+								es = core.startup(conf, null);
 							}
 							ExecuteScript.addEndScripts(es[0]);
 							ExecuteScript.addExitSystemScripts(es[1]);
@@ -74,11 +80,11 @@ class JDBCOperatorJs {
 					}
 				case 3: // isStartup.
 					{
-						return CORE.isStartup();
+						return core.isStartup();
 					}
 				case 4: // abort.
 					{
-						CORE.close();
+						core.close();
 					}
 					break;
 				case 5: // connect.
@@ -86,41 +92,41 @@ class JDBCOperatorJs {
 						if(args.length > 0) {
 							if(args.length == 1) {
 								// プーリングコネクションから取得.
-								return createConnect(CORE.getNewConnect("" + args[0]));
+								return createConnect(core.getNewConnect("" + args[0]));
 							} else {
 								// プーリングコネクションを利用せずにコネクションを取得.
-								return createConnect(CORE.getNoPoolingConnect(args));
+								return createConnect(core.getNoPoolingConnect(args));
 							}
-						} else if(CORE.size() > 0) {
+						} else if(core.size() > 0) {
 							// 一番最初に定義されている定義情報のコネクションを取得.
-							return createConnect(CORE.getNewConnect(CORE.getName(0)));
+							return createConnect(core.getNewConnect(core.getName(0)));
 						}
 						argsException("JDBC");
 					}
 				case 6: // kind.
 					{
 						if(args.length > 0) {
-							return CORE.getKind("" + args[0]).getMap();
-						} else if(CORE.size() > 0) {
+							return core.getKind("" + args[0]).getMap();
+						} else if(core.size() > 0) {
 							// 一番最初に定義されている定義情報を取得.
-							return CORE.getKind(CORE.getName(0)).getMap();
+							return core.getKind(core.getName(0)).getMap();
 						}
 						argsException("JDBC");
 					}
 				case 7: // isRegister.
 					{
 						if(args.length > 0) {
-							return CORE.isRegister("" + args[0]);
+							return core.isRegister("" + args[0]);
 						}
 						argsException("JDBC");
 					}
 				case 8: // length.
 					{
-						return CORE.size();
+						return core.size();
 					}
 				case 9: // names.
 					{
-						return CORE.names();
+						return core.names();
 					}
 				}
 				

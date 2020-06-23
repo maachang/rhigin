@@ -34,6 +34,9 @@ import rhigin.util.Flag;
  * Leveldb コアオブジェクト.
  */
 public class LevelJsCore {
+	/** LevelJsコアシングルトン. **/
+	protected static final LevelJsCore CORE = new LevelJsCore();
+	
 	/** デフォルトのLEVELコンフィグ名. **/
 	public static final String DEF_LEVEL_JS_JSON_CONFIG_NAME = "level";
 	
@@ -42,6 +45,10 @@ public class LevelJsCore {
 	protected LevelJsConfig config = null;
 	protected LevelOperatorManager manager = null;
 	protected LevelJsCloseable closeable = null;
+	
+	public static final LevelJsCore getInstance() {
+		return CORE;
+	}
 	
 	/**
 	 * コンストラクタ.

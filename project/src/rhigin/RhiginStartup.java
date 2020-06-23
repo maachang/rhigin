@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
@@ -16,6 +17,8 @@ import rhigin.http.Http;
 import rhigin.http.HttpConstants;
 import rhigin.http.HttpInfo;
 import rhigin.http.MimeType;
+import rhigin.http.execute.RhiginExecute;
+import rhigin.http.execute.RhiginExecuteManager;
 import rhigin.logs.LogFactory;
 import rhigin.net.IpPermission;
 import rhigin.scripts.ExecuteJsByEndScriptCall;
@@ -123,7 +126,7 @@ public class RhiginStartup {
 	}
 	
 	/**
-	 * ログファクトリの初期化.
+	 * Rhiginの初期化.
 	 * 
 	 * @param server
 	 * @param console
@@ -135,9 +138,9 @@ public class RhiginStartup {
 	}
 	
 	/**
-	 * ログファクトリの初期化.
+	 * Rhiginの初期化.
 	 * 
-	 * @parma confDir
+	 * @param confDir
 	 * @param server
 	 * @param console
 	 * @param noScript
@@ -183,6 +186,7 @@ public class RhiginStartup {
 			
 			// Rhiginで利用するパスの管理.
 			if(FileUtil.isDir(HttpConstants.ACCESS_PATH)) {
+				// applicationパスが存在する場合のみ、WatchPathを生成.
 				WatchPath wp = null;
 				if(!FileUtil.isDir(RhiginConstants.DIR_LIB)) {
 					wp = new WatchPath(HttpConstants.ACCESS_PATH);
@@ -190,6 +194,14 @@ public class RhiginStartup {
 					wp = new WatchPath(HttpConstants.ACCESS_PATH, RhiginConstants.DIR_LIB);
 				}
 				WatchPath.setStaticWatchPath(wp);
+			} else if(server) {
+				// サーバモードでアプリケーションパスが存在しない場合はエラー返却.
+				throw new RhiginException("Application path does not exist.");
+			}
+			
+			// サーバーモードの場合のみ、RhiginExecuteコンポーネントを登録する.
+			if(server) {
+				regRhiginExecute();
 			}
 			
 		} catch (Exception e) {
@@ -199,6 +211,15 @@ public class RhiginStartup {
 			return null;
 		}
 		return config;
+	}
+	
+	// RhiginExecuteのコンポーネント登録.
+	private static final void regRhiginExecute() {
+		// RhiginExecuteのコンポーネントを登録する.
+		final ServiceLoader<RhiginExecute> sl = ServiceLoader.load(RhiginExecute.class);
+		for(RhiginExecute e : sl) {
+			RhiginExecuteManager.add(e);
+		}
 	}
 	
 	/**

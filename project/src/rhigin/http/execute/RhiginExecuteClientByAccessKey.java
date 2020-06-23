@@ -3,7 +3,6 @@ package rhigin.http.execute;
 import java.util.Map;
 
 import rhigin.RhiginException;
-import rhigin.http.client.HttpClient;
 import rhigin.http.client.HttpResult;
 import rhigin.keys.RhiginAccessKeyClient;
 import rhigin.keys.RhiginAccessKeyUtil;
@@ -242,18 +241,16 @@ public class RhiginExecuteClientByAccessKey extends RhiginExecuteClient {
 			throw new RhiginException("Unknown execution instruction: " + value);
 		}
 		// URLに実行命令をセット.
-		url += RhiginExecuteConstants.RHIGIN_URL_EXECUTE_HEAD + RhiginExecuteByAccessKey.NAME + "/" + value;
+		url += getExecutePath(RhiginExecuteByAccessKey.NAME + "/" + value);
 		// アクセスキーが取得できた場合.
 		if(accessKey != null) {
 			// アクセスキーを追加.
 			url += "/" + accessKey;
 		}
 		try {
-			// 最小ヘッダで処理.
-			option.put("minHeader", true);
 			
 			// getで送信.
-			HttpResult ret = HttpClient.get(url, option);
+			HttpResult ret = send(url, option);
 			// 処理結果に応じてRhiginAccessClientの情報を操作.
 			if(ret.getStatus() < 300) {
 				Object json = ret.responseJson();

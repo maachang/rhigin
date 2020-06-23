@@ -28,6 +28,17 @@ import rhigin.util.Time12SequenceId;
  */
 public class JDBCCore {
 	
+	// コアオブジェクト.
+	protected static final JDBCCore CORE = new JDBCCore();
+	
+	/**
+	 * オブジェクトを取得.
+	 * @return
+	 */
+	public static final JDBCCore getInstance() {
+		return CORE;
+	}
+	
 	/** デフォルトのJDBCコンフィグ名. **/
 	public static final String DEF_JDBC_JSON_CONFIG_NAME = "jdbc";
 	

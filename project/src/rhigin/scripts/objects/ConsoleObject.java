@@ -2,18 +2,21 @@ package rhigin.scripts.objects;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.List;
+import java.util.Map;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
-import org.mozilla.javascript.IdScriptableObject;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
 import rhigin.logs.Log;
 import rhigin.logs.LogFactory;
+import rhigin.scripts.JsonOut;
 import rhigin.scripts.RhiginFunction;
 import rhigin.scripts.RhiginObject;
 import rhigin.scripts.RhiginWrapException;
+import rhigin.scripts.RhinoNativeErrorByJavaException;
 import rhigin.util.FixedKeyValues;
 
 /**
@@ -26,14 +29,6 @@ public class ConsoleObject {
 	public static final String OBJECT_NAME = "console";
 	private static final Log LOG = LogFactory.create("console");
 	
-	// javascriptの例外の情報.
-	private static final class JsError extends Throwable {
-		private static final long serialVersionUID = 3478331521144824428L;
-		JsError(Object e) {
-			super(e.toString());
-		}
-	}
-
 	// ログ出力用.
 	private static final class Execute extends RhiginFunction {
 		final int type;
@@ -49,9 +44,9 @@ public class ConsoleObject {
 				Object t = (args.length >= 2) ? args[1] : null;
 				if (t != null) {
 					try {
-						if (t instanceof IdScriptableObject &&
-							t.getClass().getName().equals("org.mozilla.javascript.NativeError")) {
-							t = new RhiginWrapException(new JsError(t));
+						t = RhinoNativeErrorByJavaException.convert(t);
+						if(t instanceof RhiginWrapException) {
+							t = ((RhiginWrapException)t).getWrappedException();
 						}
 					} catch(Exception e) {}
 					if (t instanceof Throwable) {
@@ -138,9 +133,19 @@ public class ConsoleObject {
 		return sw.toString();
 	}
 
+	// オブジェクトに合わせて文字列を出力.
 	private static final String jsString(Object o) {
 		ContextFactory.getGlobal().enterContext();
 		try {
+			if(o == null) {
+				return "null";
+			} else if(Undefined.isUndefined(o)) {
+				return "undefined";
+			} else if(o.getClass().isArray()) {
+				return JsonOut.toString(o);
+			} else if(o instanceof List || o instanceof Map) {
+				return JsonOut.toString(o);
+			}
 			return Context.toString(o);
 		} finally {
 			Context.exit();

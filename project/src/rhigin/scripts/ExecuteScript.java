@@ -399,18 +399,24 @@ public class ExecuteScript {
 			settingRhiginObject(ctx, scope);
 			final Object ret = compiled.exec(ctx, scope);
 			return RhiginWrapUtil.unwrap(ret);
+//		} catch(RhiginWrapException wre) {
+//			// rhino用のラップ例外の場合は、RhiginExceptionに変換して返却.
+//			Throwable t = wre.getWrappedException();
+//			if(t instanceof RhiginException) {
+//				((RhiginException)t).setMessage(wre.getMessage());
+//				throw (RhiginException)t;
+//			}
+//			throw new RhiginException(wre.getStatus(), t);
+//			} catch(RhiginException re) {
+//			throw re;
+//		} catch(Throwable t) {
+//			throw new RhiginException(t);
 		} catch(RhiginWrapException wre) {
-			// rhino用のラップ例外の場合は、RhiginExceptionに変換して返却.
-			Throwable t = wre.getWrappedException();
-			if(t instanceof RhiginException) {
-				((RhiginException)t).setMessage(wre.getMessage());
-				throw (RhiginException)t;
-			}
-			throw new RhiginException(wre.getStatus(), t);
+			throw wre;
 		} catch(RhiginException re) {
-			throw re;
+			throw new RhiginWrapException(re);
 		} catch(Throwable t) {
-			throw new RhiginException(t);
+			throw new RhiginWrapException(t);
 		} finally {
 			if(resetRhiginContextFlag) {
 				currentRhiginContext.set(null);
@@ -538,18 +544,24 @@ public class ExecuteScript {
 			// 実行処理.
 			final Object ret = compiled.exec(ctx, scope);
 			return RhiginWrapUtil.unwrap(ret);
+//		} catch(RhiginWrapException wre) {
+//			// rhino用のラップ例外の場合は、RhiginExceptionに変換して返却.
+//			Throwable t = wre.getWrappedException();
+//			if(t instanceof RhiginException) {
+//				((RhiginException)t).setMessage(wre.getMessage());
+//				throw (RhiginException)t;
+//			}
+//			throw new RhiginException(wre.getStatus(), t);
+//		} catch(RhiginException re) {
+//			throw re;
+//		} catch(Throwable t) {
+//			throw new RhiginException(t);
 		} catch(RhiginWrapException wre) {
-			// rhino用のラップ例外の場合は、RhiginExceptionに変換して返却.
-			Throwable t = wre.getWrappedException();
-			if(t instanceof RhiginException) {
-				((RhiginException)t).setMessage(wre.getMessage());
-				throw (RhiginException)t;
-			}
-			throw new RhiginException(wre.getStatus(), t);
+			throw wre;
 		} catch(RhiginException re) {
-			throw re;
+			throw new RhiginWrapException(re);
 		} catch(Throwable t) {
-			throw new RhiginException(t);
+			throw new RhiginWrapException(t);
 		} finally {
 			if(resetRhiginContextFlag) {
 				currentRhiginContext.set(null);

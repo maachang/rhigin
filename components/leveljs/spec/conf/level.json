@@ -1,4 +1,5 @@
 {
-    "path": "./spec/lvdb",  // leveldb 保存パス.
-    "machineId": 0          // マシンID.
+    "path": "./spec/lvdb"      // leveldb 保存パス.
+    ,"machineId": 0            // マシンID.
+    ,"csvPath": "./spec/csv"   // CSV パス.
 }

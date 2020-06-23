@@ -3,6 +3,7 @@ package rhigin.http.execute;
 import java.util.Map;
 
 import rhigin.RhiginException;
+import rhigin.http.client.HttpClient;
 import rhigin.http.client.HttpResult;
 import rhigin.keys.RhiginAccessKeyUtil;
 import rhigin.scripts.Json;
@@ -101,6 +102,15 @@ public abstract class RhiginExecuteClient {
 	protected abstract HttpResult _send(String url, Object value, Map<String, Object> option);
 	
 	/**
+	 * Rhiginサーバに送る実行命令用URLパスを取得.
+	 * @param name
+	 * @return
+	 */
+	protected static final String getExecutePath(String name) {
+		return RhiginExecuteConstants.RHIGIN_URL_EXECUTE_HEAD + name;
+	}
+	
+	/**
 	 * アクセスキーを取得.
 	 * @param check [true]の場合は存在しない場合例外発生します.
 	 * @param option optionを設定します.
@@ -162,4 +172,34 @@ public abstract class RhiginExecuteClient {
 		}
 		return header;
 	}
+	
+	/**
+	 * [GET]送信処理.
+	 * @param url
+	 * @param option
+	 * @return
+	 */
+	protected static final HttpResult send(String url, Map<String, Object> option) {
+		// 最小ヘッダで処理.
+		option.put("minHeader", true);
+		
+		// 送信.
+		return HttpClient.get(url, option);
+	}
+	
+	/**
+	 * [POST]送信処理.
+	 * @param url
+	 * @param params
+	 * @param option
+	 * @return
+	 */
+	protected static final HttpResult sendPost(String url, Object params, Map<String, Object> option) {
+		// 最小ヘッダで処理.
+		option.put("minHeader", true);
+		
+		// 送信.
+		return HttpClient.post(url, params, option);
+	}
+
 }

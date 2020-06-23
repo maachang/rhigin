@@ -11,7 +11,7 @@ import rhigin.scripts.RhiginObject;
 import rhigin.util.FixedKeyValues;
 
 public class IpPermissionObject {
-	public static final String OBJECT_NAME = "Ip`Permission";
+	public static final String OBJECT_NAME = "IpPermission";
 	private static final class Execute extends RhiginFunction {
 		final int type;
 

@@ -5,7 +5,6 @@ import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 
-import rhigin.RhiginException;
 import rhigin.util.Converter;
 
 /**
@@ -98,6 +97,8 @@ public abstract class AbstractRhiginFunction implements Function {
 	public final Object call(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
 		try {
 			return RhiginWrapUtil.wrapJavaObject(jcall(ctx, scope, thisObj, RhiginWrapUtil.unwrapArgs(args)));
+		} catch(RhiginWrapException rwe) {
+			throw rwe;
 		} catch(Throwable t) {
 			throw new RhiginWrapException(t);
 		}
@@ -109,6 +110,8 @@ public abstract class AbstractRhiginFunction implements Function {
 	public final Scriptable construct(Context arg0, Scriptable arg1, Object[] arg2) {
 		try {
 			return jconstruct(arg0, arg1, RhiginWrapUtil.unwrapArgs(arg2));
+		} catch(RhiginWrapException rwe) {
+			throw rwe;
 		} catch(Throwable t) {
 			throw new RhiginWrapException(t);
 		}
@@ -124,7 +127,7 @@ public abstract class AbstractRhiginFunction implements Function {
 	 * また、戻り値は rhigin.scripts.objects.RhiginObject を利用すると、楽に作成できると思います.
 	 */
 	public Scriptable jconstruct(Context arg0, Scriptable arg1, Object[] arg2) {
-		throw new RhiginException("This method '" + getName() +
+		throw new RhiginWrapException("This method '" + getName() +
 			"' does not support instantiation.");
 	}
 
@@ -150,9 +153,9 @@ public abstract class AbstractRhiginFunction implements Function {
 	 */
 	protected Object argsException(String objName) {
 		if (objName == null) {
-			throw new RhiginException(500, "Insufficient arguments for " + getName() + ".");
+			throw new RhiginWrapException(500, "Insufficient arguments for " + getName() + ".");
 		}
-		throw new RhiginException(500, "Insufficient arguments for " + objName + "." + getName() + ".");
+		throw new RhiginWrapException(500, "Insufficient arguments for " + objName + "." + getName() + ".");
 	}
 	
 	/**

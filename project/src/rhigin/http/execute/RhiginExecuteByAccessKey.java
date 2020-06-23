@@ -26,16 +26,15 @@ public class RhiginExecuteByAccessKey implements RhiginExecute {
 
 	@Override
 	public Object execute(HttpElement em, Request req, Response res, String executeCode) {
-		final String exec = executeCode.substring(NAME.length()).trim();
 		// /*accesskey/create 命令.
-		if(Alphabet.indexOf(exec, "/create") == 0) {
+		if(Alphabet.indexOf(executeCode, "/create") == 0) {
 			return create();
 		// /*accesskey/delete/{削除対象のaccessKey}
-		} else if(Alphabet.indexOf(exec, "/delete/") == 0) {
-			return delete(exec.substring(8));
+		} else if(Alphabet.indexOf(executeCode, "/delete/") == 0) {
+			return delete(executeCode.substring(8));
 		// /*accessKey/use/{チェック対象のaccessKey}
-		} else if(Alphabet.indexOf(exec, "/use/") == 0) {
-			return use(exec.substring(5));
+		} else if(Alphabet.indexOf(executeCode, "/use/") == 0) {
+			return use(executeCode.substring(5));
 		} else {
 			throw new RhiginException("No instruction is set or an instruction that does not exist is set.");
 		}

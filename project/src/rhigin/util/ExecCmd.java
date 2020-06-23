@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import rhigin.RhiginException;
+import rhigin.scripts.Json;
 
 /**
  * 外部コマンドを実行.

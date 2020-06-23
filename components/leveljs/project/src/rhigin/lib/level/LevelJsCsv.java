@@ -40,39 +40,49 @@ public class LevelJsCsv {
 	//private static final String DEF_CHARSET = "Windows-31J";
 	private static final String DEF_CHARSET = "UTF8";
 	
+	// ヘルプ情報を表示.
+	private static final void help() {
+		System.out.println("lcsv [-c] [-n] [-s] [-d] [-e] {file}");
+		System.out.println(" Read CSV and insert into database table.");
+		System.out.println("  [-c] [--conf] [--config] {args}");
+		System.out.println("    Set the configuration definition file name.");
+		System.out.println("    If omitted, \"level\" character is specified.");
+		//System.out.println();
+		System.out.println("  [-n] [--name] {args}");
+		System.out.println("    Set the write destination operator name.");
+		System.out.println("    If omitted, it must be set with the name of {file}.");
+		//System.out.println();
+		System.out.println("  [-s] [--charset] {args}");
+		System.out.println("    Set the character code of the CSV file.");
+		System.out.println("    If not specified, \""+ DEF_CHARSET + "\" will be set.");
+		//System.out.println();
+		System.out.println("  [-d] [--delete]");
+		System.out.println("    Set to delete all database contents.");
+		System.out.println("    If not set, all data will not be deleted.");
+		//System.out.println();
+		System.out.println("  [-e] [--env]");
+		System.out.println("    Set the environment name for reading the configuration.");
+		System.out.println("    For example, when `-e hoge` is specified, the configuration ");
+		System.out.println("    information under `./conf/hoge/` is read.");
+		//System.out.println();
+		System.out.println("  {file}");
+		System.out.println("    If [-n] is omitted, each is interpreted by the file name.");
+		System.out.println("      {file} = [operator name].csv");
+		System.out.println("    If [-n] is not omitted, set an arbitrary file name.");
+		System.out.println();
+	}
+	
+	/**
+	 * Main.
+	 * @param args
+	 * @throws Exception
+	 */
 	public static final void main(String[] args) throws Exception {
 		// コマンド引数を解析.
 		final Args params = Args.set(args);
 		// help表示.
 		if(params.isValue("-h", "--help")) {
-			System.out.println("lcsv [-c] [-n] [-s] [-d] [-e] {file}");
-			System.out.println(" Read CSV and insert into database table.");
-			System.out.println("  [-c] [--conf] [--config] {args}");
-			System.out.println("    Set the configuration definition file name.");
-			System.out.println("    If omitted, \"level\" character is specified.");
-			//System.out.println();
-			System.out.println("  [-n] [--name] {args}");
-			System.out.println("    Set the write destination operator name.");
-			System.out.println("    If omitted, it must be set with the name of {file}.");
-			//System.out.println();
-			System.out.println("  [-s] [--charset] {args}");
-			System.out.println("    Set the character code of the CSV file.");
-			System.out.println("    If not specified, \""+ DEF_CHARSET + "\" will be set.");
-			//System.out.println();
-			System.out.println("  [-d] [--delete]");
-			System.out.println("    Set to delete all database contents.");
-			System.out.println("    If not set, all data will not be deleted.");
-			//System.out.println();
-			System.out.println("  [-e] [--env]");
-			System.out.println("    Set the environment name for reading the configuration.");
-			System.out.println("    For example, when `-e hoge` is specified, the configuration ");
-			System.out.println("    information under `./conf/hoge/` is read.");
-			//System.out.println();
-			System.out.println("  {file}");
-			System.out.println("    If [-n] is omitted, each is interpreted by the file name.");
-			System.out.println("      {file} = [operator name].csv");
-			System.out.println("    If [-n] is not omitted, set an arbitrary file name.");
-			System.out.println();
+			help();
 			System.exit(0);
 			return;
 		} else if(params.isValue("-v", "--version")) {
@@ -86,7 +96,7 @@ public class LevelJsCsv {
 			// コンフィグパラメータを取得.
 			final String confName = params.get("-c", "--conf", "--config");
 			
-			// JDBCパラメータを取得.
+			// パラメータを取得.
 			String opName = params.get("-n", "--name");
 			boolean deleteFlag = params.isValue("-d", "--delete");
 			String charset = params.get("-s", "--charset");
@@ -118,7 +128,7 @@ public class LevelJsCsv {
 			System.out.println("delete flag: " + deleteFlag);
 			System.out.println();
 			
-			// JDBCコアを生成.
+			// LevelJsコアを生成.
 			core = new LevelJsCore();
 			core.startup(confName, args);
 			
@@ -143,7 +153,8 @@ public class LevelJsCsv {
 		if(name != null && !name.isEmpty()) {
 			return name;
 		}
-		int p = name.indexOf(".");
+		fname = FileUtil.getFileName(fname);
+		int p = fname.indexOf(".");
 		if(p == -1) {
 			throw new LevelJsException(
 				"Acquisition of operator name from file name failed: " + fname);
@@ -287,10 +298,10 @@ public class LevelJsCsv {
 			// データ追加.
 			List<String> row = null;
 			String operatorType = operator.getOperatorType();
-			if(rowKey.getHeader().search("$key") == -1) {
-				throw new LevelJsException("Key information frame does not exist.");
-			}
 			if("object".equals(operatorType)) {
+				if(rowKey.getHeader().search("$key") == -1) {
+					throw new LevelJsException("Key information frame does not exist.");
+				}
 				ObjectOperator op = (ObjectOperator)operator;
 				while(csv.hasNext()) {
 					row = csv.nextRow();
@@ -307,7 +318,9 @@ public class LevelJsCsv {
 				String lat = null;
 				String lon = null;
 				String secKey = null;
-				if(head.search("$qk") != -1) {
+				if(head.search("$key") != -1) {
+					qk = "$key";
+				} else if(head.search("$qk") != -1) {
 					qk = "$qk";
 				} else if(head.search("$quadKey") != -1) {
 					qk = "$quadKey";
@@ -321,6 +334,8 @@ public class LevelJsCsv {
 					secKey = "$secKey";
 				} else if(head.search("$second") != -1) {
 					secKey = "$second";
+				} else if(head.search("$secondKey") != -1) {
+					secKey = "$secondKey";
 				}
 				if(qk == null && lat == null && lon == null) {
 					throw new LevelJsException("Key information frame does not exist.");
@@ -349,6 +364,9 @@ public class LevelJsCsv {
 					}
 				}
 			} else if("sequence".equals(operatorType)) {
+				if(rowKey.getHeader().search("$key") == -1) {
+					throw new LevelJsException("Key information frame does not exist.");
+				}
 				Object key = null;
 				SequenceOperator op = (SequenceOperator)operator;
 				while(csv.hasNext()) {

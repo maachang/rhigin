@@ -53,6 +53,9 @@ public class OperatorKeyType {
 	 * @return
 	 */
 	public static final int convertStringByKeyType(final String name) {
+		if(Alphabet.eq(name, "none")) {
+			return KEY_NONE;
+		}
 		int j, lenJ;
 		String[] target;
 		final int len = PATTERNS.length;

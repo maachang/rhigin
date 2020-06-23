@@ -1,4 +1,4 @@
-package rhigin.lib;
+package rhigin.lib.level.js;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;

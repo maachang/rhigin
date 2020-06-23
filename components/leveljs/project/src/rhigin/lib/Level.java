@@ -2,6 +2,7 @@ package rhigin.lib;
 
 import org.mozilla.javascript.Scriptable;
 
+import rhigin.lib.level.js.LevelJsManagerJs;
 import rhigin.scripts.JavaRequire;
 
 /**
@@ -28,6 +29,6 @@ public class Level implements JavaRequire {
 	 */
 	@Override
 	public Scriptable load() {
-		return LevelJsManagerJs.LEVEL_JS_INSTANCE;
+		return LevelJsManagerJs.getLevelJsManagerJs();
 	}
 }

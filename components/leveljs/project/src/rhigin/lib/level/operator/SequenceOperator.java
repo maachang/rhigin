@@ -69,8 +69,12 @@ public class SequenceOperator extends SearchOperator {
 
 	@Override
 	protected OperateIterator _iterator(Lock lock, boolean desc, int keyLen, Object[] keys) {
-		final Object key = Converter.convertString(keys[0]);
-		return new SearchIterator(lock, base.snapshot(desc, key), null);
+		if(keyLen > 0) {
+			final Object key = Converter.convertString(keys[0]);
+			return new SearchIterator(lock, base.snapshot(desc, key), null);
+		} else {
+			return new SearchIterator(lock, base.snapshot(desc), null);
+		}
 	}
 
 	@Override

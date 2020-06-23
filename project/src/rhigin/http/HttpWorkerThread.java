@@ -20,9 +20,8 @@ import objectpack.SerializableCore;
 import rhigin.RhiginConstants;
 import rhigin.RhiginException;
 import rhigin.http.execute.RhiginExecute;
-import rhigin.http.execute.RhiginExecuteByAccessKey;
-import rhigin.http.execute.RhiginExecuteByJs;
 import rhigin.http.execute.RhiginExecuteConstants;
+import rhigin.http.execute.RhiginExecuteManager;
 import rhigin.keys.RhiginAccessKeyByFCipher;
 import rhigin.keys.RhiginAccessKeyConstants;
 import rhigin.logs.Log;
@@ -52,26 +51,17 @@ import rhigin.util.Xor128;
  * ワーカースレッド.
  */
 public class HttpWorkerThread extends Thread {
-	private static final Map<String, RhiginExecute> EXECUTE_MAN = new ArrayMap<String, RhiginExecute>();
 	private static final Log LOG = LogFactory.create();
 	private static final int TIMEOUT = 1000;
 	private static final byte[] BLANK_BINARY = new byte[0];
 	private static final String[] HTML_JS_HEADS = new String[] {"/$", "/@"};
 	
-	// ObjectPackのRhigin拡張.
+	// 初期化処理.
 	static {
+		// ObjectPackのRhigin拡張.
 		if(!SerializableCore.isOriginCode()) {
 			SerializableCore.setOriginCode(new ObjectPackOriginCode());
 		}
-		
-		// executeManを登録.
-		RhiginExecute r;
-		// アクセスキーのI/O.
-		r = new RhiginExecuteByAccessKey();
-		EXECUTE_MAN.put(r.getName().trim(), r);
-		// 送信されたjsを実行.
-		r = new RhiginExecuteByJs();
-		EXECUTE_MAN.put(r.getName().trim(), r);
 	}
 	
 	private final int no;
@@ -346,13 +336,10 @@ public class HttpWorkerThread extends Thread {
 			String urlPath = getPath(req.getUrl());
 			
 			// Rhigin実行命令の場合.
-			if(urlPath.startsWith(RhiginExecuteConstants.RHIGIN_URL_EXECUTE_HEAD)) {
+			if(RhiginExecuteManager.isExecuteUrl(urlPath)) {
 				
 				// Rhigin実行命令をセット.
-				final String rhiginExecuteUrl = urlPath.substring(RhiginExecuteConstants.RHIGIN_URL_EXECUTE_HEAD.length());
-				int p = rhiginExecuteUrl.indexOf("/");
-				final String rhiginExecuteName = ((p == -1) ? rhiginExecuteUrl : rhiginExecuteUrl.substring(0, p))
-						.toLowerCase();
+				final String rhiginExecuteName = RhiginExecuteManager.getExecuteName(urlPath);
 				// IpPermissionでパーミッションチェック.
 				// IpPermissionが存在する場合のみチェック.
 				final IpPermission ip = IpPermission.getMainIpPermission();
@@ -371,7 +358,7 @@ public class HttpWorkerThread extends Thread {
 					}
 				}
 				// executeManからRhigin実行命令を取得.
-				final RhiginExecute r = EXECUTE_MAN.get(rhiginExecuteName);
+				final RhiginExecute r = RhiginExecuteManager.getExecuteObject(rhiginExecuteName);
 				if(r == null) {
 					// 存在しない場合.
 					errorResponse(req, em, 404, "Unknown URL.");
@@ -381,7 +368,7 @@ public class HttpWorkerThread extends Thread {
 				Response res = new Response();
 				res.setStatus(200);
 				try {
-					ret = r.execute(em, req, res, rhiginExecuteUrl);
+					ret = r.execute(em, req, res, RhiginExecuteManager.getExecteCode(urlPath));
 				} catch (Redirect redirect) {
 					// リダイレクト.
 					redirectResponse(req, em, redirect);

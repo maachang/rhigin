@@ -17,23 +17,28 @@ public class FixedArray<E> extends AbstractList<E> implements ConvertGet<Integer
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public FixedArray(Object n) {
-		if(n == null) {
+	public FixedArray(Object... o) {
+		if(o == null || o.length == 0) {
 			array = new Object[0];
-		} else if(n.getClass().isArray()) {
-			int len = Array.getLength(n);
-			array = new Object[len];
-			System.arraycopy(n, 0, array, 0, len);
-		} else if(n instanceof List) {
-			List lst = (List)n;
-			int len = n == null ? 0 : lst.size();
-			Object[] o = new Object[len];
-			for(int i = 0; i < len; i ++) {
-				o[i] = lst.get(i);
-			}
+		} else if(o.length > 1) {
 			array = o;
 		} else {
-			array = new Object[] {n};
+			Object n = o[0];
+			if(n.getClass().isArray()) {
+				int len = Array.getLength(n);
+				array = new Object[len];
+				System.arraycopy(n, 0, array, 0, len);
+			} else if(n instanceof List) {
+				List lst = (List)n;
+				int len = n == null ? 0 : lst.size();
+				Object[] b = new Object[len];
+				for(int i = 0; i < len; i ++) {
+					b[i] = lst.get(i);
+				}
+				array = b;
+			} else {
+				array = new Object[] {n};
+			}
 		}
 	}
 	

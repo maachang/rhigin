@@ -53,6 +53,28 @@ public class HttpClient {
 	 * 
 	 * @param url
 	 *            対象のURLを設定します.
+	 * @param params GET送信対象のパラメータを設定します.
+	 * @param option 対象のオプションを設定します.
+	 *               header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
+	 *               bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
+	 *               minHeader: rhiginサーバに最小のヘッダで通信をする場合は true を設定します.
+	 *               blowser: rhiginサーバにアクセスする場合、falseをセットすることで、HTTPレスポンスヘッダ
+	 *                        の量を少し減らせます.
+	 *               accessKey: アクセスキーを用いたHttp or Https通信を行う場合に利用します.
+	 *               authCode: アクセスキーを用いたHttp or Https通信を行う場合に利用します.
+	 * @return HttpResult 返却データが返されます.
+	 */
+	@SuppressWarnings("unchecked")
+	public static final HttpResult get(String url, Object params, Map option) {
+		option.put("params", params);
+		return get(url, option);
+	}
+	
+	/**
+	 * [GET]HttpClient接続.
+	 * 
+	 * @param url
+	 *            対象のURLを設定します.
 	 * @oaram option 対象のオプションを設定します.
 	 *               params: パラメータを設定する場合は、この名前で設定します.
 	 *               header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
@@ -73,6 +95,28 @@ public class HttpClient {
 	 * 
 	 * @param url
 	 *            対象のURLを設定します.
+	 * @param params POST送信するパラメータを設定します.
+	 * @oaram option 対象のオプションを設定します.
+	 *               header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
+	 *               bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
+	 *               minHeader: rhiginサーバに最小のヘッダで通信をする場合は true を設定します.
+	 *               blowser: rhiginサーバにアクセスする場合、falseをセットすることで、HTTPレスポンスヘッダ
+	 *                        の量を少し減らせます.
+	 *               accessKey: アクセスキーを用いたHttp or Https通信を行う場合に利用します.
+	 *               authCode: アクセスキーを用いたHttp or Https通信を行う場合に利用します.
+	 * @return HttpResult 返却データが返されます.
+	 */
+	@SuppressWarnings("unchecked")
+	public static final HttpResult post(String url, Object params, Map option) {
+		option.put("params", params);
+		return post(url, option);
+	}
+	
+	/**
+	 * [POST]HttpClient接続.
+	 * 
+	 * @param url
+	 *            対象のURLを設定します.
 	 * @oaram option 対象のオプションを設定します.
 	 *               params: パラメータを設定する場合は、この名前で設定します.
 	 *               header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
@@ -88,6 +132,29 @@ public class HttpClient {
 		return connect("POST", url, option);
 	}
 
+	/**
+	 * [JSON]HttpClient接続.
+	 * 
+	 * @param url
+	 *            対象のURLを設定します.
+	 * @param json 送信対象のJSONオブジェクトを設定します.
+	 * @oaram option 対象のオプションを設定します.
+	 *               header: 追加のHTTPヘッダ情報を設定する場合は、この名前でMapで設定します.
+	 *               bodyFile: HTTPレスポンスのデータをファイルで格納させたい場合は[true]を設定します.
+	 *               minHeader: rhiginサーバに最小のヘッダで通信をする場合は true を設定します.
+	 *               blowser: rhiginサーバにアクセスする場合、falseをセットすることで、HTTPレスポンスヘッダ
+	 *                        の量を少し減らせます.
+	 *               accessKey: アクセスキーを用いたHttp or Https通信を行う場合に利用します.
+	 *               authCode: アクセスキーを用いたHttp or Https通信を行う場合に利用します.
+	 * @return HttpResult 返却データが返されます.
+	 */
+	@SuppressWarnings("unchecked")
+	public static final HttpResult json(String url, Object json, Map option) {
+		option.put("params", Json.encode(json));
+		return json(url, option);
+
+	}
+	
 	/**
 	 * [JSON]HttpClient接続.
 	 * 

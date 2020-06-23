@@ -1,4 +1,4 @@
-package rhigin.lib;
+package rhigin.lib.level.js;
 
 import org.maachang.leveldb.util.Converter;
 import org.mozilla.javascript.Context;
@@ -191,6 +191,7 @@ public class LevelJsOperatorJs {
 				}
 				case 16: // range.
 				{
+					// args = [desc, key1, key2 ...] or [key1, key2, ...]
 					if(args == null || args.length == 0) {
 						this.argsException(opName);
 					}

@@ -19,14 +19,28 @@ public class JsMap extends JavaScriptable.Map {
 	
 	public void set(final Object... args) {
 		if(args == null || args.length == 0) {
-			srcMap = new ArrayMap();
+			if(srcMap != null) {
+				srcMap.clear();
+			} else {
+				srcMap = new ArrayMap();
+			}
 		} else if(args[0] instanceof Map) {
 			srcMap = (Map)args[0];
-		} else {
-			srcMap = new ArrayMap();
+		} else if(args.length >= 2) {
+			if(srcMap != null) {
+				srcMap.clear();
+			} else {
+				srcMap = new ArrayMap();
+			}
 			final int len = args == null ? 0 : args.length;
 			for(int i = 0; i < len; i += 2) {
 				srcMap.put(args[i], args[i+1]);
+			}
+		} else {
+			if(srcMap != null) {
+				srcMap.clear();
+			} else {
+				srcMap = new ArrayMap();
 			}
 		}
 	}

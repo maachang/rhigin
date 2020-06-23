@@ -181,12 +181,17 @@ public class CsvReader implements Iterator<Map<String, Object>>, Closeable, Auto
 		if (!getCsv(list, line, cutCode)) {
 			throw new IOException("Reading of CSV information failed.");
 		}
+		String v;
 		final int len = list.size();
+		final String[] hlst = new String[len];
 		final FixedSearchArray<String> m = new FixedSearchArray<String>(len);
 		for (int i = 0; i < len; i++) {
-			m.add(list.get(i), i);
+			v = list.get(i);
+			m.add(v, i);
+			hlst[i] = v;
 		}
 		header = m;
+		headerList = hlst;
 		now = list;
 		rowMap = new RowMap(header);
 	}

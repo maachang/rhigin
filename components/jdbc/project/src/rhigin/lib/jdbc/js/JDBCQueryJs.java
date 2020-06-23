@@ -1,4 +1,4 @@
-package rhigin.lib;
+package rhigin.lib.jdbc.js;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
@@ -16,7 +16,7 @@ import rhigin.util.FixedSearchArray;
 /**
  * [js]jdbc クエリ系.
  */
-class JDBCQueryJs {
+public class JDBCQueryJs {
 	
 	// JDBCSelectメソッド名群.
 	private static final String[] JDBC_SELECT_NAMES = new String[] {

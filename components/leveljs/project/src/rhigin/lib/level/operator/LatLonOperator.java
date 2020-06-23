@@ -17,7 +17,7 @@ import rhigin.lib.level.runner.LevelJsCloseable;
 import rhigin.lib.level.runner.LevelJsException;
 import rhigin.scripts.JavaScriptable;
 import rhigin.scripts.JsMap;
-import rhigin.util.FixedArray;
+import rhigin.util.OList;
 
 /**
  * 緯度経度オペレータ.
@@ -50,10 +50,15 @@ public class LatLonOperator extends SearchOperator {
 	}
 
 	// キー情報を取得.
-	private final Object[] _getKeys(final int keyLen, final Object[] keys) {
+	private final Object[] _getKeys(final boolean zeroParamOkFlg, final int keyLen, final Object[] keys) {
 		Long qk = null;
 		Object secKey = null;
 		boolean seqId = false;
+		if(keys == null || keyLen == 0) {
+			if(zeroParamOkFlg) {
+				return null;
+			}
+		}
 		// セカンドキーがシーケンスID発行の場合.
 		if((seqId = base.isSecondKeyBySequenceId())) {
 			if(keyLen == 1 && Converter.isNumeric(keys[0])) {
@@ -98,7 +103,7 @@ public class LatLonOperator extends SearchOperator {
 
 	@Override
 	protected Object _put(Map value, int keyLen, Object[] keys) {
-		Object[] params = _getKeys(keyLen, keys);
+		Object[] params = _getKeys(false, keyLen, keys);
 		Object[] result = base.put((Long)params[0], params[1], value);
 		if(!base.isSecondKeyBySequenceId()) {
 			result[1] = OperatorKeyType.getRestoreKey(keyType, result[1]);
@@ -108,42 +113,60 @@ public class LatLonOperator extends SearchOperator {
 
 	@Override
 	protected void _remove(int keyLen, Object[] keys) {
-		Object[] params = _getKeys(keyLen, keys);
+		Object[] params = _getKeys(false, keyLen, keys);
 		base.remove((Long)params[0], params[1]);
 	}
 
 	@Override
 	protected Object _get(int keyLen, Object[] keys) {
-		Object[] params = _getKeys(keyLen, keys);
+		Object[] params = _getKeys(false, keyLen, keys);
 		return base.get((Long)params[0], params[1]);
 	}
 
 	@Override
 	protected boolean _contains(int keyLen, Object[] keys) {
-		Object[] params = _getKeys(keyLen, keys);
+		Object[] params = _getKeys(false, keyLen, keys);
 		return base.contains((Long)params[0], params[1]);
 	}
 
 	@Override
 	protected OperateIterator _iterator(Lock lock, boolean desc, int keyLen, Object[] keys) {
-		Object[] params = _getKeys(keyLen, keys);
-		return new SearchIterator(lock, false, base.isSecondKeyBySequenceId(), keyType,
-			base.snapshot(desc, (Long)params[0], params[1]));
+		Object[] params = _getKeys(true, keyLen, keys);
+		if(params == null) {
+			return new SearchIterator(lock, false, base.isSecondKeyBySequenceId(), keyType,
+					base.snapshot(desc));
+		} else {
+			return new SearchIterator(lock, false, base.isSecondKeyBySequenceId(), keyType,
+				base.snapshot(desc, (Long)params[0], params[1]));
+		}
 	}
 
 	@Override
 	protected OperateIterator _range(Lock lock, boolean desc, int keyLen, Object[] keys) {
 		// 範囲取得なので、降順・昇順の取得はできない.
+		// ただし、距離に対して、ソート済みIteratorを取得する場合は、昇順・降順を決定できる.
 		long qk;
 		int distance;
-		if(keyLen == 2 && Converter.isNumeric(keys[0]) && Converter.isNumeric(keys[1])) {
-			qk = Converter.convertLong(keys[0]);
-			distance = Converter.convertInt(keys[1]);
-		} else if(keyLen == 3 && Converter.isFloat(keys[0]) && Converter.isFloat(keys[1]) && Converter.isNumeric(keys[2])) {
+		boolean sortFlag = false;
+		if(keyLen >= 3 && Converter.isFloat(keys[0]) && Converter.isFloat(keys[1]) && Converter.isNumeric(keys[2])) {
 			qk = GeoQuadKey.create(Converter.convertDouble(keys[0]), Converter.convertDouble(keys[1]));
 			distance = Converter.convertInt(keys[2]);
+			if(keyLen >= 4) {
+				sortFlag = Converter.convertBool(keys[3]);
+			}
+		} else if(keyLen >= 2 && Converter.isNumeric(keys[0]) && Converter.isNumeric(keys[1])) {
+			qk = Converter.convertLong(keys[0]);
+			distance = Converter.convertInt(keys[1]);
+			if(keyLen >= 3) {
+				sortFlag = Converter.convertBool(keys[2]);
+			}
 		} else {
 			throw new LevelJsException("The key specification is invalid.");
+		}
+		// 距離ソートされたIterator取得の場合.
+		if(sortFlag) {
+			return new SortDistanceIterator(lock, desc, base.isSecondKeyBySequenceId(), keyType,
+					base, base.snapshot(qk, distance));
 		}
 		return new SearchIterator(lock, true, base.isSecondKeyBySequenceId(), keyType,
 			base.snapshot(qk, distance));
@@ -155,25 +178,38 @@ public class LatLonOperator extends SearchOperator {
 	}
 	
 	// iteratorのキー変換.
-	protected static final Object _resultKey(boolean seqFlg, int keyType, Object key) {
+	protected static final boolean _resultKey(JsMap out, boolean seqFlg, int keyType, Object key) {
 		if(key == null) {
-			return null;
+			return false;
 		}
 		Long qk;
 		Object secKey;
+		Integer distance;
 		if(key instanceof Object[]) {
-			qk = (Long)((Object[])key)[0];
-			secKey = ((Object[])key)[1];
+			Object[] ary = (Object[])key;
+			if(ary.length >= 2) {
+				qk = (Long)ary[0];
+				secKey = ary[1];
+			} else {
+				throw new LevelJsException("The key length is wrong: " + ary.length);
+			}
+			if(ary.length >= 3) {
+				distance = (Integer)ary[2];
+			} else {
+				distance = 0;
+			}
 		} else if(key instanceof TwoKey) {
 			qk = (Long)((TwoKey)key).get(0);
 			secKey = ((TwoKey)key).get(0);
+			distance = 0;
 		} else {
 			throw new LevelJsException("Unknown key object type.");
 		}
 		double[] d = GeoQuadKey.latLon(qk);
-		return new FixedArray(new Object[] {
-			d[0], d[1], seqFlg ? secKey : OperatorKeyType.getRestoreKey(keyType, secKey)
-		});
+		out.set("quadKey", qk, "lat", d[0], "lon", d[1],
+			"secKey", seqFlg ? secKey : OperatorKeyType.getRestoreKey(keyType, secKey),
+			"distance", distance);
+		return true;
 	}
 	
 	// 検索iterator.
@@ -184,6 +220,7 @@ public class LatLonOperator extends SearchOperator {
 		private int keyType;
 		
 		private Lock lock;
+		private JsMap nextKeyMap;
 		private JsMap nextMap;
 		
 		public SearchIterator(Lock lk, boolean sf, boolean f, int k, LevelIterator it) {
@@ -197,6 +234,7 @@ public class LatLonOperator extends SearchOperator {
 		/**
 		 * クローズ処理.
 		 */
+		@Override
 		public void close() {
 			lock.lock();
 			try {
@@ -204,12 +242,15 @@ public class LatLonOperator extends SearchOperator {
 			} finally {
 				lock.unlock();
 			}
+			nextKeyMap = null;
+			nextMap = null;
 		}
 		
 		/**
 		 * クローズ済みかチェック.
 		 * @return
 		 */
+		@Override
 		public boolean isClose() {
 			lock.lock();
 			try {
@@ -223,6 +264,7 @@ public class LatLonOperator extends SearchOperator {
 		 * 降順か取得.
 		 * @return
 		 */
+		@Override
 		public boolean isDesc() {
 			lock.lock();
 			try {
@@ -236,6 +278,7 @@ public class LatLonOperator extends SearchOperator {
 		 * キー名を取得.
 		 * @return Object キー名が返却されます.
 		 */
+		@Override
 		public Object key() {
 			Object o;
 			lock.lock();
@@ -244,7 +287,11 @@ public class LatLonOperator extends SearchOperator {
 			} finally {
 				lock.unlock();
 			}
-			return LatLonOperator._resultKey(sequenceFlag, keyType, o);
+			if(nextKeyMap == null) {
+				nextKeyMap = new JsMap();
+			}
+			LatLonOperator._resultKey(nextKeyMap, sequenceFlag, keyType, o);
+			return nextKeyMap;
 		}
 
 		@Override
@@ -273,6 +320,156 @@ public class LatLonOperator extends SearchOperator {
 		}
 	}
 	
+	// 距離に対するソート済み要素.
+	private static final class SortDistanceElement implements Comparable<SortDistanceElement> {
+		int distance;
+		long qk;
+		Object secKey;
+		SortDistanceElement(int d, long q, Object s) {
+			distance = d;
+			qk = q;
+			secKey = s;
+		}
+		@Override
+		public int compareTo(SortDistanceElement args) {
+			if(distance < args.distance) {
+				return -1;
+			} else if(distance > args.distance) {
+				return 1;
+			}
+			return 0;
+		}
+	}
+	
+	// 距離に対するソート済みのIteratorを取得.
+	// 先に最低限のキーだけを取得して、それをソートして１行づつ取得する.
+	// このIteratorの場合は、昇順・降順で取得可能.
+	// ただし、取得に対して「一時メモリに入れる」ので、その分メモリを多く使うので
+	// 検索の長さをあまり大きくしないようにする必要がある.
+	private static final class SortDistanceIterator implements OperateIterator {
+		private boolean sequenceFlag;
+		private boolean desc;
+		private LevelLatLon object;
+		private int keyType;
+		private Lock lock;
+		
+		private OList<SortDistanceElement> list;
+		private int cursorPosition;
+		private int listLength;
+		private JsMap nextKeyMap;
+		private JsMap nextMap;
+		
+		public SortDistanceIterator(Lock lk, boolean d, boolean f, int k, LevelLatLon o, LevelIterator it) {
+			lock = lk;
+			desc = d;
+			sequenceFlag = f;
+			keyType = k;
+			object = o;
+			createSortList(it);
+		}
+		
+		// ソートリストを作成.
+		// 一旦最低限のKeyを全取得して、ソートする.
+		private void createSortList(LevelIterator src) {
+			Object[] ary;
+			list = new OList<SortDistanceElement>();
+			lock.lock();
+			try {
+				while(src.hasNext()) {
+					src.next();
+					ary = (Object[])src.getKey();
+					list.add(new SortDistanceElement((Integer)ary[2], (Long)ary[0], ary[1]));
+				}
+			} finally {
+				try {
+					src.close();
+				} catch(Exception e) {}
+				lock.unlock();
+			}
+			list.sort();
+			cursorPosition = desc ? list.size() - 1 : 0;
+			listLength = list.size();
+		}
+
+		@Override
+		public boolean hasNext() {
+			if(!desc) {
+				return cursorPosition < listLength;
+			} else {
+				return cursorPosition >= 0;
+			}
+		}
+
+		@Override
+		public Map next() {
+			SortDistanceElement e;
+			if(!desc) {
+				if(cursorPosition >= listLength) {
+					throw new NoSuchElementException();
+				}
+				e = list.get(cursorPosition ++);
+			} else {
+				if(cursorPosition < 0) {
+					throw new NoSuchElementException();
+				}
+				e = list.get(cursorPosition --);
+			}
+			Object ret = null;
+			lock.lock();
+			try {
+				ret = object.get(e.qk, e.secKey);
+			} finally {
+				lock.unlock();
+			}
+			if(nextKeyMap == null) {
+				nextKeyMap = new JsMap();
+			}
+			double[] d = GeoQuadKey.latLon(e.qk);
+			nextKeyMap.set("quadKey", e.qk, "lat", d[0], "lon", d[1],
+				"secKey", sequenceFlag ? e.secKey : OperatorKeyType.getRestoreKey(keyType, e.secKey),
+				"distance", e.distance);
+			if(nextMap == null) {
+				nextMap = new JsMap((Map)ret);
+			} else {
+				nextMap.set((Map)ret);
+			}
+			return nextMap;
+		}
+
+		@Override
+		public void close() {
+			lock.lock();
+			try {
+				object = null;
+				list = null;
+				nextKeyMap = null;
+				nextMap = null;
+			} finally {
+				lock.unlock();
+			}
+		}
+
+		@Override
+		public boolean isClose() {
+			lock.lock();
+			try {
+				return object == null;
+			} finally {
+				lock.unlock();
+			}
+		}
+
+		@Override
+		public boolean isDesc() {
+			return desc;
+		}
+
+		@Override
+		public Object key() {
+			return nextKeyMap;
+		}
+	}
+	
 	// indexIterator.
 	private static final class IndexIterator implements OperateIterator {
 		private boolean sequenceFlag;
@@ -288,6 +485,7 @@ public class LatLonOperator extends SearchOperator {
 		
 		private Lock lock;
 		private boolean reverse;
+		private JsMap nextKeyMap;
 		private JsMap nextMap;
 		
 		public IndexIterator(Lock lk, boolean f, int k, LevelIndexIterator s, Comparable e, String[] c) {
@@ -329,7 +527,7 @@ public class LatLonOperator extends SearchOperator {
 
 		@Override
 		public Object key() {
-			return new FixedArray(beforeKey);
+			return beforeKey;
 		}
 
 		@Override
@@ -380,7 +578,11 @@ public class LatLonOperator extends SearchOperator {
 				if(checkKey == null) {
 					continue;
 				}
-				nextKey = LatLonOperator._resultKey(sequenceFlag, keyType, src.getKey());
+				if(nextKeyMap == null) {
+					nextKeyMap = new JsMap();
+				}
+				nextKey = nextKeyMap;
+				LatLonOperator._resultKey(nextKeyMap, sequenceFlag, keyType, src.getKey());
 				// range検索の場合.
 				if(end != null &&
 					((!reverse && end.compareTo(checkKey) <= 0) ||

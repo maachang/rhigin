@@ -1,4 +1,4 @@
-package rhigin.lib;
+package rhigin.lib.level.js;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -14,6 +14,7 @@ import org.mozilla.javascript.Undefined;
 
 import rhigin.RhiginConfig;
 import rhigin.RhiginException;
+import rhigin.lib.Level;
 import rhigin.lib.level.LevelJsBackup;
 import rhigin.lib.level.LevelJsCore;
 import rhigin.lib.level.LevelJsCsv;
@@ -31,8 +32,6 @@ import rhigin.scripts.RhiginObject;
  * [js]LevelJs マネージャ.
  */
 public class LevelJsManagerJs {
-	// コアオブジェクト.
-	protected static final LevelJsCore CORE = new LevelJsCore();
 	
 	// オブジェクト名.
 	protected static final String OBJECT_NAME = "Level";
@@ -43,8 +42,17 @@ public class LevelJsManagerJs {
 		new LevelJsManFunctions(4), new LevelJsManFunctions(5), new LevelJsManFunctions(6), new LevelJsManFunctions(7),
 		new LevelJsManFunctions(8), new LevelJsManFunctions(9), new LevelJsManFunctions(10), new LevelJsManFunctions(11),
 		new LevelJsManFunctions(12), new LevelJsManFunctions(13), new LevelJsManFunctions(14), new LevelJsManFunctions(15),
-		new LevelJsManFunctions(16), new LevelJsManFunctions(17), new LevelJsManFunctions(18)
+		new LevelJsManFunctions(16), new LevelJsManFunctions(17), new LevelJsManFunctions(18), new LevelJsManFunctions(19),
+		new LevelJsManFunctions(20), new LevelJsManFunctions(21), new LevelJsManFunctions(22)
 	});
+	
+	/**
+	 * LevelJsManagerJs オブジェクトを取得.
+	 * @return
+	 */
+	public static final RhiginObject getLevelJsManagerJs() {
+		return LEVEL_JS_INSTANCE;
+	}
 	
 	/**
 	 * LevelJsマネージャのメソッド群. 
@@ -58,6 +66,7 @@ public class LevelJsManagerJs {
 		
 		@Override
 		public final Object jcall(Context ctx, Scriptable scope, Scriptable thisObj, Object[] args) {
+			LevelJsCore core = LevelJsCore.getInstance();
 			try {
 				switch (type) {
 				case 0: // version.
@@ -71,13 +80,13 @@ public class LevelJsManagerJs {
 				case 2: // startup.
 				{
 					// スタートアップ登録されていない場合のみ実行.
-					if(!CORE.isStartup()) {
+					if(!core.isStartup()) {
 						RhiginEndScriptCall[] es = null;
 						final RhiginConfig conf = RhiginConfig.getMainConfig();
 						if(args.length > 0) {
-							es = CORE.startup(conf, "" + args[0]);
+							es = core.startup(conf, "" + args[0]);
 						} else {
-							es = CORE.startup(conf, null);
+							es = core.startup(conf, null);
 						}
 						ExecuteScript.addEndScripts(es[0]);
 						ExecuteScript.addExitSystemScripts(es[1]);
@@ -87,15 +96,15 @@ public class LevelJsManagerJs {
 				}
 				case 3: // isStartup.
 				{
-					return CORE.isStartup();
+					return core.isStartup();
 				}
 				case 4: // config.
 				{
-					return CORE.getConfig().getMap();
+					return core.getConfig().getMap();
 				}
 				case 5: // machineId.
 				{
-					return CORE.getMachineId();
+					return core.getMachineId();
 				}
 				case 6: // createObject.
 				{
@@ -105,19 +114,19 @@ public class LevelJsManagerJs {
 					if(mode.getOperatorType() == OperatorKeyType.KEY_NONE) {
 						mode.set("type", OperatorKeyType.KEY_STRING);
 					}
-					return CORE.createObject(name, mode);
+					return core.createObject(name, mode);
 				}
 				case 7: // createLatLon.
 				{
 					String name = getOperatorName(0, args);
 					OperatorMode mode = getOperatorMode(args);
-					return CORE.createLatLon(name, mode);
+					return core.createLatLon(name, mode);
 				}
 				case 8: // createSequence.
 				{
 					String name = getOperatorName(0, args);
 					OperatorMode mode = getOperatorMode(args);
-					return CORE.createSequence(name, mode);
+					return core.createSequence(name, mode);
 				}
 				case 9: // createQueue.
 				{
@@ -125,28 +134,28 @@ public class LevelJsManagerJs {
 					OperatorMode mode = getOperatorMode(args);
 					// 必ずオペレータキータイプは「なし」.
 					mode.set("type", OperatorKeyType.KEY_NONE);
-					return CORE.createQueue(name, mode);
+					return core.createQueue(name, mode);
 				}
 				case 10: // delete.
 				{
-					return CORE.delete(
+					return core.delete(
 							getOperatorName(0, args));
 				}
 				case 11: // rename.
 				{
-					return CORE.rename(
+					return core.rename(
 							getOperatorName(0, args),
 							getOperatorName(1, args));
 				}
 				case 12: // contains.
 				{
-					return CORE.contains(
+					return core.contains(
 							getOperatorName(0, args));
 				}
 				case 13: // get.
 				{
 					// commit / rollback が利用出来ないモードで取得.
-					final Operator op = CORE.get(
+					final Operator op = core.get(
 							getOperatorName(0, args));
 					if(op != null) {
 						if(op instanceof SearchOperator) {
@@ -160,7 +169,7 @@ public class LevelJsManagerJs {
 				case 14: // writeBatch
 				{
 					// commit / rollback が利用出来るモードで取得.
-					final Operator op = CORE.getWriteBatch(
+					final Operator op = core.getWriteBatch(
 							getOperatorName(0, args));
 					if(op != null) {
 						if(op instanceof SearchOperator) {
@@ -173,12 +182,12 @@ public class LevelJsManagerJs {
 				}
 				case 15: // operatorType.
 				{
-					return CORE.getOperatorType(
+					return core.getOperatorType(
 							getOperatorName(0, args));
 				}
 				case 16: // mode.
 				{
-					OperatorMode ret = CORE.getMode(
+					OperatorMode ret = core.getMode(
 							getOperatorName(0, args));
 					if(ret == null) {
 						return null;
@@ -187,11 +196,11 @@ public class LevelJsManagerJs {
 				}
 				case 17: // names.
 				{
-					return CORE.names();
+					return core.names();
 				}
 				case 18: // length.
 				{
-					return CORE.size();
+					return core.size();
 				}
 				case 19: // csvImport.
 				{
@@ -199,9 +208,9 @@ public class LevelJsManagerJs {
 						this.argsException(OBJECT_NAME);
 					}
 					if(args.length == 1) {
-						return LevelJsCsv.execute(CORE, false, null, "" + args[0]);
+						return LevelJsCsv.execute(core, false, null, "" + args[0]);
 					}
-					return LevelJsCsv.execute(CORE, false, "" + args[0], "" + args[1]);
+					return LevelJsCsv.execute(core, false, "" + args[0], "" + args[1]);
 				}
 				case 20: // csvDirect.
 				{
@@ -210,7 +219,7 @@ public class LevelJsManagerJs {
 					}
 					BufferedReader br = new BufferedReader(new StringReader("" + args[1]));
 					try {
-						return LevelJsCsv.execute(CORE, "" + args[0], false, br);
+						return LevelJsCsv.execute(core, "" + args[0], false, br);
 					} finally {
 						try {
 							br.close();
@@ -224,14 +233,14 @@ public class LevelJsManagerJs {
 					}
 					String fileName = "" + args[0];
 					String operatorName = "" + args[1];
-					if(!CORE.contains(operatorName)) {
+					if(!core.contains(operatorName)) {
 						throw new RhiginException("The backup operator '"
 								+ operatorName + "' does not exist.");
 					}
 					BufferedOutputStream bo = null;
 					try {
 						bo = new BufferedOutputStream(new FileOutputStream(fileName));
-						return LevelJsBackup.backup(bo, CORE, operatorName);
+						return LevelJsBackup.backup(bo, core, operatorName);
 					} finally {
 						try {
 							bo.close();
@@ -247,7 +256,7 @@ public class LevelJsManagerJs {
 					BufferedInputStream bi = null;
 					try {
 						bi = new BufferedInputStream(new FileInputStream(fileName));
-						return LevelJsBackup.restore(CORE, bi);
+						return LevelJsBackup.restore(core, bi);
 					} finally {
 						try {
 							bi.close();
@@ -276,13 +285,15 @@ public class LevelJsManagerJs {
 		private final OperatorMode getOperatorMode(Object[] args) {
 			int argsLen = 0;
 			if(args == null || (argsLen = args.length) <= 1) {
-				this.argsException(OBJECT_NAME);
+				//this.argsException(OBJECT_NAME);
+				return new OperatorMode();
 			}
 			if(args[1] instanceof Map) {
 				return new OperatorMode(args[1]);
 			}
 			if(argsLen <= 2) {
-				this.argsException(OBJECT_NAME);
+				//this.argsException(OBJECT_NAME);
+				return new OperatorMode();
 			}
 			Object[] params = new Object[argsLen-1];
 			System.arraycopy(args, 1, params, 0, argsLen-1);

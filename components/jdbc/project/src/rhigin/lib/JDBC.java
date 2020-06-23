@@ -2,6 +2,7 @@ package rhigin.lib;
 
 import org.mozilla.javascript.Scriptable;
 
+import rhigin.lib.jdbc.js.JDBCOperatorJs;
 import rhigin.scripts.JavaRequire;
 
 /**
@@ -31,6 +32,6 @@ public class JDBC implements JavaRequire {
 	 */
 	@Override
 	public Scriptable load() {
-		return JDBCOperatorJs.JDBC_INSTANCE;
+		return JDBCOperatorJs.getJDBCOperatorJs();
 	}
 }

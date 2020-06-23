@@ -3,7 +3,6 @@ package rhigin.http.execute;
 import java.util.Map;
 
 import rhigin.RhiginException;
-import rhigin.http.client.HttpClient;
 import rhigin.http.client.HttpResult;
 import rhigin.keys.RhiginAccessKeyUtil;
 import rhigin.util.ArrayMap;
@@ -31,19 +30,13 @@ public class RhiginExecuteClientByJs extends RhiginExecuteClient {
 			throw new RhiginException("The javascript information to execute does not exist.");
 		}
 		// URLに実行命令をセット.
-		url += RhiginExecuteConstants.RHIGIN_URL_EXECUTE_HEAD + RhiginExecuteByJs.NAME;
+		url += getExecutePath(RhiginExecuteByJs.NAME);
 		if(option == null) {
 			option = new ArrayMap<String, Object>();
 		}
 		try {
-			// 最小ヘッダで処理.
-			option.put("minHeader", true);
-			
-			// 送信対象のパラメータをセット.
-			option.put("params", value);
-			
 			// postで送信.
-			return HttpClient.post(url, option);
+			return sendPost(url, value, option);
 		} catch(RhiginException re) {
 			throw re;
 		} catch(Exception e) {
